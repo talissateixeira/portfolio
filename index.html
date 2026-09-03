@@ -426,6 +426,12 @@
     box-shadow: var(--sombra);
     transition: transform var(--transicao);
     background: var(--tinta);
+    border: none;
+    padding: 0;
+    margin: 0;
+    width: 100%;
+    font-family: inherit;
+    cursor: pointer;
   }
   .portfolio-item:hover { transform: translateY(-6px); }
   .portfolio-item:hover .portfolio-play { transform: translate(-50%, -50%) scale(1.1); }
@@ -469,6 +475,55 @@
   }
   .portfolio-info strong { font-family: "Fraunces", serif; font-size: 1.15rem; font-weight: 600; }
   .portfolio-item[hidden] { display: none; }
+
+  /* ===== PLAYER FLUTUANTE DE VÍDEO ===== */
+  .modal-video {
+    position: fixed;
+    inset: 0;
+    z-index: 2000;
+    background: rgba(20, 17, 13, 0.85);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease;
+  }
+  .modal-video.aberto { opacity: 1; pointer-events: auto; }
+  .modal-video-caixa {
+    position: relative;
+    width: 100%;
+    max-width: 400px;
+  }
+  .modal-video-container {
+    width: 100%;
+    aspect-ratio: 9 / 16;
+    border-radius: var(--raio);
+    overflow: hidden;
+    box-shadow: var(--sombra);
+    background: var(--tinta);
+  }
+  .modal-video-container iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+    display: block;
+  }
+  .modal-video-fechar {
+    position: absolute;
+    top: -44px;
+    right: 0;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: none;
+    background: var(--branco);
+    color: var(--tinta);
+    font-size: 1.4rem;
+    line-height: 1;
+    cursor: pointer;
+  }
 
   /* ===== SERVIÇOS ===== */
   .servicos-grid {
@@ -816,6 +871,14 @@
   </section>
 </main>
 
+<!-- Player flutuante dos vídeos do portfólio: toca o vídeo do YouTube sem sair da página. -->
+<div class="modal-video" id="modal-video" role="dialog" aria-modal="true" aria-label="Player de vídeo">
+  <div class="modal-video-caixa">
+    <button class="modal-video-fechar" id="modal-video-fechar" aria-label="Fechar vídeo">×</button>
+    <div class="modal-video-container" id="modal-video-container"></div>
+  </div>
+</div>
+
 <footer class="rodape">
   <div class="container">
     <div class="rodape-topo">
@@ -1052,15 +1115,17 @@
 
     function renderizarPortfolio() {
       CONFIG.portfolio.forEach(item => {
-        const a = document.createElement("a");
+        const a = document.createElement("button");
+        a.type = "button";
         a.className = "portfolio-item reveal";
         a.dataset.categoria = item.categoria;
-        a.href = `https://www.youtube.com/shorts/${item.youtubeId}`;
-        a.target = "_blank";
-        a.rel = "noopener";
-        a.setAttribute("aria-label", `Assistir no YouTube: ${item.titulo}`);
+        a.setAttribute("aria-label", `Assistir: ${item.titulo}`);
         // Rastreamento: registra qual vídeo foi clicado (o painel usa o id do YouTube pra agrupar).
-        a.addEventListener("click", () => registrarEvento("video_view", item.youtubeId, { title: item.titulo }));
+        // O vídeo toca dentro da própria página, num player flutuante (sem sair pro YouTube).
+        a.addEventListener("click", () => {
+          registrarEvento("video_view", item.youtubeId, { title: item.titulo });
+          abrirVideoModal(item.youtubeId, item.titulo);
+        });
         // Miniatura real puxada direto do YouTube a partir do id do vídeo (não precisa subir imagem nenhuma).
         a.appendChild(criarMiniaturaYoutube(item.youtubeId, item.titulo));
         const infoHtml = document.createElement("div");
@@ -1075,6 +1140,23 @@
         gridEl.appendChild(a);
       });
     }
+
+    // ---- Player flutuante: abre o vídeo do YouTube dentro da própria página ----
+    const modalVideo = document.getElementById("modal-video");
+    const modalVideoContainer = document.getElementById("modal-video-container");
+    function abrirVideoModal(youtubeId, titulo) {
+      modalVideoContainer.innerHTML = `<iframe src="https://www.youtube.com/embed/${youtubeId}?autoplay=1&rel=0" title="${titulo}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
+      modalVideo.classList.add("aberto");
+      document.body.style.overflow = "hidden";
+    }
+    function fecharVideoModal() {
+      modalVideo.classList.remove("aberto");
+      modalVideoContainer.innerHTML = "";
+      document.body.style.overflow = "";
+    }
+    document.getElementById("modal-video-fechar").addEventListener("click", fecharVideoModal);
+    modalVideo.addEventListener("click", (e) => { if (e.target === modalVideo) fecharVideoModal(); });
+    document.addEventListener("keydown", (e) => { if (e.key === "Escape") fecharVideoModal(); });
 
     function filtrarPortfolio(categoria) {
       document.querySelectorAll(".portfolio-item").forEach(item => {
