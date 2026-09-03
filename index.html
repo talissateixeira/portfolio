@@ -8,6 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300..900;1,300..900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <style>
   :root {
     --creme: #f3eee9;
@@ -303,6 +304,8 @@
     position: relative;
     z-index: 1;
     aspect-ratio: 4 / 5;
+    width: 100%;
+    object-fit: cover;
     background: linear-gradient(160deg, var(--azul) 0%, #4c7fc9 45%, var(--laranja) 100%);
   }
 
@@ -415,17 +418,39 @@
     gap: 24px;
   }
   .portfolio-item {
+    display: block;
     position: relative;
     border-radius: var(--raio);
     overflow: hidden;
-    aspect-ratio: 3 / 4;
+    aspect-ratio: 9 / 16;
     box-shadow: var(--sombra);
     transition: transform var(--transicao);
+    background: var(--tinta);
   }
   .portfolio-item:hover { transform: translateY(-6px); }
+  .portfolio-item:hover .portfolio-play { transform: translate(-50%, -50%) scale(1.1); }
   .portfolio-fundo {
     position: absolute;
     inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .portfolio-play {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 52px; height: 52px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.92);
+    color: var(--tinta);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    padding-left: 3px;
+    box-shadow: var(--sombra);
+    transition: transform var(--transicao);
   }
   .portfolio-info {
     position: absolute;
@@ -661,7 +686,7 @@
   <nav class="navbar" aria-label="Navegação principal">
     <a href="#inicio" class="logo" id="logo-nav">
       <span class="logo-badge" id="logo-badge">SN</span>
-      <span id="logo-texto">SEU NOME</span>
+      <span id="logo-texto">Talissa</span>
     </a>
     <ul class="links-nav" id="links-nav">
       <li><a href="#sobre">Sobre</a></li>
@@ -687,13 +712,13 @@
       <div class="stats-rapidas" id="stats-rapidas"></div>
       <div class="hero-cta">
         <a href="#contato" class="btn btn-primario" id="hero-cta-principal">Fechar parceria</a>
-        <a href="#portfolio" class="btn btn-secundario">Ver trabalhos →</a>
+        <a href="#portfolio" class="btn btn-secundario" id="hero-cta-secundario">Ver trabalhos →</a>
       </div>
     </div>
     <!-- Bloco em gradiente no lugar de uma foto ou vídeo real da criadora. -->
-    <!-- Para trocar por foto/vídeo: substitua a div ".hero-imagem" abaixo por <img src="sua-foto.jpg" alt="Nome da criadora sorrindo, segurando um celular gravando conteúdo" class="hero-imagem bloco-gradiente">, mantendo os selos flutuantes se quiser. -->
+    <!-- Foto de capa real: troque o arquivo "fotocapa.JPG" por outra imagem quando quiser, mantendo o mesmo nome ou atualizando o "src" abaixo. -->
     <div class="hero-imagem-wrap reveal">
-      <div class="hero-imagem bloco-gradiente" role="img" aria-label="Espaço reservado para foto de destaque da criadora"></div>
+      <img src="fotocapa.JPG" alt="Foto de destaque da criadora de conteúdo" class="hero-imagem bloco-gradiente">
       <span class="badge-flutuante topo-esquerda">▶ 9:16 vertical</span>
       <span class="badge-flutuante baixo-direita">★ 4,9 satisfação</span>
     </div>
@@ -794,7 +819,7 @@
 <footer class="rodape">
   <div class="container">
     <div class="rodape-topo">
-      <span class="rodape-logo" id="rodape-nome">SEU NOME</span>
+      <span class="rodape-logo" id="rodape-nome">Talissa</span>
       <ul class="rodape-redes" id="rodape-redes"></ul>
     </div>
     <p class="rodape-copyright" id="rodape-copyright"></p>
@@ -803,6 +828,47 @@
 
 <script>
   /* ======================================================================
+     RASTREAMENTO (grava visitas, cliques e mensagens no painel administrativo)
+     Usa a mesma chave "anon" do Supabase, que só tem permissão de INSERIR
+     dados nas tabelas portfolio_events e portfolio_leads, nunca de ler,
+     editar ou apagar. Quem lê esses dados é só o painel, depois do login.
+  ====================================================================== */
+  const SUPABASE_URL_SITE = "https://evafozzxhackvtlguqpq.supabase.co";
+  const SUPABASE_ANON_KEY_SITE = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV2YWZvenp4aGFja3Z0bGd1cXBxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg0NDY3OTMsImV4cCI6MjEwNDAyMjc5M30.VIlphy_vB4suN-0wQ93jotNgzWZGZQL3jpyq5XS8yVc";
+  const sbSite = window.supabase.createClient(SUPABASE_URL_SITE, SUPABASE_ANON_KEY_SITE);
+
+  // Um session_id novo por aba/sessão do navegador, pra contar visitantes únicos.
+  function obterSessionId() {
+    let id = sessionStorage.getItem("session_id");
+    if (!id) {
+      id = (crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random());
+      sessionStorage.setItem("session_id", id);
+    }
+    return id;
+  }
+
+  // Grava um evento (visita, clique ou vídeo assistido). Não usa .select(),
+  // de propósito, porque o site só tem permissão de gravar, não de ler de volta.
+  function registrarEvento(tipo, nome, metadata) {
+    sbSite.from("portfolio_events").insert({
+      event_type: tipo,
+      event_name: nome || null,
+      session_id: obterSessionId(),
+      page_path: window.location.pathname,
+      metadata: metadata || null
+    }).then(({ error }) => {
+      if (error) console.warn("Não foi possível registrar o evento:", error.message);
+    });
+  }
+
+  // Grava uma mensagem de contato vinda do formulário.
+  function registrarLead(dados) {
+    sbSite.from("portfolio_leads").insert(dados).then(({ error }) => {
+      if (error) console.warn("Não foi possível registrar a mensagem:", error.message);
+    });
+  }
+
+  /* ======================================================================
      CONFIGURAÇÃO DO SITE
      Edite todos os textos, listas e dados aqui. O resto do código só lê
      estas informações e monta a página automaticamente.
@@ -810,14 +876,14 @@
   const CONFIG = {
 
     // EDITE AQUI: seu nome, como deve aparecer no menu, no rodapé e no título da página.
-    nome: "SEU NOME",
+    nome: "Talissa",
 
     // EDITE AQUI: os textos principais da primeira dobra (hero).
     // Use <em>palavra</em> dentro de "titulo" para destacar uma palavra em itálico azul, e <br> para quebrar linha.
     hero: {
       eyebrow: "Criadora de Conteúdo UGC & Estrategista Digital",
       titulo: "Conteúdo que <em>converte</em><br>pra sua <em>marca</em>.",
-      subtitulo: "Eu sou SEU NOME, crio vídeos autênticos que parecem recomendação de amiga e performam como anúncio de performance.",
+      subtitulo: "Eu sou Talissa, crio vídeos autênticos que parecem recomendação de amiga e performam como anúncio de performance.",
       botao: "Fechar parceria"
     },
 
@@ -834,23 +900,24 @@
     // EDITE AQUI: o texto da seção sobre você.
     sobre: {
       titulo: "Criatividade com <em>propósito</em> comercial",
-      texto: "Sou a SEU NOME, criadora de conteúdo UGC apaixonada por transformar produtos em histórias que conectam com o público de verdade.",
+      texto: "Sou a Talissa, criadora de conteúdo UGC apaixonada por transformar produtos em histórias que conectam com o público de verdade.",
       texto2: "Trabalho lado a lado com marcas para entender objetivos, público e tom de voz, entregando conteúdo pronto para performar em redes sociais e campanhas pagas."
     },
 
     // EDITE AQUI: os trabalhos do portfólio. A categoria precisa bater com uma das opções abaixo em "categoriasPortfolio".
-    // Troque o campo "gradiente" pelo caminho de uma foto ou vídeo real quando tiver: veja o comentário no JavaScript logo abaixo desta lista.
-    categoriasPortfolio: ["Beleza", "Moda", "Comida", "Fitness", "Viagem"],
+    // Cada vídeo é um Short do YouTube publicado como "não listado". Pegue o "youtubeId" da URL:
+    // em https://youtube.com/shorts/CUNMgC-bEaE, o id é o trecho depois de "/shorts/" (antes de qualquer "?").
+    categoriasPortfolio: ["Casa e Decoração", "Unboxing", "Fitness e Wellness", "Moda e Acessórios", "Hair Care", "Autocuidado", "Educação"],
     portfolio: [
-      { categoria: "Beleza", titulo: "Rotina de skincare", cliente: "Marca Um", gradiente: "linear-gradient(135deg,#df7900,#f3c893)" },
-      { categoria: "Moda", titulo: "Look do dia", cliente: "Marca Dois", gradiente: "linear-gradient(135deg,#0049a4,#7fb3f0)" },
-      { categoria: "Comida", titulo: "Receita prática", cliente: "Marca Três", gradiente: "linear-gradient(135deg,#14110d,#5a5348)" },
-      { categoria: "Fitness", titulo: "Treino em casa", cliente: "Marca Quatro", gradiente: "linear-gradient(135deg,#0049a4,#df7900)" },
-      { categoria: "Viagem", titulo: "Diário de bordo", cliente: "Marca Cinco", gradiente: "linear-gradient(135deg,#df7900,#0049a4)" },
-      { categoria: "Beleza", titulo: "Unboxing de maquiagem", cliente: "Marca Seis", gradiente: "linear-gradient(135deg,#f3c893,#0049a4)" },
-      { categoria: "Moda", titulo: "Try on de acessórios", cliente: "Marca Um", gradiente: "linear-gradient(135deg,#5a5348,#df7900)" },
-      { categoria: "Comida", titulo: "Degustação em vídeo", cliente: "Marca Dois", gradiente: "linear-gradient(135deg,#0049a4,#14110d)" },
-      { categoria: "Fitness", titulo: "Rotina de alongamento", cliente: "Marca Três", gradiente: "linear-gradient(135deg,#df7900,#14110d)" }
+      { categoria: "Casa e Decoração", titulo: "Coala", youtubeId: "CUNMgC-bEaE" },
+      { categoria: "Casa e Decoração", titulo: "Coala 02", youtubeId: "6YB4VU45G3w" },
+      { categoria: "Unboxing", titulo: "Mare Beauty Ecommerce", youtubeId: "1A-qNlGnW5Y" },
+      { categoria: "Fitness e Wellness", titulo: "Melatonina em Goma", youtubeId: "Y2Ip24_amvo" },
+      { categoria: "Fitness e Wellness", titulo: "Vinagre de Maçã", youtubeId: "7ofP4-PhqN8" },
+      { categoria: "Moda e Acessórios", titulo: "Miallegra Lingerie Exclusiva", youtubeId: "3BQErVgKPMM" },
+      { categoria: "Hair Care", titulo: "Widicare Juba", youtubeId: "W5-9s20jfb8" },
+      { categoria: "Autocuidado", titulo: "Body Splash Rosa Selvagem", youtubeId: "l4n0RHiJF4M" },
+      { categoria: "Educação", titulo: "Depoimento Aluno Full English", youtubeId: "a4JLSf0Ew3k" }
     ],
 
     // EDITE AQUI: os serviços que você oferece.
@@ -893,6 +960,9 @@
 
   document.addEventListener("DOMContentLoaded", () => {
 
+    // ---- Rastreamento: registra a visita assim que a página carrega ----
+    registrarEvento("page_view");
+
     // ---- Nome no menu e no rodapé ----
     const iniciais = CONFIG.nome.trim().split(/\s+/).map(palavra => palavra[0]).join("").slice(0, 2).toUpperCase();
     document.getElementById("logo-badge").textContent = iniciais;
@@ -903,9 +973,14 @@
     // ---- Hero ----
     document.getElementById("hero-eyebrow").textContent = CONFIG.hero.eyebrow;
     document.getElementById("hero-titulo").innerHTML = CONFIG.hero.titulo;
-    document.getElementById("hero-subtitulo").textContent = CONFIG.hero.subtitulo.replace("SEU NOME", CONFIG.nome);
+    document.getElementById("hero-subtitulo").textContent = CONFIG.hero.subtitulo;
     document.getElementById("hero-cta-principal").textContent = CONFIG.hero.botao;
     document.getElementById("nav-cta").textContent = CONFIG.hero.botao;
+
+    // ---- Rastreamento: cliques nos botões de chamada para ação ----
+    document.getElementById("hero-cta-principal").addEventListener("click", () => registrarEvento("button_click", "cta_fechar_parceria"));
+    document.getElementById("nav-cta").addEventListener("click", () => registrarEvento("button_click", "cta_fechar_parceria"));
+    document.getElementById("hero-cta-secundario").addEventListener("click", () => registrarEvento("button_click", "cta_ver_trabalhos"));
 
     // ---- Números rápidos do hero ----
     const statsRapidas = document.getElementById("stats-rapidas");
@@ -956,22 +1031,48 @@
       });
     }
 
+    // Nem todo vídeo do YouTube tem a miniatura em alta resolução (maxresdefault) disponível.
+    // Essa função tenta a versão em alta primeiro e, se não existir, cai para a versão em qualidade média.
+    function criarMiniaturaYoutube(youtubeId, titulo) {
+      const img = document.createElement("img");
+      img.className = "portfolio-fundo";
+      img.alt = "Miniatura do vídeo: " + titulo;
+      img.loading = "lazy";
+      const qualidades = ["maxresdefault.jpg", "sddefault.jpg", "hqdefault.jpg"];
+      let indice = 0;
+      img.addEventListener("error", () => {
+        indice++;
+        if (indice < qualidades.length) {
+          img.src = `https://img.youtube.com/vi/${youtubeId}/${qualidades[indice]}`;
+        }
+      });
+      img.src = `https://img.youtube.com/vi/${youtubeId}/${qualidades[indice]}`;
+      return img;
+    }
+
     function renderizarPortfolio() {
       CONFIG.portfolio.forEach(item => {
-        const div = document.createElement("div");
-        div.className = "portfolio-item reveal";
-        div.dataset.categoria = item.categoria;
-        // Bloco em gradiente no lugar de foto/vídeo real do trabalho.
-        // Para trocar por mídia real: troque a div ".portfolio-fundo" por
-        // <img src="trabalho.jpg" alt="Descrição do trabalho para a marca X"> mantendo a classe "portfolio-fundo".
-        div.innerHTML = `
-          <div class="portfolio-fundo" style="background:${item.gradiente}" role="img" aria-label="Espaço reservado para o trabalho: ${item.titulo}"></div>
+        const a = document.createElement("a");
+        a.className = "portfolio-item reveal";
+        a.dataset.categoria = item.categoria;
+        a.href = `https://www.youtube.com/shorts/${item.youtubeId}`;
+        a.target = "_blank";
+        a.rel = "noopener";
+        a.setAttribute("aria-label", `Assistir no YouTube: ${item.titulo}`);
+        // Rastreamento: registra qual vídeo foi clicado (o painel usa o id do YouTube pra agrupar).
+        a.addEventListener("click", () => registrarEvento("video_view", item.youtubeId, { title: item.titulo }));
+        // Miniatura real puxada direto do YouTube a partir do id do vídeo (não precisa subir imagem nenhuma).
+        a.appendChild(criarMiniaturaYoutube(item.youtubeId, item.titulo));
+        const infoHtml = document.createElement("div");
+        infoHtml.innerHTML = `
+          <span class="portfolio-play" aria-hidden="true">▶</span>
           <div class="portfolio-info">
             <span>${item.categoria}</span>
             <strong>${item.titulo}</strong>
           </div>
         `;
-        gridEl.appendChild(div);
+        while (infoHtml.firstChild) a.appendChild(infoHtml.firstChild);
+        gridEl.appendChild(a);
       });
     }
 
@@ -1032,10 +1133,14 @@
 
     const contatoDiretos = document.getElementById("contato-diretos");
     contatoDiretos.innerHTML = `
-      <a class="contato-link" href="${linkWhatsapp}" target="_blank" rel="noopener">💬 WhatsApp: ${CONFIG.contato.telefone}</a>
-      <a class="contato-link" href="mailto:${CONFIG.contato.email}">✉️ ${CONFIG.contato.email}</a>
-      <a class="contato-link" href="${linkInstagram}" target="_blank" rel="noopener">📷 Instagram: ${CONFIG.contato.instagram}</a>
+      <a class="contato-link" id="link-whatsapp" href="${linkWhatsapp}" target="_blank" rel="noopener">💬 WhatsApp: ${CONFIG.contato.telefone}</a>
+      <a class="contato-link" id="link-email" href="mailto:${CONFIG.contato.email}">✉️ ${CONFIG.contato.email}</a>
+      <a class="contato-link" id="link-instagram" href="${linkInstagram}" target="_blank" rel="noopener">📷 Instagram: ${CONFIG.contato.instagram}</a>
     `;
+    // Rastreamento: cliques nos canais diretos de contato.
+    document.getElementById("link-whatsapp").addEventListener("click", () => registrarEvento("button_click", "contact_whatsapp"));
+    document.getElementById("link-email").addEventListener("click", () => registrarEvento("button_click", "contact_email"));
+    document.getElementById("link-instagram").addEventListener("click", () => registrarEvento("button_click", "contact_instagram"));
 
     // ---- Rodapé: redes sociais e copyright ----
     const rodapeRedes = document.getElementById("rodape-redes");
@@ -1055,6 +1160,10 @@
       const nome = document.getElementById("campo-nome").value;
       const email = document.getElementById("campo-email").value;
       const mensagem = document.getElementById("campo-mensagem").value;
+
+      // Rastreamento: grava a mensagem e o clique de contato pelo formulário.
+      registrarLead({ name: nome, email: email, message: mensagem, source: "contact" });
+      registrarEvento("button_click", "contact_formulario");
 
       const assunto = encodeURIComponent("Proposta de parceria via site, enviada por " + nome);
       const corpo = encodeURIComponent(
