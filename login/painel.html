@@ -58,10 +58,31 @@
     position: sticky;
     top: 0;
     height: 100vh;
+    transition: width 0.2s ease, padding 0.2s ease;
   }
-  .sidebar-topo { padding: 0 8px; margin-bottom: 30px; }
-  .logo { font-family: "Fraunces", serif; font-size: 1.3rem; font-weight: 600; }
+  .sidebar-topo {
+    padding: 0 8px;
+    margin-bottom: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .logo { font-family: "Fraunces", serif; font-size: 1.3rem; font-weight: 600; white-space: nowrap; overflow: hidden; }
   .logo .ponto { color: var(--coral); }
+
+  .btn-recolher-sidebar {
+    flex-shrink: 0;
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    border: 1.5px solid var(--borda);
+    background: var(--branco);
+    color: var(--texto-suave);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: border-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+  }
+  .btn-recolher-sidebar:hover { border-color: var(--coral); color: var(--coral); }
 
   .sidebar-nav { display: flex; flex-direction: column; gap: 4px; flex-grow: 1; }
   .nav-item {
@@ -77,11 +98,14 @@
     font-size: 0.95rem;
     font-weight: 500;
     text-align: left;
+    white-space: nowrap;
+    overflow: hidden;
     transition: background 0.2s ease, color 0.2s ease;
   }
   .nav-item:hover { background: var(--creme); color: var(--grafite); }
   .nav-item.ativo { background: var(--coral); color: var(--branco); }
   .nav-icone { display: flex; flex-shrink: 0; }
+  .nav-texto { transition: opacity 0.15s ease; }
 
   .sidebar-rodape {
     border-top: 1px solid var(--borda);
@@ -93,9 +117,16 @@
     color: var(--texto-suave);
     padding: 0 8px 12px;
     word-break: break-all;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
   .btn-sair {
     width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
     padding: 10px 14px;
     border-radius: var(--raio-sm);
     border: 1.5px solid var(--borda);
@@ -103,9 +134,22 @@
     color: var(--grafite);
     font-weight: 600;
     font-size: 0.88rem;
+    white-space: nowrap;
+    overflow: hidden;
     transition: border-color 0.2s ease, color 0.2s ease;
   }
   .btn-sair:hover { border-color: var(--erro); color: var(--erro); }
+
+  /* ---- Menu recolhido (só ícones) ---- */
+  .sidebar.recolhida { width: 84px; padding-left: 12px; padding-right: 12px; }
+  .sidebar.recolhida .logo,
+  .sidebar.recolhida .nav-texto,
+  .sidebar.recolhida .sidebar-email,
+  .sidebar.recolhida .btn-sair-texto { display: none; }
+  .sidebar.recolhida .sidebar-topo { justify-content: center; }
+  .sidebar.recolhida .btn-recolher-sidebar { transform: rotate(180deg); }
+  .sidebar.recolhida .nav-item { justify-content: center; padding: 12px; }
+  .sidebar.recolhida .btn-sair { display: flex; align-items: center; justify-content: center; padding: 10px; }
 
   .btn-abrir-menu {
     display: none;
@@ -158,6 +202,30 @@
   }
   .periodo-btn:hover { border-color: var(--coral); }
   .periodo-btn.ativo { background: var(--coral); color: var(--branco); border-color: var(--coral); }
+
+  .subtitulo-pagina { color: var(--texto-suave); font-size: 0.92rem; margin: -20px 0 24px; }
+
+  /* Sub-abas dentro da aba Portfólio */
+  .subabas {
+    display: flex;
+    gap: 6px;
+    border-bottom: 1px solid var(--borda);
+    margin-bottom: 24px;
+  }
+  .subaba-btn, .subaba-agenda-btn {
+    padding: 10px 16px;
+    border: none;
+    background: none;
+    color: var(--texto-suave);
+    font-weight: 600;
+    font-size: 0.9rem;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    transition: color 0.2s ease, border-color 0.2s ease;
+  }
+  .subaba-btn:hover, .subaba-agenda-btn:hover { color: var(--grafite); }
+  .subaba-btn.ativo, .subaba-agenda-btn.ativo { color: var(--coral); border-color: var(--coral); }
+  .subaba-painel[hidden] { display: none; }
 
   .saudacao { color: var(--texto-suave); font-size: 1.02rem; margin: 0 0 24px; }
 
@@ -310,6 +378,242 @@
   }
   .btn-whatsapp { background: var(--sucesso); }
 
+  /* ===== PROPOSTAS ===== */
+  .form-proposta {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr 1.4fr auto;
+    gap: 12px;
+    align-items: end;
+  }
+  .form-proposta .campo-proposta { display: flex; flex-direction: column; gap: 6px; }
+  .form-proposta label { font-size: 0.8rem; font-weight: 600; color: var(--texto-suave); }
+  .form-proposta input, .form-proposta select, .form-proposta textarea {
+    padding: 11px 14px;
+    border-radius: var(--raio-sm);
+    border: 1.5px solid var(--borda);
+    font-family: "DM Sans", sans-serif;
+    font-size: 0.92rem;
+    background: var(--creme);
+    color: var(--grafite);
+  }
+  .form-proposta input:focus, .form-proposta select:focus, .form-proposta textarea:focus {
+    outline: none;
+    border-color: var(--coral);
+  }
+  .btn-adicionar-proposta {
+    padding: 12px 22px;
+    border-radius: 100px;
+    border: none;
+    background: var(--coral);
+    color: var(--branco);
+    font-weight: 700;
+    font-size: 0.88rem;
+    white-space: nowrap;
+    transition: background 0.2s ease;
+  }
+  .btn-adicionar-proposta:hover { background: var(--coral-escuro); }
+  .btn-adicionar-proposta:disabled { opacity: 0.6; cursor: default; }
+
+  .lista-propostas { margin-top: 22px; display: flex; flex-direction: column; gap: 10px; }
+  .item-proposta {
+    display: grid;
+    grid-template-columns: 1.4fr 1fr 1.4fr auto auto;
+    gap: 12px;
+    align-items: center;
+    padding: 14px 16px;
+    border: 1px solid var(--borda);
+    border-radius: var(--raio-sm);
+  }
+  .item-proposta-marca { font-weight: 700; }
+  .item-proposta-data { font-size: 0.8rem; color: var(--texto-suave); }
+  .item-proposta-obs { font-size: 0.85rem; color: var(--texto-suave); }
+  .select-status {
+    padding: 8px 12px;
+    border-radius: 100px;
+    border: 1.5px solid var(--borda);
+    font-family: "DM Sans", sans-serif;
+    font-weight: 700;
+    font-size: 0.78rem;
+    cursor: pointer;
+    background: var(--creme);
+  }
+  .select-status.status-aguardando { color: var(--texto-suave); }
+  .select-status.status-respondeu { color: var(--sucesso); border-color: var(--sucesso); background: rgba(45,122,79,0.08); }
+  .select-status.status-fechou { color: var(--coral-escuro); border-color: var(--coral); background: rgba(212,87,42,0.08); }
+  .btn-apagar-proposta {
+    width: 34px; height: 34px;
+    border-radius: 50%;
+    border: 1.5px solid var(--borda);
+    background: var(--branco);
+    color: var(--texto-suave);
+    font-size: 1rem;
+    line-height: 1;
+    transition: border-color 0.2s ease, color 0.2s ease;
+  }
+  .btn-apagar-proposta:hover { border-color: var(--erro); color: var(--erro); }
+
+  /* ===== INSTAGRAM ===== */
+  .grafico-barras.grafico-pequeno { height: 140px; }
+  .grid-graficos-instagram { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+
+  /* ===== CALENDÁRIO ===== */
+  .calendario-grid {
+    display: grid;
+    grid-template-columns: 1fr 360px;
+    gap: 24px;
+    align-items: start;
+  }
+  .calendario-cabecalho {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+  }
+  .calendario-cabecalho h2 { font-size: 1.25rem; }
+  .btn-mes {
+    width: 34px; height: 34px;
+    border-radius: 50%;
+    border: 1.5px solid var(--borda);
+    background: var(--branco);
+    color: var(--texto-suave);
+    display: flex; align-items: center; justify-content: center;
+    transition: border-color 0.2s ease, color 0.2s ease;
+  }
+  .btn-mes:hover { border-color: var(--coral); color: var(--coral); }
+  .calendario-dias-semana {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    text-align: center;
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--texto-suave);
+    margin-bottom: 10px;
+  }
+  .calendario-grade {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+  }
+  .dia-calendario {
+    position: relative;
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    background: none;
+    border-radius: 50%;
+    font-size: 0.92rem;
+    font-weight: 600;
+    color: var(--grafite);
+    transition: background 0.2s ease, color 0.2s ease;
+  }
+  .dia-calendario:hover { background: var(--creme); }
+  .dia-calendario.fora-do-mes { color: var(--borda); font-weight: 500; }
+  .dia-calendario.hoje { background: var(--grafite); color: var(--branco); }
+  .dia-calendario.selecionado:not(.hoje) { background: rgba(212,87,42,0.14); color: var(--coral-escuro); }
+  .dia-calendario .ponto-agenda {
+    position: absolute;
+    bottom: 5px;
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: var(--coral);
+  }
+  .dia-calendario.hoje .ponto-agenda { background: var(--branco); }
+
+  .painel-dia-cabecalho { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px; }
+  .painel-dia-eyebrow {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--coral);
+  }
+  .painel-dia-numero { font-family: "Fraunces", serif; font-size: 2.6rem; font-weight: 600; line-height: 1.1; display: inline-block; margin-right: 10px; }
+  .painel-dia-resumo { color: var(--texto-suave); font-size: 0.9rem; }
+  .painel-dia-semana { display: block; color: var(--texto-suave); font-size: 0.85rem; margin-top: 2px; }
+  .btn-add-agenda {
+    width: 40px; height: 40px;
+    border-radius: 50%;
+    border: none;
+    background: var(--grafite);
+    color: var(--branco);
+    font-size: 1.3rem;
+    line-height: 1;
+    flex-shrink: 0;
+    transition: background 0.2s ease;
+  }
+  .btn-add-agenda:hover { background: var(--coral); }
+
+  .form-agenda-inline {
+    background: var(--creme);
+    border-radius: var(--raio-sm);
+    padding: 14px;
+    margin: 16px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .form-agenda-inline input, .form-agenda-inline select {
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: 1.5px solid var(--borda);
+    font-family: "DM Sans", sans-serif;
+    font-size: 0.9rem;
+    background: var(--branco);
+  }
+  .form-agenda-linha { display: flex; gap: 10px; }
+  .form-agenda-linha select { flex: 1.2; }
+  .form-agenda-linha input { flex: 1; }
+  .btn-salvar-agenda {
+    padding: 10px;
+    border-radius: 100px;
+    border: none;
+    background: var(--coral);
+    color: var(--branco);
+    font-weight: 700;
+    font-size: 0.88rem;
+  }
+  .btn-salvar-agenda:hover { background: var(--coral-escuro); }
+
+  .lista-agenda-dia { margin-top: 18px; display: flex; flex-direction: column; gap: 10px; }
+  .item-agenda {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    border: 1px solid var(--borda);
+    border-radius: var(--raio-sm);
+  }
+  .item-agenda-info { flex-grow: 1; min-width: 0; }
+  .item-agenda-meta { font-size: 0.75rem; color: var(--texto-suave); text-transform: uppercase; letter-spacing: 0.03em; font-weight: 700; }
+  .item-agenda-meta.tipo-pendencia { color: var(--coral-escuro); }
+  .item-agenda-titulo { font-size: 0.92rem; font-weight: 600; margin-top: 2px; }
+  .item-agenda.concluido .item-agenda-titulo { text-decoration: line-through; color: var(--texto-suave); }
+  .item-agenda-acoes { display: flex; gap: 6px; flex-shrink: 0; }
+  .btn-icone-agenda {
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    border: 1.5px solid var(--borda);
+    background: var(--branco);
+    color: var(--texto-suave);
+    display: flex; align-items: center; justify-content: center;
+    transition: border-color 0.2s ease, color 0.2s ease, background 0.2s ease;
+  }
+  .btn-icone-agenda:hover { border-color: var(--coral); color: var(--coral); }
+  .btn-concluir-agenda.concluido { background: var(--sucesso); border-color: var(--sucesso); color: var(--branco); }
+  .item-agenda-data { font-size: 0.78rem; color: var(--texto-suave); white-space: nowrap; }
+
+  /* ===== RESPONSIVO (propostas/instagram/calendário) ===== */
+  @media (max-width: 760px) {
+    .form-proposta { grid-template-columns: 1fr; }
+    .item-proposta { grid-template-columns: 1fr; text-align: left; }
+    .btn-apagar-proposta { justify-self: start; }
+    .grid-graficos-instagram { grid-template-columns: 1fr; }
+    .calendario-grid { grid-template-columns: 1fr; }
+  }
+
   /* ===== RESPONSIVO ===== */
   @media (max-width: 980px) {
     .cartoes-numeros { grid-template-columns: repeat(3, 1fr); }
@@ -348,26 +652,50 @@
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-topo">
       <div class="logo">meu<span class="ponto">.</span>painel</div>
+      <button class="btn-recolher-sidebar" id="btn-recolher-sidebar" aria-label="Recolher menu">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
     </div>
 
     <nav class="sidebar-nav">
-      <button class="nav-item ativo" data-tab="geral">
+      <button class="nav-item ativo" data-tab="geral" title="Menu Principal">
         <span class="nav-icone" aria-hidden="true">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></svg>
         </span>
-        Menu Principal
+        <span class="nav-texto">Menu Principal</span>
       </button>
-      <button class="nav-item" data-tab="portfolio">
+      <button class="nav-item" data-tab="calendario" title="Calendário">
+        <span class="nav-icone" aria-hidden="true">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+        </span>
+        <span class="nav-texto">Calendário</span>
+      </button>
+      <button class="nav-item" data-tab="portfolio" title="Portfólio">
         <span class="nav-icone" aria-hidden="true">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></svg>
         </span>
-        Portfólio
+        <span class="nav-texto">Portfólio</span>
+      </button>
+      <button class="nav-item" data-tab="propostas" title="Propostas">
+        <span class="nav-icone" aria-hidden="true">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+        </span>
+        <span class="nav-texto">Propostas</span>
+      </button>
+      <button class="nav-item" data-tab="instagram" title="Instagram">
+        <span class="nav-icone" aria-hidden="true">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+        </span>
+        <span class="nav-texto">Instagram</span>
       </button>
     </nav>
 
     <div class="sidebar-rodape">
       <div class="sidebar-email" id="sidebar-email"></div>
-      <button class="btn-sair" id="btn-sair">Sair</button>
+      <button class="btn-sair" id="btn-sair" title="Sair">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        <span class="btn-sair-texto">Sair</span>
+      </button>
     </div>
   </aside>
 
@@ -396,23 +724,144 @@
       </div>
     </section>
 
+    <!-- ABA: CALENDÁRIO -->
+    <section class="painel-tab" id="painel-calendario" hidden>
+      <div class="calendario-grid">
+        <div class="cartao">
+          <div class="calendario-cabecalho">
+            <button class="btn-mes" id="btn-mes-anterior" aria-label="Mês anterior">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+            </button>
+            <h2 id="calendario-mes-ano"></h2>
+            <button class="btn-mes" id="btn-mes-proximo" aria-label="Próximo mês">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+            </button>
+          </div>
+          <div class="calendario-dias-semana">
+            <span>Seg</span><span>Ter</span><span>Qua</span><span>Qui</span><span>Sex</span><span>Sáb</span><span>Dom</span>
+          </div>
+          <div class="calendario-grade" id="calendario-grade"></div>
+        </div>
+
+        <div class="cartao painel-dia">
+          <div class="painel-dia-cabecalho">
+            <div>
+              <span class="painel-dia-eyebrow" id="painel-dia-eyebrow">Hoje</span>
+              <div class="painel-dia-numero" id="painel-dia-numero"></div>
+              <span class="painel-dia-resumo" id="painel-dia-resumo"></span>
+              <span class="painel-dia-semana" id="painel-dia-semana"></span>
+            </div>
+            <button class="btn-add-agenda" id="btn-add-agenda" aria-label="Adicionar item">+</button>
+          </div>
+
+          <form class="form-agenda-inline" id="form-agenda-inline" hidden>
+            <input type="text" id="agenda-titulo" placeholder="Título (ex: Gravação pra marca X)" required>
+            <div class="form-agenda-linha">
+              <select id="agenda-tipo">
+                <option value="entrega">Entrega</option>
+                <option value="pendencia">Pendência</option>
+              </select>
+              <input type="time" id="agenda-horario">
+            </div>
+            <button type="submit" class="btn-salvar-agenda">Salvar</button>
+          </form>
+
+          <div class="lista-agenda-dia" id="lista-agenda-dia"></div>
+        </div>
+      </div>
+
+      <div class="cartao">
+        <h2>Todas as tarefas</h2>
+        <div class="subabas">
+          <button class="subaba-agenda-btn ativo" data-subaba-agenda="abertas">Em aberto</button>
+          <button class="subaba-agenda-btn" data-subaba-agenda="encerradas">Encerradas</button>
+        </div>
+        <div class="subaba-painel" id="subaba-agenda-abertas"></div>
+        <div class="subaba-painel" id="subaba-agenda-encerradas" hidden></div>
+      </div>
+    </section>
+
     <!-- ABA 2: PORTFÓLIO -->
     <section class="painel-tab" id="painel-portfolio" hidden>
+      <p class="subtitulo-pagina">Leads, visitas e cliques do site público.</p>
+      <div class="cartoes-numeros" id="cartoes-numeros-portfolio"></div>
+
+      <div class="subabas">
+        <button class="subaba-btn ativo" data-subaba="videos">Vídeos</button>
+        <button class="subaba-btn" data-subaba="botoes">Botões</button>
+        <button class="subaba-btn" data-subaba="leads">Leads</button>
+      </div>
+
+      <div class="subaba-painel" id="subaba-videos">
+        <div class="cartao">
+          <h2>Vídeos mais vistos</h2>
+          <div id="lista-videos"></div>
+        </div>
+      </div>
+
+      <div class="subaba-painel" id="subaba-botoes" hidden>
+        <div class="cartao">
+          <h2>Botões mais clicados</h2>
+          <div id="lista-botoes"></div>
+        </div>
+        <div class="cartao">
+          <h2>Cliques para contato</h2>
+          <div id="lista-contato-cliques"></div>
+        </div>
+      </div>
+
+      <div class="subaba-painel" id="subaba-leads" hidden>
+        <div class="cartao">
+          <h2>Mensagens recebidas</h2>
+          <div id="lista-mensagens"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ABA 3: PROPOSTAS -->
+    <section class="painel-tab" id="painel-propostas" hidden>
+      <p class="subtitulo-pagina">Anote aqui as marcas que você contatou e acompanhe o status.</p>
       <div class="cartao">
-        <h2>Vídeos mais vistos</h2>
-        <div id="lista-videos"></div>
+        <h2>Nova proposta</h2>
+        <form class="form-proposta" id="form-proposta">
+          <div class="campo-proposta">
+            <label for="proposta-marca">Marca</label>
+            <input type="text" id="proposta-marca" required>
+          </div>
+          <div class="campo-proposta">
+            <label for="proposta-status">Status</label>
+            <select id="proposta-status">
+              <option value="aguardando">Aguardando</option>
+              <option value="respondeu">Respondeu</option>
+              <option value="fechou">Fechou</option>
+            </select>
+          </div>
+          <div class="campo-proposta">
+            <label for="proposta-observacao">Observação</label>
+            <input type="text" id="proposta-observacao" placeholder="Opcional">
+          </div>
+          <button type="submit" class="btn-adicionar-proposta" id="btn-adicionar-proposta">Adicionar</button>
+        </form>
       </div>
       <div class="cartao">
-        <h2>Botões mais clicados</h2>
-        <div id="lista-botoes"></div>
+        <h2>Marcas contatadas</h2>
+        <div class="lista-propostas" id="lista-propostas"></div>
       </div>
-      <div class="cartao">
-        <h2>Cliques para contato</h2>
-        <div id="lista-contato-cliques"></div>
-      </div>
-      <div class="cartao">
-        <h2>Mensagens recebidas</h2>
-        <div id="lista-mensagens"></div>
+    </section>
+
+    <!-- ABA 4: INSTAGRAM -->
+    <section class="painel-tab" id="painel-instagram" hidden>
+      <p class="subtitulo-pagina">Quando as pessoas mais clicam para ir até o seu Instagram.</p>
+      <div class="cartao cartao-destaque" id="cartao-instagram-total"></div>
+      <div class="grid-graficos-instagram">
+        <div class="cartao">
+          <h2>Por dia da semana</h2>
+          <div class="grafico-barras grafico-pequeno" id="grafico-instagram-dia"></div>
+        </div>
+        <div class="cartao">
+          <h2>Por horário do dia</h2>
+          <div class="grafico-barras grafico-pequeno" id="grafico-instagram-hora"></div>
+        </div>
       </div>
     </section>
   </main>
@@ -428,10 +877,13 @@
   document.body.classList.remove("carregando");
   document.body.classList.add("pronto");
 
-  // ---- Navegação entre as duas abas ----
+  // ---- Navegação entre as abas ----
   const navItems = document.querySelectorAll(".nav-item");
   const tituloPagina = document.getElementById("titulo-pagina");
-  const titulos = { geral: "Menu Principal", portfolio: "Portfólio" };
+  const filtrosPeriodoEl = document.getElementById("filtros-periodo");
+  const titulos = { geral: "Menu Principal", calendario: "Calendário", portfolio: "Portfólio", propostas: "Propostas", instagram: "Instagram" };
+  // Calendário e Propostas são listas manuais, não fazem sentido filtrar por período de visitas.
+  const abasSemFiltroPeriodo = ["propostas", "calendario"];
 
   navItems.forEach(btn => {
     btn.addEventListener("click", () => {
@@ -441,7 +893,18 @@
       document.querySelectorAll(".painel-tab").forEach(p => p.hidden = true);
       document.getElementById("painel-" + tab).hidden = false;
       tituloPagina.textContent = titulos[tab];
+      filtrosPeriodoEl.hidden = abasSemFiltroPeriodo.includes(tab);
       fecharMenuMobile();
+    });
+  });
+
+  // ---- Sub-abas dentro da aba Portfólio (Vídeos / Botões / Leads) ----
+  document.querySelectorAll(".subaba-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll(".subaba-btn").forEach(b => b.classList.remove("ativo"));
+      btn.classList.add("ativo");
+      document.querySelectorAll(".subaba-painel").forEach(p => p.hidden = true);
+      document.getElementById("subaba-" + btn.dataset.subaba).hidden = false;
     });
   });
 
@@ -455,6 +918,21 @@
   overlay.addEventListener("click", fecharMenuMobile);
 
   document.getElementById("btn-sair").addEventListener("click", () => Auth.logout());
+
+  // ---- Recolher/expandir o menu lateral (no computador) ----
+  const btnRecolherSidebar = document.getElementById("btn-recolher-sidebar");
+  function aplicarSidebarRecolhida(recolhida) {
+    sidebar.classList.toggle("recolhida", recolhida);
+    btnRecolherSidebar.setAttribute("aria-label", recolhida ? "Expandir menu" : "Recolher menu");
+  }
+  try {
+    aplicarSidebarRecolhida(localStorage.getItem("sidebarRecolhida") === "1");
+  } catch (e) { /* localStorage pode falhar em modo privado; segue com o menu aberto */ }
+  btnRecolherSidebar.addEventListener("click", () => {
+    const recolhida = !sidebar.classList.contains("recolhida");
+    aplicarSidebarRecolhida(recolhida);
+    try { localStorage.setItem("sidebarRecolhida", recolhida ? "1" : "0"); } catch (e) {}
+  });
 
   // ---- Busca paginada: o Supabase limita a 1000 linhas por consulta, então
   // buscamos em blocos de 1000 até vir um bloco menor (fim da tabela). ----
@@ -479,19 +957,45 @@
   // ---- Estado em memória: carregado uma vez, refiltrado ao trocar período ----
   let eventos = [];
   let leads = [];
+  let propostas = [];
+  let agenda = [];
   let diasFiltro = 0; // 0 = "Tudo"
+
+  // ---- Estado do calendário (precisa existir antes da primeira renderização) ----
+  const NOMES_MESES = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
+  const NOMES_DIAS_SEMANA = ["domingo", "segunda-feira", "terça-feira", "quarta-feira", "quinta-feira", "sexta-feira", "sábado"];
+
+  // Formata uma data local como "AAAA-MM-DD", sem usar toISOString() (que converte
+  // pra UTC e pode voltar um dia errado dependendo do fuso horário).
+  function formatarDataISO(date) {
+    const ano = date.getFullYear();
+    const mes = String(date.getMonth() + 1).padStart(2, "0");
+    const dia = String(date.getDate()).padStart(2, "0");
+    return `${ano}-${mes}-${dia}`;
+  }
+
+  const HOJE_ISO = formatarDataISO(new Date());
+  let mesCalendario = new Date();
+  mesCalendario.setDate(1);
+  let diaSelecionadoISO = HOJE_ISO;
 
   const elCarregando = document.getElementById("painel-carregando");
   const elErro = document.getElementById("painel-erro");
 
   try {
-    [eventos, leads] = await Promise.all([
+    [eventos, leads, propostas, agenda] = await Promise.all([
       buscarTudo("portfolio_events"),
-      buscarTudo("portfolio_leads")
+      buscarTudo("portfolio_leads"),
+      buscarTudo("portfolio_propostas"),
+      buscarTudo("portfolio_agenda")
     ]);
     elCarregando.hidden = true;
     document.querySelectorAll(".painel-tab").forEach((p, i) => p.hidden = i !== 0);
     renderizarTudo();
+    renderizarPropostas();
+    renderizarCalendario();
+    renderizarPainelDia();
+    renderizarListaAgendaCompleta();
   } catch (err) {
     console.error(err);
     elCarregando.hidden = true;
@@ -519,8 +1023,9 @@
     const eventosF = filtrarPorPeriodo(eventos);
     const leadsF = filtrarPorPeriodo(leads);
     renderizarGeral(eventosF, leadsF);
-    renderizarPortfolioTab(eventosF);
+    renderizarPortfolioTab(eventosF, leadsF);
     renderizarMensagens(leadsF);
+    renderizarInstagramTab(eventosF);
   }
 
   // ==================== ABA: MENU PRINCIPAL ====================
@@ -607,9 +1112,26 @@
     return String(texto).replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
   }
 
-  function renderizarPortfolioTab(eventosF) {
+  function renderizarPortfolioTab(eventosF, leadsF) {
+    const pageViews = eventosF.filter(e => e.event_type === "page_view");
     const videos = eventosF.filter(e => e.event_type === "video_view");
     const cliques = eventosF.filter(e => e.event_type === "button_click");
+    const visitantesUnicos = new Set(pageViews.map(e => e.session_id)).size;
+
+    // ---- Resumo no topo da aba Portfólio ----
+    const resumo = [
+      { valor: leadsF.length, label: "Leads recebidos", destaque: true },
+      { valor: pageViews.length, label: "Visitas no site" },
+      { valor: visitantesUnicos, label: "Visitantes únicos" },
+      { valor: cliques.length, label: "Cliques em botões" },
+      { valor: videos.length, label: "Vídeos vistos" }
+    ];
+    document.getElementById("cartoes-numeros-portfolio").innerHTML = resumo.map(c => `
+      <div class="cartao cartao-numero ${c.destaque ? "cartao-numero-destaque" : ""}">
+        <div class="numero-grande">${c.valor.toLocaleString("pt-BR")}</div>
+        <div class="numero-label">${c.label}</div>
+      </div>
+    `).join("");
 
     // ---- Vídeos mais vistos ----
     const videosAgrupados = agrupar(videos, "event_name");
@@ -714,6 +1236,333 @@
       });
     });
   }
+
+  // ==================== ABA: INSTAGRAM ====================
+  function renderizarInstagramTab(eventosF) {
+    const cliquesInstagram = eventosF.filter(e => e.event_type === "button_click" && e.event_name === "contact_instagram");
+
+    document.getElementById("cartao-instagram-total").innerHTML = `
+      <div class="destaque-numero">${cliquesInstagram.length.toLocaleString("pt-BR")}</div>
+      <div class="destaque-titulo">Cliques no Instagram</div>
+      <p class="destaque-texto">Quantas vezes clicaram no botão do Instagram no site, no período selecionado.</p>
+    `;
+
+    // ---- Por dia da semana ----
+    const nomesDias = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
+    const porDia = nomesDias.map(() => 0);
+    cliquesInstagram.forEach(e => { porDia[new Date(e.created_at).getDay()]++; });
+    renderizarGraficoSimples("grafico-instagram-dia", nomesDias, porDia, "cliques");
+
+    // ---- Por horário do dia (agrupado de 3 em 3 horas, pra não ficar apertado) ----
+    const faixas = ["0h-3h", "3h-6h", "6h-9h", "9h-12h", "12h-15h", "15h-18h", "18h-21h", "21h-24h"];
+    const porHora = faixas.map(() => 0);
+    cliquesInstagram.forEach(e => {
+      const hora = new Date(e.created_at).getHours();
+      porHora[Math.floor(hora / 3)]++;
+    });
+    renderizarGraficoSimples("grafico-instagram-hora", faixas, porHora, "cliques");
+  }
+
+  // Gráfico de barras genérico (rótulo + valor), reaproveitado pelos gráficos do Instagram.
+  function renderizarGraficoSimples(idContainer, rotulos, valores, sufixoTitulo) {
+    const container = document.getElementById(idContainer);
+    const total = valores.reduce((a, b) => a + b, 0);
+    if (total === 0) {
+      container.innerHTML = `<p class="estado-vazio">Nenhum clique registrado ainda.</p>`;
+      return;
+    }
+    const maiorValor = Math.max(...valores, 1);
+    container.innerHTML = valores.map((valor, i) => {
+      const altura = valor > 0 ? Math.max((valor / maiorValor) * 100, 6) : 2;
+      return `
+        <div class="barra-dia" title="${rotulos[i]}: ${valor} ${sufixoTitulo}">
+          <div class="barra" style="height:${altura}%"></div>
+          <span class="barra-legenda">${rotulos[i]}</span>
+        </div>
+      `;
+    }).join("");
+  }
+
+  // ==================== ABA: PROPOSTAS ====================
+  const rotulosStatus = { aguardando: "Aguardando", respondeu: "Respondeu", fechou: "Fechou" };
+
+  function renderizarPropostas() {
+    const listaEl = document.getElementById("lista-propostas");
+    if (propostas.length === 0) {
+      listaEl.innerHTML = `<p class="estado-vazio">Nenhuma marca adicionada ainda.</p>`;
+      return;
+    }
+    const ordenadas = propostas.slice().sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+    listaEl.innerHTML = ordenadas.map(p => {
+      const data = new Date(p.data_contato).toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric" });
+      return `
+        <div class="item-proposta" data-id="${p.id}">
+          <div class="item-proposta-marca">${p.marca}</div>
+          <select class="select-status status-${p.status}" data-id="${p.id}">
+            <option value="aguardando" ${p.status === "aguardando" ? "selected" : ""}>Aguardando</option>
+            <option value="respondeu" ${p.status === "respondeu" ? "selected" : ""}>Respondeu</option>
+            <option value="fechou" ${p.status === "fechou" ? "selected" : ""}>Fechou</option>
+          </select>
+          <div class="item-proposta-obs">${p.observacao || ""}</div>
+          <div class="item-proposta-data">${data}</div>
+          <button class="btn-apagar-proposta" data-id="${p.id}" aria-label="Apagar proposta">✕</button>
+        </div>
+      `;
+    }).join("");
+
+    // Trocar o status direto na lista.
+    listaEl.querySelectorAll(".select-status").forEach(select => {
+      select.addEventListener("change", async () => {
+        const id = select.dataset.id;
+        const novoStatus = select.value;
+        select.className = "select-status status-" + novoStatus;
+        const { error } = await Auth.sb.from("portfolio_propostas")
+          .update({ status: novoStatus, updated_at: new Date().toISOString() })
+          .eq("id", id);
+        if (error) {
+          alert("Não foi possível atualizar o status agora.");
+          return;
+        }
+        const item = propostas.find(p => p.id === id);
+        if (item) item.status = novoStatus;
+      });
+    });
+
+    // Apagar uma proposta.
+    listaEl.querySelectorAll(".btn-apagar-proposta").forEach(btn => {
+      btn.addEventListener("click", async () => {
+        const id = btn.dataset.id;
+        if (!confirm("Apagar essa proposta?")) return;
+        const { error } = await Auth.sb.from("portfolio_propostas").delete().eq("id", id);
+        if (error) {
+          alert("Não foi possível apagar agora.");
+          return;
+        }
+        propostas = propostas.filter(p => p.id !== id);
+        renderizarPropostas();
+      });
+    });
+  }
+
+  const formProposta = document.getElementById("form-proposta");
+  const btnAdicionarProposta = document.getElementById("btn-adicionar-proposta");
+  formProposta.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const marca = document.getElementById("proposta-marca").value.trim();
+    const status = document.getElementById("proposta-status").value;
+    const observacao = document.getElementById("proposta-observacao").value.trim();
+
+    btnAdicionarProposta.disabled = true;
+    btnAdicionarProposta.textContent = "Adicionando...";
+    const { data, error } = await Auth.sb.from("portfolio_propostas")
+      .insert({ marca, status, observacao: observacao || null })
+      .select()
+      .single();
+    btnAdicionarProposta.disabled = false;
+    btnAdicionarProposta.textContent = "Adicionar";
+
+    if (error) {
+      alert("Não foi possível adicionar agora. Tente de novo.");
+      return;
+    }
+    propostas.push(data);
+    renderizarPropostas();
+    formProposta.reset();
+  });
+
+  // ==================== ABA: CALENDÁRIO ====================
+
+  function renderizarCalendario() {
+    const ano = mesCalendario.getFullYear();
+    const mes = mesCalendario.getMonth();
+    document.getElementById("calendario-mes-ano").textContent = `${NOMES_MESES[mes]} de ${ano}`;
+
+    const primeiroDiaSemana = (new Date(ano, mes, 1).getDay() + 6) % 7; // 0 = segunda
+    const diasNoMes = new Date(ano, mes + 1, 0).getDate();
+    const diasMesAnterior = new Date(ano, mes, 0).getDate();
+
+    const celulas = [];
+    for (let i = primeiroDiaSemana - 1; i >= 0; i--) {
+      celulas.push({ dia: diasMesAnterior - i, mesOffset: -1, foraDoMes: true });
+    }
+    for (let d = 1; d <= diasNoMes; d++) {
+      celulas.push({ dia: d, mesOffset: 0, foraDoMes: false });
+    }
+    let proximo = 1;
+    while (celulas.length % 7 !== 0) {
+      celulas.push({ dia: proximo++, mesOffset: 1, foraDoMes: true });
+    }
+
+    const grade = document.getElementById("calendario-grade");
+    grade.innerHTML = celulas.map(c => {
+      const dataReal = new Date(ano, mes + c.mesOffset, c.dia);
+      const iso = formatarDataISO(dataReal);
+      const isHoje = iso === HOJE_ISO;
+      const isSelecionado = iso === diaSelecionadoISO;
+      const temItens = agenda.some(a => a.data === iso);
+      const classes = ["dia-calendario"];
+      if (c.foraDoMes) classes.push("fora-do-mes");
+      if (isHoje) classes.push("hoje");
+      if (isSelecionado) classes.push("selecionado");
+      return `<button type="button" class="${classes.join(" ")}" data-iso="${iso}">${c.dia}${temItens ? '<span class="ponto-agenda"></span>' : ""}</button>`;
+    }).join("");
+
+    grade.querySelectorAll(".dia-calendario").forEach(btn => {
+      btn.addEventListener("click", () => {
+        diaSelecionadoISO = btn.dataset.iso;
+        document.getElementById("form-agenda-inline").hidden = true;
+        renderizarCalendario();
+        renderizarPainelDia();
+      });
+    });
+  }
+
+  function renderizarPainelDia() {
+    const [anoSel, mesSel, diaSel] = diaSelecionadoISO.split("-").map(Number);
+    const dataObj = new Date(anoSel, mesSel - 1, diaSel);
+    const isHoje = diaSelecionadoISO === HOJE_ISO;
+    const itensDoDia = agenda.filter(a => a.data === diaSelecionadoISO);
+    const entregas = itensDoDia.filter(i => i.tipo === "entrega").length;
+    const pendencias = itensDoDia.filter(i => i.tipo === "pendencia").length;
+
+    document.getElementById("painel-dia-eyebrow").textContent = isHoje ? "Hoje" : "Selecionado";
+    document.getElementById("painel-dia-numero").textContent = diaSel;
+    document.getElementById("painel-dia-resumo").textContent =
+      `${entregas} entrega${entregas === 1 ? "" : "s"} e ${pendencias} pendência${pendencias === 1 ? "" : "s"}`;
+    const nomeDiaSemana = NOMES_DIAS_SEMANA[dataObj.getDay()];
+    document.getElementById("painel-dia-semana").textContent = nomeDiaSemana.charAt(0).toUpperCase() + nomeDiaSemana.slice(1);
+
+    const listaEl = document.getElementById("lista-agenda-dia");
+    if (itensDoDia.length === 0) {
+      listaEl.innerHTML = `<p class="estado-vazio">Nada agendado pra esse dia.</p>`;
+    } else {
+      listaEl.innerHTML = itensDoDia
+        .slice()
+        .sort((a, b) => (a.horario || "99:99").localeCompare(b.horario || "99:99"))
+        .map(item => renderizarItemAgendaHTML(item, false))
+        .join("");
+    }
+  }
+
+  // Linha de um item da agenda, usada tanto no painel do dia quanto na lista completa.
+  // "mostrarData" acrescenta a data no início, útil quando o item aparece fora do contexto de um dia só.
+  function renderizarItemAgendaHTML(item, mostrarData) {
+    const horarioTexto = item.horario ? item.horario.slice(0, 5) : "Sem horário";
+    const tipoTexto = item.tipo === "pendencia" ? "Pendência" : "Entrega";
+    const dataTexto = mostrarData
+      ? new Date(item.data + "T00:00:00").toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" }) + " · "
+      : "";
+    return `
+      <div class="item-agenda ${item.concluido ? "concluido" : ""}">
+        <div class="item-agenda-info">
+          <div class="item-agenda-meta ${item.tipo === "pendencia" ? "tipo-pendencia" : ""}">${dataTexto}${tipoTexto} · ${horarioTexto}</div>
+          <div class="item-agenda-titulo">${item.titulo}</div>
+        </div>
+        <div class="item-agenda-acoes">
+          <button type="button" class="btn-icone-agenda btn-concluir-agenda ${item.concluido ? "concluido" : ""}" data-id="${item.id}" title="Marcar como concluído" aria-label="Marcar como concluído">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          </button>
+          <button type="button" class="btn-icone-agenda btn-apagar-agenda" data-id="${item.id}" title="Apagar" aria-label="Apagar">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M9 6V4a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/></svg>
+          </button>
+        </div>
+      </div>
+    `;
+  }
+
+  function renderizarListaAgendaCompleta() {
+    const abertas = agenda.filter(a => !a.concluido).slice().sort((a, b) => a.data.localeCompare(b.data));
+    const encerradas = agenda.filter(a => a.concluido).slice().sort((a, b) => b.data.localeCompare(a.data));
+
+    const elAbertas = document.getElementById("subaba-agenda-abertas");
+    elAbertas.innerHTML = abertas.length === 0
+      ? `<p class="estado-vazio">Nenhuma tarefa em aberto.</p>`
+      : abertas.map(item => renderizarItemAgendaHTML(item, true)).join("");
+
+    const elEncerradas = document.getElementById("subaba-agenda-encerradas");
+    elEncerradas.innerHTML = encerradas.length === 0
+      ? `<p class="estado-vazio">Nenhuma tarefa encerrada ainda.</p>`
+      : encerradas.map(item => renderizarItemAgendaHTML(item, true)).join("");
+  }
+
+  // ---- Navegação entre meses ----
+  document.getElementById("btn-mes-anterior").addEventListener("click", () => {
+    mesCalendario.setMonth(mesCalendario.getMonth() - 1);
+    renderizarCalendario();
+  });
+  document.getElementById("btn-mes-proximo").addEventListener("click", () => {
+    mesCalendario.setMonth(mesCalendario.getMonth() + 1);
+    renderizarCalendario();
+  });
+
+  // ---- Sub-abas "Em aberto" / "Encerradas" (independentes das sub-abas do Portfólio) ----
+  document.querySelectorAll(".subaba-agenda-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll(".subaba-agenda-btn").forEach(b => b.classList.remove("ativo"));
+      btn.classList.add("ativo");
+      const alvo = btn.dataset.subabaAgenda;
+      document.getElementById("subaba-agenda-abertas").hidden = alvo !== "abertas";
+      document.getElementById("subaba-agenda-encerradas").hidden = alvo !== "encerradas";
+    });
+  });
+
+  // ---- Adicionar novo item na agenda ----
+  const btnAddAgenda = document.getElementById("btn-add-agenda");
+  const formAgendaInline = document.getElementById("form-agenda-inline");
+  btnAddAgenda.addEventListener("click", () => {
+    formAgendaInline.hidden = !formAgendaInline.hidden;
+  });
+  formAgendaInline.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const titulo = document.getElementById("agenda-titulo").value.trim();
+    const tipo = document.getElementById("agenda-tipo").value;
+    const horario = document.getElementById("agenda-horario").value || null;
+
+    const { data, error } = await Auth.sb.from("portfolio_agenda")
+      .insert({ titulo, tipo, data: diaSelecionadoISO, horario })
+      .select()
+      .single();
+
+    if (error) {
+      alert("Não foi possível adicionar agora. Tente de novo.");
+      return;
+    }
+    agenda.push(data);
+    formAgendaInline.reset();
+    formAgendaInline.hidden = true;
+    renderizarCalendario();
+    renderizarPainelDia();
+    renderizarListaAgendaCompleta();
+  });
+
+  // ---- Concluir/apagar um item da agenda (funciona tanto no painel do dia quanto na lista completa) ----
+  document.addEventListener("click", async (e) => {
+    const btnConcluir = e.target.closest(".btn-concluir-agenda");
+    if (btnConcluir) {
+      const id = btnConcluir.dataset.id;
+      const item = agenda.find(a => a.id === id);
+      if (!item) return;
+      const novoValor = !item.concluido;
+      const { error } = await Auth.sb.from("portfolio_agenda").update({ concluido: novoValor }).eq("id", id);
+      if (error) { alert("Não foi possível atualizar agora."); return; }
+      item.concluido = novoValor;
+      renderizarCalendario();
+      renderizarPainelDia();
+      renderizarListaAgendaCompleta();
+      return;
+    }
+    const btnApagar = e.target.closest(".btn-apagar-agenda");
+    if (btnApagar) {
+      const id = btnApagar.dataset.id;
+      if (!confirm("Apagar esse item da agenda?")) return;
+      const { error } = await Auth.sb.from("portfolio_agenda").delete().eq("id", id);
+      if (error) { alert("Não foi possível apagar agora."); return; }
+      agenda = agenda.filter(a => a.id !== id);
+      renderizarCalendario();
+      renderizarPainelDia();
+      renderizarListaAgendaCompleta();
+    }
+  });
 })();
 </script>
 </body>
