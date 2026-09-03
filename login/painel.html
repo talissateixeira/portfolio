@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Painel | meu.painel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="js/auth.js"></script>
+<style>
+  :root {
+    --coral: #D4572A;
+    --coral-escuro: #B8461F;
+    --creme: #F5F3EF;
+    --branco: #FFFFFF;
+    --grafite: #1A1816;
+    --texto-suave: #6B645C;
+    --borda: #DDD8D0;
+    --sucesso: #2D7A4F;
+    --erro: #C4453C;
+    --raio-sm: 12px;
+    --raio-lg: 24px;
+    --sombra: 0 8px 24px rgba(26, 24, 22, 0.07);
+    --sidebar-largura: 250px;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--creme);
+    color: var(--grafite);
+    font-family: "DM Sans", sans-serif;
+    opacity: 0;
+    transition: opacity 0.35s ease;
+  }
+  body.pronto { opacity: 1; }
+
+  h1, h2 { font-family: "Fraunces", serif; font-weight: 600; margin: 0; }
+  a { color: inherit; }
+  button { font-family: inherit; cursor: pointer; }
+  [hidden] { display: none !important; }
+
+  .app { display: flex; min-height: 100vh; }
+
+  /* ===== SIDEBAR ===== */
+  .sidebar {
+    width: var(--sidebar-largura);
+    flex-shrink: 0;
+    background: var(--branco);
+    border-right: 1px solid var(--borda);
+    display: flex;
+    flex-direction: column;
+    padding: 26px 18px;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+  }
+  .sidebar-topo { padding: 0 8px; margin-bottom: 30px; }
+  .logo { font-family: "Fraunces", serif; font-size: 1.3rem; font-weight: 600; }
+  .logo .ponto { color: var(--coral); }
+
+  .sidebar-nav { display: flex; flex-direction: column; gap: 4px; flex-grow: 1; }
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    padding: 12px 14px;
+    border: none;
+    background: none;
+    border-radius: var(--raio-sm);
+    color: var(--texto-suave);
+    font-size: 0.95rem;
+    font-weight: 500;
+    text-align: left;
+    transition: background 0.2s ease, color 0.2s ease;
+  }
+  .nav-item:hover { background: var(--creme); color: var(--grafite); }
+  .nav-item.ativo { background: var(--coral); color: var(--branco); }
+  .nav-icone { display: flex; flex-shrink: 0; }
+
+  .sidebar-rodape {
+    border-top: 1px solid var(--borda);
+    padding-top: 16px;
+    margin-top: 16px;
+  }
+  .sidebar-email {
+    font-size: 0.8rem;
+    color: var(--texto-suave);
+    padding: 0 8px 12px;
+    word-break: break-all;
+  }
+  .btn-sair {
+    width: 100%;
+    padding: 10px 14px;
+    border-radius: var(--raio-sm);
+    border: 1.5px solid var(--borda);
+    background: var(--branco);
+    color: var(--grafite);
+    font-weight: 600;
+    font-size: 0.88rem;
+    transition: border-color 0.2s ease, color 0.2s ease;
+  }
+  .btn-sair:hover { border-color: var(--erro); color: var(--erro); }
+
+  .btn-abrir-menu {
+    display: none;
+    position: fixed;
+    top: 16px; left: 16px;
+    z-index: 200;
+    width: 44px; height: 44px;
+    border-radius: 12px;
+    border: 1px solid var(--borda);
+    background: var(--branco);
+    font-size: 1.2rem;
+    box-shadow: var(--sombra);
+  }
+
+  .overlay-sidebar {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(26,24,22,0.4);
+    z-index: 150;
+  }
+  .overlay-sidebar.visivel { display: block; }
+
+  /* ===== CONTEÚDO ===== */
+  .conteudo {
+    flex-grow: 1;
+    padding: 36px 40px 60px;
+    max-width: 1100px;
+  }
+
+  .topo-conteudo {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+  .topo-conteudo h1 { font-size: 1.8rem; }
+
+  .filtros-periodo { display: flex; gap: 8px; }
+  .periodo-btn {
+    padding: 9px 18px;
+    border-radius: 100px;
+    border: 1.5px solid var(--borda);
+    background: var(--branco);
+    color: var(--texto-suave);
+    font-weight: 600;
+    font-size: 0.85rem;
+    transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+  }
+  .periodo-btn:hover { border-color: var(--coral); }
+  .periodo-btn.ativo { background: var(--coral); color: var(--branco); border-color: var(--coral); }
+
+  .saudacao { color: var(--texto-suave); font-size: 1.02rem; margin: 0 0 24px; }
+
+  .cartao {
+    background: var(--branco);
+    border: 1px solid var(--borda);
+    border-radius: var(--raio-lg);
+    padding: 26px 24px;
+    box-shadow: var(--sombra);
+    margin-bottom: 24px;
+  }
+  .cartao h2 { font-size: 1.15rem; margin-bottom: 18px; }
+
+  /* Cartões de número */
+  .cartoes-numeros {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  .cartao-numero {
+    padding: 20px 18px;
+    margin-bottom: 0;
+  }
+  .cartao-numero-destaque {
+    background: var(--coral);
+    border-color: var(--coral);
+  }
+  .cartao-numero-destaque .numero-grande,
+  .cartao-numero-destaque .numero-label { color: var(--branco); }
+  .numero-grande { font-family: "Fraunces", serif; font-size: 2rem; font-weight: 600; line-height: 1; }
+  .numero-label { font-size: 0.82rem; color: var(--texto-suave); margin-top: 8px; }
+
+  /* Cartão de destaque de contato */
+  .cartao-destaque { text-align: left; }
+  .destaque-numero { font-family: "Fraunces", serif; font-size: 2.6rem; font-weight: 600; color: var(--coral); line-height: 1; }
+  .destaque-titulo { font-weight: 700; margin: 8px 0 6px; }
+  .destaque-texto { color: var(--texto-suave); font-size: 0.85rem; margin: 0; line-height: 1.5; }
+
+  /* Gráfico de barras */
+  .grafico-barras {
+    display: flex;
+    align-items: flex-end;
+    gap: 8px;
+    height: 180px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+  }
+  .barra-dia {
+    flex: 1 0 28px;
+    min-width: 28px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 8px;
+  }
+  .barra {
+    width: 100%;
+    max-width: 26px;
+    background: var(--coral);
+    border-radius: 6px 6px 2px 2px;
+    transition: opacity 0.2s ease;
+  }
+  .barra-dia:hover .barra { opacity: 0.75; }
+  .barra-legenda { font-size: 0.66rem; color: var(--texto-suave); white-space: nowrap; }
+
+  .estado-vazio { color: var(--texto-suave); font-size: 0.92rem; text-align: center; padding: 20px 0; margin: 0; }
+  .estado-carregando { color: var(--texto-suave); text-align: center; padding: 60px 0; }
+  .estado-erro { color: var(--erro); background: rgba(196,69,60,0.08); border-radius: var(--raio-sm); padding: 16px; text-align: center; }
+
+  /* Barras horizontais (botões, vídeos) */
+  .barra-horizontal-fundo { background: var(--creme); border-radius: 100px; height: 8px; overflow: hidden; margin-top: 6px; }
+  .barra-horizontal { background: var(--coral); height: 100%; border-radius: 100px; }
+
+  .item-barra { padding: 10px 0; border-bottom: 1px solid var(--creme); }
+  .item-barra:last-child { border-bottom: none; }
+  .item-barra-topo { display: flex; justify-content: space-between; font-size: 0.9rem; font-weight: 500; }
+
+  /* Vídeos mais vistos */
+  .item-video {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--creme);
+    text-decoration: none;
+    color: var(--grafite);
+  }
+  .item-video:last-child { border-bottom: none; }
+  .item-video img { width: 64px; height: 48px; object-fit: cover; border-radius: 8px; flex-shrink: 0; }
+  .item-video-info { flex-grow: 1; min-width: 0; }
+  .item-video-titulo { font-size: 0.9rem; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .item-video-total { font-weight: 700; color: var(--coral); font-size: 0.95rem; flex-shrink: 0; }
+
+  /* Cliques para contato */
+  .item-contato-clique {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--creme);
+    font-size: 0.92rem;
+  }
+  .item-contato-clique:last-child { border-bottom: none; }
+  .item-contato-clique strong { color: var(--coral); }
+
+  /* Mensagens recebidas */
+  .cartao-mensagem { border: 1px solid var(--borda); border-radius: var(--raio-sm); margin-bottom: 10px; overflow: hidden; }
+  .cartao-mensagem-topo {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 16px;
+    background: var(--branco);
+    border: none;
+    text-align: left;
+  }
+  .selo-origem {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    padding: 4px 10px;
+    border-radius: 100px;
+    background: var(--creme);
+    color: var(--texto-suave);
+    flex-shrink: 0;
+  }
+  .selo-popup { background: rgba(212,87,42,0.12); color: var(--coral-escuro); }
+  .cartao-mensagem-nome { font-weight: 600; flex-grow: 1; }
+  .cartao-mensagem-data { font-size: 0.8rem; color: var(--texto-suave); }
+  .cartao-mensagem-seta { color: var(--texto-suave); transition: transform 0.2s ease; }
+  .cartao-mensagem-topo.aberto .cartao-mensagem-seta { transform: rotate(180deg); }
+  .cartao-mensagem-email { padding: 0 16px 14px 16px; font-size: 0.85rem; color: var(--texto-suave); margin-top: -8px; }
+  .cartao-mensagem-detalhes { padding: 4px 16px 18px; border-top: 1px solid var(--creme); font-size: 0.9rem; }
+  .cartao-mensagem-detalhes p { margin: 8px 0; }
+  .cartao-mensagem-acoes { display: flex; gap: 10px; margin-top: 12px; flex-wrap: wrap; }
+  .btn-pequeno {
+    display: inline-flex;
+    align-items: center;
+    padding: 9px 16px;
+    border-radius: 100px;
+    background: var(--coral);
+    color: var(--branco);
+    text-decoration: none;
+    font-size: 0.82rem;
+    font-weight: 600;
+  }
+  .btn-whatsapp { background: var(--sucesso); }
+
+  /* ===== RESPONSIVO ===== */
+  @media (max-width: 980px) {
+    .cartoes-numeros { grid-template-columns: repeat(3, 1fr); }
+  }
+
+  @media (max-width: 760px) {
+    .btn-abrir-menu { display: flex; align-items: center; justify-content: center; }
+    .sidebar {
+      position: fixed;
+      left: 0; top: 0;
+      transform: translateX(-100%);
+      transition: transform 0.25s ease;
+      z-index: 180;
+      box-shadow: var(--sombra);
+    }
+    .sidebar.aberta { transform: translateX(0); }
+    .conteudo { padding: 76px 20px 50px; }
+    .cartoes-numeros { grid-template-columns: repeat(2, 1fr); }
+    .topo-conteudo h1 { font-size: 1.4rem; }
+    .filtros-periodo { width: 100%; }
+    .periodo-btn { flex: 1; padding: 9px 8px; }
+  }
+
+  @media (max-width: 480px) {
+    .cartoes-numeros { grid-template-columns: 1fr 1fr; }
+    .item-video img { width: 52px; height: 40px; }
+  }
+</style>
+</head>
+<body class="carregando">
+
+<button class="btn-abrir-menu" id="btn-abrir-menu" aria-label="Abrir menu">☰</button>
+<div class="overlay-sidebar" id="overlay-sidebar"></div>
+
+<div class="app">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-topo">
+      <div class="logo">meu<span class="ponto">.</span>painel</div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <button class="nav-item ativo" data-tab="geral">
+        <span class="nav-icone" aria-hidden="true">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></svg>
+        </span>
+        Menu Principal
+      </button>
+      <button class="nav-item" data-tab="portfolio">
+        <span class="nav-icone" aria-hidden="true">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></svg>
+        </span>
+        Portfólio
+      </button>
+    </nav>
+
+    <div class="sidebar-rodape">
+      <div class="sidebar-email" id="sidebar-email"></div>
+      <button class="btn-sair" id="btn-sair">Sair</button>
+    </div>
+  </aside>
+
+  <main class="conteudo">
+    <header class="topo-conteudo">
+      <h1 id="titulo-pagina">Menu Principal</h1>
+      <div class="filtros-periodo" id="filtros-periodo">
+        <button class="periodo-btn ativo" data-dias="0">Tudo</button>
+        <button class="periodo-btn" data-dias="7">7d</button>
+        <button class="periodo-btn" data-dias="30">30d</button>
+        <button class="periodo-btn" data-dias="90">90d</button>
+      </div>
+    </header>
+
+    <div class="estado-carregando" id="painel-carregando">Carregando os números...</div>
+    <div class="estado-erro" id="painel-erro" hidden></div>
+
+    <!-- ABA 1: MENU PRINCIPAL -->
+    <section class="painel-tab" id="painel-geral" hidden>
+      <p class="saudacao">Olá! Aqui estão os números do seu portfólio.</p>
+      <div class="cartoes-numeros" id="cartoes-numeros"></div>
+      <div class="cartao cartao-destaque" id="cartao-contato-destaque"></div>
+      <div class="cartao">
+        <h2>Visitas nos últimos 14 dias</h2>
+        <div class="grafico-barras" id="grafico-barras"></div>
+      </div>
+    </section>
+
+    <!-- ABA 2: PORTFÓLIO -->
+    <section class="painel-tab" id="painel-portfolio" hidden>
+      <div class="cartao">
+        <h2>Vídeos mais vistos</h2>
+        <div id="lista-videos"></div>
+      </div>
+      <div class="cartao">
+        <h2>Botões mais clicados</h2>
+        <div id="lista-botoes"></div>
+      </div>
+      <div class="cartao">
+        <h2>Cliques para contato</h2>
+        <div id="lista-contato-cliques"></div>
+      </div>
+      <div class="cartao">
+        <h2>Mensagens recebidas</h2>
+        <div id="lista-mensagens"></div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<script>
+(async function () {
+  // ---- Guarda de autenticação: só continua se houver sessão válida ----
+  const auth = await Auth.checkAuth();
+  if (!auth) return;
+
+  document.getElementById("sidebar-email").textContent = auth.email;
+  document.body.classList.remove("carregando");
+  document.body.classList.add("pronto");
+
+  // ---- Navegação entre as duas abas ----
+  const navItems = document.querySelectorAll(".nav-item");
+  const tituloPagina = document.getElementById("titulo-pagina");
+  const titulos = { geral: "Menu Principal", portfolio: "Portfólio" };
+
+  navItems.forEach(btn => {
+    btn.addEventListener("click", () => {
+      navItems.forEach(b => b.classList.remove("ativo"));
+      btn.classList.add("ativo");
+      const tab = btn.dataset.tab;
+      document.querySelectorAll(".painel-tab").forEach(p => p.hidden = true);
+      document.getElementById("painel-" + tab).hidden = false;
+      tituloPagina.textContent = titulos[tab];
+      fecharMenuMobile();
+    });
+  });
+
+  // ---- Menu lateral em gaveta no celular ----
+  const sidebar = document.getElementById("sidebar");
+  const overlay = document.getElementById("overlay-sidebar");
+  const btnAbrirMenu = document.getElementById("btn-abrir-menu");
+  function abrirMenuMobile() { sidebar.classList.add("aberta"); overlay.classList.add("visivel"); }
+  function fecharMenuMobile() { sidebar.classList.remove("aberta"); overlay.classList.remove("visivel"); }
+  btnAbrirMenu.addEventListener("click", abrirMenuMobile);
+  overlay.addEventListener("click", fecharMenuMobile);
+
+  document.getElementById("btn-sair").addEventListener("click", () => Auth.logout());
+
+  // ---- Busca paginada: o Supabase limita a 1000 linhas por consulta, então
+  // buscamos em blocos de 1000 até vir um bloco menor (fim da tabela). ----
+  async function buscarTudo(tabela) {
+    const TAMANHO_BLOCO = 1000;
+    let inicio = 0;
+    let todos = [];
+    while (true) {
+      const { data, error } = await Auth.sb
+        .from(tabela)
+        .select("*")
+        .order("created_at", { ascending: false })
+        .range(inicio, inicio + TAMANHO_BLOCO - 1);
+      if (error) throw error;
+      todos = todos.concat(data);
+      if (!data || data.length < TAMANHO_BLOCO) break;
+      inicio += TAMANHO_BLOCO;
+    }
+    return todos;
+  }
+
+  // ---- Estado em memória: carregado uma vez, refiltrado ao trocar período ----
+  let eventos = [];
+  let leads = [];
+  let diasFiltro = 0; // 0 = "Tudo"
+
+  const elCarregando = document.getElementById("painel-carregando");
+  const elErro = document.getElementById("painel-erro");
+
+  try {
+    [eventos, leads] = await Promise.all([
+      buscarTudo("portfolio_events"),
+      buscarTudo("portfolio_leads")
+    ]);
+    elCarregando.hidden = true;
+    document.querySelectorAll(".painel-tab").forEach((p, i) => p.hidden = i !== 0);
+    renderizarTudo();
+  } catch (err) {
+    console.error(err);
+    elCarregando.hidden = true;
+    elErro.hidden = false;
+    elErro.textContent = "Não foi possível carregar os dados agora. Tente recarregar a página.";
+  }
+
+  // ---- Filtro de período (Tudo / 7d / 30d / 90d) ----
+  document.querySelectorAll(".periodo-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      document.querySelectorAll(".periodo-btn").forEach(b => b.classList.remove("ativo"));
+      btn.classList.add("ativo");
+      diasFiltro = Number(btn.dataset.dias);
+      renderizarTudo();
+    });
+  });
+
+  function filtrarPorPeriodo(lista) {
+    if (diasFiltro === 0) return lista;
+    const limite = Date.now() - diasFiltro * 24 * 60 * 60 * 1000;
+    return lista.filter(item => new Date(item.created_at).getTime() >= limite);
+  }
+
+  function renderizarTudo() {
+    const eventosF = filtrarPorPeriodo(eventos);
+    const leadsF = filtrarPorPeriodo(leads);
+    renderizarGeral(eventosF, leadsF);
+    renderizarPortfolioTab(eventosF);
+    renderizarMensagens(leadsF);
+  }
+
+  // ==================== ABA: MENU PRINCIPAL ====================
+  function renderizarGeral(eventosF, leadsF) {
+    const pageViews = eventosF.filter(e => e.event_type === "page_view");
+    const cliques = eventosF.filter(e => e.event_type === "button_click");
+    const videos = eventosF.filter(e => e.event_type === "video_view");
+    const visitantesUnicos = new Set(pageViews.map(e => e.session_id)).size;
+    const cliquesContato = cliques.filter(e => (e.event_name || "").startsWith("contact_"));
+
+    const cartoes = [
+      { valor: pageViews.length, label: "Visitas", destaque: true },
+      { valor: visitantesUnicos, label: "Visitantes únicos" },
+      { valor: cliques.length, label: "Cliques em botões" },
+      { valor: videos.length, label: "Vídeos vistos" },
+      { valor: leadsF.length, label: "Mensagens" }
+    ];
+
+    document.getElementById("cartoes-numeros").innerHTML = cartoes.map(c => `
+      <div class="cartao cartao-numero ${c.destaque ? "cartao-numero-destaque" : ""}">
+        <div class="numero-grande">${c.valor.toLocaleString("pt-BR")}</div>
+        <div class="numero-label">${c.label}</div>
+      </div>
+    `).join("");
+
+    document.getElementById("cartao-contato-destaque").innerHTML = `
+      <div class="destaque-numero">${cliquesContato.length.toLocaleString("pt-BR")}</div>
+      <div class="destaque-titulo">Clicaram para entrar em contato</div>
+      <p class="destaque-texto">Conta quem clicou em WhatsApp, e-mail, Instagram ou no botão de enviar o formulário.</p>
+    `;
+
+    renderizarGrafico(pageViews);
+  }
+
+  function renderizarGrafico(pageViews) {
+    const container = document.getElementById("grafico-barras");
+    const dias = [];
+    for (let i = 13; i >= 0; i--) {
+      const d = new Date();
+      d.setHours(0, 0, 0, 0);
+      d.setDate(d.getDate() - i);
+      dias.push(d);
+    }
+
+    const contagemPorDia = dias.map(dia => {
+      const proximoDia = new Date(dia);
+      proximoDia.setDate(proximoDia.getDate() + 1);
+      const total = pageViews.filter(e => {
+        const t = new Date(e.created_at).getTime();
+        return t >= dia.getTime() && t < proximoDia.getTime();
+      }).length;
+      return { dia, total };
+    });
+
+    if (contagemPorDia.every(d => d.total === 0)) {
+      container.innerHTML = `<p class="estado-vazio">Nenhuma visita registrada ainda.</p>`;
+      return;
+    }
+
+    const maiorValor = Math.max(...contagemPorDia.map(d => d.total), 1);
+    container.innerHTML = contagemPorDia.map(d => {
+      const altura = d.total > 0 ? Math.max((d.total / maiorValor) * 100, 6) : 2;
+      const dataFormatada = d.dia.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" });
+      return `
+        <div class="barra-dia" title="${dataFormatada}: ${d.total} visitas">
+          <div class="barra" style="height:${altura}%"></div>
+          <span class="barra-legenda">${dataFormatada}</span>
+        </div>
+      `;
+    }).join("");
+  }
+
+  // ==================== ABA: PORTFÓLIO ====================
+  function agrupar(lista, chave) {
+    const mapa = new Map();
+    lista.forEach(item => {
+      const k = item[chave] || "sem-nome";
+      mapa.set(k, (mapa.get(k) || 0) + 1);
+    });
+    return [...mapa.entries()].sort((a, b) => b[1] - a[1]);
+  }
+
+  function legivel(texto) {
+    return String(texto).replace(/_/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+  }
+
+  function renderizarPortfolioTab(eventosF) {
+    const videos = eventosF.filter(e => e.event_type === "video_view");
+    const cliques = eventosF.filter(e => e.event_type === "button_click");
+
+    // ---- Vídeos mais vistos ----
+    const videosAgrupados = agrupar(videos, "event_name");
+    const listaVideosEl = document.getElementById("lista-videos");
+    if (videosAgrupados.length === 0) {
+      listaVideosEl.innerHTML = `<p class="estado-vazio">Nenhum vídeo assistido ainda.</p>`;
+    } else {
+      const maior = videosAgrupados[0][1];
+      listaVideosEl.innerHTML = videosAgrupados.map(([id, total]) => {
+        const evento = videos.find(v => v.event_name === id);
+        const titulo = (evento && evento.metadata && evento.metadata.title) ? evento.metadata.title : id;
+        const largura = Math.max((total / maior) * 100, 4);
+        return `
+          <a class="item-video" href="https://www.youtube.com/watch?v=${id}" target="_blank" rel="noopener">
+            <img src="https://i.ytimg.com/vi/${id}/mqdefault.jpg" alt="Miniatura de ${titulo}" loading="lazy">
+            <div class="item-video-info">
+              <div class="item-video-titulo">${titulo}</div>
+              <div class="barra-horizontal-fundo"><div class="barra-horizontal" style="width:${largura}%"></div></div>
+            </div>
+            <div class="item-video-total">${total}</div>
+          </a>
+        `;
+      }).join("");
+    }
+
+    // ---- Botões mais clicados ----
+    const botoesAgrupados = agrupar(cliques, "event_name");
+    const listaBotoesEl = document.getElementById("lista-botoes");
+    if (botoesAgrupados.length === 0) {
+      listaBotoesEl.innerHTML = `<p class="estado-vazio">Nenhum clique registrado ainda.</p>`;
+    } else {
+      const maior = botoesAgrupados[0][1];
+      listaBotoesEl.innerHTML = botoesAgrupados.map(([nome, total]) => {
+        const largura = Math.max((total / maior) * 100, 4);
+        return `
+          <div class="item-barra">
+            <div class="item-barra-topo"><span>${legivel(nome)}</span><span>${total}</span></div>
+            <div class="barra-horizontal-fundo"><div class="barra-horizontal" style="width:${largura}%"></div></div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    // ---- Cliques para contato ----
+    const cliquesContato = cliques.filter(e => (e.event_name || "").startsWith("contact_"));
+    const contatoAgrupado = agrupar(cliquesContato, "event_name");
+    const listaContatoEl = document.getElementById("lista-contato-cliques");
+    if (contatoAgrupado.length === 0) {
+      listaContatoEl.innerHTML = `<p class="estado-vazio">Ninguém clicou em nenhum canal de contato ainda.</p>`;
+    } else {
+      listaContatoEl.innerHTML = contatoAgrupado.map(([nome, total]) => `
+        <div class="item-contato-clique">
+          <span>${legivel(nome.replace("contact_", ""))}</span>
+          <strong>${total}</strong>
+        </div>
+      `).join("");
+    }
+  }
+
+  // ---- Mensagens recebidas ----
+  function renderizarMensagens(leadsF) {
+    const listaMensagensEl = document.getElementById("lista-mensagens");
+    if (leadsF.length === 0) {
+      listaMensagensEl.innerHTML = `<p class="estado-vazio">Nenhuma mensagem por enquanto.</p>`;
+      return;
+    }
+
+    const ordenadas = leadsF.slice().sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+    listaMensagensEl.innerHTML = ordenadas.map((lead, i) => {
+      const data = new Date(lead.created_at).toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric" });
+      const somenteNumeros = (lead.phone || "").replace(/\D/g, "");
+      const idExpandir = `mensagem-${i}`;
+      const origemPopup = lead.source === "popup";
+      return `
+        <div class="cartao-mensagem">
+          <button class="cartao-mensagem-topo" data-alvo="${idExpandir}">
+            <span class="selo-origem ${origemPopup ? "selo-popup" : ""}">${origemPopup ? "Pop-up" : "Contato"}</span>
+            <span class="cartao-mensagem-nome">${lead.name || "Sem nome"}</span>
+            <span class="cartao-mensagem-data">${data}</span>
+            <span class="cartao-mensagem-seta">▾</span>
+          </button>
+          <div class="cartao-mensagem-email">${lead.email || ""}</div>
+          <div class="cartao-mensagem-detalhes" id="${idExpandir}" hidden>
+            ${lead.phone ? `<p><strong>Telefone:</strong> ${lead.phone}</p>` : ""}
+            ${lead.brand ? `<p><strong>Marca:</strong> ${lead.brand}</p>` : ""}
+            ${lead.budget ? `<p><strong>Orçamento:</strong> ${lead.budget}</p>` : ""}
+            ${lead.message ? `<p><strong>Mensagem:</strong> ${lead.message}</p>` : ""}
+            <div class="cartao-mensagem-acoes">
+              <a class="btn-pequeno" href="mailto:${lead.email || ""}">Responder por e-mail</a>
+              ${somenteNumeros ? `<a class="btn-pequeno btn-whatsapp" href="https://wa.me/${somenteNumeros}" target="_blank" rel="noopener">WhatsApp</a>` : ""}
+            </div>
+          </div>
+        </div>
+      `;
+    }).join("");
+
+    listaMensagensEl.querySelectorAll(".cartao-mensagem-topo").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const alvo = document.getElementById(btn.dataset.alvo);
+        alvo.hidden = !alvo.hidden;
+        btn.classList.toggle("aberto", !alvo.hidden);
+      });
+    });
+  }
+})();
+</script>
+</body>
+</html>
