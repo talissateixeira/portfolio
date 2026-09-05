@@ -1278,7 +1278,7 @@
   // EDITE AQUI sempre que trocar uma foto no computador por um arquivo de MESMO NOME: aumente
   // esse número em 1. Isso obriga o navegador a buscar a versão nova da imagem, em vez de mostrar
   // uma versão antiga guardada no cache (é por isso que às vezes uma foto trocada "não atualiza").
-  const VERSAO_FOTOS = 7;
+  const VERSAO_FOTOS = 8;
 
   /* ======================================================================
      CONFIGURAÇÃO DO SITE
@@ -1660,7 +1660,14 @@
       return scrollWrap;
     }
 
-    // Linhas fixas (Skincare, Auto Cuidados): pill simples que só rola até a linha.
+    // Linha "Destaques": aparece primeiro no portfólio. Os pills de nicho filtram o conteúdo dela, além de rolar até ela.
+    const nichosDestaques = [];
+    CONFIG.destaques.trabalhos.forEach(t => { if (t.nicho && !nichosDestaques.includes(t.nicho)) nichosDestaques.push(t.nicho); });
+
+    const destaquesScroll = criarLinhaPortfolio("Destaques", CONFIG.destaques.subtitulo, CONFIG.destaques.trabalhos, "destaques");
+    const contagemDestaques = document.getElementById("contagem-destaques");
+
+    // Linhas fixas (Skincare, Auto Cuidados), nessa ordem, logo abaixo de Destaques: pill simples que só rola até a linha.
     CONFIG.categorias.forEach(categoria => {
       const slug = "cat-" + slugificar(categoria.nome);
       const pill = document.createElement("a");
@@ -1670,13 +1677,6 @@
       filtrosRapidos.appendChild(pill);
       criarLinhaPortfolio(categoria.nome, categoria.subtitulo, categoria.trabalhos, slug);
     });
-
-    // Linha "Destaques": os pills de nicho filtram o conteúdo dela, além de rolar até ela.
-    const nichosDestaques = [];
-    CONFIG.destaques.trabalhos.forEach(t => { if (t.nicho && !nichosDestaques.includes(t.nicho)) nichosDestaques.push(t.nicho); });
-
-    const destaquesScroll = criarLinhaPortfolio("Destaques", CONFIG.destaques.subtitulo, CONFIG.destaques.trabalhos, "destaques");
-    const contagemDestaques = document.getElementById("contagem-destaques");
 
     function filtrarDestaques(nicho, pillAtiva) {
       let visiveis = 0;
