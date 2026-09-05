@@ -1298,7 +1298,7 @@
           <textarea id="campo-mensagem" name="mensagem" placeholder="Categoria, formato, prazo, objetivo da campanha..." required></textarea>
         </div>
         <button type="submit" class="btn btn-menta">Enviar mensagem ↗</button>
-        <p class="mensagem-confirmacao" id="mensagem-confirmacao" hidden role="status">Obrigada pelo contato! Seu e-mail já deve ter aberto com a mensagem preenchida, é só enviar.</p>
+        <p class="mensagem-confirmacao" id="mensagem-confirmacao" hidden role="status">Obrigada pelo contato! Recebi sua mensagem e respondo em breve.</p>
       </form>
     </div>
     <footer class="rodape">
@@ -1322,7 +1322,50 @@
   </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script>
+  /* ======================================================================
+     RASTREAMENTO (grava visitas, cliques, vídeos assistidos e mensagens no
+     painel administrativo, em talissamuller.com/login). Usa a mesma chave
+     "anon" do Supabase, que só tem permissão de INSERIR nas tabelas
+     portfolio_events e portfolio_leads, nunca de ler, editar ou apagar.
+     Quem lê esses dados é só o painel, depois do login.
+  ====================================================================== */
+  const SUPABASE_URL_SITE = "https://evafozzxhackvtlguqpq.supabase.co";
+  const SUPABASE_ANON_KEY_SITE = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV2YWZvenp4aGFja3Z0bGd1cXBxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg0NDY3OTMsImV4cCI6MjEwNDAyMjc5M30.VIlphy_vB4suN-0wQ93jotNgzWZGZQL3jpyq5XS8yVc";
+  const sbSite = window.supabase.createClient(SUPABASE_URL_SITE, SUPABASE_ANON_KEY_SITE);
+
+  // Um session_id novo por aba/sessão do navegador, pra contar visitantes únicos.
+  function obterSessionId() {
+    let id = sessionStorage.getItem("session_id");
+    if (!id) {
+      id = (crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random());
+      sessionStorage.setItem("session_id", id);
+    }
+    return id;
+  }
+
+  // Grava um evento (visita, clique ou vídeo assistido). Não usa .select(),
+  // de propósito, porque o site só tem permissão de gravar, não de ler de volta.
+  function registrarEvento(tipo, nome, metadata) {
+    sbSite.from("portfolio_events").insert({
+      event_type: tipo,
+      event_name: nome || null,
+      session_id: obterSessionId(),
+      page_path: window.location.pathname,
+      metadata: metadata || null
+    }).then(({ error }) => {
+      if (error) console.warn("Não foi possível registrar o evento:", error.message);
+    });
+  }
+
+  // Grava uma mensagem de contato vinda do formulário.
+  function registrarLead(dados) {
+    sbSite.from("portfolio_leads").insert(dados).then(({ error }) => {
+      if (error) console.warn("Não foi possível registrar a mensagem:", error.message);
+    });
+  }
+
   // EDITE AQUI sempre que trocar uma foto no computador por um arquivo de MESMO NOME: aumente
   // esse número em 1. Isso obriga o navegador a buscar a versão nova da imagem, em vez de mostrar
   // uma versão antiga guardada no cache (é por isso que às vezes uma foto trocada "não atualiza").
@@ -1557,12 +1600,20 @@
 
   document.addEventListener("DOMContentLoaded", () => {
 
+    // ---- Rastreamento: registra a visita assim que a página carrega ----
+    registrarEvento("page_view");
+
+    // ---- Rastreamento: clique no botão principal do menu ("Trabalhe comigo") ----
+    const navCtaEl = document.querySelector(".nav-cta");
+    if (navCtaEl) navCtaEl.addEventListener("click", () => registrarEvento("button_click", "contact_nav_cta"));
+
     // ---- Player de vídeo (modal) ----
     // Abre um vídeo do YouTube (não listado) passando o "youtubeId", ou um arquivo de vídeo
     // próprio (dentro de "videos-portfolio/") passando "arquivo". Use só um dos dois por trabalho.
     const videoModal = document.getElementById("video-modal");
     const videoModalPlayer = document.getElementById("video-modal-player");
     function abrirVideoModal({ youtubeId, arquivo }) {
+      registrarEvento("video_view", youtubeId || arquivo);
       videoModalPlayer.innerHTML = youtubeId
         ? '<iframe src="https://www.youtube-nocookie.com/embed/' + youtubeId + '?autoplay=1&rel=0" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen title="Vídeo"></iframe>'
         : '<video controls playsinline autoplay src="' + arquivo + '"></video>';
@@ -1930,19 +1981,39 @@
       '<a class="contato-item" href="' + linkInstagram + '" target="_blank" rel="noopener"><span class="contato-icone" aria-hidden="true">' + ICONES.instagram + "</span>@" + CONFIG.contato.instagram + "</a>" +
       '<a class="contato-item" href="' + linkWhatsapp + '" target="_blank" rel="noopener"><span class="contato-icone" aria-hidden="true">' + ICONES.telefone + "</span>" + telefoneFormatado + "</a>";
 
-    // ---- Formulário: abre e-mail preenchido e mostra confirmação ----
+    // ---- Formulário: grava a mensagem no painel administrativo ----
     const formContato = document.getElementById("form-contato");
     const mensagemConfirmacao = document.getElementById("mensagem-confirmacao");
+    const btnEnviarMensagem = formContato.querySelector('button[type="submit"]');
     formContato.addEventListener("submit", (evento) => {
       evento.preventDefault();
       const nome = document.getElementById("campo-nome").value;
       const email = document.getElementById("campo-email").value;
       const mensagem = document.getElementById("campo-mensagem").value;
-      const assunto = encodeURIComponent("Contato pelo portfólio: " + nome);
-      const corpo = encodeURIComponent("Nome: " + nome + "\nE-mail: " + email + "\n\nMensagem:\n" + mensagem);
-      window.location.href = "mailto:" + CONFIG.contato.email + "?subject=" + assunto + "&body=" + corpo;
-      mensagemConfirmacao.hidden = false;
-      formContato.reset();
+
+      const textoOriginalBotao = btnEnviarMensagem.textContent;
+      btnEnviarMensagem.disabled = true;
+      btnEnviarMensagem.textContent = "Enviando...";
+
+      sbSite.from("portfolio_leads").insert({
+        name: nome,
+        email: email,
+        message: mensagem,
+        source: "contact"
+      }).then(({ error }) => {
+        btnEnviarMensagem.disabled = false;
+        btnEnviarMensagem.textContent = textoOriginalBotao;
+        if (error) {
+          console.warn("Não foi possível registrar a mensagem:", error.message);
+          mensagemConfirmacao.textContent = "Não conseguimos enviar agora. Tenta de novo em instantes ou chama no WhatsApp/Instagram.";
+          mensagemConfirmacao.hidden = false;
+          return;
+        }
+        registrarEvento("button_click", "contact_form_submit");
+        mensagemConfirmacao.textContent = "Obrigada pelo contato! Recebi sua mensagem e respondo em breve.";
+        mensagemConfirmacao.hidden = false;
+        formContato.reset();
+      });
     });
 
     // ---- Rodapé ----
