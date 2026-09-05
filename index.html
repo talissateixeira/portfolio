@@ -1103,8 +1103,14 @@
     .case-estatisticas { justify-content: center; }
     .fotos-grid { grid-template-columns: repeat(3, 1fr); }
     .servicos-corpo-solto { grid-template-columns: 1fr; text-align: center; }
-    .servicos-foto-central { order: -1; margin: 0 auto 28px; }
-    .icone-flutuante { display: none; }
+    .servicos-foto-central { order: -1; width: 260px; margin: 0 auto 28px; }
+    /* Ícones voltam a aparecer no celular, só que menores e mais próximos da foto, pra não vazar da tela. */
+    .icone-mao-notas { width: 62px; top: 2%; left: -22px; }
+    .icone-coracoes { width: 38px; top: 28%; left: -20px; }
+    .icone-aviao { width: 40px; top: 54%; left: -22px; }
+    .icone-brilho { width: 30px; top: 76%; left: -14px; }
+    .icone-mao-toque { width: 70px; top: 4%; right: -26px; }
+    .icone-aperto-maos { width: 64px; top: 78%; right: -20px; }
     .servicos-lado-direita { text-align: center; }
     .contato-grid { grid-template-columns: 1fr; gap: 40px; }
   }
@@ -1115,6 +1121,7 @@
     section { padding: 48px 0; }
     .fotos-grid { grid-template-columns: repeat(2, 1fr); }
     .rodape-conteudo { flex-direction: column; align-items: flex-start; }
+    .hero-nome-completo { white-space: normal; font-size: clamp(1.8rem, 11vw, 2.6rem); }
   }
 </style>
 </head>
@@ -1128,17 +1135,17 @@
 
 <div class="menu-backdrop" id="menu-backdrop"></div>
 
-<nav class="links-nav" id="links-nav" aria-label="Navegação principal">
-  <a href="#sobre">Sobre</a>
-  <a href="#servicos">Serviços</a>
-  <a href="#categorias">Categorias</a>
-  <a href="#fotos">Fotos</a>
-  <a href="#contato">Contato</a>
-  <div class="idioma-toggle" role="group" aria-label="Idioma do site">
-    <button type="button" class="idioma-btn ativo" id="idioma-pt" aria-pressed="true">PT</button>
+<nav class="links-nav" id="links-nav" data-i18n-aria="aria_nav_principal" aria-label="Navegação principal">
+  <a href="#sobre" data-i18n="nav_sobre">Sobre</a>
+  <a href="#servicos" data-i18n="nav_servicos">Serviços</a>
+  <a href="#categorias" data-i18n="nav_categorias">Categorias</a>
+  <a href="#fotos" data-i18n="nav_fotos">Fotos</a>
+  <a href="#contato" data-i18n="nav_contato">Contato</a>
+  <div class="idioma-toggle" role="group" data-i18n-aria="aria_idioma" aria-label="Idioma do site">
+    <button type="button" class="idioma-btn" id="idioma-pt" aria-pressed="false">PT</button>
     <button type="button" class="idioma-btn" id="idioma-en" aria-pressed="false">EN</button>
   </div>
-  <a href="#contato" class="nav-cta" id="nav-cta">Trabalhe comigo</a>
+  <a href="#contato" class="nav-cta" id="nav-cta" data-i18n="cta_trabalhe">Trabalhe comigo</a>
 </nav>
 
 <main id="conteudo">
@@ -1180,7 +1187,7 @@
       </div>
     </div>
     <div class="marcas-secao reveal">
-      <h3 class="marcas-titulo-flanqueada">Marcas que confiam no meu trabalho</h3>
+      <h3 class="marcas-titulo-flanqueada" data-i18n="marcas_titulo">Marcas que confiam no meu trabalho</h3>
       <div class="marcas-marquee">
         <div class="marcas-marquee-lista" id="marcas-bolhas"></div>
       </div>
@@ -1191,11 +1198,11 @@
   <section id="categorias">
     <div class="container">
       <div class="categorias-cabecalho reveal">
-        <h2>Qual <em>conteúdo</em> você busca?</h2>
-        <p>Navegue pelos nichos abaixo. Arraste para o lado, ou clique num nicho, para ver mais trabalhos.</p>
+        <h2 data-i18n-html="categorias_titulo">Qual <em>conteúdo</em> você busca?</h2>
+        <p data-i18n="categorias_subtitulo">Navegue pelos nichos abaixo. Arraste para o lado, ou clique num nicho, para ver mais trabalhos.</p>
       </div>
       <div class="filtros-rapidos-wrap reveal">
-        <nav class="filtros-rapidos" id="filtros-rapidos" aria-label="Ir direto para um nicho"></nav>
+        <nav class="filtros-rapidos" id="filtros-rapidos" data-i18n-aria="aria_filtros" aria-label="Ir direto para um nicho"></nav>
       </div>
       <div id="categorias-linhas"></div>
     </div>
@@ -1206,7 +1213,7 @@
        e edite os números e textos em CONFIG.caseOrganico, mais abaixo no <script>. -->
   <section id="case-organico">
     <div class="case-organico-grid">
-      <button type="button" class="case-foto-capa reveal" id="case-phone-btn" aria-label="Assistir ao vídeo do case">
+      <button type="button" class="case-foto-capa reveal" id="case-phone-btn" data-i18n-aria="aria_case_video" aria-label="Assistir ao vídeo do case">
         <img id="case-capa" alt="Case de conteúdo orgânico de Talissa Müller">
         <span class="case-play-botao" aria-hidden="true">▶</span>
       </button>
@@ -1233,8 +1240,8 @@
   <section id="fotos">
     <div class="container">
       <div class="reveal">
-        <h2>Fotos que <em>vendem</em></h2>
-        <p>Registros autênticos, prontos para post, carrossel ou anúncio.</p>
+        <h2 data-i18n-html="fotos_titulo">Fotos que <em>vendem</em></h2>
+        <p data-i18n="fotos_subtitulo">Registros autênticos, prontos para post, carrossel ou anúncio.</p>
       </div>
       <!-- Cada item busca um arquivo dentro da pasta "fotos-ugc/". Use fotos já recortadas, sem fundo (PNG transparente), que a sombra suave é aplicada automaticamente. Enquanto o arquivo não existir, aparece um espaço tracejado no lugar. -->
       <div class="fotos-grid reveal" id="fotos-grid"></div>
@@ -1245,8 +1252,8 @@
   <section id="servicos">
     <div class="container">
       <div class="servicos-cabecalho reveal">
-        <h2>O que podemos <span class="acento-fundo">criar</span> <strong>juntas?</strong></h2>
-        <p>Cada formato tem um objetivo: vender, engajar ou construir marca. Me conta o seu que a gente monta o combo perfeito para o seu produto.</p>
+        <h2 data-i18n-html="servicos_titulo">O que podemos <span class="acento-fundo">criar</span> <strong>juntas?</strong></h2>
+        <p data-i18n="servicos_subtitulo">Cada formato tem um objetivo: vender, engajar ou construir marca. Me conta o seu que a gente monta o combo perfeito para o seu produto.</p>
       </div>
       <div class="servicos-corpo-solto">
         <div class="servicos-lado servicos-lado-esquerda reveal" id="servicos-esquerda"></div>
@@ -1271,7 +1278,7 @@
   <section id="depoimentos">
     <div class="container">
       <div class="depoimentos-cabecalho reveal">
-        <h2>O que dizem os <em>FEEDBACKS</em></h2>
+        <h2 data-i18n-html="depoimentos_titulo">O que dizem os <em>FEEDBACKS</em></h2>
       </div>
       <div class="depoimentos-scroll reveal" id="depoimentos-scroll"></div>
     </div>
@@ -1281,24 +1288,24 @@
   <section class="contato-secao" id="contato">
     <div class="container contato-grid">
       <div class="reveal">
-        <h2 class="contato-titulo">Animada para trabalharmos juntos!</h2>
+        <h2 class="contato-titulo" data-i18n="contato_titulo">Animada para trabalharmos juntos!</h2>
         <p id="contato-texto"></p>
         <div class="contato-lista" id="contato-lista"></div>
       </div>
       <form class="form-contato reveal" id="form-contato">
         <div class="campo">
-          <label for="campo-nome">Nome</label>
-          <input type="text" id="campo-nome" name="nome" placeholder="Seu nome" required autocomplete="name">
+          <label for="campo-nome" data-i18n="label_nome">Nome</label>
+          <input type="text" id="campo-nome" name="nome" placeholder="Seu nome" data-i18n-placeholder="placeholder_nome" required autocomplete="name">
         </div>
         <div class="campo">
-          <label for="campo-email">E-mail</label>
-          <input type="email" id="campo-email" name="email" placeholder="voce@marca.com" required autocomplete="email">
+          <label for="campo-email" data-i18n="label_email">E-mail</label>
+          <input type="email" id="campo-email" name="email" placeholder="voce@marca.com" data-i18n-placeholder="placeholder_email" required autocomplete="email">
         </div>
         <div class="campo">
-          <label for="campo-mensagem">Mensagem</label>
-          <textarea id="campo-mensagem" name="mensagem" placeholder="Categoria, formato, prazo, objetivo da campanha..." required></textarea>
+          <label for="campo-mensagem" data-i18n="label_mensagem">Mensagem</label>
+          <textarea id="campo-mensagem" name="mensagem" placeholder="Categoria, formato, prazo, objetivo da campanha..." data-i18n-placeholder="placeholder_mensagem" required></textarea>
         </div>
-        <button type="submit" class="btn btn-menta">Enviar mensagem ↗</button>
+        <button type="submit" class="btn btn-menta" data-i18n="btn_enviar">Enviar mensagem ↗</button>
         <p class="mensagem-confirmacao" id="mensagem-confirmacao" hidden role="status">Obrigada pelo contato! Recebi sua mensagem e respondo em breve.</p>
       </form>
     </div>
@@ -1306,7 +1313,7 @@
       <div class="container rodape-conteudo">
         <div class="rodape-marca">
           <strong id="rodape-nome"></strong>
-          <span>UGC Creator &amp; Estrategista de Conteúdo</span>
+          <span data-i18n="rodape_cargo">UGC Creator &amp; Estrategista de Conteúdo</span>
         </div>
         <div class="rodape-links" id="rodape-links"></div>
       </div>
@@ -1318,7 +1325,7 @@
 <div class="video-modal" id="video-modal" hidden>
   <div class="video-modal-fundo" id="video-modal-fundo"></div>
   <div class="video-modal-caixa">
-    <button type="button" class="video-modal-fechar" id="video-modal-fechar" aria-label="Fechar vídeo">✕</button>
+    <button type="button" class="video-modal-fechar" id="video-modal-fechar" data-i18n-aria="aria_fechar_video" aria-label="Fechar vídeo">✕</button>
     <div class="video-modal-player" id="video-modal-player"></div>
   </div>
 </div>
@@ -1373,14 +1380,19 @@
   const VERSAO_FOTOS = 8;
 
   /* ======================================================================
-     CONFIGURAÇÃO DO SITE
+     CONFIGURAÇÃO DO SITE (VERSÃO EM PORTUGUÊS)
      Edite todos os textos, listas e dados aqui em cima. O restante do
      código, mais abaixo, só lê estas informações e monta a página sozinho.
+     A versão em inglês (CONFIG_EN) fica logo depois desta.
   ====================================================================== */
-  const CONFIG = {
+  const CONFIG_PT = {
 
     // EDITE AQUI: nome completo, como aparece no menu, no rodapé etc. (o hero usa um estilo especial, veja "hero.titulo" abaixo).
     nome: "Talissa Müller",
+
+    // EDITE AQUI: o que aparece depois do nome na aba do navegador e na descrição do Google.
+    tituloAba: "Criadora de Conteúdo UGC",
+    metaDescricao: "Talissa Müller, criadora de conteúdo UGC e estrategista de conteúdo. Vídeos, reels e fotos que ajudam marcas a venderem mais.",
 
     // EDITE AQUI: textos da capa (hero) — nome sobreposto à foto e o cargo logo abaixo.
     hero: {
@@ -1563,6 +1575,272 @@
   };
 
   /* ======================================================================
+     CONFIGURAÇÃO DO SITE (VERSÃO EM INGLÊS)
+     Mesma estrutura do CONFIG_PT acima, só com os textos traduzidos. Nomes
+     de marca, nomes de arquivo (capa, logo, áudio) e IDs de vídeo do
+     YouTube são os mesmos nas duas versões.
+  ====================================================================== */
+  const CONFIG_EN = {
+    nome: "Talissa Müller",
+    tituloAba: "UGC Content Creator",
+    metaDescricao: "Talissa Müller, UGC content creator and content strategist. Videos, reels, and photos that help brands sell more.",
+
+    hero: {
+      tituloNome: "Talissa",
+      tituloSobrenome: "Müller",
+      cargo: "UGC Creator"
+    },
+
+    especialidades: [
+      "UGC Video", "Reels & Content", "Unboxing",
+      "Product Photos", "Authentic Reviews", "Paid Traffic Content"
+    ],
+
+    sobre: {
+      titulo: "Hey, I'm <em>Tali</em>",
+      texto: "I'm a business owner with a degree in Business Management and a UGC content creator, <strong>passionate about understanding human behavior, marketing, and sales</strong>. Before moving into digital, I spent six years leading a high-end architectural visualization studio, handling everything from sales to people and complex project management.",
+      texto2: "Today I turn that background into <strong>authentic content</strong> that connects and sells. I have a natural ease in front of the camera and a strategic eye for what actually drives results for a brand. After all, selling well has always been about understanding people.",
+      pills: ["Santa Catarina · Brazil"]
+    },
+
+    marcas: [
+      { nome: "Coala", logo: "coala.png" },
+      { nome: "Mare Beauty", logo: "mare-beauty.png" },
+      { nome: "Vita Premium", logo: "vita-premium.png" },
+      { nome: "Miallegra", logo: "miallegra.png" },
+      { nome: "Rosa Selvagem", logo: "rosa-selvagem.png" },
+      { nome: "Beyoung", logo: "beyoung.png" },
+      { nome: "Azulim", logo: "azulim.png" },
+      { nome: "Full English", logo: "full-english.png" }
+    ],
+
+    categorias: [
+      {
+        nome: "Skincare",
+        subtitulo: "A skincare routine that builds trust",
+        trabalhos: [
+          { marca: "Beyoung", capa: "beyoung-1.jpg", youtubeId: "sfpTB2b1i_U" },
+          { marca: "Beyoung", capa: "beyoung-2.jpg", youtubeId: "SXzC56EE0-M" },
+          { marca: "Beyoung", capa: "beyoung-3.jpg", youtubeId: "A7AE62HxZT0" },
+          { marca: "Beyoung", capa: "beyoung-4.jpg", youtubeId: "frx7bnLQgmg" },
+          { marca: "Beyoung", capa: "beyoung-5.jpg", youtubeId: "K27GZeS6nwk" }
+        ]
+      },
+      {
+        nome: "Self-Care",
+        subtitulo: "Moments of pause that become content",
+        trabalhos: [
+          { marca: "Rosa Selvagem", capa: "body-splash.jpg", youtubeId: "l4n0RHiJF4M" },
+          { marca: "Rosa Selvagem", capa: "rosa-selvagem-1.jpg", youtubeId: "fsm1-NujM4E" },
+          { marca: "Rosa Selvagem", capa: "rosa-selvagem-2.jpg", youtubeId: "PNVhdCdnquU" },
+          { marca: "Rosa Selvagem", capa: "rosa-selvagem-3.jpg", youtubeId: "Ul8vf57er9w" },
+          { marca: "Rosa Selvagem", capa: "rosa-selvagem-4.jpg", youtubeId: "cQqoUutHA2w" }
+        ]
+      }
+    ],
+
+    destaques: {
+      subtitulo: "Click a niche above to see only those projects",
+      trabalhos: [
+        { marca: "Widi Care", capa: "widicare-juba.jpg", nicho: "Hair Care", youtubeId: "W5-9s20jfb8" },
+        { marca: "Coala", capa: "coala.jpg", nicho: "Home & Decor", youtubeId: "CUNMgC-bEaE" },
+        { marca: "Coala", capa: "coala-02.jpg", nicho: "Home & Decor", youtubeId: "6YB4VU45G3w" },
+        { marca: "Azulim", capa: "azulim.jpg", nicho: "Home & Decor", youtubeId: "_i0G3bURBB4" },
+        { marca: "Mare Beauty", capa: "mare-beauty.jpg", nicho: "Unboxing", youtubeId: "1A-qNlGnW5Y" },
+        { marca: "Vita Premium", capa: "melatonina.jpg", nicho: "Fitness & Wellness", youtubeId: "Y2Ip24_amvo" },
+        { marca: "Vita Premium", capa: "vinagre-maca.jpg", nicho: "Fitness & Wellness", youtubeId: "7ofP4-PhqN8" },
+        { marca: "Miallegra", capa: "miallegra.jpg", nicho: "Fashion & Accessories", youtubeId: "3BQErVgKPMM" },
+        { marca: "Full English", capa: "depoimento-aluno.jpg", nicho: "Education", youtubeId: "a4JLSf0Ew3k" }
+      ]
+    },
+
+    caseOrganico: {
+      titulo: "Organic<br>Content<br>Case",
+      capa: "caseorganico.jpg",
+      youtubeId: "C-PZTNOlLk4",
+      objetivoTitulo: "Goal",
+      objetivoTexto: "Show the treatment's transformation in a natural way.",
+      estrategiaTitulo: "Strategy used",
+      estrategiaItens: [
+        "Strong hook in the first 3 seconds",
+        "Storytelling based on pain → solution",
+        "Before and after with strong visual impact"
+      ],
+      resultadoTitulo: "Result",
+      resultadoItens: [
+        "+260K views",
+        "14K likes",
+        "1,600 saves"
+      ],
+      estatisticas: [
+        { icone: "play", valor: "265K" },
+        { icone: "curtida", valor: "14K" },
+        { icone: "comentario", valor: "533" },
+        { icone: "compartilhar", valor: "654" },
+        { icone: "salvar", valor: "1,614" }
+      ]
+    },
+
+    fotosUGC: [
+      { arquivo: "fotos-ugc/foto-1.jpg", marca: "" },
+      { arquivo: "fotos-ugc/foto-9.jpg", marca: "" },
+      { arquivo: "fotos-ugc/foto-2.jpg", marca: "" },
+      { arquivo: "fotos-ugc/foto-6.jpg", marca: "" },
+      { arquivo: "fotos-ugc/foto-3.jpg", marca: "" },
+      { arquivo: "fotos-ugc/foto-10.jpg", marca: "" },
+      { arquivo: "fotos-ugc/foto-7.jpg", marca: "" },
+      { arquivo: "fotos-ugc/foto-4.jpg", marca: "" },
+      { arquivo: "fotos-ugc/foto-8.jpg", marca: "" },
+      { arquivo: "fotos-ugc/foto-5.jpg", marca: "" }
+    ],
+
+    servicosEsquerda: [
+      { titulo: "UGC Video", descricao: "Authentic videos, shot in a casual home style, ready for ads and social media." },
+      { titulo: "Reels & Content", descricao: "Script, filming, and editing of reels designed to hold attention and drive engagement." },
+      { titulo: "Product Photos", descricao: "Photo shoots that highlight the product with an aesthetic aligned to your brand." }
+    ],
+    servicosDireita: [
+      { titulo: "Unboxing", descricao: "A naturally filmed unboxing experience that builds purchase desire." },
+      { titulo: "Authentic Reviews", descricao: "Honest, persuasive reviews that increase audience trust in the brand." },
+      { titulo: "Paid Traffic", descricao: "Creatives tested and optimized to perform in ad campaigns." }
+    ],
+
+    depoimentos: [
+      {
+        handle: "Miallegra",
+        logo: "miallegra.png",
+        categoria: "Ana - Photos and Videos",
+        texto: "Talissa, I loved it! You did an amazing job, congrats, you put in so much care, looked at every reference and did a perfect job, I was so happy!",
+        estrelas: 5,
+        audio: "ana-miallegra.mp3"
+      },
+      {
+        handle: "Beyoung",
+        logo: "beyoung.png",
+        categoria: "Marcelo - Photos and Videos",
+        texto: "They turned out wonderful! You brought a lot of naturalness to the content, delivered exactly what we expected, and even kept to the deadlines. The result was so good we already invited you for a new campaign.",
+        estrelas: 5,
+        audio: ""
+      },
+      {
+        handle: "Mare Beauty",
+        logo: "mare-beauty.png",
+        categoria: "Mari - E-commerce Videos",
+        texto: "The videos turned out dynamic and really cool! I loved the scripts too, they were great. Thanks for the on-time delivery and I hope we work together again soon!",
+        estrelas: 5,
+        audio: ""
+      }
+    ],
+
+    contato: {
+      texto: "Tell me a bit about your brand and what you want to achieve. I reply within 48 hours.",
+      email: "mullertalissa@gmail.com",
+      telefoneDigitos: "48988270187",
+      instagram: "talissaamuller"
+    }
+  };
+
+  // Idioma escolhido (fica salvo no navegador da pessoa que visita, então na próxima
+  // visita continua no mesmo idioma). Os botões PT/EN lá embaixo trocam isso e recarregam a página.
+  const IDIOMA_ATUAL = localStorage.getItem("idioma") === "en" ? "en" : "pt";
+  const CONFIG = IDIOMA_ATUAL === "en" ? CONFIG_EN : CONFIG_PT;
+
+  // Textinhos soltos usados direto no código (fora do CONFIG), tipo rótulos de botão e alt de imagem.
+  const TEXTOS_JS = {
+    pt: {
+      destaques: "Destaques",
+      todos: "Todos",
+      verAnteriores: "Ver anteriores em ",
+      verMais: "Ver mais em ",
+      assistirVideo: "Assistir ao vídeo de ",
+      trabalhoAlt: (marca, categoria) => "Trabalho de UGC para " + marca + ", categoria " + categoria,
+      logoDaMarca: "Logo da marca ",
+      fotoUgcAlt: (marca) => "Foto UGC" + (marca ? " para " + marca : ""),
+      ouvirDepoimento: (nome) => "Ouvir depoimento em áudio de " + nome,
+      deCincoEstrelas: " de 5 estrelas",
+      videoTitulo: "Vídeo",
+      abrirMenu: "Abrir menu",
+      fecharMenu: "Fechar menu",
+      enviando: "Enviando...",
+      erroEnvio: "Não conseguimos enviar agora. Tenta de novo em instantes ou chama no WhatsApp/Instagram.",
+      sucessoEnvio: "Obrigada pelo contato! Recebi sua mensagem e respondo em breve.",
+      separadorDecimal: ","
+    },
+    en: {
+      destaques: "Highlights",
+      todos: "All",
+      verAnteriores: "See previous in ",
+      verMais: "See more in ",
+      assistirVideo: "Watch the video of ",
+      trabalhoAlt: (marca, categoria) => "UGC work for " + marca + ", category " + categoria,
+      logoDaMarca: "Logo of the brand ",
+      fotoUgcAlt: (marca) => "UGC photo" + (marca ? " for " + marca : ""),
+      ouvirDepoimento: (nome) => "Listen to the audio review from " + nome,
+      deCincoEstrelas: " out of 5 stars",
+      videoTitulo: "Video",
+      abrirMenu: "Open menu",
+      fecharMenu: "Close menu",
+      enviando: "Sending...",
+      erroEnvio: "We couldn't send it right now. Try again in a bit or reach out on WhatsApp/Instagram.",
+      sucessoEnvio: "Thanks for reaching out! I got your message and will reply soon.",
+      separadorDecimal: "."
+    }
+  };
+  const T = TEXTOS_JS[IDIOMA_ATUAL];
+
+  // Textos estáticos do HTML (menu, títulos de seção, formulário etc.), aplicados uma vez
+  // no carregamento com base no idioma salvo. "html" preserva as tags internas (<em>, <strong>...).
+  const TEXTOS_UI = {
+    aria_nav_principal: { pt: "Navegação principal", en: "Main navigation" },
+    nav_sobre: { pt: "Sobre", en: "About" },
+    nav_servicos: { pt: "Serviços", en: "Services" },
+    nav_categorias: { pt: "Categorias", en: "Categories" },
+    nav_fotos: { pt: "Fotos", en: "Photos" },
+    nav_contato: { pt: "Contato", en: "Contact" },
+    aria_idioma: { pt: "Idioma do site", en: "Site language" },
+    cta_trabalhe: { pt: "Trabalhe comigo", en: "Work with me" },
+    marcas_titulo: { pt: "Marcas que confiam no meu trabalho", en: "Brands that trust my work" },
+    categorias_titulo: { pt: 'Qual <em>conteúdo</em> você busca?', en: 'What <em>content</em> are you looking for?' },
+    categorias_subtitulo: { pt: "Navegue pelos nichos abaixo. Arraste para o lado, ou clique num nicho, para ver mais trabalhos.", en: "Browse the niches below. Drag sideways, or click a niche, to see more work." },
+    aria_filtros: { pt: "Ir direto para um nicho", en: "Jump straight to a niche" },
+    aria_case_video: { pt: "Assistir ao vídeo do case", en: "Watch the case study video" },
+    fotos_titulo: { pt: "Fotos que <em>vendem</em>", en: "Photos that <em>sell</em>" },
+    fotos_subtitulo: { pt: "Registros autênticos, prontos para post, carrossel ou anúncio.", en: "Authentic shots, ready for a post, carousel, or ad." },
+    servicos_titulo: { pt: 'O que podemos <span class="acento-fundo">criar</span> <strong>juntas?</strong>', en: 'What can we <span class="acento-fundo">create</span> <strong>together?</strong>' },
+    servicos_subtitulo: { pt: "Cada formato tem um objetivo: vender, engajar ou construir marca. Me conta o seu que a gente monta o combo perfeito para o seu produto.", en: "Every format has a goal: selling, engaging, or building a brand. Tell me yours and we'll put together the perfect combo for your product." },
+    depoimentos_titulo: { pt: "O que dizem os <em>FEEDBACKS</em>", en: "What my <em>CLIENTS</em> say" },
+    contato_titulo: { pt: "Animada para trabalharmos juntos!", en: "Excited to work together!" },
+    aria_fechar_video: { pt: "Fechar vídeo", en: "Close video" },
+    label_nome: { pt: "Nome", en: "Name" },
+    placeholder_nome: { pt: "Seu nome", en: "Your name" },
+    label_email: { pt: "E-mail", en: "Email" },
+    placeholder_email: { pt: "voce@marca.com", en: "you@brand.com" },
+    label_mensagem: { pt: "Mensagem", en: "Message" },
+    placeholder_mensagem: { pt: "Categoria, formato, prazo, objetivo da campanha...", en: "Category, format, deadline, campaign goal..." },
+    btn_enviar: { pt: "Enviar mensagem ↗", en: "Send message ↗" },
+    rodape_cargo: { pt: "UGC Creator & Estrategista de Conteúdo", en: "UGC Creator & Content Strategist" }
+  };
+
+  function aplicarTextosEstaticos(idioma) {
+    document.querySelectorAll("[data-i18n]").forEach(el => {
+      const item = TEXTOS_UI[el.dataset.i18n];
+      if (item) el.textContent = item[idioma];
+    });
+    document.querySelectorAll("[data-i18n-html]").forEach(el => {
+      const item = TEXTOS_UI[el.dataset.i18nHtml];
+      if (item) el.innerHTML = item[idioma];
+    });
+    document.querySelectorAll("[data-i18n-placeholder]").forEach(el => {
+      const item = TEXTOS_UI[el.dataset.i18nPlaceholder];
+      if (item) el.placeholder = item[idioma];
+    });
+    document.querySelectorAll("[data-i18n-aria]").forEach(el => {
+      const item = TEXTOS_UI[el.dataset.i18nAria];
+      if (item) el.setAttribute("aria-label", item[idioma]);
+    });
+  }
+
+  /* ======================================================================
      A PARTIR DAQUI: o código lê o CONFIG acima e monta a página sozinho.
      Normalmente não é necessário mexer no que vem abaixo.
   ====================================================================== */
@@ -1616,7 +1894,7 @@
     function abrirVideoModal({ youtubeId, arquivo }) {
       registrarEvento("video_view", youtubeId || arquivo);
       videoModalPlayer.innerHTML = youtubeId
-        ? '<iframe src="https://www.youtube-nocookie.com/embed/' + youtubeId + '?autoplay=1&rel=0" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen title="Vídeo"></iframe>'
+        ? '<iframe src="https://www.youtube-nocookie.com/embed/' + youtubeId + '?autoplay=1&rel=0" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen title="' + T.videoTitulo + '"></iframe>'
         : '<video controls playsinline autoplay src="' + arquivo + '"></video>';
       videoModal.hidden = false;
       document.body.style.overflow = "hidden";
@@ -1638,8 +1916,14 @@
     const telefoneFormatado = formatarTelefone(CONFIG.contato.telefoneDigitos);
 
     // ---- Nome, título da aba ----
+    // ---- Idioma: aplica os textos estáticos e o estado dos botões PT/EN ----
+    aplicarTextosEstaticos(IDIOMA_ATUAL);
+    document.documentElement.lang = IDIOMA_ATUAL === "en" ? "en" : "pt-BR";
+    const metaDescricaoEl = document.querySelector('meta[name="description"]');
+    if (metaDescricaoEl) metaDescricaoEl.setAttribute("content", CONFIG.metaDescricao);
+
     document.getElementById("rodape-nome").textContent = CONFIG.nome;
-    document.title = CONFIG.nome + " | Criadora de Conteúdo UGC";
+    document.title = CONFIG.nome + " | " + CONFIG.tituloAba;
 
     // ---- Hero ----
     document.getElementById("hero-titulo").textContent = CONFIG.hero.tituloNome + " " + CONFIG.hero.tituloSobrenome;
@@ -1675,7 +1959,7 @@
     [...CONFIG.marcas, ...CONFIG.marcas].forEach(marca => {
       const img = document.createElement("img");
       img.src = "logos-marcas/" + marca.logo + "?v=" + VERSAO_FOTOS;
-      img.alt = "Logo da marca " + marca.nome;
+      img.alt = T.logoDaMarca + marca.nome;
       img.loading = "lazy";
       marcasBolhas.appendChild(img);
     });
@@ -1694,8 +1978,8 @@
       cabecalho.innerHTML =
         '<div><div class="categoria-titulo-grupo"><h3>' + nome + '</h3><span class="categoria-contagem" id="contagem-' + slug + '">' +
         String(trabalhos.length).padStart(2, "0") + '</span></div><p class="categoria-subtitulo">' + subtitulo + "</p></div>" +
-        '<div class="categoria-setas"><button type="button" class="seta-btn" data-direcao="-1" aria-label="Ver anteriores em ' + nome + '">‹</button>' +
-        '<button type="button" class="seta-btn" data-direcao="1" aria-label="Ver mais em ' + nome + '">›</button></div>';
+        '<div class="categoria-setas"><button type="button" class="seta-btn" data-direcao="-1" aria-label="' + T.verAnteriores + nome + '">‹</button>' +
+        '<button type="button" class="seta-btn" data-direcao="1" aria-label="' + T.verMais + nome + '">›</button></div>';
       linha.appendChild(cabecalho);
 
       const scrollWrap = document.createElement("div");
@@ -1709,13 +1993,13 @@
         if (trabalho.nicho) card.dataset.nicho = trabalho.nicho;
         card.innerHTML =
           '<div class="trabalho-imagem-wrap"><span class="trabalho-tag">' + trabalho.marca + '</span>' +
-          '<img src="capas-portfolio/' + trabalho.capa + '?v=' + VERSAO_FOTOS + '" alt="Trabalho de UGC para ' + trabalho.marca + ', categoria ' + rotuloLegenda + '" loading="lazy">' +
+          '<img src="capas-portfolio/' + trabalho.capa + '?v=' + VERSAO_FOTOS + '" alt="' + T.trabalhoAlt(trabalho.marca, rotuloLegenda) + '" loading="lazy">' +
           (temVideo ? '<span class="trabalho-play-badge" aria-hidden="true">▶</span>' : "") +
           "</div>";
         if (temVideo) {
           card.setAttribute("role", "button");
           card.setAttribute("tabindex", "0");
-          card.setAttribute("aria-label", "Assistir ao vídeo de " + trabalho.marca);
+          card.setAttribute("aria-label", T.assistirVideo + trabalho.marca);
           const abrir = () => abrirVideoModal(trabalho.youtubeId
             ? { youtubeId: trabalho.youtubeId }
             : { arquivo: "videos-portfolio/" + trabalho.video + "?v=" + VERSAO_FOTOS });
@@ -1743,7 +2027,7 @@
     const nichosDestaques = [];
     CONFIG.destaques.trabalhos.forEach(t => { if (t.nicho && !nichosDestaques.includes(t.nicho)) nichosDestaques.push(t.nicho); });
 
-    const destaquesScroll = criarLinhaPortfolio("Destaques", CONFIG.destaques.subtitulo, CONFIG.destaques.trabalhos, "destaques");
+    const destaquesScroll = criarLinhaPortfolio(T.destaques, CONFIG.destaques.subtitulo, CONFIG.destaques.trabalhos, "destaques");
     const contagemDestaques = document.getElementById("contagem-destaques");
 
     function filtrarDestaques(nicho, pillAtiva) {
@@ -1762,7 +2046,7 @@
     const pillTodos = document.createElement("a");
     pillTodos.className = "filtro-pill ativo";
     pillTodos.href = "#destaques";
-    pillTodos.textContent = "Todos";
+    pillTodos.textContent = T.todos;
     pillTodos.dataset.nicho = "todos";
     pillTodos.addEventListener("click", () => filtrarDestaques("todos", pillTodos));
     filtrosRapidos.appendChild(pillTodos);
@@ -1831,7 +2115,7 @@
       const item = document.createElement("div");
       item.innerHTML =
         '<div class="foto-ugc-item">' +
-        '<img src="' + foto.arquivo + '?v=' + VERSAO_FOTOS + '" alt="Foto UGC' + (foto.marca ? " para " + foto.marca : "") + '" loading="lazy" ' +
+        '<img src="' + foto.arquivo + '?v=' + VERSAO_FOTOS + '" alt="' + T.fotoUgcAlt(foto.marca) + '" loading="lazy" ' +
         'onerror="this.style.display=&quot;none&quot;; this.nextElementSibling.style.display=&quot;flex&quot;;">' +
         '<div class="foto-ugc-vazio">Adicione a foto em<br>&quot;' + foto.arquivo + '&quot;</div>' +
         "</div>" +
@@ -1874,12 +2158,12 @@
       const card = document.createElement("div");
       card.className = "depoimento-card";
       const avatarConteudo = dep.logo
-        ? '<img src="logos-marcas/' + dep.logo + '?v=' + VERSAO_FOTOS + '" alt="Logo da marca ' + dep.handle + '" loading="lazy">'
+        ? '<img src="logos-marcas/' + dep.logo + '?v=' + VERSAO_FOTOS + '" alt="' + T.logoDaMarca + dep.handle + '" loading="lazy">'
         : "<span>" + iniciaisDe(dep.handle.replace("@", "")) + "</span>";
       card.innerHTML =
         '<div class="depoimento-avatar">' + avatarConteudo + "</div>" +
         '<div class="depoimento-handle">' + dep.handle + "</div>" +
-        '<div class="depoimento-estrelas" aria-label="' + dep.estrelas + ' de 5 estrelas">' + "★".repeat(dep.estrelas) + "</div>" +
+        '<div class="depoimento-estrelas" aria-label="' + dep.estrelas + T.deCincoEstrelas + '">' + "★".repeat(dep.estrelas) + "</div>" +
         '<div class="depoimento-categoria">' + dep.categoria + "</div>" +
         '<p class="depoimento-texto">' + dep.texto + "</p>";
 
@@ -1891,7 +2175,7 @@
         const play = document.createElement("button");
         play.type = "button";
         play.className = "audio-whats-play";
-        play.setAttribute("aria-label", "Ouvir depoimento em áudio de " + dep.handle);
+        play.setAttribute("aria-label", T.ouvirDepoimento(dep.handle));
         play.textContent = "▶";
 
         const meio = document.createElement("div");
@@ -1962,7 +2246,7 @@
         velocidadeBtn.addEventListener("click", () => {
           velocidadeIndice = (velocidadeIndice + 1) % velocidades.length;
           audio.playbackRate = velocidades[velocidadeIndice];
-          velocidadeBtn.textContent = String(velocidades[velocidadeIndice]).replace(".", ",") + "x";
+          velocidadeBtn.textContent = String(velocidades[velocidadeIndice]).replace(".", T.separadorDecimal) + "x";
         });
 
         wrap.appendChild(play);
@@ -1994,7 +2278,7 @@
 
       const textoOriginalBotao = btnEnviarMensagem.textContent;
       btnEnviarMensagem.disabled = true;
-      btnEnviarMensagem.textContent = "Enviando...";
+      btnEnviarMensagem.textContent = T.enviando;
 
       sbSite.from("portfolio_leads").insert({
         name: nome,
@@ -2006,12 +2290,12 @@
         btnEnviarMensagem.textContent = textoOriginalBotao;
         if (error) {
           console.warn("Não foi possível registrar a mensagem:", error.message);
-          mensagemConfirmacao.textContent = "Não conseguimos enviar agora. Tenta de novo em instantes ou chama no WhatsApp/Instagram.";
+          mensagemConfirmacao.textContent = T.erroEnvio;
           mensagemConfirmacao.hidden = false;
           return;
         }
         registrarEvento("button_click", "contact_form_submit");
-        mensagemConfirmacao.textContent = "Obrigada pelo contato! Recebi sua mensagem e respondo em breve.";
+        mensagemConfirmacao.textContent = T.sucessoEnvio;
         mensagemConfirmacao.hidden = false;
         formContato.reset();
       });
@@ -2027,34 +2311,41 @@
     const btnMenu = document.getElementById("btn-menu");
     const linksNav = document.getElementById("links-nav");
     const menuBackdrop = document.getElementById("menu-backdrop");
+    btnMenu.setAttribute("aria-label", T.abrirMenu);
     function fecharMenu() {
       linksNav.classList.remove("aberto");
       menuBackdrop.classList.remove("aberto");
       btnMenu.setAttribute("aria-expanded", "false");
-      btnMenu.setAttribute("aria-label", "Abrir menu");
+      btnMenu.setAttribute("aria-label", T.abrirMenu);
     }
     function alternarMenu() {
       const aberto = linksNav.classList.toggle("aberto");
       menuBackdrop.classList.toggle("aberto", aberto);
       btnMenu.setAttribute("aria-expanded", String(aberto));
-      btnMenu.setAttribute("aria-label", aberto ? "Fechar menu" : "Abrir menu");
+      btnMenu.setAttribute("aria-label", aberto ? T.fecharMenu : T.abrirMenu);
     }
     btnMenu.addEventListener("click", alternarMenu);
     menuBackdrop.addEventListener("click", fecharMenu);
     linksNav.querySelectorAll("a").forEach(link => link.addEventListener("click", fecharMenu));
     document.addEventListener("keydown", (evento) => { if (evento.key === "Escape") fecharMenu(); });
 
-    // ---- Botão de idioma (visual por enquanto) ----
+    // ---- Botão de idioma: PT/EN de verdade — salva a escolha e recarrega a página nesse idioma ----
     const idiomaPt = document.getElementById("idioma-pt");
     const idiomaEn = document.getElementById("idioma-en");
-    function alternarIdioma(ativo) {
-      idiomaPt.classList.toggle("ativo", ativo === "pt");
-      idiomaEn.classList.toggle("ativo", ativo === "en");
-      idiomaPt.setAttribute("aria-pressed", String(ativo === "pt"));
-      idiomaEn.setAttribute("aria-pressed", String(ativo === "en"));
-    }
-    idiomaPt.addEventListener("click", () => alternarIdioma("pt"));
-    idiomaEn.addEventListener("click", () => alternarIdioma("en"));
+    idiomaPt.classList.toggle("ativo", IDIOMA_ATUAL === "pt");
+    idiomaEn.classList.toggle("ativo", IDIOMA_ATUAL === "en");
+    idiomaPt.setAttribute("aria-pressed", String(IDIOMA_ATUAL === "pt"));
+    idiomaEn.setAttribute("aria-pressed", String(IDIOMA_ATUAL === "en"));
+    idiomaPt.addEventListener("click", () => {
+      if (IDIOMA_ATUAL === "pt") return;
+      localStorage.setItem("idioma", "pt");
+      location.reload();
+    });
+    idiomaEn.addEventListener("click", () => {
+      if (IDIOMA_ATUAL === "en") return;
+      localStorage.setItem("idioma", "en");
+      location.reload();
+    });
 
     // ---- Animação de entrada ao rolar a página ----
     const prefereReduzirMovimento = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
