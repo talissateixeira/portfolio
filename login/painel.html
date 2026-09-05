@@ -555,7 +555,8 @@
     flex-direction: column;
     gap: 10px;
   }
-  .form-agenda-inline input, .form-agenda-inline select {
+  .form-agenda-inline input, .form-agenda-inline select,
+  .form-editar-agenda input, .form-editar-agenda select {
     padding: 10px 12px;
     border-radius: 10px;
     border: 1.5px solid var(--borda);
@@ -577,6 +578,22 @@
   }
   .btn-salvar-agenda:hover { background: var(--coral-escuro); }
 
+  .form-editar-agenda { display: flex; flex-direction: column; gap: 8px; width: 100%; }
+  .form-editar-agenda .editar-titulo { font-weight: 600; }
+  .editar-acoes { display: flex; gap: 8px; }
+  .editar-acoes .btn-salvar-agenda { flex: 1; }
+  .btn-cancelar-edicao {
+    flex: 1;
+    padding: 10px;
+    border-radius: 100px;
+    border: 1.5px solid var(--borda);
+    background: var(--branco);
+    color: var(--texto-suave);
+    font-weight: 700;
+    font-size: 0.88rem;
+  }
+  .btn-cancelar-edicao:hover { border-color: var(--erro); color: var(--erro); }
+
   .lista-agenda-dia { margin-top: 18px; display: flex; flex-direction: column; gap: 10px; }
   .item-agenda {
     display: flex;
@@ -591,6 +608,18 @@
   .item-agenda-meta.tipo-pendencia { color: var(--coral-escuro); }
   .item-agenda-titulo { font-size: 0.92rem; font-weight: 600; margin-top: 2px; }
   .item-agenda.concluido .item-agenda-titulo { text-decoration: line-through; color: var(--texto-suave); }
+  button.item-agenda-titulo-editavel {
+    display: block;
+    width: 100%;
+    text-align: left;
+    background: none;
+    border: none;
+    padding: 0;
+    font-family: "DM Sans", sans-serif;
+    color: var(--grafite);
+    cursor: pointer;
+  }
+  button.item-agenda-titulo-editavel:hover { text-decoration: underline; color: var(--coral); }
   .item-agenda-acoes { display: flex; gap: 6px; flex-shrink: 0; }
   .btn-icone-agenda {
     width: 30px; height: 30px;
@@ -1000,7 +1029,7 @@
     console.error(err);
     elCarregando.hidden = true;
     elErro.hidden = false;
-    elErro.textContent = "Não foi possível carregar os dados agora. Tente recarregar a página.";
+    elErro.textContent = "Não foi possível carregar os dados agora. Detalhe técnico: " + (err && err.message ? err.message : String(err)) + " | " + (err && err.stack ? err.stack.split("\n").slice(0,3).join(" » ") : "");
   }
 
   // ---- Filtro de período (Tudo / 7d / 30d / 90d) ----
@@ -1452,11 +1481,15 @@
     const dataTexto = mostrarData
       ? new Date(item.data + "T00:00:00").toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" }) + " · "
       : "";
+    // No painel do dia (mostrarData=false), o título é clicável pra editar. Na lista completa, é só texto.
+    const tituloHtml = mostrarData
+      ? `<div class="item-agenda-titulo">${item.titulo}</div>`
+      : `<button type="button" class="item-agenda-titulo item-agenda-titulo-editavel" data-id="${item.id}" title="Clique para editar">${item.titulo}</button>`;
     return `
-      <div class="item-agenda ${item.concluido ? "concluido" : ""}">
+      <div class="item-agenda ${item.concluido ? "concluido" : ""}" data-item-id="${item.id}">
         <div class="item-agenda-info">
           <div class="item-agenda-meta ${item.tipo === "pendencia" ? "tipo-pendencia" : ""}">${dataTexto}${tipoTexto} · ${horarioTexto}</div>
-          <div class="item-agenda-titulo">${item.titulo}</div>
+          ${tituloHtml}
         </div>
         <div class="item-agenda-acoes">
           <button type="button" class="btn-icone-agenda btn-concluir-agenda ${item.concluido ? "concluido" : ""}" data-id="${item.id}" title="Marcar como concluído" aria-label="Marcar como concluído">
@@ -1468,6 +1501,60 @@
         </div>
       </div>
     `;
+  }
+
+  // Troca o item pelo formulário de edição, direto no lugar onde ele estava.
+  function ativarEdicaoAgenda(id, elementoItem) {
+    const item = agenda.find(a => a.id === id);
+    if (!item || !elementoItem) return;
+    const tituloEscapado = String(item.titulo).replace(/"/g, "&quot;");
+    elementoItem.innerHTML = `
+      <form class="form-editar-agenda">
+        <input type="text" class="editar-titulo" value="${tituloEscapado}" required>
+        <div class="form-agenda-linha">
+          <select class="editar-tipo">
+            <option value="entrega" ${item.tipo === "entrega" ? "selected" : ""}>Entrega</option>
+            <option value="pendencia" ${item.tipo === "pendencia" ? "selected" : ""}>Pendência</option>
+          </select>
+          <input type="date" class="editar-data" value="${item.data}">
+          <input type="time" class="editar-horario" value="${item.horario ? item.horario.slice(0, 5) : ""}">
+        </div>
+        <div class="editar-acoes">
+          <button type="submit" class="btn-salvar-agenda">Salvar</button>
+          <button type="button" class="btn-cancelar-edicao">Cancelar</button>
+        </div>
+      </form>
+    `;
+
+    const form = elementoItem.querySelector(".form-editar-agenda");
+    form.querySelector(".editar-titulo").focus();
+
+    form.querySelector(".btn-cancelar-edicao").addEventListener("click", () => {
+      renderizarPainelDia();
+    });
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const novoTitulo = form.querySelector(".editar-titulo").value.trim();
+      const novoTipo = form.querySelector(".editar-tipo").value;
+      const novaData = form.querySelector(".editar-data").value;
+      const novoHorario = form.querySelector(".editar-horario").value || null;
+
+      const { error } = await Auth.sb.from("portfolio_agenda")
+        .update({ titulo: novoTitulo, tipo: novoTipo, data: novaData, horario: novoHorario })
+        .eq("id", id);
+      if (error) {
+        alert("Não foi possível salvar agora. Tente de novo.");
+        return;
+      }
+      item.titulo = novoTitulo;
+      item.tipo = novoTipo;
+      item.data = novaData;
+      item.horario = novoHorario;
+      renderizarCalendario();
+      renderizarPainelDia();
+      renderizarListaAgendaCompleta();
+    });
   }
 
   function renderizarListaAgendaCompleta() {
@@ -1535,8 +1622,15 @@
     renderizarListaAgendaCompleta();
   });
 
-  // ---- Concluir/apagar um item da agenda (funciona tanto no painel do dia quanto na lista completa) ----
+  // ---- Concluir/apagar/editar um item da agenda ----
   document.addEventListener("click", async (e) => {
+    const btnEditar = e.target.closest(".item-agenda-titulo-editavel");
+    if (btnEditar) {
+      const id = btnEditar.dataset.id;
+      const itemEl = btnEditar.closest(".item-agenda");
+      ativarEdicaoAgenda(id, itemEl);
+      return;
+    }
     const btnConcluir = e.target.closest(".btn-concluir-agenda");
     if (btnConcluir) {
       const id = btnConcluir.dataset.id;

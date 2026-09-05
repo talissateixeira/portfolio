@@ -3,53 +3,62 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Portfólio Criadora UGC</title>
-<meta name="description" content="Portfólio profissional de criadora de conteúdo UGC. Vídeos, fotos e reels para marcas venderem mais.">
+<title>Talissa Müller | Criadora de Conteúdo UGC</title>
+<meta name="description" content="Talissa Müller, criadora de conteúdo UGC e estrategista de conteúdo. Vídeos, reels e fotos que ajudam marcas a venderem mais.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300..900;1,300..900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,500;0,600;0,700;0,900;1,500;1,600&family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@700;800;900&family=Italiana&family=Mrs+Saint+Delafield&display=swap" rel="stylesheet">
 <style>
   :root {
-    --creme: #f3eee9;
-    --creme-escuro: #e8e0d8;
-    --tinta: #14110d;
-    --azul: #0049a4;
-    --azul-escuro: #003576;
-    --laranja: #df7900;
-    --branco: #ffffff;
-    --raio: 18px;
-    --sombra: 0 10px 30px rgba(20, 17, 13, 0.08);
-    --transicao: 0.3s ease;
+    --creme: #f1ece1;
+    --verde-petroleo: #1f3d37;
+    --verde-petroleo-escuro: #12241f;
+    --verde-petroleo-suave: #4c6961;
+    --acento: #7a2e35;
+    --blush: #ecd9d4;
+    --menta: #a9e0cd;
+    --preto: #0d0d0d;
+    --dourado: #eab308;
+    --texto: #1f3d37;
+    --texto-suave: #5c6d67;
+    --borda: rgba(31, 61, 55, 0.14);
+    --raio: 20px;
+    --raio-grande: 28px;
+    --transicao: 0.25s ease;
+    --fonte-titulo: "Fraunces", "Georgia", serif;
+    --fonte-base: "Inter", "Segoe UI", system-ui, sans-serif;
   }
 
   * { box-sizing: border-box; }
 
-  html {
-    scroll-behavior: smooth;
-    scroll-padding-top: 90px;
-  }
+  html { scroll-behavior: smooth; scroll-padding-top: 96px; }
 
   body {
     margin: 0;
     background: var(--creme);
-    color: var(--tinta);
-    font-family: "Plus Jakarta Sans", sans-serif;
-    line-height: 1.6;
+    color: var(--texto);
+    font-family: var(--fonte-base);
+    line-height: 1.65;
     overflow-x: hidden;
   }
 
-  img, svg { max-width: 100%; display: block; }
+  img { max-width: 100%; display: block; }
 
   h1, h2, h3 {
-    font-family: "Fraunces", serif;
-    font-weight: 600;
-    line-height: 1.15;
-    margin: 0 0 0.6em 0;
-    color: var(--tinta);
+    font-family: var(--fonte-titulo);
+    font-weight: 700;
+    line-height: 1.12;
+    margin: 0 0 0.5em 0;
+    color: var(--verde-petroleo);
   }
 
-  h1 em, h2 em, h3 em { font-style: italic; color: var(--azul); font-family: "Fraunces", serif; }
+  h2 { font-size: clamp(2rem, 3.2vw, 2.75rem); }
+
+  em, .acento {
+    font-style: italic;
+    font-weight: 600;
+    color: var(--acento);
+  }
 
   p { margin: 0 0 1em 0; }
 
@@ -57,699 +66,894 @@
 
   .container {
     width: 100%;
-    max-width: 1180px;
+    max-width: 1220px;
     margin: 0 auto;
-    padding: 0 24px;
+    padding: 0 28px;
+    position: relative;
   }
 
-  .eyebrow {
+  section { padding: 64px 0; }
+
+  /* ===== TIPOGRAFIA AUXILIAR ===== */
+  .rotulo {
     display: inline-flex;
     align-items: center;
-    gap: 8px;
-    font-size: 0.95rem;
-    letter-spacing: 0.1em;
+    gap: 10px;
+    font-size: 0.78rem;
+    letter-spacing: 0.14em;
     text-transform: uppercase;
-    color: var(--laranja);
-    font-weight: 800;
-    margin-bottom: 16px;
+    color: var(--acento);
+    font-weight: 700;
+    margin-bottom: 18px;
   }
-  .eyebrow::before {
-    content: "";
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: var(--laranja);
-    flex-shrink: 0;
-  }
+  .rotulo::before { content: ""; width: 20px; height: 1.5px; background: var(--acento); }
+  .rotulo.rotulo-sem-traco::before { content: none; }
 
-  .badge-eyebrow {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    font-family: "Plus Jakarta Sans", sans-serif;
-    font-size: 0.85rem;
-    font-weight: 600;
-    color: var(--tinta);
-    background: var(--branco);
-    border: 1.5px solid rgba(20, 17, 13, 0.14);
-    border-radius: 100px;
-    padding: 8px 18px;
-    margin-bottom: 22px;
-    text-transform: none;
-    letter-spacing: normal;
-  }
-  .badge-eyebrow .badge-icone { color: var(--laranja); font-weight: 700; }
-
-  section { padding: 76px 0; }
-
+  /* ===== BOTÕES ===== */
   .btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 8px;
-    padding: 16px 32px;
+    padding: 15px 30px;
     border-radius: 100px;
     font-weight: 600;
-    font-size: 1rem;
+    font-size: 0.95rem;
     text-decoration: none;
-    border: 2px solid transparent;
+    border: 1.5px solid transparent;
     cursor: pointer;
-    transition: transform var(--transicao), box-shadow var(--transicao), background var(--transicao), color var(--transicao);
-    font-family: "Plus Jakarta Sans", sans-serif;
+    transition: transform var(--transicao), box-shadow var(--transicao), background var(--transicao);
+    font-family: var(--fonte-base);
   }
-
   .btn:focus-visible, a:focus-visible, button:focus-visible, input:focus-visible, textarea:focus-visible {
-    outline: 3px solid var(--azul);
+    outline: 3px solid var(--acento);
     outline-offset: 3px;
   }
+  .btn-primario { background: var(--verde-petroleo); color: #fff; }
+  .btn-primario:hover, .btn-primario:focus-visible { background: var(--verde-petroleo-escuro); transform: translateY(-2px); box-shadow: 0 12px 24px rgba(18,36,31,0.2); }
+  .btn-escuro { background: var(--verde-petroleo); color: #fff; }
+  .btn-escuro:hover, .btn-escuro:focus-visible { background: var(--verde-petroleo-escuro); transform: translateY(-2px); }
+  .btn-menta { background: var(--menta); color: var(--verde-petroleo-escuro); }
+  .btn-menta:hover, .btn-menta:focus-visible { background: #fff; transform: translateY(-2px); }
+  .link-seta { display: inline-flex; align-items: center; gap: 8px; text-decoration: none; font-weight: 600; color: var(--verde-petroleo); }
+  .link-seta:hover { color: var(--acento); }
 
-  .btn-primario {
-    background: var(--azul);
-    color: var(--branco);
+  /* ===== AVISO TOPO ===== */
+  .aviso {
+    background: var(--verde-petroleo-escuro);
+    color: #dfeae5;
+    text-align: center;
+    font-size: 0.82rem;
+    padding: 10px 20px;
   }
-  .btn-primario:hover { background: var(--azul-escuro); transform: translateY(-2px); box-shadow: var(--sombra); }
-
-  .btn-secundario {
-    background: transparent;
-    color: var(--tinta);
-    border-color: var(--tinta);
-  }
-  .btn-secundario:hover { background: var(--tinta); color: var(--creme); transform: translateY(-2px); }
+  .aviso a { color: var(--menta); text-decoration: underline; font-weight: 600; }
 
   /* ===== HEADER / NAV ===== */
   header.topo {
-    position: fixed;
-    top: 0; left: 0; right: 0;
+    position: sticky;
+    top: 0;
     z-index: 1000;
-    background: rgba(243, 238, 233, 0.9);
+    background: rgba(241, 236, 225, 0.92);
     backdrop-filter: blur(10px);
-    border-bottom: 1px solid rgba(20, 17, 13, 0.08);
+    border-bottom: 1px solid var(--borda);
   }
-
   nav.navbar {
-    max-width: 1180px;
+    max-width: 1220px;
     margin: 0 auto;
-    padding: 18px 24px;
+    padding: 18px 28px;
     display: flex;
     align-items: center;
     justify-content: space-between;
+    position: relative;
   }
-
   .logo {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-family: "Fraunces", serif;
-    font-weight: 600;
-    font-size: 1.15rem;
-    text-decoration: none;
-    color: var(--tinta);
-  }
-
-  .logo-badge {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 34px;
-    height: 34px;
-    border-radius: 9px;
-    background: var(--azul);
-    color: var(--branco);
-    font-family: "Plus Jakarta Sans", sans-serif;
+    font-family: var(--fonte-titulo);
     font-weight: 700;
-    font-size: 0.85rem;
-    flex-shrink: 0;
-  }
-
-  .nav-cta {
-    background: var(--tinta);
-    color: var(--creme) !important;
-    padding: 11px 22px;
-    border-radius: 100px;
-    font-weight: 600;
-    font-size: 0.9rem;
+    font-size: 1.15rem;
+    letter-spacing: 0.02em;
     text-decoration: none;
-    transition: background var(--transicao), transform var(--transicao);
+    color: var(--verde-petroleo);
+    white-space: nowrap;
   }
-  .nav-cta:hover { background: var(--azul); transform: translateY(-1px); }
-  .nav-cta::after { display: none !important; content: none !important; }
-
+  .logo .ponto { color: var(--acento); }
   .links-nav {
     list-style: none;
     display: flex;
-    gap: 32px;
+    align-items: center;
+    gap: 30px;
     margin: 0;
     padding: 0;
   }
-
-  .links-nav a {
+  .links-nav a:not(.nav-cta) {
     text-decoration: none;
-    font-weight: 500;
-    font-size: 0.95rem;
-    color: var(--tinta);
-    position: relative;
-    padding: 4px 0;
+    font-size: 0.82rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--verde-petroleo-suave);
+    transition: color var(--transicao);
   }
+  .links-nav a:not(.nav-cta):hover, .links-nav a:not(.nav-cta):focus-visible { color: var(--verde-petroleo); }
 
-  .links-nav a::after {
-    content: "";
-    position: absolute;
-    left: 0; bottom: -2px;
-    width: 0; height: 2px;
-    background: var(--laranja);
-    transition: width var(--transicao);
+  .idioma-toggle {
+    display: flex;
+    align-items: center;
+    border: 1px solid var(--borda);
+    border-radius: 100px;
+    padding: 3px;
+    gap: 2px;
   }
-  .links-nav a:hover::after, .links-nav a:focus-visible::after { width: 100%; }
+  .idioma-btn {
+    border: none;
+    background: none;
+    cursor: pointer;
+    font-family: var(--fonte-base);
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    padding: 6px 12px;
+    border-radius: 100px;
+    color: var(--verde-petroleo-suave);
+    transition: background var(--transicao), color var(--transicao);
+  }
+  .idioma-btn.ativo { background: var(--verde-petroleo); color: #fff; }
+
+  .nav-cta {
+    background: var(--verde-petroleo);
+    color: #fff !important;
+    padding: 11px 22px;
+    border-radius: 100px;
+    font-weight: 600;
+    font-size: 0.85rem;
+    text-decoration: none;
+    transition: background var(--transicao), transform var(--transicao);
+  }
+  .nav-cta:hover, .nav-cta:focus-visible { background: var(--acento); transform: translateY(-1px); }
 
   .btn-menu {
     display: none;
     background: none;
     border: none;
     cursor: pointer;
-    width: 44px;
-    height: 44px;
+    width: 44px; height: 44px;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     gap: 5px;
     padding: 0;
   }
-  .btn-menu span {
-    width: 26px;
-    height: 2px;
-    background: var(--tinta);
-    transition: transform var(--transicao), opacity var(--transicao);
-  }
+  .btn-menu span { width: 26px; height: 2px; background: var(--verde-petroleo); transition: transform var(--transicao), opacity var(--transicao); }
   .btn-menu[aria-expanded="true"] span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
   .btn-menu[aria-expanded="true"] span:nth-child(2) { opacity: 0; }
   .btn-menu[aria-expanded="true"] span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
 
   /* ===== HERO ===== */
   .hero {
-    padding: 160px 0 96px;
-    display: grid;
-    grid-template-columns: 1.1fr 0.9fr;
-    gap: 56px;
-    align-items: center;
-    background-image:
-      linear-gradient(rgba(20,17,13,0.05) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(20,17,13,0.05) 1px, transparent 1px);
-    background-size: 36px 36px;
-    background-position: center top;
+    position: relative;
+    padding-top: 80px;
+    padding-bottom: 72px;
+    overflow: hidden;
+    isolation: isolate;
   }
-
-  .hero h1 {
-    font-family: "Plus Jakarta Sans", sans-serif;
-    font-weight: 800;
-    letter-spacing: -0.02em;
-    font-size: clamp(2.6rem, 5.2vw, 4rem);
-  }
-  .hero .subtitulo { font-size: 1.1rem; max-width: 480px; color: #3a352d; }
-  .hero-cta { display: flex; gap: 16px; margin-top: 32px; flex-wrap: wrap; }
-
-  .stats-rapidas {
-    display: flex;
-    gap: 32px;
-    margin: 28px 0;
-    flex-wrap: wrap;
-  }
-  .stat-rapido strong {
-    display: block;
-    font-family: "Fraunces", serif;
-    font-size: 1.5rem;
-    font-weight: 700;
-    color: var(--tinta);
-  }
-  .stat-rapido span {
-    font-size: 0.8rem;
-    color: #6b6357;
-  }
-
-  .bloco-gradiente {
-    border-radius: var(--raio);
-    box-shadow: var(--sombra);
-  }
-
-  .hero-imagem-wrap { position: relative; }
-  .hero-imagem-wrap::before {
+  /* Fundo com profundidade e luz natural (foto "fundo-luz.jpg"), num pseudo-elemento separado para nunca deixar o conteúdo real (botões, foto, textos) transparente. */
+  .hero::before {
     content: "";
     position: absolute;
-    inset: 24px -24px -24px 24px;
-    background: rgba(223, 121, 0, 0.14);
-    border-radius: var(--raio);
+    inset: -2%;
     z-index: 0;
+    pointer-events: none;
+    background-image: url("fundo-luz.jpg");
+    background-size: cover;
+    background-position: center 42%;
+    filter: contrast(1.22) saturate(1.1);
+    -webkit-mask-image: linear-gradient(to bottom, black 0%, black 65%, transparent 98%);
+    mask-image: linear-gradient(to bottom, black 0%, black 65%, transparent 98%);
+    animation: fundo-luz-flutuar 22s ease-in-out infinite;
   }
-
-  .hero-imagem {
+  @keyframes fundo-luz-flutuar {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    50% { transform: translate(-1.5%, 1.5%) scale(1.05); }
+  }
+  /* Brilho quente extra, pulsando por cima, para reforçar a sensação de luz de sol se movendo. */
+  .hero::after {
+    content: "";
+    position: absolute;
+    inset: -2%;
+    z-index: 0;
+    pointer-events: none;
+    background: radial-gradient(ellipse 50% 40% at 28% 18%, rgba(255, 249, 230, 0.5), transparent 70%);
+    mix-blend-mode: soft-light;
+    -webkit-mask-image: linear-gradient(to bottom, black 0%, black 65%, transparent 98%);
+    mask-image: linear-gradient(to bottom, black 0%, black 65%, transparent 98%);
+    animation: luz-pulsar 9s ease-in-out infinite;
+  }
+  @keyframes luz-pulsar {
+    0%, 100% { opacity: 0.4; transform: translate(0, 0); }
+    50% { opacity: 0.85; transform: translate(4%, -3%); }
+  }
+  @media (prefers-reduced-motion: reduce) { .hero::before, .hero::after { animation: none; } }
+  .hero-grid {
     position: relative;
     z-index: 1;
-    aspect-ratio: 4 / 5;
-    width: 100%;
-    object-fit: cover;
-    background: linear-gradient(160deg, var(--azul) 0%, #4c7fc9 45%, var(--laranja) 100%);
+    display: grid;
+    grid-template-columns: 1.05fr 0.95fr;
+    gap: 56px;
+    align-items: center;
   }
+  .hero-texto, .hero-visual { min-width: 0; }
 
-  .badge-flutuante {
-    position: absolute;
-    z-index: 2;
+  .badge-disponivel {
     display: inline-flex;
     align-items: center;
-    gap: 6px;
-    background: var(--branco);
+    gap: 10px;
+    background: #fff;
+    border: 1px solid var(--borda);
     border-radius: 100px;
-    padding: 8px 16px;
-    font-size: 0.8rem;
+    padding: 9px 18px 9px 10px;
+    font-size: 0.82rem;
     font-weight: 600;
-    box-shadow: var(--sombra);
-    color: var(--tinta);
+    color: var(--verde-petroleo);
+    margin-bottom: 24px;
   }
-  .badge-flutuante.topo-esquerda { top: 18px; left: 18px; }
-  .badge-flutuante.baixo-direita { bottom: 18px; right: 18px; color: var(--azul-escuro); }
+  .badge-disponivel .selo {
+    display: flex; align-items: center; justify-content: center;
+    width: 22px; height: 22px; border-radius: 50%;
+    background: var(--verde-petroleo); color: #fff; font-size: 0.7rem; flex-shrink: 0;
+  }
 
-  /* ===== FAIXA DE MARCAS ===== */
-  .faixa-marcas {
-    padding: 30px 0;
-    background: var(--tinta);
-    overflow: hidden;
-  }
-  .faixa-marcas-label {
-    text-align: center;
-    font-size: 0.75rem;
-    letter-spacing: 0.16em;
+  /* Nome do hero: "Talissa" numa serifa alta e grande, "Müller" numa caligrafia de assinatura. */
+  .hero h1 { margin-bottom: 0.3em; }
+  .hero-nome-serif {
+    display: block;
+    font-family: "Italiana", "Playfair Display", serif;
+    font-weight: 400;
     text-transform: uppercase;
-    color: #b6afa2;
-    font-weight: 600;
-    margin: 0 0 18px 0;
+    letter-spacing: 0.06em;
+    font-size: clamp(3.2rem, 7.6vw, 6.2rem);
+    color: var(--verde-petroleo);
   }
-  .marquee-track {
+  .hero-nome-assinatura {
+    display: block;
+    font-family: "Mrs Saint Delafield", cursive;
+    font-weight: 400;
+    font-size: clamp(3rem, 7vw, 5.2rem);
+    color: var(--acento);
+    margin-top: -0.12em;
+    margin-left: 0.12em;
+  }
+
+  .hero-subtitulo { font-size: 1.1rem; color: var(--texto-suave); max-width: 460px; }
+
+  .hero-cta { display: flex; align-items: center; gap: 24px; margin-top: 26px; flex-wrap: wrap; }
+
+  .hero-visual { position: relative; }
+  .hero-foto-moldura {
+    position: relative;
+    border-radius: var(--raio-grande);
     overflow: hidden;
-    width: 100%;
-    -webkit-mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
-    mask-image: linear-gradient(to right, transparent, black 8%, black 92%, transparent);
+    aspect-ratio: 4 / 5;
+    box-shadow: 0 30px 60px rgba(18, 36, 31, 0.22);
   }
-  .marcas-lista {
+  .hero-foto-moldura img { width: 100%; height: 100%; object-fit: cover; }
+  .hero-foto-gradiente {
+    width: 100%; height: 100%;
+    background: linear-gradient(150deg, var(--verde-petroleo) 0%, #6b8f88 55%, var(--menta) 100%);
+  }
+
+  /* ===== FAIXA (movimento) ===== */
+  .ticker-escuro {
+    background: var(--preto);
+    padding: 18px 0;
+    overflow: hidden;
+  }
+  .ticker-track { overflow: hidden; width: 100%; }
+  .ticker-lista {
     display: flex;
     align-items: center;
-    gap: 40px;
+    gap: 28px;
     list-style: none;
     margin: 0;
     padding: 0;
     width: max-content;
-    animation: rolar-marcas 28s linear infinite;
+    animation: rolar-ticker 34s linear infinite;
   }
-  .marquee-track:hover .marcas-lista { animation-play-state: paused; }
-  .marcas-lista li {
-    font-family: "Fraunces", serif;
-    font-style: italic;
-    font-size: 1.15rem;
-    color: var(--creme);
-    font-weight: 500;
+  .ticker-track:hover .ticker-lista { animation-play-state: paused; }
+  .ticker-lista li {
+    font-family: var(--fonte-titulo);
+    font-weight: 700;
+    font-size: 1.05rem;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    color: #f1ece1;
     white-space: nowrap;
   }
-  .marcas-lista li.separador {
-    color: var(--laranja);
-    font-size: 0.9rem;
+  .ticker-lista li.separador { color: var(--menta); font-size: 0.9rem; }
+  @keyframes rolar-ticker { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+  @media (prefers-reduced-motion: reduce) { .ticker-lista { animation: none; } }
+
+  /* ===== SOBRE + MARCAS (seção única) ===== */
+  .sobre-marcas-grid {
+    display: grid;
+    grid-template-columns: 1.15fr auto 0.85fr;
+    gap: 44px;
+    align-items: center;
   }
-  @keyframes rolar-marcas {
-    from { transform: translateX(0); }
-    to { transform: translateX(-50%); }
+  .sobre-divisor { width: 1px; align-self: stretch; background: var(--borda); }
+  .sobre-coluna { display: flex; flex-direction: column; align-items: flex-start; text-align: left; min-width: 0; }
+  .sobre-imagem {
+    position: relative;
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    overflow: hidden;
+    box-shadow: 0 16px 32px rgba(18,36,31,0.18);
+    margin-bottom: 22px;
   }
-  @media (prefers-reduced-motion: reduce) {
-    .marcas-lista { animation: none; }
+  .sobre-imagem img { position: relative; width: 100%; height: 100%; object-fit: cover; }
+  .sobre-imagem-gradiente {
+    position: absolute; inset: 0;
+    background: linear-gradient(140deg, var(--verde-petroleo) 0%, #7ba79d 60%, var(--menta) 100%);
+  }
+  .sobre-coluna h2 { margin-bottom: 0.5em; font-size: clamp(1.7rem, 2.6vw, 2.3rem); white-space: nowrap; }
+  @media (max-width: 980px) { .sobre-coluna h2 { white-space: normal; } }
+  .sobre-pills { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 6px; }
+  .pill-info {
+    background: #fff;
+    border: 1px solid var(--borda);
+    border-radius: 100px;
+    padding: 10px 18px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--verde-petroleo);
   }
 
-  /* ===== SOBRE ===== */
-  .sobre-grid {
+  .marcas-coluna { text-align: center; min-width: 0; }
+  .marcas-titulo {
+    font-family: var(--fonte-titulo);
+    font-style: italic;
+    font-weight: 600;
+    font-size: 1.25rem;
+    color: var(--verde-petroleo);
+    margin: 0 0 24px 0;
+  }
+  .marcas-bolhas {
     display: grid;
-    grid-template-columns: 0.9fr 1.1fr;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 18px;
+    max-width: 440px;
+    margin: 0 auto;
+  }
+  .marca-bolha {
+    aspect-ratio: 1 / 1;
+    border-radius: 50%;
+    background: #fff;
+    border: 1px solid var(--borda);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 14px;
+    animation: flutuar-bolha 6s ease-in-out infinite;
+  }
+  .marca-bolha img { max-width: 100%; max-height: 100%; object-fit: contain; }
+  @keyframes flutuar-bolha {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+  }
+  @media (prefers-reduced-motion: reduce) { .marca-bolha { animation: none; } }
+
+  /* ===== CATEGORIAS / PORTFÓLIO ===== */
+  .categorias-cabecalho { max-width: 640px; }
+  /* Envolve a fileira de nichos para poder desenhar um esmaecimento na borda direita,
+     avisando que dá pra arrastar pro lado sem "cortar" a última pílula de forma seca. */
+  .filtros-rapidos-wrap {
+    position: relative;
+    margin: 28px 0 40px;
+  }
+  .filtros-rapidos-wrap::after {
+    content: "";
+    position: absolute;
+    top: 0; right: 0; bottom: 4px;
+    width: 56px;
+    background: linear-gradient(to right, transparent, var(--creme));
+    pointer-events: none;
+  }
+  .filtros-rapidos {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 8px;
+    overflow-x: auto;
+    padding: 0 40px 4px 0;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .filtros-rapidos::-webkit-scrollbar { display: none; }
+  .filtro-pill {
+    background: #fff;
+    border: 1px solid var(--borda);
+    border-radius: 100px;
+    flex: 0 0 auto;
+    white-space: nowrap;
+    padding: 8px 14px;
+    font-size: 0.74rem;
+    font-weight: 600;
+    color: var(--verde-petroleo);
+    text-decoration: none;
+    cursor: pointer;
+    transition: background var(--transicao), color var(--transicao), transform var(--transicao);
+  }
+  .filtro-pill:hover, .filtro-pill:focus-visible { background: var(--verde-petroleo); color: #fff; transform: translateY(-1px); }
+  .filtro-pill.ativo { background: var(--verde-petroleo); color: #fff; }
+
+  .categoria-linha { margin-bottom: 48px; scroll-margin-top: 110px; }
+  .categoria-linha:last-child { margin-bottom: 0; }
+  .categoria-cabecalho-linha {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 20px;
+    margin-bottom: 18px;
+  }
+  .categoria-titulo-grupo { display: flex; align-items: baseline; gap: 12px; }
+  .categoria-titulo-grupo h3 { margin: 0; font-size: 1.5rem; }
+  .categoria-contagem {
+    font-family: var(--fonte-base);
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--texto-suave);
+  }
+  .categoria-subtitulo { font-style: italic; color: var(--texto-suave); margin: 4px 0 0; font-size: 0.92rem; }
+  .categoria-setas { display: flex; gap: 8px; flex-shrink: 0; }
+  .seta-btn {
+    width: 38px; height: 38px;
+    border-radius: 50%;
+    border: 1px solid var(--borda);
+    background: #fff;
+    color: var(--verde-petroleo);
+    font-size: 1rem;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: background var(--transicao), color var(--transicao);
+  }
+  .seta-btn:hover, .seta-btn:focus-visible { background: var(--verde-petroleo); color: #fff; }
+
+  .categoria-scroll {
+    display: flex;
+    gap: 18px;
+    overflow-x: auto;
+    scroll-snap-type: x proximity;
+    padding-bottom: 6px;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .categoria-scroll::-webkit-scrollbar { display: none; }
+
+  .trabalho-card { flex: 0 0 auto; width: 220px; scroll-snap-align: start; }
+  .trabalho-imagem-wrap {
+    position: relative;
+    aspect-ratio: 9 / 16;
+    border-radius: 16px;
+    overflow: hidden;
+    background: linear-gradient(150deg, var(--verde-petroleo), var(--menta));
+    box-shadow: 0 10px 24px rgba(18,36,31,0.15);
+  }
+  .trabalho-imagem-wrap img { width: 100%; height: 100%; object-fit: cover; }
+  .trabalho-tag {
+    position: absolute;
+    top: 12px; left: 12px;
+    background: #fff;
+    border-radius: 100px;
+    padding: 5px 12px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--verde-petroleo);
+  }
+  .trabalho-legenda { margin-top: 10px; }
+  .trabalho-legenda strong { display: block; font-size: 0.95rem; color: var(--verde-petroleo); }
+  .trabalho-legenda span { font-size: 0.75rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--texto-suave); }
+
+  /* ===== CASE DE CONTEÚDO ORGÂNICO ===== */
+  #case-organico { background: #fff; }
+  .case-organico-grid {
+    display: grid;
+    grid-template-columns: 0.9fr auto 1.3fr;
     gap: 56px;
     align-items: center;
   }
-  .sobre-imagem {
-    aspect-ratio: 1 / 1;
-    background: linear-gradient(135deg, var(--laranja) 0%, #f3b26a 50%, var(--azul) 100%);
-  }
-
-  /* ===== PORTFÓLIO ===== */
-  .filtros {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12px;
-    margin-bottom: 40px;
-  }
-  .filtro-btn {
-    padding: 10px 22px;
-    border-radius: 100px;
-    border: 2px solid var(--tinta);
-    background: transparent;
-    color: var(--tinta);
-    font-weight: 600;
-    cursor: pointer;
-    transition: background var(--transicao), color var(--transicao);
-    font-family: "Plus Jakarta Sans", sans-serif;
-    font-size: 0.9rem;
-  }
-  .filtro-btn:hover { background: rgba(20,17,13,0.08); }
-  .filtro-btn.ativo { background: var(--tinta); color: var(--creme); }
-
-  .portfolio-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 24px;
-  }
-  .portfolio-item {
-    display: block;
-    position: relative;
-    border-radius: var(--raio);
-    overflow: hidden;
-    aspect-ratio: 9 / 16;
-    box-shadow: var(--sombra);
-    transition: transform var(--transicao);
-    background: var(--tinta);
-    border: none;
-    padding: 0;
+  .case-organico-titulo {
+    font-size: clamp(2.2rem, 4vw, 3.2rem);
+    text-transform: uppercase;
+    line-height: 1.08;
     margin: 0;
-    width: 100%;
-    font-family: inherit;
-    cursor: pointer;
   }
-  .portfolio-item:hover { transform: translateY(-6px); }
-  .portfolio-item:hover .portfolio-play { transform: translate(-50%, -50%) scale(1.1); }
-  .portfolio-fundo {
-    position: absolute;
-    inset: 0;
+  .case-phone-frame {
+    position: relative;
+    width: 240px;
+    aspect-ratio: 9 / 19.5;
+    background: #111;
+    border-radius: 38px;
+    padding: 10px;
+    box-shadow: 0 24px 50px rgba(18, 36, 31, 0.25);
+  }
+  .case-phone-frame img {
     width: 100%;
     height: 100%;
     object-fit: cover;
+    border-radius: 28px;
   }
-  .portfolio-play {
+  .case-phone-notch {
+    position: absolute;
+    top: 10px; left: 50%;
+    transform: translateX(-50%);
+    width: 90px; height: 18px;
+    background: #111;
+    border-radius: 0 0 14px 14px;
+    z-index: 2;
+  }
+  .case-play-botao {
     position: absolute;
     top: 50%; left: 50%;
     transform: translate(-50%, -50%);
-    width: 52px; height: 52px;
+    width: 50px; height: 50px;
     border-radius: 50%;
-    background: rgba(255,255,255,0.92);
-    color: var(--tinta);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.1rem;
+    background: rgba(13, 13, 13, 0.45);
+    border: 1.5px solid rgba(255,255,255,0.7);
+    color: #fff;
+    font-size: 1rem;
+    display: flex; align-items: center; justify-content: center;
     padding-left: 3px;
-    box-shadow: var(--sombra);
-    transition: transform var(--transicao);
-  }
-  .portfolio-info {
-    position: absolute;
-    left: 0; right: 0; bottom: 0;
-    padding: 20px;
-    background: linear-gradient(to top, rgba(0,0,0,0.55), transparent);
-    color: var(--branco);
-  }
-  .portfolio-info span {
-    display: block;
-    font-size: 0.75rem;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    opacity: 0.85;
-    margin-bottom: 4px;
-  }
-  .portfolio-info strong { font-family: "Fraunces", serif; font-size: 1.15rem; font-weight: 600; }
-  .portfolio-item[hidden] { display: none; }
-
-  /* ===== PLAYER FLUTUANTE DE VÍDEO ===== */
-  .modal-video {
-    position: fixed;
-    inset: 0;
-    z-index: 2000;
-    background: rgba(20, 17, 13, 0.85);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 24px;
-    opacity: 0;
+    z-index: 3;
     pointer-events: none;
-    transition: opacity 0.25s ease;
   }
-  .modal-video.aberto { opacity: 1; pointer-events: auto; }
-  .modal-video-caixa {
+  .case-bloco { margin-bottom: 24px; }
+  .case-bloco:last-of-type { margin-bottom: 22px; }
+  .case-bloco-titulo { display: block; font-weight: 700; color: var(--verde-petroleo); margin-bottom: 6px; }
+  .case-bloco-texto { font-style: italic; color: var(--texto-suave); margin: 0; }
+  .case-lista { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 7px; }
+  .case-lista li { font-style: italic; color: var(--texto-suave); padding-left: 18px; position: relative; }
+  .case-lista li::before { content: "•"; position: absolute; left: 0; color: var(--acento); }
+  .case-lista-resultado li:first-child { font-style: normal; font-weight: 700; color: var(--verde-petroleo); }
+  .case-estatisticas {
+    display: flex;
+    gap: 26px;
+    margin-top: 22px;
+    padding-top: 20px;
+    border-top: 1px solid var(--borda);
+  }
+  .case-estat { display: flex; flex-direction: column; align-items: center; gap: 5px; }
+  .case-estat svg { width: 18px; height: 18px; stroke: var(--texto-suave); fill: none; stroke-width: 1.6; }
+  .case-estat span { font-size: 0.76rem; color: var(--texto-suave); font-weight: 600; }
+
+  /* ===== FOTOS UGC ===== */
+  .fotos-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 20px;
+  }
+  .foto-ugc-item {
     position: relative;
-    width: 100%;
-    max-width: 400px;
+    aspect-ratio: 3 / 4;
   }
-  .modal-video-container {
-    width: 100%;
-    aspect-ratio: 9 / 16;
-    border-radius: var(--raio);
-    overflow: hidden;
-    box-shadow: var(--sombra);
-    background: var(--tinta);
-  }
-  .modal-video-container iframe {
+  .foto-ugc-item img {
     width: 100%;
     height: 100%;
-    border: none;
-    display: block;
+    object-fit: contain;
+    filter: drop-shadow(0 18px 26px rgba(18, 36, 31, 0.28));
   }
-  .modal-video-fechar {
+  .foto-ugc-vazio {
+    display: none;
     position: absolute;
-    top: -44px;
-    right: 0;
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    border: none;
-    background: var(--branco);
-    color: var(--tinta);
-    font-size: 1.4rem;
-    line-height: 1;
-    cursor: pointer;
-  }
-
-  /* ===== SERVIÇOS ===== */
-  .servicos-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 24px;
-  }
-  .servico-card {
-    background: var(--branco);
-    padding: 36px 28px;
-    border-radius: var(--raio);
-    box-shadow: var(--sombra);
-  }
-  .servico-icone { font-size: 2rem; margin-bottom: 16px; }
-  .servico-card h3 { font-size: 1.25rem; }
-  .servico-card p { color: #4a453c; font-size: 0.95rem; margin: 0; }
-
-  /* ===== RESULTADOS ===== */
-  .resultados {
-    background: var(--tinta);
-    color: var(--creme);
-    border-radius: var(--raio);
-    margin: 24px 24px 0;
-    padding: 64px 40px;
-  }
-  .resultados .container { max-width: 1132px; padding: 0; }
-  .resultados-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 32px;
+    inset: 0;
+    align-items: center;
+    justify-content: center;
     text-align: center;
+    border: 2px dashed var(--borda);
+    border-radius: 16px;
+    color: var(--texto-suave);
+    font-size: 0.76rem;
+    padding: 14px;
   }
-  .resultado-numero {
-    font-family: "Fraunces", serif;
-    font-size: clamp(2.2rem, 4vw, 3rem);
-    color: var(--laranja);
-    font-weight: 600;
+  .foto-ugc-legenda { margin-top: 10px; font-size: 0.8rem; font-weight: 600; color: var(--verde-petroleo); text-align: center; }
+
+  /* ===== SERVIÇOS (texto solto ao redor da foto) ===== */
+  .servicos-cabecalho { max-width: 640px; margin: 0 auto 44px; text-align: center; }
+  .servicos-cabecalho h2 .acento-fundo {
+    background: var(--blush);
+    padding: 2px 10px;
+    border-radius: 8px;
+    font-style: normal;
+    font-weight: 700;
+    color: var(--acento);
   }
-  .resultado-label {
-    font-size: 0.9rem;
-    color: #cfc9bf;
-    margin-top: 8px;
+  .servicos-corpo-solto {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: 40px;
+    align-items: center;
   }
+  .servicos-lado { display: flex; flex-direction: column; gap: 30px; }
+  .servicos-lado-direita { text-align: right; }
+  .servico-solto-titulo {
+    display: inline-block;
+    font-family: var(--fonte-base);
+    font-weight: 700;
+    font-size: 0.76rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--acento);
+    background: #fff;
+    border: 1px solid var(--borda);
+    border-radius: 100px;
+    padding: 6px 16px;
+    margin-bottom: 10px;
+  }
+  .servico-solto p { font-size: 0.88rem; color: var(--texto-suave); margin: 0; }
+  /* Foto recortada (fundo transparente) com sombra leve. Arquivo "foto-criar-juntos.png" nesta mesma pasta. */
+  .servicos-foto-central { position: relative; width: 320px; }
+  .servicos-foto-principal { width: 100%; filter: drop-shadow(0 26px 42px rgba(18, 36, 31, 0.28)); }
+  #servicos { padding-bottom: 32px; }
+  #depoimentos { padding-top: 32px; }
+
+  /* Ícones soltos ao redor da foto de Serviços (recortados do PDF que você baixou), com a
+     mesma animação de flutuar das bolhas de marcas. */
+  .icone-flutuante {
+    position: absolute;
+    z-index: 2;
+    filter: drop-shadow(0 10px 18px rgba(18, 36, 31, 0.18));
+    animation: flutuar-icone-servico 4.5s ease-in-out infinite;
+    pointer-events: none;
+  }
+  @keyframes flutuar-icone-servico {
+    0%, 100% { transform: translateY(0) rotate(-3deg); }
+    50% { transform: translateY(-18px) rotate(3deg); }
+  }
+  @media (prefers-reduced-motion: reduce) { .icone-flutuante { animation: none; } }
+  .icone-mao-notas { width: 110px; top: 4%; left: -56px; animation-delay: 0s; }
+  .icone-coracoes { width: 62px; top: 30%; left: -54px; animation-delay: 0.6s; }
+  .icone-aviao { width: 66px; top: 55%; left: -56px; animation-delay: 1.2s; }
+  .icone-brilho { width: 48px; top: 78%; left: -38px; animation-delay: 1.8s; }
+  .icone-mao-toque { width: 128px; top: 6%; right: -66px; animation-delay: 0.3s; }
+  .icone-aperto-maos { width: 118px; top: 80%; right: -54px; animation-delay: 0.9s; }
 
   /* ===== DEPOIMENTOS ===== */
-  .depoimentos-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 24px;
+  .depoimentos-cabecalho { text-align: center; margin-bottom: 32px; }
+  .depoimentos-scroll {
+    display: flex;
+    gap: 22px;
+    flex-wrap: wrap;
+    justify-content: center;
   }
   .depoimento-card {
-    background: var(--branco);
+    position: relative;
+    flex: 0 0 auto;
+    width: 340px;
+    background: #fff;
+    border: 1px solid var(--borda);
     border-radius: var(--raio);
-    padding: 32px;
-    box-shadow: var(--sombra);
-    display: flex;
-    flex-direction: column;
+    padding: 40px 28px 28px;
+    text-align: center;
   }
+  /* Logo "quebrando" a borda de cima do card, meio dentro meio fora. */
+  .depoimento-avatar {
+    position: absolute;
+    top: -30px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60px; height: 60px;
+    border-radius: 50%;
+    margin: 0;
+    background: #fff;
+    border: 1px solid var(--borda);
+    box-shadow: 0 8px 18px rgba(18, 36, 31, 0.14);
+    display: flex; align-items: center; justify-content: center;
+    overflow: hidden;
+  }
+  .depoimento-avatar img { width: 100%; height: 100%; object-fit: contain; padding: 8px; }
+  .depoimento-avatar span { font-family: var(--fonte-titulo); font-weight: 700; color: var(--verde-petroleo); }
+  .depoimento-handle { font-weight: 700; font-size: 0.9rem; color: var(--verde-petroleo); }
+  .depoimento-estrelas { color: var(--dourado); font-size: 0.85rem; margin: 4px 0; letter-spacing: 2px; }
+  .depoimento-categoria { font-size: 0.72rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--texto-suave); font-weight: 700; margin-bottom: 16px; }
   .depoimento-texto {
-    font-style: italic;
-    font-family: "Fraunces", serif;
-    font-size: 1.1rem;
-    color: #2b2820;
-    flex-grow: 1;
+    font-family: var(--fonte-titulo);
+    font-size: 1.18rem;
+    line-height: 1.4;
+    font-weight: 400;
+    color: var(--verde-petroleo);
+    text-align: left;
   }
-  .depoimento-autor { margin-top: 20px; font-weight: 700; font-size: 0.95rem; }
-  .depoimento-empresa { font-size: 0.85rem; color: #6b6357; }
 
-  /* ===== CONTATO ===== */
-  .contato-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 56px;
-    align-items: start;
-  }
-  .contato-diretos {
-    display: flex;
-    flex-direction: column;
-    gap: 14px;
-    margin-top: 28px;
-  }
-  .contato-link {
+  /* Player de áudio estilo mensagem de voz. */
+  .audio-whats {
     display: flex;
     align-items: center;
-    gap: 12px;
-    text-decoration: none;
-    font-weight: 600;
-    padding: 14px 20px;
+    gap: 10px;
+    margin-top: 16px;
+    padding: 8px 12px 8px 8px;
+    background: var(--creme);
     border-radius: 100px;
-    background: var(--branco);
-    box-shadow: var(--sombra);
-    transition: transform var(--transicao);
-    width: fit-content;
+    text-align: left;
   }
-  .contato-link:hover { transform: translateY(-2px); }
+  .audio-whats-play {
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    width: 34px; height: 34px;
+    border-radius: 50%;
+    border: none;
+    background: var(--verde-petroleo);
+    color: #fff;
+    font-size: 0.7rem;
+    padding-left: 2px;
+    cursor: pointer;
+    transition: background var(--transicao);
+  }
+  .audio-whats-play:hover { background: var(--acento); }
+  .audio-whats-play.tocando { padding-left: 0; }
+  .audio-whats-meio { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+  .audio-whats-onda { display: flex; align-items: center; gap: 2px; height: 22px; }
+  .audio-whats-onda span {
+    flex: 1 1 0;
+    min-width: 2px;
+    background: rgba(31, 61, 55, 0.25);
+    border-radius: 2px;
+    transition: background var(--transicao);
+  }
+  .audio-whats-onda span.tocada { background: var(--verde-petroleo); }
+  .audio-whats-tempos { display: flex; justify-content: space-between; font-size: 0.66rem; color: var(--texto-suave); font-family: var(--fonte-base); }
+  .audio-whats-velocidade {
+    flex-shrink: 0;
+    border: 1px solid var(--borda);
+    background: #fff;
+    color: var(--verde-petroleo);
+    font-size: 0.68rem;
+    font-weight: 700;
+    padding: 5px 9px;
+    border-radius: 100px;
+    cursor: pointer;
+  }
+  .audio-whats-velocidade:hover { background: var(--verde-petroleo); color: #fff; }
 
-  form.form-contato {
-    background: var(--branco);
-    padding: 32px;
-    border-radius: var(--raio);
-    box-shadow: var(--sombra);
-    display: flex;
-    flex-direction: column;
-    gap: 18px;
+  /* ===== CONTATO ===== */
+  .contato-secao { background: var(--verde-petroleo-escuro); color: #dfeae5; }
+  .contato-secao .rotulo { color: var(--menta); }
+  .contato-secao .rotulo::before { background: var(--menta); }
+  .contato-secao h2 { color: #fff; font-size: clamp(2.4rem, 5.5vw, 3.6rem); }
+  .contato-titulo {
+    font-family: "Italiana", "Playfair Display", serif;
+    font-weight: 400;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
   }
-  .campo { display: flex; flex-direction: column; gap: 6px; }
-  .campo label { font-size: 0.9rem; font-weight: 600; }
+  .contato-secao p { color: #b7cbc3; }
+  .contato-grid { display: grid; grid-template-columns: 0.85fr 1.15fr; gap: 60px; align-items: start; }
+  .contato-lista { display: flex; flex-direction: column; gap: 16px; margin-top: 26px; }
+  .contato-item { display: flex; align-items: center; gap: 14px; text-decoration: none; font-weight: 600; color: #fff; }
+  .contato-icone {
+    display: flex; align-items: center; justify-content: center;
+    width: 38px; height: 38px;
+    border-radius: 50%;
+    border: 1.5px solid rgba(255,255,255,0.3);
+    flex-shrink: 0;
+    transition: border-color var(--transicao), background var(--transicao);
+  }
+  .contato-icone svg { width: 17px; height: 17px; stroke: currentColor; fill: none; stroke-width: 1.6; }
+  .contato-item:hover, .contato-item:focus-visible { color: var(--menta); }
+  .contato-item:hover .contato-icone, .contato-item:focus-visible .contato-icone { border-color: var(--menta); }
+
+  .form-contato { display: flex; flex-direction: column; gap: 18px; }
+  .campo { display: flex; flex-direction: column; gap: 8px; }
+  .campo label { font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; font-weight: 700; color: #9fb6ac; }
   .campo input, .campo textarea {
     padding: 14px 16px;
     border-radius: 10px;
-    border: 1.5px solid rgba(20,17,13,0.18);
-    font-family: "Plus Jakarta Sans", sans-serif;
-    font-size: 1rem;
-    background: var(--creme);
-    color: var(--tinta);
+    border: 1px solid rgba(255,255,255,0.18);
+    background: rgba(255,255,255,0.06);
+    color: #fff;
+    font-family: var(--fonte-base);
+    font-size: 0.95rem;
   }
+  .campo input::placeholder, .campo textarea::placeholder { color: #728a80; }
   .campo textarea { resize: vertical; min-height: 110px; }
   .mensagem-confirmacao {
-    margin-top: 14px;
+    margin-top: 4px;
     padding: 14px 18px;
-    background: rgba(0,73,164,0.1);
+    background: rgba(169, 224, 205, 0.12);
+    border: 1px solid rgba(169, 224, 205, 0.4);
     border-radius: 10px;
-    color: var(--azul-escuro);
+    color: var(--menta);
     font-weight: 600;
-    font-size: 0.9rem;
+    font-size: 0.88rem;
   }
   .mensagem-confirmacao[hidden] { display: none; }
 
   /* ===== RODAPÉ ===== */
   footer.rodape {
-    background: var(--tinta);
-    color: var(--creme);
-    padding: 56px 0 32px;
-    margin-top: 96px;
+    background: var(--verde-petroleo-escuro);
+    border-top: 1px solid rgba(255,255,255,0.1);
+    padding: 26px 0;
   }
-  .rodape-topo {
+  .rodape-conteudo {
     display: flex;
     justify-content: space-between;
     align-items: center;
     flex-wrap: wrap;
-    gap: 24px;
-    padding-bottom: 32px;
-    border-bottom: 1px solid rgba(243,238,233,0.15);
+    gap: 14px;
   }
-  .rodape-logo { font-family: "Fraunces", serif; font-size: 1.4rem; }
-  .rodape-redes { display: flex; gap: 20px; list-style: none; padding: 0; margin: 0; }
-  .rodape-redes a { text-decoration: none; font-weight: 500; color: var(--creme); }
-  .rodape-redes a:hover { color: var(--laranja); }
-  .rodape-copyright {
-    padding-top: 24px;
-    font-size: 0.85rem;
-    color: #b6afa2;
-    text-align: center;
-  }
+  .rodape-marca strong { display: block; font-family: var(--fonte-titulo); color: #fff; font-size: 1.05rem; }
+  .rodape-marca span { font-size: 0.78rem; color: #9fb6ac; letter-spacing: 0.04em; text-transform: uppercase; }
+  .rodape-links { display: flex; gap: 8px; flex-wrap: wrap; font-size: 0.82rem; color: #9fb6ac; }
+  .rodape-links a { text-decoration: none; color: #dfeae5; }
+  .rodape-links a:hover { color: var(--menta); }
 
   /* ===== ANIMAÇÃO DE ENTRADA (reveal) ===== */
-  .reveal {
-    opacity: 0;
-    transform: translateY(24px);
-    transition: opacity 0.7s ease, transform 0.7s ease;
-  }
-  .reveal.visivel {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  .reveal { opacity: 0; transform: translateY(22px); transition: opacity 0.7s ease, transform 0.7s ease; }
+  .reveal.visivel { opacity: 1; transform: translateY(0); }
+  @media (prefers-reduced-motion: reduce) { .reveal { transition: none; } }
 
   /* ===== RESPONSIVO ===== */
-  @media (max-width: 900px) {
-    .hero { grid-template-columns: 1fr; padding-top: 140px; }
-    .hero-imagem-wrap { order: -1; max-width: 340px; margin: 0 auto; }
-    .sobre-grid { grid-template-columns: 1fr; }
-    .sobre-imagem { max-width: 360px; margin: 0 auto; }
-    .portfolio-grid { grid-template-columns: repeat(2, 1fr); }
-    .servicos-grid { grid-template-columns: repeat(2, 1fr); }
-    .depoimentos-grid { grid-template-columns: 1fr; }
-    .resultados-grid { grid-template-columns: repeat(2, 1fr); }
+  @media (max-width: 980px) {
+    .hero-grid { grid-template-columns: 1fr; text-align: center; }
+    .hero-visual { order: -1; max-width: 340px; margin: 0 auto 30px; }
+    .hero-subtitulo, .badge-disponivel { margin-left: auto; margin-right: auto; }
+    .hero-cta { justify-content: center; }
+    .sobre-marcas-grid { grid-template-columns: 1fr; }
+    .sobre-divisor { display: none; }
+    .sobre-coluna { align-items: center; text-align: center; }
+    .sobre-pills { justify-content: center; }
+    .marcas-coluna { margin-top: 12px; }
+    .case-organico-grid { grid-template-columns: 1fr; text-align: center; justify-items: center; }
+    .case-organico-titulo { order: -2; }
+    .case-phone-frame { order: -1; margin-bottom: 12px; }
+    .case-bloco-titulo, .case-bloco-texto, .case-lista li { text-align: left; }
+    .case-estatisticas { justify-content: center; }
+    .fotos-grid { grid-template-columns: repeat(3, 1fr); }
+    .servicos-corpo-solto { grid-template-columns: 1fr; text-align: center; }
+    .servicos-foto-central { order: -1; margin: 0 auto 28px; }
+    .icone-flutuante { display: none; }
+    .servicos-lado-direita { text-align: center; }
     .contato-grid { grid-template-columns: 1fr; }
   }
 
   @media (max-width: 720px) {
     .links-nav {
       position: absolute;
-      top: 100%;
-      left: 0;
-      right: 0;
+      top: 100%; left: 0; right: 0;
       flex-direction: column;
+      align-items: flex-start;
       background: var(--creme);
-      padding: 24px;
-      gap: 20px;
-      border-bottom: 1px solid rgba(20,17,13,0.08);
+      padding: 24px 28px;
+      gap: 18px;
+      border-bottom: 1px solid var(--borda);
       display: none;
     }
     .links-nav.aberto { display: flex; }
     .btn-menu { display: flex; }
-    section { padding: 64px 0; }
-    .portfolio-grid { grid-template-columns: 1fr 1fr; gap: 14px; }
-    .servicos-grid { grid-template-columns: 1fr; }
-    .resultados-grid { grid-template-columns: 1fr 1fr; gap: 24px 16px; }
-    .resultados { padding: 48px 24px; margin: 20px 16px 0; }
-    .hero-cta { justify-content: center; }
-    .hero { text-align: center; }
-    .hero .subtitulo { margin-left: auto; margin-right: auto; }
-    .stats-rapidas { justify-content: center; }
-    .badge-eyebrow { margin-left: auto; margin-right: auto; }
-  }
-
-  @media (max-width: 480px) {
-    .portfolio-grid { grid-template-columns: 1fr; }
+    section { padding: 48px 0; }
+    .fotos-grid { grid-template-columns: repeat(2, 1fr); }
+    .rodape-conteudo { flex-direction: column; align-items: flex-start; }
+    .marcas-bolhas { max-width: 320px; gap: 10px; }
   }
 </style>
 </head>
 <body>
 
+<div class="aviso" id="aviso"></div>
+
 <header class="topo">
   <nav class="navbar" aria-label="Navegação principal">
-    <a href="#inicio" class="logo" id="logo-nav">
-      <span class="logo-badge" id="logo-badge">SN</span>
-      <span id="logo-texto">Talissa</span>
-    </a>
+    <a href="#inicio" class="logo" id="logo-nav">Talissa Müller<span class="ponto">.</span></a>
     <ul class="links-nav" id="links-nav">
       <li><a href="#sobre">Sobre</a></li>
-      <li><a href="#portfolio">Portfólio</a></li>
       <li><a href="#servicos">Serviços</a></li>
-      <li><a href="#resultados">Resultados</a></li>
-      <li><a href="#depoimentos">Depoimentos</a></li>
-      <li><a href="#contato" class="nav-cta" id="nav-cta">Fechar parceria</a></li>
+      <li><a href="#categorias">Categorias</a></li>
+      <li><a href="#fotos">Fotos</a></li>
+      <li><a href="#contato">Contato</a></li>
+      <!-- Botão de idioma: por enquanto é só visual (alterna a aparência). A tradução de verdade entra depois que o conteúdo em português estiver fechado. -->
+      <li class="idioma-toggle" role="group" aria-label="Idioma do site">
+        <button type="button" class="idioma-btn ativo" id="idioma-pt" aria-pressed="true">PT</button>
+        <button type="button" class="idioma-btn" id="idioma-en" aria-pressed="false">EN</button>
+      </li>
+      <li><a href="#contato" class="nav-cta" id="nav-cta">Trabalhe comigo</a></li>
     </ul>
     <button class="btn-menu" id="btn-menu" aria-label="Abrir menu" aria-expanded="false" aria-controls="links-nav">
       <span></span><span></span><span></span>
@@ -757,567 +961,825 @@
   </nav>
 </header>
 
-<main>
-  <!-- 2. HERO -->
-  <section class="hero container" id="inicio">
-    <div class="hero-texto reveal">
-      <span class="badge-eyebrow"><span class="badge-icone">+</span> <span id="hero-eyebrow">Criadora de Conteúdo UGC</span></span>
-      <h1 id="hero-titulo"></h1>
-      <p class="subtitulo" id="hero-subtitulo"></p>
-      <div class="stats-rapidas" id="stats-rapidas"></div>
-      <div class="hero-cta">
-        <a href="#contato" class="btn btn-primario" id="hero-cta-principal">Fechar parceria</a>
-        <a href="#portfolio" class="btn btn-secundario" id="hero-cta-secundario">Ver trabalhos →</a>
+<main id="conteudo">
+  <!-- HERO -->
+  <section class="hero" id="inicio">
+    <div class="container hero-grid">
+      <div class="hero-texto reveal">
+        <span class="badge-disponivel"><span class="selo" aria-hidden="true">✓</span> <span id="hero-badge"></span></span>
+        <h1 id="hero-titulo"></h1>
+        <p class="hero-subtitulo" id="hero-subtitulo"></p>
+        <div class="hero-cta">
+          <a href="#contato" class="btn btn-primario" id="hero-cta-principal">Fale comigo</a>
+          <a href="#categorias" class="link-seta" id="hero-cta-secundario">Saiba mais →</a>
+        </div>
       </div>
-    </div>
-    <!-- Bloco em gradiente no lugar de uma foto ou vídeo real da criadora. -->
-    <!-- Foto de capa real: troque o arquivo "fotocapa.JPG" por outra imagem quando quiser, mantendo o mesmo nome ou atualizando o "src" abaixo. -->
-    <div class="hero-imagem-wrap reveal">
-      <img src="fotocapa.JPG" alt="Foto de destaque da criadora de conteúdo" class="hero-imagem bloco-gradiente">
-      <span class="badge-flutuante topo-esquerda">▶ 9:16 vertical</span>
-      <span class="badge-flutuante baixo-direita">★ 4,9 satisfação</span>
-    </div>
-  </section>
-
-  <!-- 3. FAIXA DE MARCAS -->
-  <section class="faixa-marcas">
-    <div class="container">
-      <div class="marquee-track">
-        <ul class="marcas-lista" id="lista-marcas"></ul>
+      <!-- Foto real de destaque. Para trocar, substitua o arquivo "fotocapa.JPG" na pasta por outra imagem, mantendo o mesmo nome, ou troque o "src" abaixo. -->
+      <div class="hero-visual reveal">
+        <div class="hero-foto-moldura">
+          <img src="fotocapa.JPG" alt="Foto de destaque de Talissa Müller, criadora de conteúdo UGC" onerror="this.parentElement.innerHTML='&lt;div class=&quot;hero-foto-gradiente&quot;&gt;&lt;/div&gt;'">
+        </div>
       </div>
     </div>
   </section>
 
-  <!-- 4. SOBRE -->
+  <!-- FAIXA EM MOVIMENTO -->
+  <section class="ticker-escuro">
+    <div class="ticker-track">
+      <ul class="ticker-lista" id="ticker-lista"></ul>
+    </div>
+  </section>
+
+  <!-- SOBRE + MARCAS -->
   <section id="sobre">
-    <div class="container sobre-grid">
-      <!-- Bloco em gradiente no lugar de uma foto pessoal. -->
-      <!-- Para trocar por foto: substitua por <img src="sobre.jpg" alt="Nome da criadora em um ambiente de gravação" class="sobre-imagem bloco-gradiente"> -->
-      <div class="sobre-imagem bloco-gradiente reveal" role="img" aria-label="Espaço reservado para foto da seção sobre"></div>
-      <div class="reveal">
-        <span class="eyebrow">Sobre mim</span>
+    <div class="container sobre-marcas-grid">
+      <div class="sobre-coluna reveal">
+        <!-- Foto da seção Sobre: coloque um arquivo "sobre.jpg" nesta mesma pasta que ela aparece aqui automaticamente. Enquanto não existir, aparece um fundo em degradê no lugar. -->
+        <div class="sobre-imagem">
+          <div class="sobre-imagem-gradiente"></div>
+          <img src="sobre.jpg?v=2" alt="Talissa Müller, criadora de conteúdo UGC" onerror="this.style.display='none'">
+        </div>
         <h2 id="sobre-titulo"></h2>
         <p id="sobre-texto"></p>
         <p id="sobre-texto-2"></p>
+        <div class="sobre-pills" id="sobre-pills"></div>
+      </div>
+      <div class="sobre-divisor" aria-hidden="true"></div>
+      <div class="marcas-coluna reveal">
+        <h3 class="marcas-titulo">Marcas que confiaram no meu trabalho</h3>
+        <div class="marcas-bolhas" id="marcas-bolhas"></div>
       </div>
     </div>
   </section>
 
-  <!-- 5. PORTFÓLIO -->
-  <section id="portfolio">
+  <!-- CATEGORIAS / PORTFÓLIO -->
+  <section id="categorias">
     <div class="container">
-      <span class="eyebrow reveal">Portfólio</span>
-      <h2 class="reveal">Trabalhos que já <em>performaram</em></h2>
-      <div class="filtros reveal" id="filtros" role="group" aria-label="Filtrar trabalhos por nicho"></div>
-      <div class="portfolio-grid" id="portfolio-grid"></div>
+      <div class="categorias-cabecalho reveal">
+        <h2>Qual tipo de <em>conteúdo</em> você busca?</h2>
+        <p>Navegue pelos nichos abaixo. Arraste para o lado, ou clique num nicho, para ver mais trabalhos.</p>
+      </div>
+      <div class="filtros-rapidos-wrap reveal">
+        <nav class="filtros-rapidos" id="filtros-rapidos" aria-label="Ir direto para um nicho"></nav>
+      </div>
+      <div id="categorias-linhas"></div>
     </div>
   </section>
 
-  <!-- 6. SERVIÇOS -->
+  <!-- CASE DE CONTEÚDO ORGÂNICO -->
+  <!-- Troque "case-organico.jpg" nesta mesma pasta pela imagem/frame do vídeo que você quer destacar,
+       e edite os números e textos em CONFIG.caseOrganico, mais abaixo no <script>. -->
+  <section id="case-organico">
+    <div class="container case-organico-grid">
+      <h2 class="case-organico-titulo reveal" id="case-titulo"></h2>
+      <div class="case-phone-frame reveal">
+        <div class="case-phone-notch"></div>
+        <img id="case-video" alt="Case de conteúdo orgânico de Talissa Müller">
+        <span class="case-play-botao" aria-hidden="true">▶</span>
+      </div>
+      <div class="reveal">
+        <div class="case-bloco">
+          <span class="case-bloco-titulo" id="case-objetivo-titulo"></span>
+          <p class="case-bloco-texto" id="case-objetivo-texto"></p>
+        </div>
+        <div class="case-bloco">
+          <span class="case-bloco-titulo" id="case-estrategia-titulo"></span>
+          <ul class="case-lista" id="case-estrategia-lista"></ul>
+        </div>
+        <div class="case-bloco">
+          <span class="case-bloco-titulo" id="case-resultado-titulo"></span>
+          <ul class="case-lista case-lista-resultado" id="case-resultado-lista"></ul>
+        </div>
+        <div class="case-estatisticas" id="case-estatisticas"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOTOS UGC -->
+  <section id="fotos">
+    <div class="container">
+      <div class="reveal">
+        <h2>Fotos que também <em>vendem</em></h2>
+        <p>Registros autênticos, prontos para post, carrossel ou anúncio.</p>
+      </div>
+      <!-- Cada item busca um arquivo dentro da pasta "fotos-ugc/". Use fotos já recortadas, sem fundo (PNG transparente), que a sombra suave é aplicada automaticamente. Enquanto o arquivo não existir, aparece um espaço tracejado no lugar. -->
+      <div class="fotos-grid reveal" id="fotos-grid"></div>
+    </div>
+  </section>
+
+  <!-- SERVIÇOS -->
   <section id="servicos">
     <div class="container">
-      <span class="eyebrow reveal">Serviços</span>
-      <h2 class="reveal">O que eu entrego para a sua <em>marca</em></h2>
-      <div class="servicos-grid" id="servicos-grid"></div>
-    </div>
-  </section>
-
-  <!-- 7. RESULTADOS -->
-  <section id="resultados">
-    <div class="container">
-      <span class="eyebrow reveal">Resultados</span>
-      <h2 class="reveal">Números que provam o <em>trabalho</em></h2>
-      <div class="resultados reveal">
-        <div class="resultados-grid" id="resultados-grid"></div>
+      <div class="servicos-cabecalho reveal">
+        <h2>O que podemos <span class="acento-fundo">criar</span> juntas?</h2>
+        <p>Cada formato tem um objetivo: vender, engajar ou construir marca. Me conta o seu que a gente monta o combo perfeito para o seu produto.</p>
+      </div>
+      <div class="servicos-corpo-solto">
+        <div class="servicos-lado servicos-lado-esquerda reveal" id="servicos-esquerda"></div>
+        <!-- Foto recortada (fundo transparente), com sombra leve. Arquivo "foto-criar-juntos.png" nesta mesma pasta.
+             Os ícones ao redor vêm da pasta "icones-servicos/" (recortados do PDF que você baixou) e flutuam
+             com a mesma animação das bolhas de marcas lá em cima. -->
+        <div class="servicos-foto-central reveal">
+          <img src="icones-servicos/icon-mao-notas.png" alt="" class="icone-flutuante icone-mao-notas" aria-hidden="true">
+          <img src="icones-servicos/icon-coracoes.png" alt="" class="icone-flutuante icone-coracoes" aria-hidden="true">
+          <img src="icones-servicos/icon-aviao.png" alt="" class="icone-flutuante icone-aviao" aria-hidden="true">
+          <img src="icones-servicos/icon-brilho.png" alt="" class="icone-flutuante icone-brilho" aria-hidden="true">
+          <img src="icones-servicos/icon-mao-toque.png" alt="" class="icone-flutuante icone-mao-toque" aria-hidden="true">
+          <img src="icones-servicos/icon-aperto-maos.png" alt="" class="icone-flutuante icone-aperto-maos" aria-hidden="true">
+          <img src="foto-criar-juntos.png" alt="Foto de Talissa Müller" class="servicos-foto-principal" onerror="this.parentElement.style.display='none'">
+        </div>
+        <div class="servicos-lado servicos-lado-direita reveal" id="servicos-direita"></div>
       </div>
     </div>
   </section>
 
-  <!-- 8. DEPOIMENTOS -->
+  <!-- DEPOIMENTOS -->
   <section id="depoimentos">
     <div class="container">
-      <span class="eyebrow reveal">Depoimentos</span>
-      <h2 class="reveal">Marcas que já <em>confiaram</em> no meu trabalho</h2>
-      <div class="depoimentos-grid" id="depoimentos-grid"></div>
+      <div class="depoimentos-cabecalho reveal">
+        <h2>O que dizem os <em>FEEDBACKS</em></h2>
+      </div>
+      <div class="depoimentos-scroll reveal" id="depoimentos-scroll"></div>
     </div>
   </section>
 
-  <!-- 9. CONTATO -->
-  <section id="contato">
+  <!-- CONTATO -->
+  <section class="contato-secao" id="contato">
     <div class="container contato-grid">
       <div class="reveal">
-        <span class="eyebrow">Contato</span>
-        <h2>Vamos criar <em>juntos</em>?</h2>
-        <p id="contato-texto">Preencha o formulário ou me chame direto pelos canais abaixo. Respondo rapidinho!</p>
-        <div class="contato-diretos" id="contato-diretos"></div>
+        <h2 class="contato-titulo">Animada para trabalharmos juntos!</h2>
+        <p id="contato-texto"></p>
+        <div class="contato-lista" id="contato-lista"></div>
       </div>
       <form class="form-contato reveal" id="form-contato">
         <div class="campo">
           <label for="campo-nome">Nome</label>
-          <input type="text" id="campo-nome" name="nome" required autocomplete="name">
+          <input type="text" id="campo-nome" name="nome" placeholder="Seu nome" required autocomplete="name">
         </div>
         <div class="campo">
           <label for="campo-email">E-mail</label>
-          <input type="email" id="campo-email" name="email" required autocomplete="email">
+          <input type="email" id="campo-email" name="email" placeholder="voce@marca.com" required autocomplete="email">
         </div>
         <div class="campo">
           <label for="campo-mensagem">Mensagem</label>
-          <textarea id="campo-mensagem" name="mensagem" required></textarea>
+          <textarea id="campo-mensagem" name="mensagem" placeholder="Categoria, formato, prazo, objetivo da campanha..." required></textarea>
         </div>
-        <button type="submit" class="btn btn-primario">Enviar mensagem</button>
-        <p class="mensagem-confirmacao" id="mensagem-confirmacao" hidden role="status">Obrigada pelo contato! Seu aplicativo de e-mail vai abrir com a mensagem pronta para envio.</p>
+        <button type="submit" class="btn btn-menta">Enviar mensagem ↗</button>
+        <p class="mensagem-confirmacao" id="mensagem-confirmacao" hidden role="status">Obrigada pelo contato! Seu e-mail já deve ter aberto com a mensagem preenchida, é só enviar.</p>
       </form>
     </div>
   </section>
 </main>
 
-<!-- Player flutuante dos vídeos do portfólio: toca o vídeo do YouTube sem sair da página. -->
-<div class="modal-video" id="modal-video" role="dialog" aria-modal="true" aria-label="Player de vídeo">
-  <div class="modal-video-caixa">
-    <button class="modal-video-fechar" id="modal-video-fechar" aria-label="Fechar vídeo">×</button>
-    <div class="modal-video-container" id="modal-video-container"></div>
-  </div>
-</div>
-
 <footer class="rodape">
-  <div class="container">
-    <div class="rodape-topo">
-      <span class="rodape-logo" id="rodape-nome">Talissa</span>
-      <ul class="rodape-redes" id="rodape-redes"></ul>
+  <div class="container rodape-conteudo">
+    <div class="rodape-marca">
+      <strong id="rodape-nome"></strong>
+      <span>UGC Creator &amp; Estrategista de Conteúdo</span>
     </div>
-    <p class="rodape-copyright" id="rodape-copyright"></p>
+    <div class="rodape-links" id="rodape-links"></div>
   </div>
 </footer>
 
 <script>
-  /* ======================================================================
-     RASTREAMENTO (grava visitas, cliques e mensagens no painel administrativo)
-     Usa a mesma chave "anon" do Supabase, que só tem permissão de INSERIR
-     dados nas tabelas portfolio_events e portfolio_leads, nunca de ler,
-     editar ou apagar. Quem lê esses dados é só o painel, depois do login.
-  ====================================================================== */
-  const SUPABASE_URL_SITE = "https://evafozzxhackvtlguqpq.supabase.co";
-  const SUPABASE_ANON_KEY_SITE = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV2YWZvenp4aGFja3Z0bGd1cXBxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg0NDY3OTMsImV4cCI6MjEwNDAyMjc5M30.VIlphy_vB4suN-0wQ93jotNgzWZGZQL3jpyq5XS8yVc";
-  const sbSite = window.supabase.createClient(SUPABASE_URL_SITE, SUPABASE_ANON_KEY_SITE);
-
-  // Um session_id novo por aba/sessão do navegador, pra contar visitantes únicos.
-  function obterSessionId() {
-    let id = sessionStorage.getItem("session_id");
-    if (!id) {
-      id = (crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random());
-      sessionStorage.setItem("session_id", id);
-    }
-    return id;
-  }
-
-  // Grava um evento (visita, clique ou vídeo assistido). Não usa .select(),
-  // de propósito, porque o site só tem permissão de gravar, não de ler de volta.
-  function registrarEvento(tipo, nome, metadata) {
-    sbSite.from("portfolio_events").insert({
-      event_type: tipo,
-      event_name: nome || null,
-      session_id: obterSessionId(),
-      page_path: window.location.pathname,
-      metadata: metadata || null
-    }).then(({ error }) => {
-      if (error) console.warn("Não foi possível registrar o evento:", error.message);
-    });
-  }
-
-  // Grava uma mensagem de contato vinda do formulário.
-  function registrarLead(dados) {
-    sbSite.from("portfolio_leads").insert(dados).then(({ error }) => {
-      if (error) console.warn("Não foi possível registrar a mensagem:", error.message);
-    });
-  }
+  // EDITE AQUI sempre que trocar uma foto no computador por um arquivo de MESMO NOME: aumente
+  // esse número em 1. Isso obriga o navegador a buscar a versão nova da imagem, em vez de mostrar
+  // uma versão antiga guardada no cache (é por isso que às vezes uma foto trocada "não atualiza").
+  const VERSAO_FOTOS = 6;
 
   /* ======================================================================
      CONFIGURAÇÃO DO SITE
-     Edite todos os textos, listas e dados aqui. O resto do código só lê
-     estas informações e monta a página automaticamente.
+     Edite todos os textos, listas e dados aqui em cima. O restante do
+     código, mais abaixo, só lê estas informações e monta a página sozinho.
   ====================================================================== */
   const CONFIG = {
 
-    // EDITE AQUI: seu nome, como deve aparecer no menu, no rodapé e no título da página.
-    nome: "Talissa",
+    // EDITE AQUI: nome completo, como aparece no menu, no rodapé etc. (o hero usa um estilo especial, veja "hero.titulo" abaixo).
+    nome: "Talissa Müller",
 
-    // EDITE AQUI: os textos principais da primeira dobra (hero).
-    // Use <em>palavra</em> dentro de "titulo" para destacar uma palavra em itálico azul, e <br> para quebrar linha.
+    // EDITE AQUI: a barra de aviso fixa no topo da página.
+    aviso: {
+      texto: "Está chegando o Dia do Cliente — hora de agradecer quem compra de você",
+      linkTexto: "vamos conversar",
+      href: "#contato"
+    },
+
+    // EDITE AQUI: textos principais da primeira dobra (hero).
     hero: {
-      eyebrow: "Criadora de Conteúdo UGC & Estrategista Digital",
-      titulo: "Conteúdo que <em>converte</em><br>pra sua <em>marca</em>.",
-      subtitulo: "Eu sou Talissa, crio vídeos autênticos que parecem recomendação de amiga e performam como anúncio de performance.",
-      botao: "Fechar parceria"
+      badge: "UGC Creator & Estrategista de Conteúdo",
+      // "titulo" é montado com dois estilos: o primeiro nome numa serifa grande, o sobrenome numa caligrafia de assinatura.
+      tituloNome: "Talissa",
+      tituloSobrenome: "Müller",
+      subtitulo: "Crio vídeos autênticos que parecem recomendação de amiga e convertem para a sua marca."
     },
 
-    // EDITE AQUI: números rápidos que aparecem logo abaixo do texto do hero.
-    heroStats: [
-      { numero: "+500", label: "vídeos" },
-      { numero: "+200", label: "marcas" },
-      { numero: "100M+", label: "views" }
+    // EDITE AQUI: as tags que rolam na faixa preta logo abaixo do hero.
+    especialidades: [
+      "Vídeo UGC", "Reels e Conteúdo", "Unboxing",
+      "Fotos de Produto", "Reviews Autênticos", "Conteúdo para Tráfego"
     ],
 
-    // EDITE AQUI: nomes das marcas com quem você já trabalhou (aparecem na faixa rolante abaixo do hero).
-    marcas: ["Marca Um", "Marca Dois", "Marca Três", "Marca Quatro", "Marca Cinco", "Marca Seis"],
-
-    // EDITE AQUI: o texto da seção sobre você.
+    // EDITE AQUI: o texto da seção Sobre.
     sobre: {
-      titulo: "Criatividade com <em>propósito</em> comercial",
-      texto: "Sou a Talissa, criadora de conteúdo UGC apaixonada por transformar produtos em histórias que conectam com o público de verdade.",
-      texto2: "Trabalho lado a lado com marcas para entender objetivos, público e tom de voz, entregando conteúdo pronto para performar em redes sociais e campanhas pagas."
+      titulo: "Oie, pode me chamar de <em>Tali</em>!",
+      texto: "Sou empresária formada em Gestão Comercial e criadora de conteúdo UGC, <strong>apaixonada por entender comportamento humano, marketing e vendas</strong>. Antes de migrar para o digital, passei seis anos à frente de um estúdio de visualização arquitetônica de alto padrão, cuidando de tudo, do comercial à gestão de pessoas e projetos complexos.",
+      texto2: "Hoje transformo essa bagagem em <strong>conteúdo autêntico</strong> que conecta e vende. Tenho desenvoltura natural na frente das câmeras e um olhar estratégico sobre o que realmente gera resultado para a marca. Afinal, vender bem sempre foi sobre entender de pessoas.",
+      pills: ["Santa Catarina · Brasil"]
     },
 
-    // EDITE AQUI: os trabalhos do portfólio. A categoria precisa bater com uma das opções abaixo em "categoriasPortfolio".
-    // Cada vídeo é um Short do YouTube publicado como "não listado". Pegue o "youtubeId" da URL:
-    // em https://youtube.com/shorts/CUNMgC-bEaE, o id é o trecho depois de "/shorts/" (antes de qualquer "?").
-    categoriasPortfolio: ["Casa e Decoração", "Unboxing", "Fitness e Wellness", "Moda e Acessórios", "Hair Care", "Autocuidado", "Educação"],
-    portfolio: [
-      { categoria: "Casa e Decoração", titulo: "Coala", youtubeId: "CUNMgC-bEaE" },
-      { categoria: "Casa e Decoração", titulo: "Coala 02", youtubeId: "6YB4VU45G3w" },
-      { categoria: "Unboxing", titulo: "Mare Beauty Ecommerce", youtubeId: "1A-qNlGnW5Y" },
-      { categoria: "Fitness e Wellness", titulo: "Melatonina em Goma", youtubeId: "Y2Ip24_amvo" },
-      { categoria: "Fitness e Wellness", titulo: "Vinagre de Maçã", youtubeId: "7ofP4-PhqN8" },
-      { categoria: "Moda e Acessórios", titulo: "Miallegra Lingerie Exclusiva", youtubeId: "3BQErVgKPMM" },
-      { categoria: "Hair Care", titulo: "Widicare Juba", youtubeId: "W5-9s20jfb8" },
-      { categoria: "Autocuidado", titulo: "Body Splash Rosa Selvagem", youtubeId: "l4n0RHiJF4M" },
-      { categoria: "Educação", titulo: "Depoimento Aluno Full English", youtubeId: "a4JLSf0Ew3k" }
+    // EDITE AQUI: as marcas que aparecem nas bolinhas ao lado do Sobre.
+    // "logo" é o nome do arquivo dentro da pasta "logos-marcas/".
+    marcas: [
+      { nome: "Coala", logo: "coala.png" },
+      { nome: "Mare Beauty", logo: "mare-beauty.png" },
+      { nome: "Vita Premium", logo: "vita-premium.png" },
+      { nome: "Miallegra", logo: "miallegra.png" },
+      { nome: "Rosa Selvagem", logo: "rosa-selvagem.png" },
+      { nome: "Beyoung", logo: "beyoung.png" },
+      { nome: "Azulim", logo: "azulim.png" },
+      { nome: "Full English", logo: "full-english.png" }
     ],
 
-    // EDITE AQUI: os serviços que você oferece.
-    servicos: [
-      { icone: "🎥", titulo: "Vídeo UGC", descricao: "Vídeos autênticos, gravados em estilo caseiro, prontos para uso em anúncios e redes sociais." },
-      { icone: "📱", titulo: "Reels e conteúdo para redes", descricao: "Roteiro, gravação e edição de reels pensados para reter atenção e gerar engajamento." },
-      { icone: "📸", titulo: "Fotos de produto", descricao: "Ensaios fotográficos que destacam o produto com estética alinhada à sua marca." },
-      { icone: "📦", titulo: "Unboxing", descricao: "Experiência de desembalagem gravada de forma natural, gerando desejo de compra." },
-      { icone: "⭐", titulo: "Reviews autênticos", descricao: "Avaliações sinceras e persuasivas que aumentam a confiança do público na marca." },
-      { icone: "🎯", titulo: "Conteúdo para tráfego pago", descricao: "Criativos testados e otimizados para performar em campanhas de anúncios." }
+    // EDITE AQUI: categorias com linha própria e sempre visível no portfólio.
+    // "capa" é o nome do arquivo de imagem dentro da pasta "capas-portfolio/".
+    // ATENÇÃO: as capas abaixo estão marcadas para trocar (você comentou que não ficaram legais).
+    categorias: [
+      {
+        nome: "Skincare",
+        subtitulo: "Rotina de pele que gera confiança",
+        trabalhos: [
+          { marca: "Beyoung", capa: "beyoung-1.jpg" },
+          { marca: "Beyoung", capa: "beyoung-2.jpg" },
+          { marca: "Beyoung", capa: "beyoung-3.jpg" },
+          { marca: "Beyoung", capa: "beyoung-4.jpg" },
+          { marca: "Beyoung", capa: "beyoung-5.jpg" }
+        ]
+      },
+      {
+        nome: "Auto Cuidados",
+        subtitulo: "Momentos de pausa que viram conteúdo",
+        trabalhos: [
+          { marca: "Rosa Selvagem", capa: "body-splash.jpg" },
+          { marca: "Rosa Selvagem", capa: "rosa-selvagem-1.jpg" },
+          { marca: "Rosa Selvagem", capa: "rosa-selvagem-2.jpg" },
+          { marca: "Rosa Selvagem", capa: "rosa-selvagem-3.jpg" },
+          { marca: "Rosa Selvagem", capa: "rosa-selvagem-4.jpg" }
+        ]
+      }
     ],
 
-    // EDITE AQUI: seus números de destaque. Use "decimal: true" quando o número tiver casas decimais, como em taxas de engajamento.
-    resultados: [
-      { numero: 1200000, sufixo: "+", label: "Seguidores nas redes" },
-      { numero: 45000000, sufixo: "+", label: "Visualizações geradas" },
-      { numero: 80, sufixo: "+", label: "Marcas atendidas" },
-      { numero: 9.8, sufixo: "%", label: "Taxa média de engajamento", decimal: true }
+    // EDITE AQUI: a linha "Destaques", que reúne os demais nichos.
+    // Cada trabalho tem um "nicho": ao clicar num nicho no menu de filtros lá em cima, só os trabalhos daquele nicho aparecem aqui.
+    destaques: {
+      subtitulo: "Clique num nicho ali em cima para ver só aqueles trabalhos",
+      trabalhos: [
+        { marca: "Widi Care", capa: "widicare-juba.jpg", nicho: "Hair Care" },
+        { marca: "Coala", capa: "coala.jpg", nicho: "Casa e Decoração" },
+        { marca: "Coala", capa: "coala-02.jpg", nicho: "Casa e Decoração" },
+        { marca: "Azulim", capa: "azulim.jpg", nicho: "Casa e Decoração" },
+        { marca: "Mare Beauty", capa: "mare-beauty.jpg", nicho: "Unboxing" },
+        { marca: "Vita Premium", capa: "melatonina.jpg", nicho: "Fitness e Wellness" },
+        { marca: "Vita Premium", capa: "vinagre-maca.jpg", nicho: "Fitness e Wellness" },
+        { marca: "Miallegra", capa: "miallegra.jpg", nicho: "Moda e Acessórios" },
+        { marca: "Full English", capa: "depoimento-aluno.jpg", nicho: "Educação" }
+      ]
+    },
+
+    // EDITE AQUI: a seção "Case de Conteúdo Orgânico", entre o portfólio e as fotos.
+    // "video": nome do arquivo (foto/print do vídeo) dentro desta mesma pasta.
+    // "resultadoItens": o primeiro item aparece em destaque (negrito) — deixe o número mais forte ali.
+    // Troque os números de "estatisticas" pelos números reais do seu vídeo (visualizações, curtidas, comentários, compartilhamentos, salvamentos).
+    caseOrganico: {
+      titulo: "Case<br>Conteúdo<br>Orgânico",
+      video: "case-organico.jpg",
+      objetivoTitulo: "Objetivo",
+      objetivoTexto: "Demonstrar a transformação do procedimento de forma natural.",
+      estrategiaTitulo: "Estratégia utilizada",
+      estrategiaItens: [
+        "Gancho forte nos primeiros 3 segundos",
+        "Storytelling baseado em dor → solução",
+        "Antes e depois com forte impacto visual"
+      ],
+      resultadoTitulo: "Resultado",
+      resultadoItens: [
+        "+260 mil visualizações orgânicas",
+        "14 mil curtidas",
+        "1.600 salvamentos"
+      ],
+      estatisticas: [
+        { icone: "play", valor: "265K" },
+        { icone: "curtida", valor: "14K" },
+        { icone: "comentario", valor: "533" },
+        { icone: "compartilhar", valor: "654" },
+        { icone: "salvar", valor: "1.614" }
+      ]
+    },
+
+    // EDITE AQUI: quantas fotos UGC (fundo transparente) aparecem na seção Fotos.
+    // "arquivo": nome do arquivo dentro da pasta "fotos-ugc/". "marca": opcional, aparece como legenda embaixo da foto.
+    fotosUGC: [
+      { arquivo: "fotos-ugc/foto-1.jpg", marca: "" },
+      { arquivo: "fotos-ugc/foto-9.jpg", marca: "" },
+      { arquivo: "fotos-ugc/foto-2.jpg", marca: "" },
+      { arquivo: "fotos-ugc/foto-6.jpg", marca: "" },
+      { arquivo: "fotos-ugc/foto-3.jpg", marca: "" },
+      { arquivo: "fotos-ugc/foto-10.jpg", marca: "" },
+      { arquivo: "fotos-ugc/foto-7.jpg", marca: "" },
+      { arquivo: "fotos-ugc/foto-4.jpg", marca: "" },
+      { arquivo: "fotos-ugc/foto-8.jpg", marca: "" },
+      { arquivo: "fotos-ugc/foto-5.jpg", marca: "" }
+    ],
+
+    // EDITE AQUI: os serviços, divididos em dois lados soltos ao redor da foto (3 de cada lado).
+    servicosEsquerda: [
+      { titulo: "Vídeo UGC", descricao: "Vídeos autênticos, gravados em estilo caseiro, prontos para anúncios e redes sociais." },
+      { titulo: "Reels e Conteúdo", descricao: "Roteiro, gravação e edição de reels pensados para reter atenção e gerar engajamento." },
+      { titulo: "Fotos de Produto", descricao: "Ensaios fotográficos que destacam o produto com estética alinhada à sua marca." }
+    ],
+    servicosDireita: [
+      { titulo: "Unboxing", descricao: "Experiência de desembalagem gravada de forma natural, gerando desejo de compra." },
+      { titulo: "Reviews Autênticos", descricao: "Avaliações sinceras e persuasivas que aumentam a confiança do público na marca." },
+      { titulo: "Tráfego Pago", descricao: "Criativos testados e otimizados para performar em campanhas de anúncios." }
     ],
 
     // EDITE AQUI: depoimentos de clientes e marcas.
+    // "logo": opcional, nome do arquivo dentro de "logos-marcas/". Se vazio, mostra as iniciais.
+    // "audio": opcional, nome do arquivo dentro de "depoimentos-audio/". Se vazio, o card não mostra o player de áudio.
     depoimentos: [
-      { texto: "O conteúdo entregue superou nossas expectativas e trouxe um aumento real nas conversões dos anúncios.", nome: "Ana Paula", empresa: "Gerente de Marketing, Marca Um" },
-      { texto: "Profissionalismo do início ao fim. Os prazos foram cumpridos e o resultado ficou impecável.", nome: "Rafael Souza", empresa: "Fundador, Marca Três" },
-      { texto: "A criatividade e a naturalidade dos vídeos fizeram toda a diferença no engajamento da campanha.", nome: "Camila Ferreira", empresa: "Social Media, Marca Cinco" }
+      {
+        handle: "Miallegra",
+        logo: "miallegra.png",
+        categoria: "Ana - Fotos e Vídeos",
+        texto: "Talissa, amei! Você arrasou muito, adorei! Parabéns, você se esforçou, tomou muito cuidado, olhou todas as referências e fez um trabalho perfeito, fiquei muito feliz!",
+        estrelas: 5,
+        audio: "ana-miallegra.mp3"
+      },
+      {
+        handle: "Beyoung",
+        logo: "beyoung.png",
+        categoria: "Marcelo - Fotos e Vídeos",
+        texto: "Ficaram maravilhosos! Você trouxe muita naturalidade para os conteúdos, fez uma entrega super alinhada com o que esperávamos e ainda cumpriu os prazos certinho. O resultado foi tão bom que já te convidamos pra uma nova campanha.",
+        estrelas: 5,
+        audio: ""
+      },
+      {
+        handle: "Mare Beauty",
+        logo: "mare-beauty.png",
+        categoria: "Mari - Vídeos para e-commerce",
+        texto: "Os vídeos ficaram dinâmicos e muito legais! Adorei os roteiros também, ficaram ótimos. Agradeço a entrega pontual e espero em breve trabalharmos juntas de novo!",
+        estrelas: 5,
+        audio: ""
+      }
     ],
 
-    // EDITE AQUI: seus dados de contato e redes sociais.
+    // EDITE AQUI: seus dados de contato. O telefone deve conter só números (DDD + número), sem espaços nem símbolos.
     contato: {
-      email: "seuemail@email.com",
-      telefone: "(00) 00000-0000",
-      instagram: "@seuusuario"
+      texto: "Conta um pouco sobre a sua marca e o que você quer alcançar. Respondo em até 48 horas.",
+      email: "mullertalissa@gmail.com",
+      telefoneDigitos: "48988270187",
+      instagram: "talissaamuller"
     }
   };
 
   /* ======================================================================
-     A PARTIR DAQUI: o código lê o CONFIG acima e monta a página.
+     A PARTIR DAQUI: o código lê o CONFIG acima e monta a página sozinho.
      Normalmente não é necessário mexer no que vem abaixo.
   ====================================================================== */
 
+  const ICONES = {
+    email: '<svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"></rect><path d="M3 7l9 6 9-6"></path></svg>',
+    instagram: '<svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="5"></rect><circle cx="12" cy="12" r="4"></circle><circle cx="17.3" cy="6.7" r="0.6" fill="currentColor" stroke="none"></circle></svg>',
+    telefone: '<svg viewBox="0 0 24 24"><path d="M6.6 10.8c1.4 2.8 3.7 5.1 6.5 6.5l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.5.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1C10.7 21 3 13.3 3 4c0-.6.4-1 1-1h3.8c.6 0 1 .4 1 1 0 1.2.2 2.4.6 3.5.1.3 0 .7-.2 1L6.6 10.8z"></path></svg>',
+    play: '<svg viewBox="0 0 24 24"><path d="M7 4l13 8-13 8V4z"></path></svg>',
+    curtida: '<svg viewBox="0 0 24 24"><path d="M12 20s-7-4.4-9.5-8.8C0.8 7.8 2.4 4.5 5.8 4.5c2 0 3.5 1.2 4.5 2.7 1-1.5 2.5-2.7 4.5-2.7 3.4 0 5 3.3 3.3 6.7C19 15.6 12 20 12 20z"></path></svg>',
+    comentario: '<svg viewBox="0 0 24 24"><path d="M21 11.5a8.4 8.4 0 0 1-8.5 8.4 8.4 8.4 0 0 1-3.8-.9L3 21l1.9-5.7a8.4 8.4 0 0 1-.9-3.8A8.4 8.4 0 0 1 12.5 3a8.4 8.4 0 0 1 8.5 8.5z"></path></svg>',
+    compartilhar: '<svg viewBox="0 0 24 24"><path d="M4 12v7a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7"></path><path d="M16 6l-4-4-4 4"></path><path d="M12 2v14"></path></svg>',
+    salvar: '<svg viewBox="0 0 24 24"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>'
+  };
+
+  function formatarTelefone(digitos) {
+    return "(" + digitos.slice(0, 2) + ") " + digitos.slice(2, 7) + "-" + digitos.slice(7);
+  }
+
+  function slugificar(texto) {
+    return texto
+      .normalize("NFD").replace(/[̀-ͯ]/g, "")
+      .toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+  }
+
+  function iniciaisDe(texto) {
+    return texto.trim().split(/\s+/).map(p => p[0]).join("").slice(0, 2).toUpperCase();
+  }
+
+  function formatarTempo(segundos) {
+    if (!isFinite(segundos) || segundos < 0) return "0:00";
+    const m = Math.floor(segundos / 60);
+    const s = Math.floor(segundos % 60);
+    return m + ":" + String(s).padStart(2, "0");
+  }
+
   document.addEventListener("DOMContentLoaded", () => {
 
-    // ---- Rastreamento: registra a visita assim que a página carrega ----
-    registrarEvento("page_view");
+    const linkWhatsapp = "https://wa.me/55" + CONFIG.contato.telefoneDigitos + "?text=" + encodeURIComponent("Olá, Talissa! Vim pelo seu portfólio e quero falar sobre uma parceria.");
+    const linkInstagram = "https://instagram.com/" + CONFIG.contato.instagram;
+    const linkEmail = "mailto:" + CONFIG.contato.email;
+    const telefoneFormatado = formatarTelefone(CONFIG.contato.telefoneDigitos);
 
-    // ---- Nome no menu e no rodapé ----
-    const iniciais = CONFIG.nome.trim().split(/\s+/).map(palavra => palavra[0]).join("").slice(0, 2).toUpperCase();
-    document.getElementById("logo-badge").textContent = iniciais;
-    document.getElementById("logo-texto").textContent = CONFIG.nome;
+    // ---- Nome, título da aba ----
+    document.getElementById("logo-nav").firstChild.textContent = CONFIG.nome;
     document.getElementById("rodape-nome").textContent = CONFIG.nome;
     document.title = CONFIG.nome + " | Criadora de Conteúdo UGC";
 
+    // ---- Aviso no topo ----
+    document.getElementById("aviso").innerHTML =
+      CONFIG.aviso.texto + " · <a href=\"" + CONFIG.aviso.href + "\">" + CONFIG.aviso.linkTexto + " →</a>";
+
     // ---- Hero ----
-    document.getElementById("hero-eyebrow").textContent = CONFIG.hero.eyebrow;
-    document.getElementById("hero-titulo").innerHTML = CONFIG.hero.titulo;
+    document.getElementById("hero-badge").textContent = CONFIG.hero.badge;
+    document.getElementById("hero-titulo").innerHTML =
+      '<span class="hero-nome-serif">' + CONFIG.hero.tituloNome + '</span><span class="hero-nome-assinatura">' + CONFIG.hero.tituloSobrenome + "</span>";
     document.getElementById("hero-subtitulo").textContent = CONFIG.hero.subtitulo;
-    document.getElementById("hero-cta-principal").textContent = CONFIG.hero.botao;
-    document.getElementById("nav-cta").textContent = CONFIG.hero.botao;
 
-    // ---- Rastreamento: cliques nos botões de chamada para ação ----
-    document.getElementById("hero-cta-principal").addEventListener("click", () => registrarEvento("button_click", "cta_fechar_parceria"));
-    document.getElementById("nav-cta").addEventListener("click", () => registrarEvento("button_click", "cta_fechar_parceria"));
-    document.getElementById("hero-cta-secundario").addEventListener("click", () => registrarEvento("button_click", "cta_ver_trabalhos"));
-
-    // ---- Números rápidos do hero ----
-    const statsRapidas = document.getElementById("stats-rapidas");
-    CONFIG.heroStats.forEach(stat => {
-      const div = document.createElement("div");
-      div.className = "stat-rapido";
-      div.innerHTML = `<strong>${stat.numero}</strong><span>${stat.label}</span>`;
-      statsRapidas.appendChild(div);
-    });
-
-    // ---- Faixa de marcas (ticker rolando) ----
-    // A lista é duplicada para o efeito de rolagem contínua (marquee) ficar perfeito, sem "pulo" no final.
-    const listaMarcas = document.getElementById("lista-marcas");
-    const marcasDuplicadas = [...CONFIG.marcas, ...CONFIG.marcas];
-    marcasDuplicadas.forEach((marca, i) => {
+    // ---- Faixa de especialidades ----
+    const tickerLista = document.getElementById("ticker-lista");
+    [...CONFIG.especialidades, ...CONFIG.especialidades].forEach(item => {
       const li = document.createElement("li");
-      li.textContent = marca;
-      listaMarcas.appendChild(li);
-      const separador = document.createElement("li");
-      separador.className = "separador";
-      separador.textContent = "✦";
-      separador.setAttribute("aria-hidden", "true");
-      listaMarcas.appendChild(separador);
+      li.textContent = item;
+      tickerLista.appendChild(li);
+      const sep = document.createElement("li");
+      sep.className = "separador";
+      sep.textContent = "◆";
+      sep.setAttribute("aria-hidden", "true");
+      tickerLista.appendChild(sep);
     });
 
     // ---- Sobre ----
     document.getElementById("sobre-titulo").innerHTML = CONFIG.sobre.titulo;
-    document.getElementById("sobre-texto").textContent = CONFIG.sobre.texto;
-    document.getElementById("sobre-texto-2").textContent = CONFIG.sobre.texto2;
+    document.getElementById("sobre-texto").innerHTML = CONFIG.sobre.texto;
+    document.getElementById("sobre-texto-2").innerHTML = CONFIG.sobre.texto2;
+    const sobrePills = document.getElementById("sobre-pills");
+    CONFIG.sobre.pills.forEach(texto => {
+      const span = document.createElement("span");
+      span.className = "pill-info";
+      span.textContent = texto;
+      sobrePills.appendChild(span);
+    });
 
-    // ---- Portfólio com filtro ----
-    const filtrosEl = document.getElementById("filtros");
-    const gridEl = document.getElementById("portfolio-grid");
-
-    function renderizarFiltros() {
-      const categorias = ["Todos", ...CONFIG.categoriasPortfolio];
-      categorias.forEach((cat, i) => {
-        const btn = document.createElement("button");
-        btn.className = "filtro-btn" + (i === 0 ? " ativo" : "");
-        btn.textContent = cat;
-        btn.type = "button";
-        btn.addEventListener("click", () => {
-          document.querySelectorAll(".filtro-btn").forEach(b => b.classList.remove("ativo"));
-          btn.classList.add("ativo");
-          filtrarPortfolio(cat);
-        });
-        filtrosEl.appendChild(btn);
-      });
-    }
-
-    // Nem todo vídeo do YouTube tem a miniatura em alta resolução (maxresdefault) disponível.
-    // Essa função tenta a versão em alta primeiro e, se não existir, cai para a versão em qualidade média.
-    function criarMiniaturaYoutube(youtubeId, titulo) {
+    // ---- Marcas (bolinhas flutuantes) ----
+    const marcasBolhas = document.getElementById("marcas-bolhas");
+    CONFIG.marcas.forEach((marca, i) => {
+      const bolha = document.createElement("div");
+      bolha.className = "marca-bolha";
+      bolha.style.animationDelay = (i * 0.4) + "s";
       const img = document.createElement("img");
-      img.className = "portfolio-fundo";
-      img.alt = "Miniatura do vídeo: " + titulo;
+      img.src = "logos-marcas/" + marca.logo + "?v=" + VERSAO_FOTOS;
+      img.alt = "Logo da marca " + marca.nome;
       img.loading = "lazy";
-      const qualidades = ["maxresdefault.jpg", "sddefault.jpg", "hqdefault.jpg"];
-      let indice = 0;
-      img.addEventListener("error", () => {
-        indice++;
-        if (indice < qualidades.length) {
-          img.src = `https://img.youtube.com/vi/${youtubeId}/${qualidades[indice]}`;
-        }
-      });
-      img.src = `https://img.youtube.com/vi/${youtubeId}/${qualidades[indice]}`;
-      return img;
-    }
+      bolha.appendChild(img);
+      marcasBolhas.appendChild(bolha);
+    });
 
-    function renderizarPortfolio() {
-      CONFIG.portfolio.forEach(item => {
-        const a = document.createElement("button");
-        a.type = "button";
-        a.className = "portfolio-item reveal";
-        a.dataset.categoria = item.categoria;
-        a.setAttribute("aria-label", `Assistir: ${item.titulo}`);
-        // Rastreamento: registra qual vídeo foi clicado (o painel usa o id do YouTube pra agrupar).
-        // O vídeo toca dentro da própria página, num player flutuante (sem sair pro YouTube).
-        a.addEventListener("click", () => {
-          registrarEvento("video_view", item.youtubeId, { title: item.titulo });
-          abrirVideoModal(item.youtubeId, item.titulo);
+    // ---- Filtros rápidos + linhas de categorias fixas (Skincare, Auto Cuidados) ----
+    const filtrosRapidos = document.getElementById("filtros-rapidos");
+    const categoriasLinhas = document.getElementById("categorias-linhas");
+
+    function criarLinhaPortfolio(nome, subtitulo, trabalhos, slug) {
+      const linha = document.createElement("div");
+      linha.className = "categoria-linha reveal";
+      linha.id = slug;
+
+      const cabecalho = document.createElement("div");
+      cabecalho.className = "categoria-cabecalho-linha";
+      cabecalho.innerHTML =
+        '<div><div class="categoria-titulo-grupo"><h3>' + nome + '</h3><span class="categoria-contagem" id="contagem-' + slug + '">' +
+        String(trabalhos.length).padStart(2, "0") + '</span></div><p class="categoria-subtitulo">' + subtitulo + "</p></div>" +
+        '<div class="categoria-setas"><button type="button" class="seta-btn" data-direcao="-1" aria-label="Ver anteriores em ' + nome + '">‹</button>' +
+        '<button type="button" class="seta-btn" data-direcao="1" aria-label="Ver mais em ' + nome + '">›</button></div>';
+      linha.appendChild(cabecalho);
+
+      const scrollWrap = document.createElement("div");
+      scrollWrap.className = "categoria-scroll";
+      scrollWrap.id = "scroll-" + slug;
+      trabalhos.forEach(trabalho => {
+        const rotuloLegenda = trabalho.nicho || nome;
+        const card = document.createElement("div");
+        card.className = "trabalho-card";
+        if (trabalho.nicho) card.dataset.nicho = trabalho.nicho;
+        card.innerHTML =
+          '<div class="trabalho-imagem-wrap"><span class="trabalho-tag">' + trabalho.marca + '</span>' +
+          '<img src="capas-portfolio/' + trabalho.capa + '?v=' + VERSAO_FOTOS + '" alt="Trabalho de UGC para ' + trabalho.marca + ', categoria ' + rotuloLegenda + '" loading="lazy"></div>' +
+          '<div class="trabalho-legenda"><strong>' + trabalho.marca + '</strong><span>' + rotuloLegenda + "</span></div>";
+        scrollWrap.appendChild(card);
+      });
+      linha.appendChild(scrollWrap);
+
+      cabecalho.querySelectorAll(".seta-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const direcao = parseInt(btn.dataset.direcao, 10);
+          scrollWrap.scrollBy({ left: direcao * 260, behavior: "smooth" });
         });
-        // Miniatura real puxada direto do YouTube a partir do id do vídeo (não precisa subir imagem nenhuma).
-        a.appendChild(criarMiniaturaYoutube(item.youtubeId, item.titulo));
-        const infoHtml = document.createElement("div");
-        infoHtml.innerHTML = `
-          <span class="portfolio-play" aria-hidden="true">▶</span>
-          <div class="portfolio-info">
-            <span>${item.categoria}</span>
-            <strong>${item.titulo}</strong>
-          </div>
-        `;
-        while (infoHtml.firstChild) a.appendChild(infoHtml.firstChild);
-        gridEl.appendChild(a);
       });
+
+      categoriasLinhas.appendChild(linha);
+      return scrollWrap;
     }
 
-    // ---- Player flutuante: abre o vídeo do YouTube dentro da própria página ----
-    const modalVideo = document.getElementById("modal-video");
-    const modalVideoContainer = document.getElementById("modal-video-container");
-    function abrirVideoModal(youtubeId, titulo) {
-      modalVideoContainer.innerHTML = `<iframe src="https://www.youtube.com/embed/${youtubeId}?autoplay=1&rel=0" title="${titulo}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
-      modalVideo.classList.add("aberto");
-      document.body.style.overflow = "hidden";
-    }
-    function fecharVideoModal() {
-      modalVideo.classList.remove("aberto");
-      modalVideoContainer.innerHTML = "";
-      document.body.style.overflow = "";
-    }
-    document.getElementById("modal-video-fechar").addEventListener("click", fecharVideoModal);
-    modalVideo.addEventListener("click", (e) => { if (e.target === modalVideo) fecharVideoModal(); });
-    document.addEventListener("keydown", (e) => { if (e.key === "Escape") fecharVideoModal(); });
-
-    function filtrarPortfolio(categoria) {
-      document.querySelectorAll(".portfolio-item").forEach(item => {
-        const mostrar = categoria === "Todos" || item.dataset.categoria === categoria;
-        item.hidden = !mostrar;
-      });
-    }
-
-    renderizarFiltros();
-    renderizarPortfolio();
-
-    // ---- Serviços ----
-    const servicosGrid = document.getElementById("servicos-grid");
-    CONFIG.servicos.forEach(servico => {
-      const card = document.createElement("div");
-      card.className = "servico-card reveal";
-      card.innerHTML = `
-        <div class="servico-icone" aria-hidden="true">${servico.icone}</div>
-        <h3>${servico.titulo}</h3>
-        <p>${servico.descricao}</p>
-      `;
-      servicosGrid.appendChild(card);
+    // Linhas fixas (Skincare, Auto Cuidados): pill simples que só rola até a linha.
+    CONFIG.categorias.forEach(categoria => {
+      const slug = "cat-" + slugificar(categoria.nome);
+      const pill = document.createElement("a");
+      pill.className = "filtro-pill";
+      pill.href = "#" + slug;
+      pill.textContent = categoria.nome;
+      filtrosRapidos.appendChild(pill);
+      criarLinhaPortfolio(categoria.nome, categoria.subtitulo, categoria.trabalhos, slug);
     });
 
-    // ---- Resultados com contador ----
-    const resultadosGrid = document.getElementById("resultados-grid");
-    CONFIG.resultados.forEach(res => {
-      const div = document.createElement("div");
-      div.className = "resultado-bloco";
-      div.innerHTML = `
-        <div class="resultado-numero" data-alvo="${res.numero}" data-sufixo="${res.sufixo}" data-decimal="${!!res.decimal}">0</div>
-        <div class="resultado-label">${res.label}</div>
-      `;
-      resultadosGrid.appendChild(div);
+    // Linha "Destaques": os pills de nicho filtram o conteúdo dela, além de rolar até ela.
+    const nichosDestaques = [];
+    CONFIG.destaques.trabalhos.forEach(t => { if (t.nicho && !nichosDestaques.includes(t.nicho)) nichosDestaques.push(t.nicho); });
+
+    const destaquesScroll = criarLinhaPortfolio("Destaques", CONFIG.destaques.subtitulo, CONFIG.destaques.trabalhos, "destaques");
+    const contagemDestaques = document.getElementById("contagem-destaques");
+
+    function filtrarDestaques(nicho, pillAtiva) {
+      let visiveis = 0;
+      destaquesScroll.querySelectorAll(".trabalho-card").forEach(card => {
+        const mostrar = nicho === "todos" || card.dataset.nicho === nicho;
+        card.hidden = !mostrar;
+        if (mostrar) visiveis++;
+      });
+      contagemDestaques.textContent = String(visiveis).padStart(2, "0");
+      filtrosRapidos.querySelectorAll(".filtro-pill[data-nicho]").forEach(p => p.classList.remove("ativo"));
+      if (pillAtiva) pillAtiva.classList.add("ativo");
+    }
+
+    const todosLista = ["Todos", ...nichosDestaques];
+    todosLista.forEach((nicho, i) => {
+      const valor = i === 0 ? "todos" : nicho;
+      const pill = document.createElement("a");
+      pill.className = "filtro-pill" + (i === 0 ? " ativo" : "");
+      pill.href = "#destaques";
+      pill.textContent = nicho;
+      pill.dataset.nicho = valor;
+      pill.addEventListener("click", () => filtrarDestaques(valor, pill));
+      filtrosRapidos.appendChild(pill);
     });
+
+    // ---- Case de Conteúdo Orgânico ----
+    const caseCfg = CONFIG.caseOrganico;
+    document.getElementById("case-video").src = caseCfg.video + "?v=" + VERSAO_FOTOS;
+    document.getElementById("case-titulo").innerHTML = caseCfg.titulo;
+    document.getElementById("case-objetivo-titulo").textContent = caseCfg.objetivoTitulo;
+    document.getElementById("case-objetivo-texto").textContent = caseCfg.objetivoTexto;
+    document.getElementById("case-estrategia-titulo").textContent = caseCfg.estrategiaTitulo;
+    document.getElementById("case-resultado-titulo").textContent = caseCfg.resultadoTitulo;
+
+    const caseEstrategiaLista = document.getElementById("case-estrategia-lista");
+    caseCfg.estrategiaItens.forEach(item => {
+      const li = document.createElement("li");
+      li.textContent = item;
+      caseEstrategiaLista.appendChild(li);
+    });
+
+    const caseResultadoLista = document.getElementById("case-resultado-lista");
+    caseCfg.resultadoItens.forEach(item => {
+      const li = document.createElement("li");
+      li.textContent = item;
+      caseResultadoLista.appendChild(li);
+    });
+
+    const caseEstatisticas = document.getElementById("case-estatisticas");
+    caseCfg.estatisticas.forEach(estat => {
+      const bloco = document.createElement("div");
+      bloco.className = "case-estat";
+      bloco.innerHTML = (ICONES[estat.icone] || "") + "<span>" + estat.valor + "</span>";
+      caseEstatisticas.appendChild(bloco);
+    });
+
+    // ---- Fotos UGC ----
+    const fotosGrid = document.getElementById("fotos-grid");
+    CONFIG.fotosUGC.forEach((foto) => {
+      const item = document.createElement("div");
+      item.innerHTML =
+        '<div class="foto-ugc-item">' +
+        '<img src="' + foto.arquivo + '?v=' + VERSAO_FOTOS + '" alt="Foto UGC' + (foto.marca ? " para " + foto.marca : "") + '" loading="lazy" ' +
+        'onerror="this.style.display=&quot;none&quot;; this.nextElementSibling.style.display=&quot;flex&quot;;">' +
+        '<div class="foto-ugc-vazio">Adicione a foto em<br>&quot;' + foto.arquivo + '&quot;</div>' +
+        "</div>" +
+        (foto.marca ? '<div class="foto-ugc-legenda">' + foto.marca + "</div>" : "");
+      fotosGrid.appendChild(item);
+    });
+
+    // ---- Serviços (soltos ao redor da foto) ----
+    function renderizarServicosSoltos(lista, containerId) {
+      const container = document.getElementById(containerId);
+      lista.forEach(servico => {
+        const bloco = document.createElement("div");
+        bloco.className = "servico-solto";
+        bloco.innerHTML = '<span class="servico-solto-titulo">' + servico.titulo + '</span><p>' + servico.descricao + "</p>";
+        container.appendChild(bloco);
+      });
+    }
+    renderizarServicosSoltos(CONFIG.servicosEsquerda, "servicos-esquerda");
+    renderizarServicosSoltos(CONFIG.servicosDireita, "servicos-direita");
 
     // ---- Depoimentos ----
-    const depoimentosGrid = document.getElementById("depoimentos-grid");
+    let audioTocando = null;
+    let botaoTocando = null;
+
+    function pararAudioAtual() {
+      if (audioTocando) {
+        audioTocando.pause();
+        audioTocando.currentTime = 0;
+      }
+      if (botaoTocando) {
+        botaoTocando.textContent = "▶";
+        botaoTocando.classList.remove("tocando");
+      }
+      audioTocando = null;
+      botaoTocando = null;
+    }
+
+    const depoimentosScroll = document.getElementById("depoimentos-scroll");
     CONFIG.depoimentos.forEach(dep => {
       const card = document.createElement("div");
-      card.className = "depoimento-card reveal";
-      card.innerHTML = `
-        <p class="depoimento-texto">"${dep.texto}"</p>
-        <div>
-          <div class="depoimento-autor">${dep.nome}</div>
-          <div class="depoimento-empresa">${dep.empresa}</div>
-        </div>
-      `;
-      depoimentosGrid.appendChild(card);
+      card.className = "depoimento-card";
+      const avatarConteudo = dep.logo
+        ? '<img src="logos-marcas/' + dep.logo + '?v=' + VERSAO_FOTOS + '" alt="Logo da marca ' + dep.handle + '" loading="lazy">'
+        : "<span>" + iniciaisDe(dep.handle.replace("@", "")) + "</span>";
+      card.innerHTML =
+        '<div class="depoimento-avatar">' + avatarConteudo + "</div>" +
+        '<div class="depoimento-handle">' + dep.handle + "</div>" +
+        '<div class="depoimento-estrelas" aria-label="' + dep.estrelas + ' de 5 estrelas">' + "★".repeat(dep.estrelas) + "</div>" +
+        '<div class="depoimento-categoria">' + dep.categoria + "</div>" +
+        '<p class="depoimento-texto">' + dep.texto + "</p>";
+
+      if (dep.audio) {
+        // Player de áudio no estilo mensagem de voz (tocar/pausar, onda, velocidade e tempo).
+        const wrap = document.createElement("div");
+        wrap.className = "audio-whats";
+
+        const play = document.createElement("button");
+        play.type = "button";
+        play.className = "audio-whats-play";
+        play.setAttribute("aria-label", "Ouvir depoimento em áudio de " + dep.handle);
+        play.textContent = "▶";
+
+        const meio = document.createElement("div");
+        meio.className = "audio-whats-meio";
+
+        const onda = document.createElement("div");
+        onda.className = "audio-whats-onda";
+        const barras = [];
+        for (let i = 0; i < 26; i++) {
+          const barra = document.createElement("span");
+          const altura = 30 + Math.round(Math.random() * 70);
+          barra.style.height = altura + "%";
+          onda.appendChild(barra);
+          barras.push(barra);
+        }
+
+        const tempos = document.createElement("div");
+        tempos.className = "audio-whats-tempos";
+        const tempoAtual = document.createElement("span");
+        tempoAtual.textContent = "0:00";
+        const tempoTotal = document.createElement("span");
+        tempoTotal.textContent = "0:00";
+        tempos.appendChild(tempoAtual);
+        tempos.appendChild(tempoTotal);
+
+        meio.appendChild(onda);
+        meio.appendChild(tempos);
+
+        const velocidadeBtn = document.createElement("button");
+        velocidadeBtn.type = "button";
+        velocidadeBtn.className = "audio-whats-velocidade";
+        velocidadeBtn.textContent = "1x";
+        const velocidades = [1, 1.5, 2];
+        let velocidadeIndice = 0;
+
+        const audio = new Audio("depoimentos-audio/" + dep.audio);
+
+        audio.addEventListener("loadedmetadata", () => {
+          tempoTotal.textContent = formatarTempo(audio.duration);
+        });
+        audio.addEventListener("timeupdate", () => {
+          tempoAtual.textContent = formatarTempo(audio.currentTime);
+          const progresso = audio.duration ? audio.currentTime / audio.duration : 0;
+          const limite = Math.round(progresso * barras.length);
+          barras.forEach((barra, i) => barra.classList.toggle("tocada", i < limite));
+        });
+        audio.addEventListener("ended", () => {
+          play.textContent = "▶";
+          play.classList.remove("tocando");
+          barras.forEach(barra => barra.classList.remove("tocada"));
+        });
+
+        play.addEventListener("click", () => {
+          if (audioTocando && audioTocando !== audio) pararAudioAtual();
+          if (audio.paused) {
+            audio.play();
+            play.textContent = "❚❚";
+            play.classList.add("tocando");
+            audioTocando = audio;
+            botaoTocando = play;
+          } else {
+            audio.pause();
+            play.textContent = "▶";
+            play.classList.remove("tocando");
+          }
+        });
+
+        velocidadeBtn.addEventListener("click", () => {
+          velocidadeIndice = (velocidadeIndice + 1) % velocidades.length;
+          audio.playbackRate = velocidades[velocidadeIndice];
+          velocidadeBtn.textContent = String(velocidades[velocidadeIndice]).replace(".", ",") + "x";
+        });
+
+        wrap.appendChild(play);
+        wrap.appendChild(meio);
+        wrap.appendChild(velocidadeBtn);
+        card.appendChild(wrap);
+      }
+
+      depoimentosScroll.appendChild(card);
     });
 
-    // ---- Contato: botões diretos ----
-    const somenteNumeros = CONFIG.contato.telefone.replace(/\D/g, "");
-    const linkWhatsapp = "https://wa.me/55" + somenteNumeros;
-    const linkInstagram = "https://instagram.com/" + CONFIG.contato.instagram.replace("@", "");
+    // ---- Contato ----
+    document.getElementById("contato-texto").textContent = CONFIG.contato.texto;
+    const contatoLista = document.getElementById("contato-lista");
+    contatoLista.innerHTML =
+      '<a class="contato-item" href="' + linkEmail + '"><span class="contato-icone" aria-hidden="true">' + ICONES.email + "</span>" + CONFIG.contato.email + "</a>" +
+      '<a class="contato-item" href="' + linkInstagram + '" target="_blank" rel="noopener"><span class="contato-icone" aria-hidden="true">' + ICONES.instagram + "</span>@" + CONFIG.contato.instagram + "</a>" +
+      '<a class="contato-item" href="' + linkWhatsapp + '" target="_blank" rel="noopener"><span class="contato-icone" aria-hidden="true">' + ICONES.telefone + "</span>" + telefoneFormatado + "</a>";
 
-    const contatoDiretos = document.getElementById("contato-diretos");
-    contatoDiretos.innerHTML = `
-      <a class="contato-link" id="link-whatsapp" href="${linkWhatsapp}" target="_blank" rel="noopener">💬 WhatsApp: ${CONFIG.contato.telefone}</a>
-      <a class="contato-link" id="link-email" href="mailto:${CONFIG.contato.email}">✉️ ${CONFIG.contato.email}</a>
-      <a class="contato-link" id="link-instagram" href="${linkInstagram}" target="_blank" rel="noopener">📷 Instagram: ${CONFIG.contato.instagram}</a>
-    `;
-    // Rastreamento: cliques nos canais diretos de contato.
-    document.getElementById("link-whatsapp").addEventListener("click", () => registrarEvento("button_click", "contact_whatsapp"));
-    document.getElementById("link-email").addEventListener("click", () => registrarEvento("button_click", "contact_email"));
-    document.getElementById("link-instagram").addEventListener("click", () => registrarEvento("button_click", "contact_instagram"));
-
-    // ---- Rodapé: redes sociais e copyright ----
-    const rodapeRedes = document.getElementById("rodape-redes");
-    rodapeRedes.innerHTML = `
-      <li><a href="${linkInstagram}" target="_blank" rel="noopener">Instagram</a></li>
-      <li><a href="mailto:${CONFIG.contato.email}">E-mail</a></li>
-      <li><a href="${linkWhatsapp}" target="_blank" rel="noopener">WhatsApp</a></li>
-    `;
-    const ano = new Date().getFullYear();
-    document.getElementById("rodape-copyright").textContent = "© " + ano + " " + CONFIG.nome + ". Todos os direitos reservados.";
-
-    // ---- Formulário de contato (mailto + confirmação na tela) ----
-    const form = document.getElementById("form-contato");
+    // ---- Formulário: abre e-mail preenchido e mostra confirmação ----
+    const formContato = document.getElementById("form-contato");
     const mensagemConfirmacao = document.getElementById("mensagem-confirmacao");
-    form.addEventListener("submit", (e) => {
-      e.preventDefault();
+    formContato.addEventListener("submit", (evento) => {
+      evento.preventDefault();
       const nome = document.getElementById("campo-nome").value;
       const email = document.getElementById("campo-email").value;
       const mensagem = document.getElementById("campo-mensagem").value;
-
-      // Rastreamento: grava a mensagem e o clique de contato pelo formulário.
-      registrarLead({ name: nome, email: email, message: mensagem, source: "contact" });
-      registrarEvento("button_click", "contact_formulario");
-
-      const assunto = encodeURIComponent("Proposta de parceria via site, enviada por " + nome);
-      const corpo = encodeURIComponent(
-        "Nome: " + nome + "\n" +
-        "E-mail: " + email + "\n\n" +
-        "Mensagem:\n" + mensagem
-      );
-      window.location.href = `mailto:${CONFIG.contato.email}?subject=${assunto}&body=${corpo}`;
-
+      const assunto = encodeURIComponent("Contato pelo portfólio: " + nome);
+      const corpo = encodeURIComponent("Nome: " + nome + "\nE-mail: " + email + "\n\nMensagem:\n" + mensagem);
+      window.location.href = "mailto:" + CONFIG.contato.email + "?subject=" + assunto + "&body=" + corpo;
       mensagemConfirmacao.hidden = false;
-      form.reset();
+      formContato.reset();
     });
 
-    // ---- Menu hambúrguer ----
+    // ---- Rodapé ----
+    document.getElementById("rodape-links").innerHTML =
+      '<a href="' + linkEmail + '">' + CONFIG.contato.email + '</a><span>·</span>' +
+      '<a href="' + linkInstagram + '" target="_blank" rel="noopener">Instagram</a><span>·</span>' +
+      "<span>© " + new Date().getFullYear() + " " + CONFIG.nome + "</span>";
+
+    // ---- Menu hambúrguer (mobile) ----
     const btnMenu = document.getElementById("btn-menu");
     const linksNav = document.getElementById("links-nav");
-    btnMenu.addEventListener("click", () => {
+    function fecharMenu() {
+      linksNav.classList.remove("aberto");
+      btnMenu.setAttribute("aria-expanded", "false");
+      btnMenu.setAttribute("aria-label", "Abrir menu");
+    }
+    function alternarMenu() {
       const aberto = linksNav.classList.toggle("aberto");
       btnMenu.setAttribute("aria-expanded", String(aberto));
       btnMenu.setAttribute("aria-label", aberto ? "Fechar menu" : "Abrir menu");
-    });
-    linksNav.querySelectorAll("a").forEach(link => {
-      link.addEventListener("click", () => {
-        linksNav.classList.remove("aberto");
-        btnMenu.setAttribute("aria-expanded", "false");
-        btnMenu.setAttribute("aria-label", "Abrir menu");
-      });
-    });
-
-    // ---- Animação de entrada ao rolar a página (fade + subida leve) ----
-    const observadorReveal = new IntersectionObserver((entradas) => {
-      entradas.forEach(entrada => {
-        if (entrada.isIntersecting) {
-          entrada.target.classList.add("visivel");
-          observadorReveal.unobserve(entrada.target);
-        }
-      });
-    }, { threshold: 0.15 });
-    document.querySelectorAll(".reveal").forEach(el => observadorReveal.observe(el));
-
-    // ---- Contadores animados dos resultados ----
-    function animarContador(elemento) {
-      const alvo = parseFloat(elemento.dataset.alvo);
-      const sufixo = elemento.dataset.sufixo || "";
-      const decimal = elemento.dataset.decimal === "true";
-      const duracao = 1600;
-      const inicio = performance.now();
-
-      function passo(agora) {
-        const progresso = Math.min((agora - inicio) / duracao, 1);
-        const valorAtual = alvo * progresso;
-        const textoFormatado = decimal
-          ? valorAtual.toLocaleString("pt-BR", { minimumFractionDigits: 1, maximumFractionDigits: 1 })
-          : Math.floor(valorAtual).toLocaleString("pt-BR");
-        elemento.textContent = textoFormatado + sufixo;
-        if (progresso < 1) {
-          requestAnimationFrame(passo);
-        }
-      }
-      requestAnimationFrame(passo);
     }
+    btnMenu.addEventListener("click", alternarMenu);
+    linksNav.querySelectorAll("a").forEach(link => link.addEventListener("click", fecharMenu));
+    document.addEventListener("keydown", (evento) => { if (evento.key === "Escape") fecharMenu(); });
 
-    const observadorContador = new IntersectionObserver((entradas) => {
-      entradas.forEach(entrada => {
-        if (entrada.isIntersecting) {
-          animarContador(entrada.target);
-          observadorContador.unobserve(entrada.target);
-        }
-      });
-    }, { threshold: 0.4 });
-    document.querySelectorAll(".resultado-numero").forEach(el => observadorContador.observe(el));
+    // ---- Botão de idioma (visual por enquanto) ----
+    const idiomaPt = document.getElementById("idioma-pt");
+    const idiomaEn = document.getElementById("idioma-en");
+    function alternarIdioma(ativo) {
+      idiomaPt.classList.toggle("ativo", ativo === "pt");
+      idiomaEn.classList.toggle("ativo", ativo === "en");
+      idiomaPt.setAttribute("aria-pressed", String(ativo === "pt"));
+      idiomaEn.setAttribute("aria-pressed", String(ativo === "en"));
+    }
+    idiomaPt.addEventListener("click", () => alternarIdioma("pt"));
+    idiomaEn.addEventListener("click", () => alternarIdioma("en"));
 
+    // ---- Animação de entrada ao rolar a página ----
+    const prefereReduzirMovimento = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const elementosReveal = document.querySelectorAll(".reveal");
+    if (prefereReduzirMovimento) {
+      elementosReveal.forEach(el => el.classList.add("visivel"));
+    } else {
+      const observador = new IntersectionObserver((entradas) => {
+        entradas.forEach(entrada => {
+          if (entrada.isIntersecting) {
+            entrada.target.classList.add("visivel");
+            observador.unobserve(entrada.target);
+          }
+        });
+      }, { threshold: 0.12 });
+      elementosReveal.forEach(el => observador.observe(el));
+    }
   });
 </script>
 </body>
