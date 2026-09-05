@@ -575,7 +575,12 @@
     border-radius: 38px;
     padding: 10px;
     box-shadow: 0 24px 50px rgba(18, 36, 31, 0.25);
+    border: none;
+    cursor: pointer;
+    font: inherit;
+    transition: transform var(--transicao);
   }
+  .case-phone-frame:hover, .case-phone-frame:focus-visible { transform: translateY(-3px); }
   .case-phone-frame img {
     width: 100%;
     height: 100%;
@@ -885,6 +890,69 @@
   .rodape-links a { text-decoration: none; color: #dfeae5; }
   .rodape-links a:hover { color: var(--menta); }
 
+  /* ===== PLAYER DE VÍDEO (modal por cima da página) ===== */
+  .video-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+  .video-modal[hidden] { display: none; }
+  .video-modal-fundo {
+    position: absolute;
+    inset: 0;
+    background: rgba(13, 13, 13, 0.88);
+  }
+  .video-modal-caixa {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 420px;
+  }
+  .video-modal-player {
+    display: block;
+    width: 100%;
+    max-height: 85vh;
+    border-radius: 16px;
+    background: #000;
+  }
+  .video-modal-fechar {
+    position: absolute;
+    top: -46px;
+    right: 0;
+    width: 38px; height: 38px;
+    border-radius: 50%;
+    border: 1.5px solid rgba(255,255,255,0.5);
+    background: rgba(255,255,255,0.08);
+    color: #fff;
+    font-size: 1rem;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .video-modal-fechar:hover, .video-modal-fechar:focus-visible { background: rgba(255,255,255,0.2); }
+
+  /* Ícone de "assistir" nos cards do portfólio que têm vídeo de verdade (ver CONFIG). */
+  .trabalho-imagem-wrap { position: relative; }
+  .trabalho-play-badge {
+    position: absolute;
+    bottom: 10px; right: 10px;
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    background: rgba(13, 13, 13, 0.55);
+    border: 1.5px solid rgba(255,255,255,0.8);
+    color: #fff;
+    font-size: 0.7rem;
+    display: flex; align-items: center; justify-content: center;
+    padding-left: 2px;
+    pointer-events: none;
+  }
+  .trabalho-card.tem-video { cursor: pointer; }
+  .trabalho-card.tem-video .trabalho-imagem-wrap { transition: transform var(--transicao); }
+  .trabalho-card.tem-video:hover .trabalho-imagem-wrap { transform: translateY(-3px); }
+
   /* ===== ANIMAÇÃO DE ENTRADA (reveal) ===== */
   .reveal { opacity: 0; transform: translateY(22px); transition: opacity 0.7s ease, transform 0.7s ease; }
   .reveal.visivel { opacity: 1; transform: translateY(0); }
@@ -1032,11 +1100,11 @@
   <section id="case-organico">
     <div class="container case-organico-grid">
       <h2 class="case-organico-titulo reveal" id="case-titulo"></h2>
-      <div class="case-phone-frame reveal">
+      <button type="button" class="case-phone-frame reveal" id="case-phone-btn" aria-label="Assistir ao vídeo do case">
         <div class="case-phone-notch"></div>
-        <img id="case-video" alt="Case de conteúdo orgânico de Talissa Müller">
+        <img id="case-capa" alt="Case de conteúdo orgânico de Talissa Müller">
         <span class="case-play-botao" aria-hidden="true">▶</span>
-      </div>
+      </button>
       <div class="reveal">
         <div class="case-bloco">
           <span class="case-bloco-titulo" id="case-objetivo-titulo"></span>
@@ -1141,6 +1209,15 @@
   </div>
 </footer>
 
+<!-- Player de vídeo que abre por cima da página ao clicar num trabalho do portfólio ou no Case. -->
+<div class="video-modal" id="video-modal" hidden>
+  <div class="video-modal-fundo" id="video-modal-fundo"></div>
+  <div class="video-modal-caixa">
+    <button type="button" class="video-modal-fechar" id="video-modal-fechar" aria-label="Fechar vídeo">✕</button>
+    <video class="video-modal-player" id="video-modal-player" controls playsinline></video>
+  </div>
+</div>
+
 <script>
   // EDITE AQUI sempre que trocar uma foto no computador por um arquivo de MESMO NOME: aumente
   // esse número em 1. Isso obriga o navegador a buscar a versão nova da imagem, em vez de mostrar
@@ -1202,17 +1279,19 @@
 
     // EDITE AQUI: categorias com linha própria e sempre visível no portfólio.
     // "capa" é o nome do arquivo de imagem dentro da pasta "capas-portfolio/".
-    // ATENÇÃO: as capas abaixo estão marcadas para trocar (você comentou que não ficaram legais).
+    // "video" (opcional): nome do arquivo dentro da pasta "videos-portfolio/". Se preenchido, o card
+    // fica clicável e abre o vídeo de verdade num player por cima da página. Sem "video", o card
+    // fica só com a foto, como antes.
     categorias: [
       {
         nome: "Skincare",
         subtitulo: "Rotina de pele que gera confiança",
         trabalhos: [
-          { marca: "Beyoung", capa: "beyoung-1.jpg" },
-          { marca: "Beyoung", capa: "beyoung-2.jpg" },
-          { marca: "Beyoung", capa: "beyoung-3.jpg" },
-          { marca: "Beyoung", capa: "beyoung-4.jpg" },
-          { marca: "Beyoung", capa: "beyoung-5.jpg" }
+          { marca: "Beyoung", capa: "beyoung-1.jpg", video: "beyoung-1.mp4" },
+          { marca: "Beyoung", capa: "beyoung-2.jpg", video: "beyoung-2.mp4" },
+          { marca: "Beyoung", capa: "beyoung-3.jpg", video: "beyoung-3.mp4" },
+          { marca: "Beyoung", capa: "beyoung-4.jpg", video: "beyoung-4.mp4" },
+          { marca: "Beyoung", capa: "beyoung-5.jpg", video: "beyoung-5.mp4" }
         ]
       },
       {
@@ -1220,10 +1299,10 @@
         subtitulo: "Momentos de pausa que viram conteúdo",
         trabalhos: [
           { marca: "Rosa Selvagem", capa: "body-splash.jpg" },
-          { marca: "Rosa Selvagem", capa: "rosa-selvagem-1.jpg" },
-          { marca: "Rosa Selvagem", capa: "rosa-selvagem-2.jpg" },
+          { marca: "Rosa Selvagem", capa: "rosa-selvagem-1.jpg", video: "rosa-selvagem-1.mp4" },
+          { marca: "Rosa Selvagem", capa: "rosa-selvagem-2.jpg", video: "rosa-selvagem-2.mp4" },
           { marca: "Rosa Selvagem", capa: "rosa-selvagem-3.jpg" },
-          { marca: "Rosa Selvagem", capa: "rosa-selvagem-4.jpg" }
+          { marca: "Rosa Selvagem", capa: "rosa-selvagem-4.jpg", video: "rosa-selvagem-4.mp4" }
         ]
       }
     ],
@@ -1233,11 +1312,11 @@
     destaques: {
       subtitulo: "Clique num nicho ali em cima para ver só aqueles trabalhos",
       trabalhos: [
-        { marca: "Widi Care", capa: "widicare-juba.jpg", nicho: "Hair Care" },
-        { marca: "Coala", capa: "coala.jpg", nicho: "Casa e Decoração" },
-        { marca: "Coala", capa: "coala-02.jpg", nicho: "Casa e Decoração" },
-        { marca: "Azulim", capa: "azulim.jpg", nicho: "Casa e Decoração" },
-        { marca: "Mare Beauty", capa: "mare-beauty.jpg", nicho: "Unboxing" },
+        { marca: "Widi Care", capa: "widicare-juba.jpg", nicho: "Hair Care", video: "widicare-juba.mp4" },
+        { marca: "Coala", capa: "coala.jpg", nicho: "Casa e Decoração", video: "coala.mp4" },
+        { marca: "Coala", capa: "coala-02.jpg", nicho: "Casa e Decoração", video: "coala-02.mp4" },
+        { marca: "Azulim", capa: "azulim.jpg", nicho: "Casa e Decoração", video: "azulim.mp4" },
+        { marca: "Mare Beauty", capa: "mare-beauty.jpg", nicho: "Unboxing", video: "mare-beauty.mp4" },
         { marca: "Vita Premium", capa: "melatonina.jpg", nicho: "Fitness e Wellness" },
         { marca: "Vita Premium", capa: "vinagre-maca.jpg", nicho: "Fitness e Wellness" },
         { marca: "Miallegra", capa: "miallegra.jpg", nicho: "Moda e Acessórios" },
@@ -1246,12 +1325,15 @@
     },
 
     // EDITE AQUI: a seção "Case de Conteúdo Orgânico", entre o portfólio e as fotos.
-    // "video": nome do arquivo (foto/print do vídeo) dentro desta mesma pasta.
+    // "capa": nome do arquivo de foto (frame do vídeo) dentro desta mesma pasta, mostrado antes de clicar.
+    // "video" (opcional): nome do arquivo de vídeo dentro desta mesma pasta. Se preenchido, clicar no
+    // celular abre o vídeo de verdade num player por cima da página.
     // "resultadoItens": o primeiro item aparece em destaque (negrito) — deixe o número mais forte ali.
     // Troque os números de "estatisticas" pelos números reais do seu vídeo (visualizações, curtidas, comentários, compartilhamentos, salvamentos).
     caseOrganico: {
       titulo: "Case<br>Conteúdo<br>Orgânico",
-      video: "case-organico.jpg",
+      capa: "case-organico.jpg",
+      video: "case-organico.mp4",
       objetivoTitulo: "Objetivo",
       objetivoTexto: "Demonstrar a transformação do procedimento de forma natural.",
       estrategiaTitulo: "Estratégia utilizada",
@@ -1380,6 +1462,28 @@
 
   document.addEventListener("DOMContentLoaded", () => {
 
+    // ---- Player de vídeo (modal) ----
+    const videoModal = document.getElementById("video-modal");
+    const videoModalPlayer = document.getElementById("video-modal-player");
+    function abrirVideoModal(src) {
+      videoModalPlayer.src = src;
+      videoModal.hidden = false;
+      document.body.style.overflow = "hidden";
+      videoModalPlayer.play().catch(() => {});
+    }
+    function fecharVideoModal() {
+      videoModal.hidden = true;
+      videoModalPlayer.pause();
+      videoModalPlayer.removeAttribute("src");
+      videoModalPlayer.load();
+      document.body.style.overflow = "";
+    }
+    document.getElementById("video-modal-fechar").addEventListener("click", fecharVideoModal);
+    document.getElementById("video-modal-fundo").addEventListener("click", fecharVideoModal);
+    document.addEventListener("keydown", (evento) => {
+      if (evento.key === "Escape" && !videoModal.hidden) fecharVideoModal();
+    });
+
     const linkWhatsapp = "https://wa.me/55" + CONFIG.contato.telefoneDigitos + "?text=" + encodeURIComponent("Olá, Talissa! Vim pelo seu portfólio e quero falar sobre uma parceria.");
     const linkInstagram = "https://instagram.com/" + CONFIG.contato.instagram;
     const linkEmail = "mailto:" + CONFIG.contato.email;
@@ -1463,12 +1567,24 @@
       trabalhos.forEach(trabalho => {
         const rotuloLegenda = trabalho.nicho || nome;
         const card = document.createElement("div");
-        card.className = "trabalho-card";
+        card.className = "trabalho-card" + (trabalho.video ? " tem-video" : "");
         if (trabalho.nicho) card.dataset.nicho = trabalho.nicho;
         card.innerHTML =
           '<div class="trabalho-imagem-wrap"><span class="trabalho-tag">' + trabalho.marca + '</span>' +
-          '<img src="capas-portfolio/' + trabalho.capa + '?v=' + VERSAO_FOTOS + '" alt="Trabalho de UGC para ' + trabalho.marca + ', categoria ' + rotuloLegenda + '" loading="lazy"></div>' +
+          '<img src="capas-portfolio/' + trabalho.capa + '?v=' + VERSAO_FOTOS + '" alt="Trabalho de UGC para ' + trabalho.marca + ', categoria ' + rotuloLegenda + '" loading="lazy">' +
+          (trabalho.video ? '<span class="trabalho-play-badge" aria-hidden="true">▶</span>' : "") +
+          "</div>" +
           '<div class="trabalho-legenda"><strong>' + trabalho.marca + '</strong><span>' + rotuloLegenda + "</span></div>";
+        if (trabalho.video) {
+          card.setAttribute("role", "button");
+          card.setAttribute("tabindex", "0");
+          card.setAttribute("aria-label", "Assistir ao vídeo de " + trabalho.marca);
+          const abrir = () => abrirVideoModal("videos-portfolio/" + trabalho.video + "?v=" + VERSAO_FOTOS);
+          card.addEventListener("click", abrir);
+          card.addEventListener("keydown", (evento) => {
+            if (evento.key === "Enter" || evento.key === " ") { evento.preventDefault(); abrir(); }
+          });
+        }
         scrollWrap.appendChild(card);
       });
       linha.appendChild(scrollWrap);
@@ -1528,7 +1644,10 @@
 
     // ---- Case de Conteúdo Orgânico ----
     const caseCfg = CONFIG.caseOrganico;
-    document.getElementById("case-video").src = caseCfg.video + "?v=" + VERSAO_FOTOS;
+    document.getElementById("case-capa").src = caseCfg.capa + "?v=" + VERSAO_FOTOS;
+    if (caseCfg.video) {
+      document.getElementById("case-phone-btn").addEventListener("click", () => abrirVideoModal(caseCfg.video + "?v=" + VERSAO_FOTOS));
+    }
     document.getElementById("case-titulo").innerHTML = caseCfg.titulo;
     document.getElementById("case-objetivo-titulo").textContent = caseCfg.objetivoTitulo;
     document.getElementById("case-objetivo-texto").textContent = caseCfg.objetivoTexto;
