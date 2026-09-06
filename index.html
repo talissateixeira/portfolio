@@ -1122,7 +1122,10 @@
     .fotos-grid { grid-template-columns: repeat(2, 1fr); }
     .rodape-conteudo { flex-direction: column; align-items: flex-start; }
     .hero-texto-sobreposto { padding: 0 16px 40px; }
-    .hero-nome-completo { white-space: normal; letter-spacing: 0; line-height: 1.35; font-size: clamp(1.2rem, 7vw, 2.4rem); }
+    /* Continua numa linha só (como no desktop) só que bem menor, escalando puro em vw:
+       assim nunca precisa quebrar em duas linhas, o que evitava a sobreposição das letras
+       dessa fonte decorativa (ela tem ascendentes/descendentes bem altos). */
+    .hero-nome-completo { letter-spacing: 0; font-size: 4.5vw; }
   }
 </style>
 </head>
