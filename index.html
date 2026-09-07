@@ -967,6 +967,13 @@
     background: linear-gradient(115deg, rgba(0,0,0,0.62) 0%, rgba(0,0,0,0.48) 45%, rgba(0,0,0,0.3) 100%);
   }
   .contato-secao > .container { position: relative; z-index: 1; }
+  /* Essa div "reveal" some com a fonte cursiva do título ("juntos!") durante a própria animação
+     de entrada — o Safari desenha errado o "j" enquanto o ancestral ainda tem um transform
+     animando. Tirando o transform daqui (fica só o fade), o "j" nunca aparece cortado, nem por
+     um instante. !important pq a regra ".reveal.visivel" vem depois no arquivo com a mesma
+     especificidade e ganharia sem isso. */
+  .contato-secao .reveal,
+  .contato-secao .reveal.visivel { transform: none !important; }
   /* Rodapé virou parte da mesma foto/seção de contato, sem barra sólida separada. */
   .contato-secao .rodape {
     position: relative;
