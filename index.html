@@ -596,6 +596,7 @@
   .trabalho-tag {
     position: absolute;
     top: 12px; left: 12px;
+    z-index: 2;
     background: #fff;
     border-radius: 100px;
     padding: 5px 12px;
@@ -605,6 +606,18 @@
     text-transform: uppercase;
     color: var(--verde-petroleo);
   }
+  /* Prévia muda em loop do vídeo (YouTube), ligada só quando o card está visível na tela. */
+  .trabalho-preview {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    opacity: 0;
+    background: #000;
+    transition: opacity 0.5s ease;
+  }
+  .trabalho-preview.ativa { opacity: 1; }
+  .trabalho-preview iframe { width: 100%; height: 100%; border: 0; display: block; }
   /* ===== CASE DE CONTEÚDO ORGÂNICO ===== */
   /* Foto sangrando até a borda esquerda da tela, em P&B, altura cheia da seção; texto respirando
      à direita — a seção não usa ".container" pra poder furar o limite de largura do site. */
@@ -1075,6 +1088,7 @@
   .trabalho-play-badge {
     position: absolute;
     bottom: 10px; right: 10px;
+    z-index: 2;
     width: 30px; height: 30px;
     border-radius: 50%;
     background: rgba(50, 31, 20, 0.55);
@@ -1998,6 +2012,7 @@
         card.innerHTML =
           '<div class="trabalho-imagem-wrap"><span class="trabalho-tag">' + trabalho.marca + '</span>' +
           '<img src="capas-portfolio/' + trabalho.capa + '?v=' + VERSAO_FOTOS + '" alt="' + T.trabalhoAlt(trabalho.marca, rotuloLegenda) + '" loading="lazy">' +
+          (trabalho.youtubeId ? '<div class="trabalho-preview" data-youtube-id="' + trabalho.youtubeId + '"></div>' : "") +
           (temVideo ? '<span class="trabalho-play-badge" aria-hidden="true">▶</span>' : "") +
           "</div>";
         if (temVideo) {
@@ -2076,6 +2091,37 @@
       pill.addEventListener("click", () => filtrarDestaques(nicho, pill));
       filtrosRapidos.appendChild(pill);
     });
+
+    // ---- Prévia animada (loop, muda) dos cards de vídeo do portfólio, ligada só quando visível ----
+    // Dá um efeito mais vivo à grade sem precisar clicar: ao entrar na tela, o card troca a foto
+    // por um trechinho do vídeo do YouTube em loop e sem som; ao sair da tela, desliga de novo
+    // (economiza dados e evita vários vídeos tocando ao mesmo tempo). O clique continua abrindo
+    // o vídeo completo, com som, no modal — isso aqui é só decorativo.
+    if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      const previewObserver = new IntersectionObserver((entradas) => {
+        entradas.forEach((entrada) => {
+          const preview = entrada.target;
+          if (entrada.isIntersecting) {
+            if (preview.childElementCount) return;
+            const id = preview.dataset.youtubeId;
+            const iframe = document.createElement("iframe");
+            iframe.src = "https://www.youtube-nocookie.com/embed/" + id +
+              "?autoplay=1&mute=1&loop=1&playlist=" + id +
+              "&controls=0&modestbranding=1&playsinline=1&rel=0&iv_load_policy=3&disablekb=1";
+            iframe.setAttribute("allow", "autoplay; encrypted-media");
+            iframe.setAttribute("tabindex", "-1");
+            iframe.setAttribute("aria-hidden", "true");
+            iframe.title = "";
+            preview.appendChild(iframe);
+            requestAnimationFrame(() => preview.classList.add("ativa"));
+          } else {
+            preview.classList.remove("ativa");
+            preview.innerHTML = "";
+          }
+        });
+      }, { threshold: 0.6 });
+      document.querySelectorAll(".trabalho-preview").forEach(el => previewObserver.observe(el));
+    }
 
     // ---- Case de Conteúdo Orgânico ----
     const caseCfg = CONFIG.caseOrganico;
