@@ -992,6 +992,9 @@
     letter-spacing: 0;
     line-height: 1.4;
     padding-bottom: 0.1em;
+    /* O floreio do "j" cursivo (em "juntos!") se estende bem pra esquerda do início do texto —
+       sem essa margem ele fica cortado pela borda da seção (overflow:hidden). */
+    margin-left: 0.12em;
     font-size: clamp(2.6rem, 5.8vw, 4.4rem);
   }
   .contato-secao p { font-family: var(--fonte-montserrat); color: var(--creme); }
