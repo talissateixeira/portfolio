@@ -2414,16 +2414,24 @@
     });
 
     // ---- Animação de entrada ao rolar a página ----
+    // Depois que a animação termina, tira o "transform" de vez (fica só o estado final visível,
+    // sem nenhum transform aplicado). Um translateY(0) parado ainda conta como transform ativo
+    // pro navegador, e o Safari especificamente erra o recorte arredondado de <video> e o desenho
+    // de fontes cursivas com descendente (tipo o "j" de "juntos!") quando um ancestral tem
+    // qualquer transform, mesmo "zerado". Sem isso, esses elementos ficam com esse bug pra sempre
+    // depois que entram na tela uma vez.
     const prefereReduzirMovimento = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const elementosReveal = document.querySelectorAll(".reveal");
     if (prefereReduzirMovimento) {
-      elementosReveal.forEach(el => el.classList.add("visivel"));
+      elementosReveal.forEach(el => { el.classList.add("visivel"); el.style.transform = "none"; });
     } else {
       const observador = new IntersectionObserver((entradas) => {
         entradas.forEach(entrada => {
           if (entrada.isIntersecting) {
-            entrada.target.classList.add("visivel");
-            observador.unobserve(entrada.target);
+            const el = entrada.target;
+            el.classList.add("visivel");
+            setTimeout(() => { el.style.transform = "none"; }, 750);
+            observador.unobserve(el);
           }
         });
       }, { threshold: 0.12 });
