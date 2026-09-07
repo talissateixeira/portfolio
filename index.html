@@ -589,10 +589,15 @@
     aspect-ratio: 9 / 16;
     border-radius: 16px;
     overflow: hidden;
-    background: linear-gradient(150deg, #321F14, var(--menta));
+    background: var(--creme);
     box-shadow: 0 10px 24px rgba(38, 1, 1,0.15);
+    /* Sem isso o Safari ignora o border-radius/overflow:hidden pro <video> tocando e mostra
+       cantos quadrados. O clip-path força um recorte arredondado preciso (o antigo truque de
+       mask-image com gradiente radial não fica exato, sobra uma sobrinha reta no canto). */
+    -webkit-clip-path: inset(0 round 16px);
+    clip-path: inset(0 round 16px);
   }
-  .trabalho-imagem-wrap img { width: 100%; height: 100%; object-fit: cover; }
+  .trabalho-imagem-wrap img { width: 100%; height: 100%; object-fit: cover; transition: transform var(--transicao); }
   .trabalho-tag {
     position: absolute;
     top: 12px; left: 12px;
@@ -606,7 +611,7 @@
     text-transform: uppercase;
     color: var(--verde-petroleo);
   }
-  /* Prévia muda em loop do vídeo (YouTube), ligada só quando o card está visível na tela. */
+  /* Prévia muda em loop de um vídeo próprio, ligada no hover da seção (ver JS). */
   .trabalho-preview {
     position: absolute;
     inset: 0;
@@ -614,9 +619,17 @@
     pointer-events: none;
     opacity: 0;
     background: #000;
-    transition: opacity 0.5s ease;
+    border-radius: 16px;
+    overflow: hidden;
+    /* translateZ(0) força esse recorte arredondado pra sua própria camada de composição —
+       sem isso o Safari às vezes ignora o overflow:hidden pro <video> tocando dentro dele. */
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+    transition: opacity 0.5s ease, transform var(--transicao);
   }
   .trabalho-preview.ativa { opacity: 1; }
+  /* border-radius direto no <video> pq alguns navegadores compositam vídeo tocando numa camada
+     à parte que ignora o overflow:hidden/border-radius só do container pai. */
   .trabalho-preview video { width: 100%; height: 100%; object-fit: cover; display: block; }
   /* ===== CASE DE CONTEÚDO ORGÂNICO ===== */
   /* Foto sangrando até a borda esquerda da tela, em P&B, altura cheia da seção; texto respirando
@@ -640,7 +653,7 @@
     height: 100%;
     border: none;
     padding: 0;
-    cursor: pointer;
+    cursor: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCIgdmlld0JveD0iMCAwIDQwIDQwIj48Y2lyY2xlIGN4PSIyMCIgY3k9IjIwIiByPSIxOCIgZmlsbD0id2hpdGUiIHN0cm9rZT0iIzBkMGQwZCIgc3Ryb2tlLXdpZHRoPSIyIi8+PHBhdGggZD0iTTE3IDEzLjVMMjggMjBMMTcgMjYuNVoiIGZpbGw9IiMwZDBkMGQiLz48L3N2Zz4=") 20 20, pointer;
     background: #ddd;
   }
   .case-foto-capa img { width: 100%; height: 100%; object-fit: cover; object-position: center 12%; display: block; filter: grayscale(100%); }
@@ -1099,9 +1112,14 @@
     padding-left: 2px;
     pointer-events: none;
   }
-  .trabalho-card.tem-video { cursor: pointer; }
+  .trabalho-card.tem-video {
+    cursor: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCIgdmlld0JveD0iMCAwIDQwIDQwIj48Y2lyY2xlIGN4PSIyMCIgY3k9IjIwIiByPSIxOC41IiBmaWxsPSJyZ2JhKDUwLDMxLDIwLDAuNzUpIiBzdHJva2U9IndoaXRlIiBzdHJva2Utd2lkdGg9IjEuNSIvPjxwYXRoIGQ9Ik0xNi41IDEzLjVMMjcgMjBMMTYuNSAyNi41WiIgZmlsbD0id2hpdGUiLz48L3N2Zz4=") 20 20, pointer;
+  }
   .trabalho-card.tem-video .trabalho-imagem-wrap { transition: transform var(--transicao); }
   .trabalho-card.tem-video:hover .trabalho-imagem-wrap { transform: translateY(-3px); }
+  .trabalho-card.tem-video:hover .trabalho-imagem-wrap img,
+  .trabalho-card.tem-video:hover .trabalho-preview { transform: scale(1.06); }
+  .trabalho-card.tem-video:hover .trabalho-preview { -webkit-transform: scale(1.06); }
 
   /* ===== ANIMAÇÃO DE ENTRADA (reveal) ===== */
   .reveal { opacity: 0; transform: translateY(22px); transition: opacity 0.7s ease, transform 0.7s ease; }
@@ -2041,6 +2059,32 @@
         });
       });
 
+      // Prévia animada (loop, muda) dos cards de vídeo: passando o mouse por qualquer lugar
+      // dessa seção (título ou cards), TODOS os vídeos dela tocam juntos, em loop e sem som,
+      // no lugar da foto; tirando o mouse da seção, todos voltam a ficar estáticos. O clique
+      // no card continua abrindo o vídeo completo, com som, no modal do YouTube — isso aqui é
+      // só decorativo. Não usa embed do YouTube pra prévia porque o player dele sempre mostra
+      // a marca/nome do canal quando pausado.
+      if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+        linha.addEventListener("mouseenter", () => {
+          linha.querySelectorAll(".trabalho-card:not([hidden]) .trabalho-preview").forEach(preview => {
+            const video = preview.querySelector("video");
+            if (!video) return;
+            if (!video.src) video.src = video.dataset.src;
+            video.currentTime = 0;
+            video.play().catch(() => {});
+            preview.classList.add("ativa");
+          });
+        });
+        linha.addEventListener("mouseleave", () => {
+          linha.querySelectorAll(".trabalho-preview").forEach(preview => {
+            preview.classList.remove("ativa");
+            const video = preview.querySelector("video");
+            if (video) video.pause();
+          });
+        });
+      }
+
       categoriasLinhas.appendChild(linha);
       return scrollWrap;
     }
@@ -2094,30 +2138,6 @@
       pill.addEventListener("click", () => filtrarDestaques(nicho, pill));
       filtrosRapidos.appendChild(pill);
     });
-
-    // ---- Prévia animada (loop, muda) dos cards de vídeo do portfólio, ligada só quando visível ----
-    // Dá um efeito mais vivo à grade sem precisar clicar: ao entrar na tela, o card troca a foto
-    // por um trechinho de vídeo próprio (arquivo em "videos-portfolio/", ver "preview" no CONFIG)
-    // tocando em loop e sem som; ao sair da tela, pausa de novo. O clique continua abrindo o
-    // vídeo completo, com som, no modal do YouTube — isso aqui é só decorativo. Não usa embed do
-    // YouTube pra prévia porque o player dele sempre mostra a marca/nome do canal quando pausado.
-    if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      const previewObserver = new IntersectionObserver((entradas) => {
-        entradas.forEach((entrada) => {
-          const video = entrada.target.querySelector("video");
-          if (!video) return;
-          if (entrada.isIntersecting) {
-            if (!video.src) video.src = video.dataset.src;
-            video.play().catch(() => {});
-            requestAnimationFrame(() => entrada.target.classList.add("ativa"));
-          } else {
-            entrada.target.classList.remove("ativa");
-            video.pause();
-          }
-        });
-      }, { threshold: 0.6 });
-      document.querySelectorAll(".trabalho-preview").forEach(el => previewObserver.observe(el));
-    }
 
     // ---- Case de Conteúdo Orgânico ----
     const caseCfg = CONFIG.caseOrganico;
