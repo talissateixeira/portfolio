@@ -617,7 +617,7 @@
     transition: opacity 0.5s ease;
   }
   .trabalho-preview.ativa { opacity: 1; }
-  .trabalho-preview iframe { width: 100%; height: 100%; border: 0; display: block; }
+  .trabalho-preview video { width: 100%; height: 100%; object-fit: cover; display: block; }
   /* ===== CASE DE CONTEÚDO ORGÂNICO ===== */
   /* Foto sangrando até a borda esquerda da tela, em P&B, altura cheia da seção; texto respirando
      à direita — a seção não usa ".container" pra poder furar o limite de largura do site. */
@@ -1451,6 +1451,9 @@
     // "youtubeId" (opcional): o código do vídeo não listado do YouTube (a parte final do link,
     // depois de "/shorts/"). Se preenchido, o card fica clicável e abre esse vídeo num player
     // por cima da página. Sem "youtubeId", o card fica só com a foto, como antes.
+    // "preview" (opcional): nome de um arquivo de vídeo curto e mudo dentro da pasta
+    // "videos-portfolio/" (ex.: "beyoung-1.mp4"). Se preenchido, o card toca esse clipe em loop,
+    // sem som, sozinho, assim que aparece na tela (efeito de prévia animada, tipo Reels/TikTok).
     categorias: [
       {
         nome: "Skincare",
@@ -2012,7 +2015,7 @@
         card.innerHTML =
           '<div class="trabalho-imagem-wrap"><span class="trabalho-tag">' + trabalho.marca + '</span>' +
           '<img src="capas-portfolio/' + trabalho.capa + '?v=' + VERSAO_FOTOS + '" alt="' + T.trabalhoAlt(trabalho.marca, rotuloLegenda) + '" loading="lazy">' +
-          (trabalho.youtubeId ? '<div class="trabalho-preview" data-youtube-id="' + trabalho.youtubeId + '"></div>' : "") +
+          (trabalho.preview ? '<div class="trabalho-preview"><video muted loop playsinline preload="none" data-src="videos-portfolio/' + trabalho.preview + '?v=' + VERSAO_FOTOS + '"></video></div>' : "") +
           (temVideo ? '<span class="trabalho-play-badge" aria-hidden="true">▶</span>' : "") +
           "</div>";
         if (temVideo) {
@@ -2094,29 +2097,22 @@
 
     // ---- Prévia animada (loop, muda) dos cards de vídeo do portfólio, ligada só quando visível ----
     // Dá um efeito mais vivo à grade sem precisar clicar: ao entrar na tela, o card troca a foto
-    // por um trechinho do vídeo do YouTube em loop e sem som; ao sair da tela, desliga de novo
-    // (economiza dados e evita vários vídeos tocando ao mesmo tempo). O clique continua abrindo
-    // o vídeo completo, com som, no modal — isso aqui é só decorativo.
+    // por um trechinho de vídeo próprio (arquivo em "videos-portfolio/", ver "preview" no CONFIG)
+    // tocando em loop e sem som; ao sair da tela, pausa de novo. O clique continua abrindo o
+    // vídeo completo, com som, no modal do YouTube — isso aqui é só decorativo. Não usa embed do
+    // YouTube pra prévia porque o player dele sempre mostra a marca/nome do canal quando pausado.
     if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
       const previewObserver = new IntersectionObserver((entradas) => {
         entradas.forEach((entrada) => {
-          const preview = entrada.target;
+          const video = entrada.target.querySelector("video");
+          if (!video) return;
           if (entrada.isIntersecting) {
-            if (preview.childElementCount) return;
-            const id = preview.dataset.youtubeId;
-            const iframe = document.createElement("iframe");
-            iframe.src = "https://www.youtube-nocookie.com/embed/" + id +
-              "?autoplay=1&mute=1&loop=1&playlist=" + id +
-              "&controls=0&modestbranding=1&playsinline=1&rel=0&iv_load_policy=3&disablekb=1";
-            iframe.setAttribute("allow", "autoplay; encrypted-media");
-            iframe.setAttribute("tabindex", "-1");
-            iframe.setAttribute("aria-hidden", "true");
-            iframe.title = "";
-            preview.appendChild(iframe);
-            requestAnimationFrame(() => preview.classList.add("ativa"));
+            if (!video.src) video.src = video.dataset.src;
+            video.play().catch(() => {});
+            requestAnimationFrame(() => entrada.target.classList.add("ativa"));
           } else {
-            preview.classList.remove("ativa");
-            preview.innerHTML = "";
+            entrada.target.classList.remove("ativa");
+            video.pause();
           }
         });
       }, { threshold: 0.6 });
