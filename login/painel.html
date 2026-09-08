@@ -294,12 +294,13 @@
   }
   .barra-dia:hover .barra { opacity: 0.75; }
   .barra-legenda { font-size: 0.66rem; color: var(--texto-suave); white-space: nowrap; }
-  /* Tooltip customizado ao passar o mouse na barra, com o número do dia. */
-  .barra-tooltip {
-    position: absolute;
-    bottom: calc(100% + 10px);
-    left: 50%;
-    transform: translateX(-50%) translateY(4px);
+  /* Tooltip do gráfico: um único elemento reaproveitado e posicionado via JS com
+     position:fixed (não pode ser position:absolute dentro de ".barra-dia" porque
+     ".grafico-barras" tem overflow-x:auto, e isso força o navegador a cortar também
+     o overflow vertical — o balão sumiria atrás desse corte). */
+  #tooltip-grafico {
+    position: fixed;
+    transform: translate(-50%, -100%);
     background: var(--grafite);
     color: var(--branco);
     font-size: 0.72rem;
@@ -309,10 +310,11 @@
     white-space: nowrap;
     opacity: 0;
     pointer-events: none;
-    transition: opacity 0.15s ease, transform 0.15s ease;
-    z-index: 5;
+    transition: opacity 0.15s ease;
+    z-index: 999;
   }
-  .barra-tooltip::after {
+  #tooltip-grafico.visivel { opacity: 1; }
+  #tooltip-grafico::after {
     content: "";
     position: absolute;
     top: 100%;
@@ -321,7 +323,6 @@
     border: 5px solid transparent;
     border-top-color: var(--grafite);
   }
-  .barra-dia:hover .barra-tooltip { opacity: 1; transform: translateX(-50%) translateY(0); }
 
   .estado-vazio { color: var(--texto-suave); font-size: 0.92rem; text-align: center; padding: 20px 0; margin: 0; }
   .estado-carregando { color: var(--texto-suave); text-align: center; padding: 60px 0; }
@@ -1054,6 +1055,8 @@
   </main>
 </div>
 
+<div id="tooltip-grafico"></div>
+
 <script>
 (async function () {
   // ---- Guarda de autenticação: só continua se houver sessão válida ----
@@ -1250,6 +1253,26 @@
     renderizarGrafico(pageViews);
   }
 
+  // Liga o tooltip compartilhado (#tooltip-grafico) às barras de um gráfico recém-renderizado.
+  // Usa position:fixed + JS (em vez de position:absolute dentro da barra) porque o container
+  // do gráfico tem overflow-x:auto, que corta qualquer coisa que passe da altura da caixa.
+  function ativarTooltipsGrafico(container) {
+    const tooltip = document.getElementById("tooltip-grafico");
+    container.querySelectorAll(".barra-dia").forEach(barra => {
+      barra.addEventListener("mouseenter", () => {
+        tooltip.textContent = barra.dataset.tooltip;
+        tooltip.classList.add("visivel");
+      });
+      barra.addEventListener("mousemove", (evento) => {
+        tooltip.style.left = evento.clientX + "px";
+        tooltip.style.top = (evento.clientY - 14) + "px";
+      });
+      barra.addEventListener("mouseleave", () => {
+        tooltip.classList.remove("visivel");
+      });
+    });
+  }
+
   function renderizarGrafico(pageViews) {
     const container = document.getElementById("grafico-barras");
     const dias = [];
@@ -1281,13 +1304,13 @@
       const dataFormatada = d.dia.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" });
       const rotuloVisitas = d.total === 1 ? "visita" : "visitas";
       return `
-        <div class="barra-dia">
-          <span class="barra-tooltip">${dataFormatada}: ${d.total} ${rotuloVisitas}</span>
+        <div class="barra-dia" data-tooltip="${dataFormatada}: ${d.total} ${rotuloVisitas}">
           <div class="barra" style="height:${altura}%"></div>
           <span class="barra-legenda">${dataFormatada}</span>
         </div>
       `;
     }).join("");
+    ativarTooltipsGrafico(container);
   }
 
   // ==================== ABA: PORTFÓLIO ====================
@@ -1467,13 +1490,13 @@
     container.innerHTML = valores.map((valor, i) => {
       const altura = valor > 0 ? Math.max((valor / maiorValor) * 100, 6) : 2;
       return `
-        <div class="barra-dia">
-          <span class="barra-tooltip">${rotulos[i]}: ${valor} ${sufixoTitulo}</span>
+        <div class="barra-dia" data-tooltip="${rotulos[i]}: ${valor} ${sufixoTitulo}">
           <div class="barra" style="height:${altura}%"></div>
           <span class="barra-legenda">${rotulos[i]}</span>
         </div>
       `;
     }).join("");
+    ativarTooltipsGrafico(container);
   }
 
   // ==================== ABA: PROPOSTAS ====================
