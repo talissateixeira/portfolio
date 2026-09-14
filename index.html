@@ -1468,10 +1468,10 @@
       { nome: "Mare Beauty", logo: "mare-beauty.png" },
       { nome: "Vita Premium", logo: "vita-premium.png" },
       { nome: "Miallegra", logo: "miallegra.png" },
-      { nome: "Rosa Selvagem", logo: "rosa-selvagem.png" },
-      { nome: "Beyoung", logo: "beyoung.png" },
+      { nome: "Rosa Selvagem", logo: "rosa-selvagem.png", altura: 26 },
+      { nome: "Beyoung", logo: "beyoung.png", altura: 20 },
       { nome: "Azulim", logo: "azulim.png" },
-      { nome: "Full English", logo: "full-english.png" }
+      { nome: "Full English", logo: "full-english.png", altura: 26 }
     ],
 
     // EDITE AQUI: categorias com linha própria e sempre visível no portfólio.
@@ -1544,13 +1544,13 @@
       ],
       resultadoTitulo: "Resultado",
       resultadoItens: [
-        "+260 mil visualizações",
-        "14 mil curtidas",
+        "+280 mil visualizações",
+        "15 mil curtidas",
         "1.600 salvamentos"
       ],
       estatisticas: [
-        { icone: "play", valor: "265K" },
-        { icone: "curtida", valor: "14K" },
+        { icone: "play", valor: "280K" },
+        { icone: "curtida", valor: "15K" },
         { icone: "comentario", valor: "533" },
         { icone: "compartilhar", valor: "654" },
         { icone: "salvar", valor: "1.614" }
@@ -1657,10 +1657,10 @@
       { nome: "Mare Beauty", logo: "mare-beauty.png" },
       { nome: "Vita Premium", logo: "vita-premium.png" },
       { nome: "Miallegra", logo: "miallegra.png" },
-      { nome: "Rosa Selvagem", logo: "rosa-selvagem.png" },
-      { nome: "Beyoung", logo: "beyoung.png" },
+      { nome: "Rosa Selvagem", logo: "rosa-selvagem.png", altura: 26 },
+      { nome: "Beyoung", logo: "beyoung.png", altura: 20 },
       { nome: "Azulim", logo: "azulim.png" },
-      { nome: "Full English", logo: "full-english.png" }
+      { nome: "Full English", logo: "full-english.png", altura: 26 }
     ],
 
     categorias: [
@@ -1717,13 +1717,13 @@
       ],
       resultadoTitulo: "Result",
       resultadoItens: [
-        "+260K views",
-        "14K likes",
+        "+280K views",
+        "15K likes",
         "1,600 saves"
       ],
       estatisticas: [
-        { icone: "play", valor: "265K" },
-        { icone: "curtida", valor: "14K" },
+        { icone: "play", valor: "280K" },
+        { icone: "curtida", valor: "15K" },
         { icone: "comentario", valor: "533" },
         { icone: "compartilhar", valor: "654" },
         { icone: "salvar", valor: "1,614" }
@@ -2010,6 +2010,7 @@
       img.src = "logos-marcas/" + marca.logo + "?v=" + VERSAO_FOTOS;
       img.alt = T.logoDaMarca + marca.nome;
       img.loading = "lazy";
+      if (marca.altura) img.style.height = marca.altura + "px";
       marcasBolhas.appendChild(img);
     });
 
