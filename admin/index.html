@@ -177,6 +177,12 @@
   .origem-barra-fundo { flex: 1; height: 6px; background: var(--fundo-acento); border-radius: 3px; margin: 0 10px; overflow: hidden; }
   .origem-barra { height: 100%; background: var(--acento); border-radius: 3px; }
 
+  .funil-linha { display: flex; gap: 14px; flex-wrap: wrap; }
+  .funil-item { flex: 1; min-width: 130px; }
+  .funil-valor { font-size: 1.3rem; font-weight: 700; }
+  .funil-rotulo { font-size: 0.76rem; color: var(--texto-suave); margin-top: 2px; }
+  .funil-percentual { font-size: 0.72rem; color: var(--acento); font-weight: 600; margin-top: 1px; }
+
   /* ===== BOTÕES ===== */
   .botao {
     display: inline-flex; align-items: center; gap: 6px;
@@ -507,6 +513,17 @@
         <div class="painel-branco">
           <div class="painel-titulo">De onde vêm</div>
           <div id="lista-origens"></div>
+        </div>
+      </div>
+
+      <div class="grade-2-col">
+        <div class="painel-branco">
+          <div class="painel-titulo">Vídeos mais clicados</div>
+          <div id="lista-videos-clicados"></div>
+        </div>
+        <div class="painel-branco">
+          <div class="painel-titulo">Do primeiro clique até a mensagem</div>
+          <div class="funil-linha" id="funil-conversao"></div>
         </div>
       </div>
 
@@ -929,15 +946,18 @@
   let listaVideos = [];
 
   async function carregarPortfolio() {
-    const [videos, visitas14, visitasHoje] = await Promise.all([
+    const [videos, visitas14, visitasHoje, eventos14] = await Promise.all([
       consultarSeguro("videos", sb.from("videos").select("*").order("ordem", { ascending: true })),
       consultarSeguro("visitas", sb.from("visitas").select("data,pagina,origem").gte("data", new Date(Date.now() - 13 * 86400000).toISOString())),
-      consultarSeguro("visitas", sb.from("visitas").select("id").gte("data", hojeISO() + "T00:00:00"))
+      consultarSeguro("visitas", sb.from("visitas").select("id").gte("data", hojeISO() + "T00:00:00")),
+      consultarSeguro("eventos", sb.from("eventos").select("tipo,video_titulo").gte("data", new Date(Date.now() - 13 * 86400000).toISOString()))
     ]);
     listaVideos = videos;
     renderStatsPortfolio(videos, visitas14, visitasHoje);
     renderGraficoVisitas(visitas14);
     renderOrigens(visitas14);
+    renderVideosClicados(eventos14);
+    renderFunil(visitas14, eventos14);
     renderTabelaVideos();
   }
 
@@ -953,12 +973,48 @@
     const stats = [
       { rotulo: "Visitas em 14 dias", valor: visitas14.length },
       { rotulo: "Visitas hoje", valor: visitasHoje.length },
-      { rotulo: "Vídeos no ar", valor: videosNoAr },
-      { rotulo: "Nicho mais forte", valor: nichoTop ? nichoTop[0] : "—" },
-      { rotulo: "De onde mais vêm", valor: origemTop ? origemTop[0] : "—" }
+      { rotulo: "Vídeos no ar", valor: videosNoAr, extra: videos.length + " no total" },
+      { rotulo: "Nicho mais forte", valor: nichoTop ? nichoTop[0] : "—", extra: nichoTop ? nichoTop[1] + " vídeos" : "" },
+      { rotulo: "De onde mais vêm", valor: origemTop ? origemTop[0] : "—", extra: origemTop ? origemTop[1] + " visitas" : "" }
     ];
     document.getElementById("stats-portfolio").innerHTML = stats.map(s =>
-      '<div class="stat-item"><div class="stat-valor">' + s.valor + '</div><div class="stat-rotulo">' + s.rotulo + "</div></div>"
+      '<div class="stat-item"><div class="stat-valor">' + s.valor + (s.extra ? "<small>" + s.extra + "</small>" : "") + '</div><div class="stat-rotulo">' + s.rotulo + "</div></div>"
+    ).join("");
+  }
+
+  // "Vídeos mais clicados": conta os eventos "clique_video" dos últimos 14 dias,
+  // agrupados pelo título do vídeo, do mais clicado pro menos.
+  function renderVideosClicados(eventos14) {
+    const alvo = document.getElementById("lista-videos-clicados");
+    const cliques = eventos14.filter(e => e.tipo === "clique_video");
+    if (cliques.length === 0) {
+      alvo.innerHTML = '<p class="texto-vazio">Ainda não há cliques em vídeo registrados nos últimos 14 dias.</p>';
+      return;
+    }
+    const contagem = {};
+    cliques.forEach(e => { const t = e.video_titulo || "Sem título"; contagem[t] = (contagem[t] || 0) + 1; });
+    const linhas = Object.entries(contagem).sort((a, b) => b[1] - a[1]).slice(0, 6);
+    const max = Math.max(...linhas.map(l => l[1]), 0);
+    alvo.innerHTML = '<div class="lista-origens">' + linhas.map(([titulo, total], i) =>
+      '<div class="origem-linha"><span>' + (i + 1) + ". " + titulo + '</span><div class="origem-barra-fundo"><div class="origem-barra" style="width:' + (max > 0 ? (total / max) * 100 : 0) + '%"></div></div><strong>' + total + "</strong></div>"
+    ).join("") + "</div>";
+  }
+
+  // Funil "visita -> rolou até o formulário -> mandou mensagem", com o
+  // percentual de cada etapa em cima do total de visitas dos últimos 14 dias.
+  function renderFunil(visitas14, eventos14) {
+    const alvo = document.getElementById("funil-conversao");
+    const totalVisitas = visitas14.length;
+    const rolaram = eventos14.filter(e => e.tipo === "rolou_formulario").length;
+    const mensagens = eventos14.filter(e => e.tipo === "mensagem_enviada").length;
+    const pct = (valor) => totalVisitas > 0 ? Math.round((valor / totalVisitas) * 100) + "% de quem visitou" : "—";
+    const etapas = [
+      { valor: totalVisitas, rotulo: "abriram o portfólio", extra: "todas as visitas registradas" },
+      { valor: rolaram, rotulo: "rolaram até o formulário", extra: pct(rolaram) },
+      { valor: mensagens, rotulo: "mandaram mensagem", extra: pct(mensagens) }
+    ];
+    alvo.innerHTML = etapas.map(e =>
+      '<div class="funil-item"><div class="funil-valor">' + e.valor + '</div><div class="funil-rotulo">' + e.rotulo + '</div><div class="funil-percentual">' + e.extra + "</div></div>"
     ).join("");
   }
 

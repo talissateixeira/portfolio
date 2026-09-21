@@ -1523,6 +1523,19 @@
     return sbSite.from("marcas").insert(Object.assign({ situacao: "lead" }, dados));
   }
 
+  // Grava um evento pras métricas extras do admin (vídeos mais clicados, e o
+  // funil de visita -> formulário -> mensagem). Tudo opcional/decorativo: se
+  // a tabela "eventos" ainda não existir, só avisa no console e segue o jogo.
+  function registrarEventoSite(tipo, videoTitulo) {
+    sbSite.from("eventos").insert({
+      tipo: tipo,
+      video_titulo: videoTitulo || null,
+      pagina: window.location.pathname
+    }).then(({ error }) => {
+      if (error) console.warn("Não foi possível registrar o evento:", error.message);
+    });
+  }
+
   // EDITE AQUI sempre que trocar uma foto no computador por um arquivo de MESMO NOME: aumente
   // esse número em 1. Isso obriga o navegador a buscar a versão nova da imagem, em vez de mostrar
   // uma versão antiga guardada no cache (é por isso que às vezes uma foto trocada "não atualiza").
@@ -1969,6 +1982,26 @@
     // ---- Rastreamento: registra a visita assim que a página carrega ----
     registrarVisita();
 
+    // ---- Rastreamento: registra quando a pessoa rola até o formulário de
+    // contato, uma vez só por visita (pro funil "visita -> formulário -> mensagem"
+    // no admin). ----
+    (function () {
+      const secaoContato = document.getElementById("contato");
+      if (!secaoContato) return;
+      const CHAVE = "rolouFormularioRegistrado";
+      if (sessionStorage.getItem(CHAVE)) return;
+      const observador = new IntersectionObserver((entradas) => {
+        entradas.forEach((entrada) => {
+          if (entrada.isIntersecting && !sessionStorage.getItem(CHAVE)) {
+            sessionStorage.setItem(CHAVE, "1");
+            registrarEventoSite("rolou_formulario");
+            observador.disconnect();
+          }
+        });
+      }, { threshold: 0.2 });
+      observador.observe(secaoContato);
+    })();
+
     // ---- Player de vídeo (modal) ----
     // Abre um vídeo do YouTube (não listado) passando o "youtubeId", ou um arquivo de vídeo
     // próprio (dentro de "videos-portfolio/") passando "arquivo". Use só um dos dois por trabalho.
@@ -2096,7 +2129,10 @@
           card.setAttribute("role", "button");
           card.setAttribute("tabindex", "0");
           card.setAttribute("aria-label", T.assistirVideo + trabalho.marca);
-          const abrir = () => abrirVideoModal({ youtubeId: idYoutube });
+          const abrir = () => {
+            registrarEventoSite("clique_video", trabalho.titulo || trabalho.marca);
+            abrirVideoModal({ youtubeId: idYoutube });
+          };
           card.addEventListener("click", abrir);
           card.addEventListener("keydown", (evento) => {
             if (evento.key === "Enter" || evento.key === " ") { evento.preventDefault(); abrir(); }
@@ -2236,9 +2272,12 @@
     const caseCfg = CONFIG.caseOrganico;
     document.getElementById("case-capa").src = caseCfg.capa + "?v=" + VERSAO_FOTOS;
     if (caseCfg.youtubeId || caseCfg.video) {
-      document.getElementById("case-phone-btn").addEventListener("click", () => abrirVideoModal(caseCfg.youtubeId
-        ? { youtubeId: caseCfg.youtubeId }
-        : { arquivo: caseCfg.video + "?v=" + VERSAO_FOTOS }));
+      document.getElementById("case-phone-btn").addEventListener("click", () => {
+        registrarEventoSite("clique_video", "Case de Conteúdo Orgânico");
+        abrirVideoModal(caseCfg.youtubeId
+          ? { youtubeId: caseCfg.youtubeId }
+          : { arquivo: caseCfg.video + "?v=" + VERSAO_FOTOS });
+      });
     }
     document.getElementById("case-titulo").innerHTML = caseCfg.titulo;
     document.getElementById("case-objetivo-titulo").textContent = caseCfg.objetivoTitulo;
@@ -2452,6 +2491,7 @@
           mensagemConfirmacao.hidden = false;
           return;
         }
+        registrarEventoSite("mensagem_enviada");
         mensagemConfirmacao.textContent = T.sucessoEnvio;
         mensagemConfirmacao.hidden = false;
         formContato.reset();
@@ -2520,6 +2560,7 @@
             mensagemPopup.hidden = false;
             return;
           }
+          registrarEventoSite("mensagem_enviada");
           formPopup.hidden = true;
           mensagemPopup.textContent = T.popupSucesso;
           mensagemPopup.hidden = false;
