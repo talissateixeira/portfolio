@@ -163,7 +163,7 @@
     padding: 18px 20px;
   }
   .bloco-portfolio { margin-bottom: 20px; }
-  .portfolio-subtitulo { color: var(--texto-suave); font-size: 0.88rem; margin: 4px 0 0; }
+  .portfolio-subtitulo { color: var(--texto-suave); font-size: 0.88rem; margin: 4px 0 20px; }
   .painel-titulo { font-size: 0.85rem; font-weight: 700; margin-bottom: 14px; }
   .texto-vazio { color: var(--texto-suave); font-size: 0.85rem; line-height: 1.6; padding: 10px 0; }
 
@@ -519,13 +519,7 @@
 
     <!-- ===================== ABA PORTFÓLIO ===================== -->
     <section class="aba" id="aba-portfolio">
-      <div class="barra-acoes">
-        <p class="portfolio-subtitulo">Como o seu site está indo e os vídeos que aparecem nele.</p>
-        <button class="botao botao-principal" id="botao-add-video">
-          <span class="icone" style="width:14px;height:14px;"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></span>
-          Adicionar vídeo
-        </button>
-      </div>
+      <p class="portfolio-subtitulo">Como o seu site está indo e os vídeos que aparecem nele.</p>
 
       <div class="stats-faixa" id="stats-portfolio"></div>
 
@@ -549,7 +543,13 @@
         <div class="funil-linha" id="funil-conversao"></div>
       </div>
 
-      <h2 style="font-size:0.95rem;margin-bottom:16px;">Meus vídeos</h2>
+      <div class="barra-acoes">
+        <h2 style="font-size:0.95rem;">Meus vídeos</h2>
+        <button class="botao botao-principal" id="botao-add-video">
+          <span class="icone" style="width:14px;height:14px;"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></span>
+          Adicionar vídeo
+        </button>
+      </div>
       <div class="painel-branco tabela-scroll">
         <table class="tabela">
           <thead>
