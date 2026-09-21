@@ -1,0 +1,1686 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Painel | Talissa Müller</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --creme: #FFFCF9;
+    --preto: #321F14;
+    --texto: #591902;
+    --texto-suave: #7A4735;
+    --acento: #A64F03;
+    --borda: rgba(89, 25, 2, 0.16);
+    --fundo-acento: rgba(166, 79, 3, 0.1);
+    --branco: #FFFFFF;
+    --sucesso: #2D7A4F;
+    --fundo-sucesso: rgba(45, 122, 79, 0.1);
+    --erro: #C4453C;
+    --fundo-erro: rgba(196, 69, 60, 0.1);
+    --aviso: #B08900;
+    --fundo-aviso: rgba(176, 137, 0, 0.12);
+    --cinza: #8A8A8A;
+    --fundo-cinza: rgba(138, 138, 138, 0.14);
+    --raio: 14px;
+    --raio-grande: 20px;
+    --sidebar-largura: 234px;
+    --fonte: "Inter", "Segoe UI", system-ui, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    margin: 0;
+    background: var(--creme);
+    color: var(--preto);
+    font-family: var(--fonte);
+    font-size: 14px;
+    line-height: 1.45;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+  }
+  body.pronto { opacity: 1; }
+  a { color: inherit; }
+  button { font-family: var(--fonte); }
+  h1, h2, h3 { font-family: var(--fonte); font-weight: 700; margin: 0; }
+  .icone { width: 18px; height: 18px; flex-shrink: 0; }
+  .icone svg { width: 100%; height: 100%; stroke: currentColor; fill: none; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+
+  /* ===== ESTRUTURA GERAL ===== */
+  .layout { display: flex; min-height: 100vh; }
+
+  .sidebar {
+    width: var(--sidebar-largura);
+    flex-shrink: 0;
+    background: var(--branco);
+    border-right: 1px solid var(--borda);
+    display: flex;
+    flex-direction: column;
+    padding: 22px 14px;
+    position: fixed;
+    top: 0; left: 0; bottom: 0;
+    z-index: 300;
+    transition: transform 0.25s ease;
+  }
+  .sidebar-marca { padding: 0 8px 20px; font-weight: 700; font-size: 0.95rem; }
+  .sidebar-marca span { display: block; font-size: 0.72rem; font-weight: 500; color: var(--texto-suave); margin-top: 2px; }
+  .nav-grupo { margin-bottom: 18px; }
+  .nav-grupo-titulo { font-size: 0.68rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--texto-suave); padding: 0 10px; margin-bottom: 6px; }
+  .nav-item {
+    display: flex; align-items: center; gap: 10px;
+    width: 100%;
+    padding: 9px 10px;
+    border: none; background: none;
+    border-radius: 10px;
+    color: var(--texto);
+    font-size: 0.88rem;
+    font-weight: 500;
+    text-align: left;
+    cursor: pointer;
+    transition: background 0.15s ease;
+  }
+  .nav-item:hover { background: rgba(89, 25, 2, 0.05); }
+  .nav-item.ativo { background: var(--fundo-acento); color: var(--acento); font-weight: 700; }
+  .sidebar-rodape {
+    margin-top: auto;
+    padding: 12px 10px 0;
+    border-top: 1px solid var(--borda);
+  }
+  .sidebar-email { font-size: 0.76rem; color: var(--texto-suave); word-break: break-all; margin-bottom: 8px; }
+  .botao-sair {
+    display: flex; align-items: center; gap: 8px;
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid var(--borda);
+    border-radius: 10px;
+    background: none;
+    color: var(--texto);
+    font-size: 0.82rem;
+    cursor: pointer;
+  }
+  .botao-sair:hover { background: rgba(89, 25, 2, 0.05); }
+
+  .btn-menu-mobile {
+    display: none;
+    position: fixed;
+    top: 14px; left: 14px;
+    z-index: 320;
+    width: 38px; height: 38px;
+    border-radius: 10px;
+    border: 1px solid var(--borda);
+    background: var(--branco);
+    align-items: center; justify-content: center;
+    cursor: pointer;
+  }
+  .drawer-fundo { display: none; position: fixed; inset: 0; background: rgba(50,31,20,0.35); z-index: 290; }
+
+  .conteudo {
+    flex: 1;
+    margin-left: var(--sidebar-largura);
+    padding: 28px 32px 60px;
+    max-width: 1180px;
+  }
+  .conteudo-topo { margin-bottom: 22px; }
+  .conteudo-titulo { font-size: 1.25rem; }
+
+  .avisos { margin-bottom: 16px; display: flex; flex-direction: column; gap: 8px; }
+  .aviso-linha {
+    background: var(--fundo-aviso);
+    border: 1px solid rgba(176, 137, 0, 0.3);
+    color: var(--aviso);
+    padding: 9px 14px;
+    border-radius: 10px;
+    font-size: 0.82rem;
+  }
+
+  .aba { display: none; }
+  .aba.ativa { display: block; }
+
+  /* ===== CARTÕES / ESTATÍSTICAS ===== */
+  .stats-faixa {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1px;
+    background: var(--borda);
+    border: 1px solid var(--borda);
+    border-radius: var(--raio);
+    overflow: hidden;
+    margin-bottom: 20px;
+  }
+  .stat-item { background: var(--branco); padding: 16px 18px; }
+  .stat-valor { font-size: 1.4rem; font-weight: 700; }
+  .stat-valor small { font-size: 0.8rem; font-weight: 600; color: var(--texto-suave); display: block; margin-top: 2px; }
+  .stat-rotulo { font-size: 0.74rem; color: var(--texto-suave); margin-top: 2px; }
+
+  .painel-branco {
+    background: var(--branco);
+    border: 1px solid var(--borda);
+    border-radius: var(--raio);
+    padding: 18px 20px;
+  }
+  .grade-2-col { display: grid; grid-template-columns: 1.5fr 1fr; gap: 16px; margin-bottom: 20px; align-items: stretch; }
+  .painel-titulo { font-size: 0.85rem; font-weight: 700; margin-bottom: 14px; }
+  .texto-vazio { color: var(--texto-suave); font-size: 0.85rem; line-height: 1.6; padding: 10px 0; }
+
+  /* Gráfico de barras simples, sem biblioteca */
+  .grafico-barras { display: flex; align-items: flex-end; gap: 6px; height: 130px; }
+  .grafico-coluna { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; gap: 6px; }
+  .grafico-barra { width: 100%; max-width: 22px; background: var(--acento); border-radius: 4px 4px 0 0; min-height: 2px; }
+  .grafico-rotulo { font-size: 0.62rem; color: var(--texto-suave); }
+
+  .lista-origens { display: flex; flex-direction: column; gap: 10px; }
+  .origem-linha { display: flex; align-items: center; justify-content: space-between; font-size: 0.85rem; }
+  .origem-barra-fundo { flex: 1; height: 6px; background: var(--fundo-acento); border-radius: 3px; margin: 0 10px; overflow: hidden; }
+  .origem-barra { height: 100%; background: var(--acento); border-radius: 3px; }
+
+  /* ===== BOTÕES ===== */
+  .botao {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 9px 16px;
+    border-radius: 100px;
+    border: 1px solid transparent;
+    font-size: 0.83rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.15s ease;
+  }
+  .botao-principal { background: var(--preto); color: #fff; }
+  .botao-principal:hover { opacity: 0.88; }
+  .botao-secundario { background: var(--branco); color: var(--texto); border-color: var(--borda); }
+  .botao-secundario:hover { background: rgba(89,25,2,0.04); }
+  .botao-icone {
+    width: 30px; height: 30px;
+    display: inline-flex; align-items: center; justify-content: center;
+    border-radius: 8px;
+    border: 1px solid var(--borda);
+    background: var(--branco);
+    cursor: pointer;
+    color: var(--texto);
+  }
+  .botao-icone:hover { background: rgba(89,25,2,0.05); }
+
+  .barra-acoes { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
+  .barra-acoes-esquerda { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .barra-acoes-direita { display: flex; align-items: center; gap: 8px; }
+
+  .campo-busca {
+    padding: 8px 14px;
+    border-radius: 100px;
+    border: 1px solid var(--borda);
+    background: var(--branco);
+    font-size: 0.83rem;
+    min-width: 200px;
+  }
+
+  .pill-filtro {
+    padding: 6px 14px;
+    border-radius: 100px;
+    border: 1px solid var(--borda);
+    background: var(--branco);
+    color: var(--texto-suave);
+    font-size: 0.78rem;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .pill-filtro.ativo { background: var(--preto); border-color: var(--preto); color: #fff; }
+
+  /* ===== TABELAS ===== */
+  table.tabela { width: 100%; border-collapse: collapse; font-size: 0.84rem; }
+  table.tabela th {
+    text-align: left;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--texto-suave);
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--borda);
+    white-space: nowrap;
+  }
+  table.tabela th.ordenavel { cursor: pointer; user-select: none; }
+  table.tabela th .seta-ordem { font-size: 0.65rem; margin-left: 3px; opacity: 0.4; }
+  table.tabela th .seta-ordem.ativa { opacity: 1; color: var(--acento); }
+  table.tabela td { padding: 10px 12px; border-bottom: 1px solid var(--borda); vertical-align: middle; }
+  table.tabela tbody tr:hover { background: rgba(89,25,2,0.03); }
+  table.tabela tbody tr.linha-clicavel { cursor: pointer; }
+  table.tabela tbody tr.favorita { box-shadow: inset 3px 0 0 var(--acento); }
+
+  .pill {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 100px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+  .badge-prazo { display: inline-block; margin-left: 6px; padding: 2px 8px; border-radius: 100px; font-size: 0.68rem; font-weight: 700; }
+  .badge-atrasado { background: var(--fundo-erro); color: var(--erro); }
+  .badge-vencendo { background: var(--fundo-aviso); color: var(--aviso); }
+
+  .estrela-btn { background: none; border: none; cursor: pointer; font-size: 1rem; color: var(--borda); padding: 2px; }
+  .estrela-btn.marcada { color: var(--acento); }
+
+  .video-thumb { width: 34px; height: 52px; object-fit: cover; border-radius: 5px; background: var(--fundo-acento); }
+  .celula-video { display: flex; align-items: center; gap: 10px; }
+  .celula-video-textos strong { display: block; font-size: 0.85rem; }
+  .celula-video-textos span { font-size: 0.74rem; color: var(--texto-suave); }
+  .alca-arrastar { cursor: grab; color: var(--texto-suave); }
+  tr.arrastando { opacity: 0.4; }
+
+  .tabela-scroll { overflow-x: auto; }
+
+  /* ===== MODAL / FORMULÁRIO ===== */
+  .modal-fundo {
+    position: fixed; inset: 0; z-index: 400;
+    background: rgba(50,31,20,0.4);
+    display: flex; align-items: flex-start; justify-content: center;
+    padding: 40px 20px;
+    overflow-y: auto;
+  }
+  .modal-fundo[hidden] { display: none; }
+  .modal-caixa {
+    width: 100%; max-width: 460px;
+    background: var(--branco);
+    border-radius: var(--raio-grande);
+    padding: 26px 26px 22px;
+  }
+  .modal-titulo { font-size: 1rem; margin-bottom: 16px; }
+  .campo-form { display: flex; flex-direction: column; gap: 5px; margin-bottom: 12px; }
+  .campo-form label { font-size: 0.75rem; font-weight: 600; color: var(--texto-suave); }
+  .campo-form input, .campo-form select, .campo-form textarea {
+    padding: 9px 12px;
+    border-radius: 9px;
+    border: 1px solid var(--borda);
+    background: var(--creme);
+    font-family: var(--fonte);
+    font-size: 0.85rem;
+    color: var(--preto);
+  }
+  .campo-form textarea { resize: vertical; min-height: 70px; }
+  .linha-form-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .modal-acoes { display: flex; justify-content: space-between; align-items: center; margin-top: 18px; gap: 8px; }
+  .link-apagar { color: var(--erro); background: none; border: none; font-size: 0.8rem; cursor: pointer; text-decoration: underline; }
+  .modal-acoes-direita { display: flex; gap: 8px; margin-left: auto; }
+
+  /* ===== CALENDÁRIO ===== */
+  .calendario-topo { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; flex-wrap: wrap; gap: 10px; }
+  .calendario-nav { display: flex; align-items: center; gap: 10px; }
+  .calendario-mes-nome { font-weight: 700; font-size: 0.95rem; min-width: 150px; text-align: center; }
+  .grade-calendario { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+  .dia-semana-nome { font-size: 0.68rem; font-weight: 700; text-transform: uppercase; color: var(--texto-suave); text-align: center; padding-bottom: 6px; }
+  .dia-cel {
+    background: var(--branco);
+    border: 1px solid var(--borda);
+    border-radius: 10px;
+    min-height: 92px;
+    padding: 6px;
+    position: relative;
+    display: flex; flex-direction: column; gap: 3px;
+    cursor: pointer;
+  }
+  .dia-cel.fora-mes { background: rgba(89,25,2,0.02); color: var(--texto-suave); opacity: 0.55; }
+  .dia-cel.hoje { border-color: var(--acento); box-shadow: 0 0 0 1px var(--acento) inset; }
+  .dia-numero { font-size: 0.76rem; font-weight: 700; }
+  .dia-item {
+    font-size: 0.66rem;
+    padding: 2px 5px;
+    border-radius: 5px;
+    background: var(--fundo-acento);
+    color: var(--texto);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  }
+  .dia-item.feito { text-decoration: line-through; opacity: 0.6; }
+  .dia-item.prazo-campanha { background: var(--fundo-sucesso); color: var(--sucesso); font-weight: 600; }
+  .dia-mais { font-size: 0.66rem; color: var(--texto-suave); font-weight: 600; }
+  .dia-add-btn {
+    position: absolute; top: 4px; right: 4px;
+    width: 18px; height: 18px;
+    border-radius: 5px;
+    border: none;
+    background: var(--preto);
+    color: #fff;
+    font-size: 0.75rem;
+    line-height: 1;
+    display: none;
+    align-items: center; justify-content: center;
+    cursor: pointer;
+  }
+  .dia-cel:hover .dia-add-btn { display: flex; }
+
+  .bloco-atrasados { margin-top: 24px; }
+  .item-atrasado { display: flex; justify-content: space-between; align-items: center; padding: 9px 0; border-bottom: 1px solid var(--borda); font-size: 0.85rem; }
+  .item-atrasado:last-child { border-bottom: none; }
+  .item-atrasado-dias { color: var(--erro); font-weight: 700; font-size: 0.76rem; }
+
+  /* ===== CHECKLIST ===== */
+  .subtabs { display: flex; gap: 6px; margin-bottom: 18px; flex-wrap: wrap; }
+  .subtab-btn { padding: 7px 14px; border-radius: 100px; border: 1px solid var(--borda); background: var(--branco); font-size: 0.8rem; font-weight: 600; color: var(--texto-suave); cursor: pointer; }
+  .subtab-btn.ativo { background: var(--fundo-acento); border-color: var(--acento); color: var(--acento); }
+  .subaba { display: none; }
+  .subaba.ativa { display: block; }
+
+  .barra-progresso-fundo { height: 7px; background: var(--fundo-acento); border-radius: 4px; overflow: hidden; }
+  .barra-progresso { height: 100%; background: var(--acento); border-radius: 4px; transition: width 0.3s ease; }
+  .progresso-geral { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; }
+  .progresso-geral .barra-progresso-fundo { flex: 1; }
+  .progresso-geral span { font-size: 0.78rem; font-weight: 700; color: var(--texto-suave); white-space: nowrap; }
+
+  .secao-checklist { border: 1px solid var(--borda); border-radius: var(--raio); margin-bottom: 10px; overflow: hidden; background: var(--branco); }
+  .secao-cabecalho { display: flex; align-items: center; gap: 12px; padding: 14px 16px; cursor: pointer; }
+  .secao-emoji { font-size: 1.2rem; }
+  .secao-textos { flex: 1; }
+  .secao-textos strong { display: block; font-size: 0.88rem; }
+  .secao-textos span { font-size: 0.76rem; color: var(--texto-suave); }
+  .secao-barra { width: 90px; }
+  .secao-corpo { padding: 0 16px 16px; display: none; }
+  .secao-corpo.aberta { display: block; }
+  .secao-porque { font-size: 0.8rem; color: var(--texto-suave); background: var(--creme); border-radius: 10px; padding: 10px 12px; margin-bottom: 12px; }
+  .item-check { display: flex; gap: 10px; padding: 8px 0; border-top: 1px solid var(--borda); }
+  .item-check:first-of-type { border-top: none; }
+  .item-check input { margin-top: 3px; }
+  .item-check-textos strong { display: block; font-size: 0.83rem; }
+  .item-check-textos span { font-size: 0.76rem; color: var(--texto-suave); }
+  .item-check.marcado .item-check-textos strong { text-decoration: line-through; opacity: 0.6; }
+
+  .grade-referencias { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 12px; }
+  .cartao-ref {
+    aspect-ratio: 9 / 13;
+    border-radius: var(--raio);
+    padding: 12px;
+    display: flex; flex-direction: column; justify-content: space-between;
+    color: #fff;
+    cursor: pointer;
+    border: none;
+    text-align: left;
+  }
+  .cartao-ref-emoji { font-size: 1.6rem; }
+  .cartao-ref-titulo { font-size: 0.82rem; font-weight: 700; line-height: 1.25; }
+  .cartao-ref-meta { font-size: 0.68rem; opacity: 0.9; }
+
+  .ficha-ref-bloco { margin-bottom: 14px; }
+  .ficha-ref-bloco h4 { font-size: 0.76rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--texto-suave); margin-bottom: 4px; }
+  .ficha-ref-bloco p { font-size: 0.85rem; margin: 0; }
+  .roteiro-bloco { display: flex; gap: 10px; padding: 8px 0; border-top: 1px solid var(--borda); font-size: 0.83rem; }
+  .roteiro-bloco:first-of-type { border-top: none; }
+  .roteiro-tempo { flex-shrink: 0; width: 70px; font-weight: 700; color: var(--acento); font-size: 0.76rem; }
+
+  .acordeao-simples { border: 1px solid var(--borda); border-radius: var(--raio); margin-bottom: 10px; background: var(--branco); overflow: hidden; }
+  .acordeao-cabecalho { display: flex; align-items: center; gap: 10px; padding: 13px 16px; cursor: pointer; }
+  .acordeao-cabecalho strong { flex: 1; font-size: 0.86rem; }
+  .acordeao-corpo { display: none; padding: 0 16px 16px; }
+  .acordeao-corpo.aberta { display: block; }
+  .lista-erros { font-size: 0.8rem; color: var(--erro); margin-top: 10px; padding-left: 18px; }
+
+  .grade-nichos { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 12px; }
+  .cartao-nicho { border: 1px solid var(--borda); border-radius: var(--raio); padding: 14px 16px; background: var(--branco); }
+  .cartao-nicho h4 { font-size: 0.88rem; margin-bottom: 8px; }
+  .ideia-item { padding: 8px 0; border-top: 1px solid var(--borda); }
+  .ideia-item:first-of-type { border-top: none; }
+  .ideia-item strong { display: block; font-size: 0.82rem; }
+  .ideia-item p { margin: 3px 0 0; font-size: 0.78rem; color: var(--texto-suave); font-style: italic; }
+
+  .caixa-dica { background: var(--fundo-acento); border-radius: var(--raio); padding: 14px 16px; margin-bottom: 16px; font-size: 0.8rem; }
+  .caixa-dica ul { margin: 6px 0 0; padding-left: 18px; }
+
+  textarea.campo-revisao { width: 100%; min-height: 160px; padding: 12px 14px; border-radius: var(--raio); border: 1px solid var(--borda); background: var(--branco); font-family: var(--fonte); font-size: 0.85rem; margin-bottom: 20px; }
+
+  @media (max-width: 900px) {
+    .grade-2-col { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 780px) {
+    .btn-menu-mobile { display: flex; }
+    .sidebar { transform: translateX(-100%); box-shadow: 0 0 40px rgba(0,0,0,0.2); }
+    .sidebar.aberta { transform: translateX(0); }
+    .drawer-fundo.ativo { display: block; }
+    .conteudo { margin-left: 0; padding: 70px 16px 60px; }
+    .linha-form-2 { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<button type="button" class="btn-menu-mobile" id="btn-menu-mobile" aria-label="Abrir menu">
+  <div class="icone"><svg viewBox="0 0 24 24"><path d="M3 6h18M3 12h18M3 18h18"/></svg></div>
+</button>
+<div class="drawer-fundo" id="drawer-fundo"></div>
+
+<div class="layout">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-marca">Talissa Müller<span>Painel administrativo</span></div>
+
+    <nav class="nav-grupo">
+      <div class="nav-grupo-titulo">Meu site</div>
+      <button class="nav-item" data-aba="portfolio">
+        <span class="icone"><svg viewBox="0 0 24 24"><path d="M4 19V9M10 19V5M16 19v-7M22 19H2"/></svg></span>
+        Portfólio
+      </button>
+      <button class="nav-item" data-aba="marcas">
+        <span class="icone"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M2.5 20c0-3.6 2.9-6.2 6.5-6.2s6.5 2.6 6.5 6.2M16 8.3c1.6.3 2.8 1.6 2.8 3.2 0 1.5-1 2.7-2.4 3.1M17.5 14c2.6.5 4 2.4 4 5"/></svg></span>
+        Marcas
+      </button>
+    </nav>
+
+    <nav class="nav-grupo">
+      <div class="nav-grupo-titulo">Minha rotina</div>
+      <button class="nav-item" data-aba="calendario">
+        <span class="icone"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2.5"/><path d="M8 3v4M16 3v4M3 10h18"/></svg></span>
+        Calendário
+      </button>
+      <button class="nav-item" data-aba="campanhas">
+        <span class="icone"><svg viewBox="0 0 24 24"><rect x="3" y="7.5" width="18" height="12.5" rx="2.2"/><path d="M8 7.5V6a2.5 2.5 0 0 1 2.5-2.5h3A2.5 2.5 0 0 1 16 6v1.5M3 13h18"/></svg></span>
+        Campanhas
+      </button>
+      <button class="nav-item" data-aba="checklist">
+        <span class="icone"><svg viewBox="0 0 24 24"><path d="M9 11l2.2 2.2L15 9"/><rect x="3" y="3" width="18" height="18" rx="3"/></svg></span>
+        Checklist
+      </button>
+    </nav>
+
+    <div class="sidebar-rodape">
+      <div class="sidebar-email" id="sidebar-email">...</div>
+      <button class="botao-sair" id="botao-sair">
+        <span class="icone"><svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></span>
+        Sair
+      </button>
+    </div>
+  </aside>
+
+  <main class="conteudo">
+    <div class="conteudo-topo">
+      <h1 class="conteudo-titulo" id="titulo-aba">Portfólio</h1>
+    </div>
+
+    <div class="avisos" id="avisos" hidden></div>
+
+    <!-- ===================== ABA PORTFÓLIO ===================== -->
+    <section class="aba" id="aba-portfolio">
+      <div class="stats-faixa" id="stats-portfolio"></div>
+
+      <div class="grade-2-col">
+        <div class="painel-branco">
+          <div class="painel-titulo">Visitas nos últimos 14 dias</div>
+          <div id="grafico-visitas"></div>
+        </div>
+        <div class="painel-branco">
+          <div class="painel-titulo">De onde vêm</div>
+          <div id="lista-origens"></div>
+        </div>
+      </div>
+
+      <div class="barra-acoes">
+        <h2 style="font-size:0.95rem;">Meus vídeos</h2>
+        <button class="botao botao-principal" id="botao-add-video">
+          <span class="icone" style="width:14px;height:14px;"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></span>
+          Adicionar vídeo
+        </button>
+      </div>
+      <div class="painel-branco tabela-scroll">
+        <table class="tabela">
+          <thead>
+            <tr>
+              <th></th>
+              <th>Vídeo</th>
+              <th>Nicho</th>
+              <th>Formato</th>
+              <th>Destaque</th>
+              <th>Visível</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="corpo-tabela-videos"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ===================== ABA MARCAS ===================== -->
+    <section class="aba" id="aba-marcas">
+      <div class="barra-acoes">
+        <div class="barra-acoes-esquerda">
+          <input type="text" class="campo-busca" id="busca-marcas" placeholder="Buscar por nome, @ ou e-mail...">
+          <button class="pill-filtro ativo" data-situacao="todas">Todas</button>
+          <button class="pill-filtro" data-situacao="lead">Lead</button>
+          <button class="pill-filtro" data-situacao="conversando">Conversando</button>
+          <button class="pill-filtro" data-situacao="cliente">Cliente</button>
+          <button class="pill-filtro" data-situacao="parada">Parada</button>
+        </div>
+        <div class="barra-acoes-direita">
+          <button class="botao botao-secundario" id="botao-exportar-marcas">Baixar CSV</button>
+          <button class="botao botao-principal" id="botao-add-marca">+ Adicionar</button>
+        </div>
+      </div>
+      <div class="painel-branco tabela-scroll">
+        <table class="tabela">
+          <thead>
+            <tr>
+              <th>Marca</th><th>Instagram</th><th>E-mail</th><th>Telefone</th><th>Situação</th><th>Observação</th><th>Último contato</th><th></th>
+            </tr>
+          </thead>
+          <tbody id="corpo-tabela-marcas"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ===================== ABA CALENDÁRIO ===================== -->
+    <section class="aba" id="aba-calendario">
+      <div class="calendario-topo">
+        <div class="calendario-nav">
+          <button class="botao-icone" id="mes-anterior"><span class="icone"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></span></button>
+          <span class="calendario-mes-nome" id="calendario-mes-nome"></span>
+          <button class="botao-icone" id="mes-seguinte"><span class="icone"><svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></span></button>
+          <button class="botao botao-secundario" id="botao-este-mes">Este mês</button>
+        </div>
+        <div class="barra-acoes-esquerda">
+          <button class="pill-filtro ativo" data-tipo="todos">Todos</button>
+          <button class="pill-filtro" data-tipo="gravar">Gravar</button>
+          <button class="pill-filtro" data-tipo="editar">Editar</button>
+          <button class="pill-filtro" data-tipo="postar">Postar</button>
+        </div>
+      </div>
+      <div class="grade-calendario" id="grade-calendario"></div>
+
+      <div class="bloco-atrasados">
+        <h2 style="font-size:0.95rem;margin-bottom:10px;">Ficou pra trás</h2>
+        <div class="painel-branco" id="lista-atrasados"></div>
+      </div>
+    </section>
+
+    <!-- ===================== ABA CAMPANHAS ===================== -->
+    <section class="aba" id="aba-campanhas">
+      <div class="stats-faixa" id="stats-campanhas"></div>
+
+      <div class="barra-acoes">
+        <div class="barra-acoes-esquerda">
+          <button class="pill-filtro ativo" data-filtro-campanha="todas">Todas</button>
+          <button class="pill-filtro" data-filtro-campanha="ativas">Ativas</button>
+          <button class="pill-filtro" data-filtro-campanha="finalizadas">Finalizadas</button>
+          <input type="text" class="campo-busca" id="busca-campanhas" placeholder="Buscar campanha ou cliente...">
+        </div>
+        <div class="barra-acoes-direita">
+          <button class="botao botao-secundario" id="botao-exportar-campanhas">Baixar CSV</button>
+          <button class="botao botao-principal" id="botao-add-campanha">+ Adicionar</button>
+        </div>
+      </div>
+      <div class="painel-branco tabela-scroll">
+        <table class="tabela">
+          <thead>
+            <tr>
+              <th></th>
+              <th class="ordenavel" data-coluna="campanha">Campanha <span class="seta-ordem">▾</span></th>
+              <th class="ordenavel" data-coluna="cliente">Cliente <span class="seta-ordem">▾</span></th>
+              <th class="ordenavel" data-coluna="tipo">Tipo <span class="seta-ordem">▾</span></th>
+              <th class="ordenavel" data-coluna="status">Status <span class="seta-ordem">▾</span></th>
+              <th class="ordenavel" data-coluna="qtd">Qtd <span class="seta-ordem">▾</span></th>
+              <th class="ordenavel" data-coluna="valor">Valor <span class="seta-ordem">▾</span></th>
+              <th class="ordenavel" data-coluna="prazo">Prazo <span class="seta-ordem">▾</span></th>
+              <th class="ordenavel" data-coluna="pagamento">Pagamento <span class="seta-ordem">▾</span></th>
+            </tr>
+          </thead>
+          <tbody id="corpo-tabela-campanhas"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ===================== ABA CHECKLIST ===================== -->
+    <section class="aba" id="aba-checklist">
+      <div class="subtabs">
+        <button class="subtab-btn ativo" data-subaba="check">Checklist do portfólio</button>
+        <button class="subtab-btn" data-subaba="referencias">Referências de vídeo</button>
+        <button class="subtab-btn" data-subaba="roteiros">Roteiros</button>
+        <button class="subtab-btn" data-subaba="nichos">Ideias por nicho</button>
+        <button class="subtab-btn" data-subaba="revisar">Revisar meu roteiro</button>
+      </div>
+
+      <div class="subaba ativa" id="subaba-check">
+        <div class="progresso-geral">
+          <div class="barra-progresso-fundo"><div class="barra-progresso" id="barra-progresso-geral"></div></div>
+          <span id="texto-progresso-geral">0%</span>
+        </div>
+        <div id="lista-secoes-checklist"></div>
+      </div>
+
+      <div class="subaba" id="subaba-referencias">
+        <div class="grade-referencias" id="grade-referencias"></div>
+      </div>
+
+      <div class="subaba" id="subaba-roteiros">
+        <div id="lista-roteiros"></div>
+      </div>
+
+      <div class="subaba" id="subaba-nichos">
+        <div class="caixa-dica" id="caixa-como-usar" hidden></div>
+        <div class="grade-nichos" id="grade-nichos"></div>
+      </div>
+
+      <div class="subaba" id="subaba-revisar">
+        <textarea class="campo-revisao" id="campo-revisao" placeholder="Cole aqui o roteiro que você escreveu, só pra ler do lado dos blocos de revisão abaixo..."></textarea>
+        <div id="lista-revisao"></div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<!-- ===================== MODAIS ===================== -->
+<div class="modal-fundo" id="modal-video" hidden>
+  <div class="modal-caixa">
+    <h3 class="modal-titulo" id="modal-video-titulo">Adicionar vídeo</h3>
+    <form id="form-video">
+      <input type="hidden" id="video-id">
+      <div class="linha-form-2">
+        <div class="campo-form"><label>Título</label><input type="text" id="video-titulo" required></div>
+        <div class="campo-form"><label>Marca</label><input type="text" id="video-marca" required></div>
+      </div>
+      <div class="linha-form-2">
+        <div class="campo-form"><label>Nicho</label><input type="text" id="video-nicho" required></div>
+        <div class="campo-form"><label>Formato</label><input type="text" id="video-formato" placeholder="Vídeo, Reels..."></div>
+      </div>
+      <div class="campo-form"><label>Link do vídeo (YouTube)</label><input type="url" id="video-link" required></div>
+      <div class="campo-form"><label>Foto de capa (caminho ou link)</label><input type="text" id="video-capa" placeholder="capas-portfolio/nome.jpg" required></div>
+      <div class="campo-form"><label>Vídeo de prévia (opcional)</label><input type="text" id="video-preview" placeholder="videos-portfolio/nome.mp4"></div>
+      <div class="linha-form-2">
+        <div class="campo-form"><label>Destaque (opcional)</label><input type="text" id="video-destaque" placeholder="Ex: 2,4M views"></div>
+        <div class="campo-form"><label>Visível no site</label>
+          <select id="video-visivel"><option value="true">Sim</option><option value="false">Não</option></select>
+        </div>
+      </div>
+      <div class="modal-acoes">
+        <button type="button" class="link-apagar" id="video-apagar" hidden>Apagar vídeo</button>
+        <div class="modal-acoes-direita">
+          <button type="button" class="botao botao-secundario" data-fechar-modal>Cancelar</button>
+          <button type="submit" class="botao botao-principal">Salvar</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="modal-fundo" id="modal-marca" hidden>
+  <div class="modal-caixa">
+    <h3 class="modal-titulo" id="modal-marca-titulo">Adicionar marca</h3>
+    <form id="form-marca">
+      <input type="hidden" id="marca-id">
+      <div class="campo-form"><label>Marca</label><input type="text" id="marca-nome" required></div>
+      <div class="linha-form-2">
+        <div class="campo-form"><label>Instagram</label><input type="text" id="marca-instagram" placeholder="@marca"></div>
+        <div class="campo-form"><label>Telefone</label><input type="text" id="marca-telefone" placeholder="55999999999"></div>
+      </div>
+      <div class="campo-form"><label>E-mail</label><input type="email" id="marca-email"></div>
+      <div class="linha-form-2">
+        <div class="campo-form"><label>Situação</label>
+          <select id="marca-situacao">
+            <option value="lead">Lead</option>
+            <option value="conversando">Conversando</option>
+            <option value="cliente">Cliente</option>
+            <option value="parada">Parada</option>
+          </select>
+        </div>
+        <div class="campo-form"><label>Último contato</label><input type="date" id="marca-ultimo-contato"></div>
+      </div>
+      <div class="campo-form"><label>Observação</label><textarea id="marca-obs"></textarea></div>
+      <div class="modal-acoes">
+        <button type="button" class="link-apagar" id="marca-apagar" hidden>Apagar marca</button>
+        <div class="modal-acoes-direita">
+          <button type="button" class="botao botao-secundario" data-fechar-modal>Cancelar</button>
+          <button type="submit" class="botao botao-principal">Salvar</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="modal-fundo" id="modal-dia" hidden>
+  <div class="modal-caixa">
+    <h3 class="modal-titulo" id="modal-dia-titulo">Dia</h3>
+    <div id="modal-dia-lista" style="margin-bottom:16px;"></div>
+    <button type="button" class="botao botao-principal" id="modal-dia-add" style="width:100%;">+ Adicionar item neste dia</button>
+  </div>
+</div>
+
+<div class="modal-fundo" id="modal-item-calendario" hidden>
+  <div class="modal-caixa">
+    <h3 class="modal-titulo" id="modal-item-calendario-titulo">Adicionar item</h3>
+    <form id="form-item-calendario">
+      <input type="hidden" id="cal-id">
+      <div class="campo-form"><label>Título</label><input type="text" id="cal-titulo" required></div>
+      <div class="linha-form-2">
+        <div class="campo-form"><label>Marca (opcional)</label><input type="text" id="cal-marca"></div>
+        <div class="campo-form"><label>Tipo</label>
+          <select id="cal-tipo"><option value="gravar">Gravar</option><option value="editar">Editar</option><option value="postar">Postar</option></select>
+        </div>
+      </div>
+      <div class="linha-form-2">
+        <div class="campo-form"><label>Data</label><input type="date" id="cal-data" required></div>
+        <div class="campo-form"><label>Status</label>
+          <select id="cal-status"><option value="a_fazer">A fazer</option><option value="feito">Feito</option></select>
+        </div>
+      </div>
+      <div class="modal-acoes">
+        <button type="button" class="link-apagar" id="cal-apagar" hidden>Apagar item</button>
+        <div class="modal-acoes-direita">
+          <button type="button" class="botao botao-secundario" data-fechar-modal>Cancelar</button>
+          <button type="submit" class="botao botao-principal">Salvar</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="modal-fundo" id="modal-campanha" hidden>
+  <div class="modal-caixa">
+    <h3 class="modal-titulo" id="modal-campanha-titulo">Adicionar campanha</h3>
+    <form id="form-campanha">
+      <input type="hidden" id="camp-id">
+      <div class="linha-form-2">
+        <div class="campo-form"><label>Campanha</label><input type="text" id="camp-campanha" required></div>
+        <div class="campo-form"><label>Cliente</label><input type="text" id="camp-cliente" required></div>
+      </div>
+      <div class="linha-form-2">
+        <div class="campo-form"><label>Tipo</label>
+          <select id="camp-tipo"><option value="Conteúdo">Conteúdo</option><option value="Publicidade">Publicidade</option></select>
+        </div>
+        <div class="campo-form"><label>Status</label>
+          <select id="camp-status">
+            <option>Briefing</option><option>Roteiro</option><option>Aprovação Roteiro</option>
+            <option>Gravação</option><option>Edição</option><option>Aprovado</option><option>Entregue</option>
+          </select>
+        </div>
+      </div>
+      <div class="linha-form-2">
+        <div class="campo-form"><label>Quantidade de vídeos</label><input type="number" id="camp-qtd" min="1" value="1" required></div>
+        <div class="campo-form"><label>Valor total (R$)</label><input type="number" id="camp-valor" min="0" step="0.01" value="0" required></div>
+      </div>
+      <div class="linha-form-2">
+        <div class="campo-form"><label>Prazo</label><input type="date" id="camp-prazo"></div>
+        <div class="campo-form"><label>Pagamento</label>
+          <select id="camp-pagamento"><option value="pendente">Pendente</option><option value="pago">Pago</option></select>
+        </div>
+      </div>
+      <div class="campo-form">
+        <label><input type="checkbox" id="camp-ativa" checked style="width:auto;display:inline;margin-right:6px;"> Campanha ativa</label>
+      </div>
+      <div class="modal-acoes">
+        <button type="button" class="link-apagar" id="camp-apagar" hidden>Apagar campanha</button>
+        <div class="modal-acoes-direita">
+          <button type="button" class="botao botao-secundario" data-fechar-modal>Cancelar</button>
+          <button type="submit" class="botao botao-principal">Salvar</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="modal-fundo" id="modal-ficha-referencia" hidden>
+  <div class="modal-caixa" style="max-width:560px;">
+    <h3 class="modal-titulo" id="ficha-ref-titulo"></h3>
+    <div id="ficha-ref-corpo"></div>
+    <div class="modal-acoes"><div class="modal-acoes-direita"><button type="button" class="botao botao-secundario" data-fechar-modal>Fechar</button></div></div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="../js/banco.js"></script>
+<script src="../js/biblioteca.js"></script>
+<script>
+(async function () {
+  "use strict";
+  const sb = Banco.sb;
+
+  // Guarda de autenticação: nada na tela aparece antes de confirmar a sessão.
+  const usuario = await Banco.exigirSessao("../login/index.html");
+  if (!usuario) return;
+  document.getElementById("sidebar-email").textContent = usuario.email || "";
+  document.body.classList.add("pronto");
+
+  // ---- Avisos (tabela/campo faltando etc.) — nunca deixamos o admin quebrar. ----
+  const caixaAvisos = document.getElementById("avisos");
+  const avisosMostrados = new Set();
+  function avisar(mensagem) {
+    if (avisosMostrados.has(mensagem)) return;
+    avisosMostrados.add(mensagem);
+    caixaAvisos.hidden = false;
+    const linha = document.createElement("div");
+    linha.className = "aviso-linha";
+    linha.textContent = mensagem;
+    caixaAvisos.appendChild(linha);
+  }
+  // Roda uma consulta ao banco com segurança: nunca deixa um erro (tabela ou
+  // coluna faltando, por exemplo) quebrar a página — devolve uma lista vazia
+  // e avisa, em vez de travar o admin inteiro.
+  async function consultarSeguro(nomeTabela, promessa) {
+    try {
+      const { data, error } = await promessa;
+      if (error) {
+        avisar('Não consegui carregar "' + nomeTabela + '": ' + error.message);
+        return [];
+      }
+      return data || [];
+    } catch (erro) {
+      avisar('Não consegui carregar "' + nomeTabela + '": ' + erro.message);
+      return [];
+    }
+  }
+  async function salvarSeguro(nomeTabela, promessa) {
+    try {
+      const { data, error } = await promessa;
+      if (error) { alert("Não consegui salvar em " + nomeTabela + ": " + error.message); return null; }
+      return data;
+    } catch (erro) {
+      alert("Não consegui salvar em " + nomeTabela + ": " + erro.message);
+      return null;
+    }
+  }
+
+  // ---- Navegação (abas + gaveta no celular) ----
+  const TITULOS_ABA = { portfolio: "Portfólio", marcas: "Marcas", calendario: "Calendário", campanhas: "Campanhas", checklist: "Checklist" };
+  const CARREGADORES_ABA = { portfolio: carregarPortfolio, marcas: carregarMarcas, calendario: carregarCalendario, campanhas: carregarCampanhas, checklist: carregarChecklist };
+  const abasCarregadas = new Set();
+
+  function abrirAba(nome) {
+    if (!TITULOS_ABA[nome]) nome = "portfolio";
+    document.querySelectorAll(".nav-item").forEach(b => b.classList.toggle("ativo", b.dataset.aba === nome));
+    document.querySelectorAll(".aba").forEach(s => s.classList.toggle("ativa", s.id === "aba-" + nome));
+    document.getElementById("titulo-aba").textContent = TITULOS_ABA[nome];
+    window.location.hash = nome;
+    fecharGaveta();
+    if (!abasCarregadas.has(nome)) {
+      abasCarregadas.add(nome);
+      CARREGADORES_ABA[nome]();
+    }
+  }
+  document.querySelectorAll(".nav-item").forEach(botao => {
+    botao.addEventListener("click", () => abrirAba(botao.dataset.aba));
+  });
+
+  const sidebar = document.getElementById("sidebar");
+  const drawerFundo = document.getElementById("drawer-fundo");
+  function abrirGaveta() { sidebar.classList.add("aberta"); drawerFundo.classList.add("ativo"); }
+  function fecharGaveta() { sidebar.classList.remove("aberta"); drawerFundo.classList.remove("ativo"); }
+  document.getElementById("btn-menu-mobile").addEventListener("click", abrirGaveta);
+  drawerFundo.addEventListener("click", fecharGaveta);
+
+  document.getElementById("botao-sair").addEventListener("click", () => Banco.sair("../login/index.html"));
+
+  // Modais: fecham no botão "Cancelar/Fechar" ou clicando fora da caixa.
+  document.querySelectorAll("[data-fechar-modal]").forEach(botao => {
+    botao.addEventListener("click", () => botao.closest(".modal-fundo").hidden = true);
+  });
+  document.querySelectorAll(".modal-fundo").forEach(modal => {
+    modal.addEventListener("click", (evento) => { if (evento.target === modal) modal.hidden = true; });
+  });
+
+  function formatarMoeda(valor) {
+    return (valor || 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+  }
+  function formatarData(dataIso) {
+    if (!dataIso) return "";
+    const [ano, mes, dia] = dataIso.split("-");
+    return dia + "/" + mes + "/" + ano;
+  }
+  function hojeISO() {
+    const d = new Date();
+    return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+  }
+
+  // ============================================================================
+  // ABA 1 — PORTFÓLIO
+  // ============================================================================
+  let listaVideos = [];
+
+  async function carregarPortfolio() {
+    const [videos, visitas14, visitasHoje] = await Promise.all([
+      consultarSeguro("videos", sb.from("videos").select("*").order("ordem", { ascending: true })),
+      consultarSeguro("visitas", sb.from("visitas").select("data,pagina,origem").gte("data", new Date(Date.now() - 13 * 86400000).toISOString())),
+      consultarSeguro("visitas", sb.from("visitas").select("id").gte("data", hojeISO() + "T00:00:00"))
+    ]);
+    listaVideos = videos;
+    renderStatsPortfolio(videos, visitas14, visitasHoje);
+    renderGraficoVisitas(visitas14);
+    renderOrigens(visitas14);
+    renderTabelaVideos();
+  }
+
+  function renderStatsPortfolio(videos, visitas14, visitasHoje) {
+    const videosNoAr = videos.filter(v => v.visivel).length;
+    const contagemNicho = {};
+    videos.filter(v => v.visivel).forEach(v => { contagemNicho[v.nicho] = (contagemNicho[v.nicho] || 0) + 1; });
+    const nichoTop = Object.entries(contagemNicho).sort((a, b) => b[1] - a[1])[0];
+    const contagemOrigem = {};
+    visitas14.forEach(v => { const o = v.origem || "Direto"; contagemOrigem[o] = (contagemOrigem[o] || 0) + 1; });
+    const origemTop = Object.entries(contagemOrigem).sort((a, b) => b[1] - a[1])[0];
+
+    const stats = [
+      { rotulo: "Visitas em 14 dias", valor: visitas14.length },
+      { rotulo: "Visitas hoje", valor: visitasHoje.length },
+      { rotulo: "Vídeos no ar", valor: videosNoAr },
+      { rotulo: "Nicho mais forte", valor: nichoTop ? nichoTop[0] : "—" },
+      { rotulo: "De onde mais vêm", valor: origemTop ? origemTop[0] : "—" }
+    ];
+    document.getElementById("stats-portfolio").innerHTML = stats.map(s =>
+      '<div class="stat-item"><div class="stat-valor">' + s.valor + '</div><div class="stat-rotulo">' + s.rotulo + "</div></div>"
+    ).join("");
+  }
+
+  function renderGraficoVisitas(visitas14) {
+    const alvo = document.getElementById("grafico-visitas");
+    if (visitas14.length === 0) {
+      alvo.innerHTML = '<p class="texto-vazio">Ainda não há visitas registradas. Assim que as pessoas começarem a visitar o seu site, este gráfico vai mostrar os últimos 14 dias.</p>';
+      return;
+    }
+    const dias = [];
+    for (let i = 13; i >= 0; i--) {
+      const d = new Date(Date.now() - i * 86400000);
+      dias.push({ chave: d.toISOString().slice(0, 10), rotulo: String(d.getDate()).padStart(2, "0") + "/" + String(d.getMonth() + 1).padStart(2, "0"), total: 0 });
+    }
+    visitas14.forEach(v => {
+      const chave = (v.data || "").slice(0, 10);
+      const dia = dias.find(d => d.chave === chave);
+      if (dia) dia.total++;
+    });
+    const max = Math.max(...dias.map(d => d.total), 0);
+    alvo.innerHTML = '<div class="grafico-barras">' + dias.map(d =>
+      '<div class="grafico-coluna"><div class="grafico-barra" style="height:' + (max > 0 ? (d.total / max) * 100 : 0) + '%" title="' + d.total + ' visitas"></div><div class="grafico-rotulo">' + d.rotulo + "</div></div>"
+    ).join("") + "</div>";
+  }
+
+  function renderOrigens(visitas14) {
+    const alvo = document.getElementById("lista-origens");
+    if (visitas14.length === 0) {
+      alvo.innerHTML = '<p class="texto-vazio">Ainda não há visitas suficientes pra saber de onde as pessoas estão vindo.</p>';
+      return;
+    }
+    const contagem = {};
+    visitas14.forEach(v => { const o = v.origem || "Direto"; contagem[o] = (contagem[o] || 0) + 1; });
+    const linhas = Object.entries(contagem).sort((a, b) => b[1] - a[1]).slice(0, 6);
+    const max = Math.max(...linhas.map(l => l[1]), 0);
+    alvo.innerHTML = '<div class="lista-origens">' + linhas.map(([origem, total]) =>
+      '<div class="origem-linha"><span>' + origem + '</span><div class="origem-barra-fundo"><div class="origem-barra" style="width:' + (max > 0 ? (total / max) * 100 : 0) + '%"></div></div><strong>' + total + "</strong></div>"
+    ).join("") + "</div>";
+  }
+
+  function renderTabelaVideos() {
+    const corpo = document.getElementById("corpo-tabela-videos");
+    if (listaVideos.length === 0) {
+      corpo.innerHTML = '<tr><td colspan="7" class="texto-vazio">Nenhum vídeo cadastrado ainda. Clique em "Adicionar vídeo" para começar.</td></tr>';
+      return;
+    }
+    corpo.innerHTML = listaVideos.map((v, indice) =>
+      '<tr draggable="true" data-indice="' + indice + '" data-id="' + v.id + '">' +
+        '<td><span class="alca-arrastar">⠿⠿</span></td>' +
+        '<td><div class="celula-video"><img class="video-thumb" src="../' + v.capa_url + '" onerror="this.style.visibility=\'hidden\'"><div class="celula-video-textos"><strong>' + v.titulo + '</strong><span>' + v.marca + '</span></div></div></td>' +
+        "<td>" + v.nicho + "</td>" +
+        "<td>" + (v.formato || "—") + "</td>" +
+        "<td>" + (v.destaque || "—") + "</td>" +
+        '<td><button class="botao-icone botao-olho" data-id="' + v.id + '" data-visivel="' + v.visivel + '" title="' + (v.visivel ? "Visível — clique pra esconder" : "Escondido — clique pra mostrar") + '"><span class="icone">' + (v.visivel ? '<svg viewBox="0 0 24 24"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z"/><circle cx="12" cy="12" r="3"/></svg>' : '<svg viewBox="0 0 24 24"><path d="M3 3l18 18M10.6 10.6a2.8 2.8 0 0 0 3.9 3.9M9.4 5.2A10.6 10.6 0 0 1 12 5c7 0 11 7 11 7a13.8 13.8 0 0 1-3.1 3.6M6.5 6.6C3.4 8.5 1 12 1 12a13.7 13.7 0 0 0 5 5.1"/></svg>') + "</span></button></td>" +
+        '<td><button class="botao-icone botao-editar-video" data-id="' + v.id + '"><span class="icone"><svg viewBox="0 0 24 24"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></span></button></td>' +
+      "</tr>"
+    ).join("");
+
+    corpo.querySelectorAll(".botao-olho").forEach(botao => {
+      botao.addEventListener("click", async () => {
+        const visivelAtual = botao.dataset.visivel === "true";
+        await salvarSeguro("videos", sb.from("videos").update({ visivel: !visivelAtual }).eq("id", botao.dataset.id));
+        carregarPortfolioForcado();
+      });
+    });
+    corpo.querySelectorAll(".botao-editar-video").forEach(botao => {
+      botao.addEventListener("click", () => abrirModalVideo(listaVideos.find(v => v.id === botao.dataset.id)));
+    });
+
+    // Arrastar pela linha inteira pra reordenar (a "alça" é só o indicador visual).
+    let indiceArrastado = null;
+    corpo.querySelectorAll("tr[draggable]").forEach(linha => {
+      linha.addEventListener("dragstart", () => { indiceArrastado = Number(linha.dataset.indice); linha.classList.add("arrastando"); });
+      linha.addEventListener("dragend", () => linha.classList.remove("arrastando"));
+      linha.addEventListener("dragover", (evento) => evento.preventDefault());
+      linha.addEventListener("drop", async () => {
+        const indiceDestino = Number(linha.dataset.indice);
+        if (indiceArrastado === null || indiceArrastado === indiceDestino) return;
+        const [item] = listaVideos.splice(indiceArrastado, 1);
+        listaVideos.splice(indiceDestino, 0, item);
+        renderTabelaVideos();
+        await Promise.all(listaVideos.map((v, i) => sb.from("videos").update({ ordem: i }).eq("id", v.id)));
+      });
+    });
+  }
+  async function carregarPortfolioForcado() { await carregarPortfolio(); }
+
+  const modalVideo = document.getElementById("modal-video");
+  document.getElementById("botao-add-video").addEventListener("click", () => abrirModalVideo(null));
+  function abrirModalVideo(video) {
+    document.getElementById("form-video").reset();
+    document.getElementById("modal-video-titulo").textContent = video ? "Editar vídeo" : "Adicionar vídeo";
+    document.getElementById("video-id").value = video ? video.id : "";
+    document.getElementById("video-titulo").value = video ? video.titulo : "";
+    document.getElementById("video-marca").value = video ? video.marca : "";
+    document.getElementById("video-nicho").value = video ? video.nicho : "";
+    document.getElementById("video-formato").value = video ? (video.formato || "") : "";
+    document.getElementById("video-link").value = video ? video.link : "";
+    document.getElementById("video-capa").value = video ? video.capa_url : "";
+    document.getElementById("video-preview").value = video ? (video.preview_url || "") : "";
+    document.getElementById("video-destaque").value = video ? (video.destaque || "") : "";
+    document.getElementById("video-visivel").value = video ? String(video.visivel) : "true";
+    document.getElementById("video-apagar").hidden = !video;
+    modalVideo.hidden = false;
+  }
+  document.getElementById("video-apagar").addEventListener("click", async () => {
+    const id = document.getElementById("video-id").value;
+    if (!id || !confirm("Apagar este vídeo? Ele some do site na hora.")) return;
+    await salvarSeguro("videos", sb.from("videos").delete().eq("id", id));
+    modalVideo.hidden = true;
+    carregarPortfolioForcado();
+  });
+  document.getElementById("form-video").addEventListener("submit", async (evento) => {
+    evento.preventDefault();
+    const id = document.getElementById("video-id").value;
+    const registro = {
+      titulo: document.getElementById("video-titulo").value.trim(),
+      marca: document.getElementById("video-marca").value.trim(),
+      nicho: document.getElementById("video-nicho").value.trim(),
+      formato: document.getElementById("video-formato").value.trim() || null,
+      link: document.getElementById("video-link").value.trim(),
+      capa_url: document.getElementById("video-capa").value.trim(),
+      preview_url: document.getElementById("video-preview").value.trim() || null,
+      destaque: document.getElementById("video-destaque").value.trim() || null,
+      visivel: document.getElementById("video-visivel").value === "true"
+    };
+    if (id) {
+      await salvarSeguro("videos", sb.from("videos").update(registro).eq("id", id));
+    } else {
+      registro.ordem = listaVideos.length;
+      await salvarSeguro("videos", sb.from("videos").insert(registro));
+    }
+    modalVideo.hidden = true;
+    carregarPortfolioForcado();
+  });
+
+  // ============================================================================
+  // ABA 2 — MARCAS
+  // ============================================================================
+  let listaMarcas = [];
+  let filtroSituacaoAtual = "todas";
+
+  async function carregarMarcas() {
+    listaMarcas = await consultarSeguro("marcas", sb.from("marcas").select("*").order("created_at", { ascending: false }));
+    renderTabelaMarcas();
+  }
+  function renderTabelaMarcas() {
+    const termo = document.getElementById("busca-marcas").value.trim().toLowerCase();
+    const filtradas = listaMarcas.filter(m => {
+      if (filtroSituacaoAtual !== "todas" && m.situacao !== filtroSituacaoAtual) return false;
+      if (!termo) return true;
+      return (m.marca || "").toLowerCase().includes(termo) || (m.instagram || "").toLowerCase().includes(termo) || (m.email || "").toLowerCase().includes(termo);
+    });
+    const corpo = document.getElementById("corpo-tabela-marcas");
+    if (filtradas.length === 0) {
+      corpo.innerHTML = '<tr><td colspan="8" class="texto-vazio">Nenhuma marca encontrada.</td></tr>';
+      return;
+    }
+    const CORES_SITUACAO = { lead: "fundo-cinza", conversando: "fundo-aviso", cliente: "fundo-sucesso", parada: "fundo-erro" };
+    const TEXTO_COR_SITUACAO = { lead: "cinza", conversando: "aviso", cliente: "sucesso", parada: "erro" };
+    const NOMES_SITUACAO = { lead: "Lead", conversando: "Conversando", cliente: "Cliente", parada: "Parada" };
+    corpo.innerHTML = filtradas.map(m => {
+      const wa = m.telefone ? '<a class="botao-icone" title="WhatsApp" target="_blank" rel="noopener" href="https://wa.me/' + m.telefone.replace(/\D/g, "") + '" onclick="event.stopPropagation()"><span class="icone"><svg viewBox="0 0 24 24"><path d="M21 11.5a8.5 8.5 0 0 1-12.4 7.6L3 20l1-5.4A8.5 8.5 0 1 1 21 11.5Z"/><path d="M8.5 9.5c.3 3 2.7 5.4 5.7 5.7"/></svg></span></a>' : "";
+      const ig = m.instagram ? '<a target="_blank" rel="noopener" href="https://instagram.com/' + m.instagram.replace("@", "") + '" onclick="event.stopPropagation()">' + m.instagram + "</a>" : "—";
+      return '<tr class="linha-clicavel" data-id="' + m.id + '">' +
+        "<td>" + m.marca + "</td>" +
+        "<td>" + ig + "</td>" +
+        "<td>" + (m.email || "—") + "</td>" +
+        "<td>" + (m.telefone || "—") + "</td>" +
+        '<td><span class="pill fundo-' + TEXTO_COR_SITUACAO[m.situacao] + '" style="background:var(--' + CORES_SITUACAO[m.situacao] + ');color:var(--' + TEXTO_COR_SITUACAO[m.situacao] + ')">' + (NOMES_SITUACAO[m.situacao] || m.situacao) + "</span></td>" +
+        '<td style="max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + (m.obs || "—") + "</td>" +
+        "<td>" + (m.ultimo_contato ? formatarData(m.ultimo_contato) : "—") + "</td>" +
+        "<td>" + wa + "</td>" +
+      "</tr>";
+    }).join("");
+    corpo.querySelectorAll("tr[data-id]").forEach(linha => {
+      linha.addEventListener("click", () => abrirModalMarca(listaMarcas.find(m => m.id === linha.dataset.id)));
+    });
+  }
+  document.getElementById("busca-marcas").addEventListener("input", renderTabelaMarcas);
+  document.querySelectorAll('[data-situacao]').forEach(pill => {
+    pill.addEventListener("click", () => {
+      document.querySelectorAll('[data-situacao]').forEach(p => p.classList.remove("ativo"));
+      pill.classList.add("ativo");
+      filtroSituacaoAtual = pill.dataset.situacao;
+      renderTabelaMarcas();
+    });
+  });
+
+  const modalMarca = document.getElementById("modal-marca");
+  document.getElementById("botao-add-marca").addEventListener("click", () => abrirModalMarca(null));
+  function abrirModalMarca(marca) {
+    document.getElementById("form-marca").reset();
+    document.getElementById("modal-marca-titulo").textContent = marca ? "Editar marca" : "Adicionar marca";
+    document.getElementById("marca-id").value = marca ? marca.id : "";
+    document.getElementById("marca-nome").value = marca ? marca.marca : "";
+    document.getElementById("marca-instagram").value = marca ? (marca.instagram || "") : "";
+    document.getElementById("marca-telefone").value = marca ? (marca.telefone || "") : "";
+    document.getElementById("marca-email").value = marca ? (marca.email || "") : "";
+    document.getElementById("marca-situacao").value = marca ? marca.situacao : "lead";
+    document.getElementById("marca-ultimo-contato").value = marca ? (marca.ultimo_contato || "") : "";
+    document.getElementById("marca-obs").value = marca ? (marca.obs || "") : "";
+    document.getElementById("marca-apagar").hidden = !marca;
+    modalMarca.hidden = false;
+  }
+  document.getElementById("marca-apagar").addEventListener("click", async () => {
+    const id = document.getElementById("marca-id").value;
+    if (!id || !confirm("Apagar esta marca da sua base?")) return;
+    await salvarSeguro("marcas", sb.from("marcas").delete().eq("id", id));
+    modalMarca.hidden = true;
+    carregarMarcas();
+  });
+  document.getElementById("form-marca").addEventListener("submit", async (evento) => {
+    evento.preventDefault();
+    const id = document.getElementById("marca-id").value;
+    const registro = {
+      marca: document.getElementById("marca-nome").value.trim(),
+      instagram: document.getElementById("marca-instagram").value.trim() || null,
+      telefone: document.getElementById("marca-telefone").value.trim() || null,
+      email: document.getElementById("marca-email").value.trim() || null,
+      situacao: document.getElementById("marca-situacao").value,
+      ultimo_contato: document.getElementById("marca-ultimo-contato").value || null,
+      obs: document.getElementById("marca-obs").value.trim() || null
+    };
+    if (id) await salvarSeguro("marcas", sb.from("marcas").update(registro).eq("id", id));
+    else await salvarSeguro("marcas", sb.from("marcas").insert(registro));
+    modalMarca.hidden = true;
+    carregarMarcas();
+  });
+
+  function baixarCsv(nomeArquivo, colunas, linhas) {
+    const escapar = (valor) => '"' + String(valor == null ? "" : valor).replace(/"/g, '""') + '"';
+    const texto = "﻿" + [colunas.map(escapar).join(";")].concat(
+      linhas.map(linha => linha.map(escapar).join(";"))
+    ).join("\r\n");
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(new Blob([texto], { type: "text/csv;charset=utf-8;" }));
+    link.download = nomeArquivo;
+    link.click();
+  }
+  document.getElementById("botao-exportar-marcas").addEventListener("click", () => {
+    const termo = document.getElementById("busca-marcas").value.trim().toLowerCase();
+    const linhas = listaMarcas.filter(m => {
+      if (filtroSituacaoAtual !== "todas" && m.situacao !== filtroSituacaoAtual) return false;
+      if (!termo) return true;
+      return (m.marca || "").toLowerCase().includes(termo) || (m.instagram || "").toLowerCase().includes(termo) || (m.email || "").toLowerCase().includes(termo);
+    }).map(m => [m.marca, m.instagram, m.email, m.telefone, m.situacao, m.obs, m.ultimo_contato]);
+    baixarCsv("marcas.csv", ["Marca", "Instagram", "E-mail", "Telefone", "Situação", "Observação", "Último contato"], linhas);
+  });
+
+  // ============================================================================
+  // ABA 3 — CALENDÁRIO
+  // ============================================================================
+  let mesAtual = new Date().getMonth();
+  let anoAtual = new Date().getFullYear();
+  let listaCalendario = [];
+  let listaPrazosCampanhas = [];
+  let filtroTipoAtual = "todos";
+  const NOMES_MES = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
+
+  async function carregarCalendario() { await renderCalendarioCompleto(); }
+
+  async function renderCalendarioCompleto() {
+    const inicioMes = new Date(anoAtual, mesAtual, 1);
+    const fimMes = new Date(anoAtual, mesAtual + 1, 0);
+    const [itens, campanhas, atrasados] = await Promise.all([
+      consultarSeguro("calendario", sb.from("calendario").select("*").gte("data", isoData(inicioMes)).lte("data", isoData(fimMes))),
+      consultarSeguro("campanhas", sb.from("campanhas").select("id,campanha,cliente,prazo").not("prazo", "is", null).gte("prazo", isoData(inicioMes)).lte("prazo", isoData(fimMes))),
+      consultarSeguro("calendario", sb.from("calendario").select("*").eq("status", "a_fazer").lt("data", hojeISO()).order("data", { ascending: true }))
+    ]);
+    listaCalendario = itens;
+    listaPrazosCampanhas = campanhas;
+    document.getElementById("calendario-mes-nome").textContent = NOMES_MES[mesAtual] + " de " + anoAtual;
+    renderGradeCalendario();
+    renderAtrasados(atrasados);
+  }
+  function isoData(d) { return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); }
+
+  function renderGradeCalendario() {
+    const grade = document.getElementById("grade-calendario");
+    const NOMES_DIA = ["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"];
+    let html = NOMES_DIA.map(n => '<div class="dia-semana-nome">' + n + "</div>").join("");
+
+    const primeiroDiaMes = new Date(anoAtual, mesAtual, 1);
+    // getDay(): 0=domingo..6=sábado; convertendo pra semana começando na segunda.
+    const deslocamento = (primeiroDiaMes.getDay() + 6) % 7;
+    const diasNoMes = new Date(anoAtual, mesAtual + 1, 0).getDate();
+    const diasMesAnterior = new Date(anoAtual, mesAtual, 0).getDate();
+
+    const celulas = [];
+    for (let i = deslocamento - 1; i >= 0; i--) celulas.push({ dia: diasMesAnterior - i, foraMes: true, mesOffset: -1 });
+    for (let d = 1; d <= diasNoMes; d++) celulas.push({ dia: d, foraMes: false, mesOffset: 0 });
+    while (celulas.length % 7 !== 0) celulas.push({ dia: celulas.length - (deslocamento + diasNoMes) + 1, foraMes: true, mesOffset: 1 });
+
+    const hoje = hojeISO();
+    html += celulas.map(c => {
+      const dataReal = new Date(anoAtual, mesAtual + c.mesOffset, c.dia);
+      const dataIso = isoData(dataReal);
+      const itensDoDia = listaCalendario.filter(i => i.data === dataIso && (filtroTipoAtual === "todos" || i.tipo === filtroTipoAtual));
+      const prazosDoDia = listaPrazosCampanhas.filter(p => p.prazo === dataIso);
+      const totalItens = itensDoDia.length + prazosDoDia.length;
+      const mostrar = itensDoDia.slice(0, 3);
+      const restante = totalItens - mostrar.length - (mostrar.length < 3 ? prazosDoDia.length : 0);
+      let corpoItens = mostrar.map(i => '<div class="dia-item' + (i.status === "feito" ? " feito" : "") + '">' + i.titulo + "</div>").join("");
+      if (mostrar.length < 3) {
+        prazosDoDia.slice(0, 3 - mostrar.length).forEach(p => { corpoItens += '<div class="dia-item prazo-campanha">Prazo: ' + p.campanha + "</div>"; });
+      }
+      const escondidos = totalItens - (mostrar.length + Math.min(prazosDoDia.length, Math.max(0, 3 - mostrar.length)));
+      return '<div class="dia-cel' + (c.foraMes ? " fora-mes" : "") + (dataIso === hoje ? " hoje" : "") + '" data-data="' + dataIso + '">' +
+        '<div class="dia-numero">' + c.dia + "</div>" + corpoItens +
+        (escondidos > 0 ? '<div class="dia-mais">+' + escondidos + " mais</div>" : "") +
+        '<button type="button" class="dia-add-btn" data-data="' + dataIso + '">+</button>' +
+      "</div>";
+    }).join("");
+    grade.innerHTML = html;
+
+    grade.querySelectorAll(".dia-add-btn").forEach(botao => {
+      botao.addEventListener("click", (evento) => { evento.stopPropagation(); abrirModalItemCalendario(null, botao.dataset.data); });
+    });
+    grade.querySelectorAll(".dia-cel").forEach(celula => {
+      celula.addEventListener("click", () => abrirModalDia(celula.dataset.data));
+    });
+  }
+
+  function abrirModalDia(dataIso) {
+    const itensDoDia = listaCalendario.filter(i => i.data === dataIso);
+    const prazosDoDia = listaPrazosCampanhas.filter(p => p.prazo === dataIso);
+    document.getElementById("modal-dia-titulo").textContent = formatarData(dataIso);
+    const lista = document.getElementById("modal-dia-lista");
+    if (itensDoDia.length === 0 && prazosDoDia.length === 0) {
+      lista.innerHTML = '<p class="texto-vazio">Nada marcado neste dia ainda.</p>';
+    } else {
+      lista.innerHTML = itensDoDia.map(i =>
+        '<div class="item-atrasado" data-id="' + i.id + '" style="cursor:pointer;"><span>' + (i.tipo === "gravar" ? "🎥" : i.tipo === "editar" ? "✂️" : "📤") + " " + i.titulo + (i.marca ? " · " + i.marca : "") + '</span><span>' + (i.status === "feito" ? "Feito" : "A fazer") + "</span></div>"
+      ).join("") + prazosDoDia.map(p =>
+        '<div class="item-atrasado"><span>🚩 Prazo: ' + p.campanha + " · " + p.cliente + "</span></div>"
+      ).join("");
+      lista.querySelectorAll("[data-id]").forEach(linha => {
+        linha.addEventListener("click", () => {
+          document.getElementById("modal-dia").hidden = true;
+          abrirModalItemCalendario(listaCalendario.find(i => i.id === linha.dataset.id), dataIso);
+        });
+      });
+    }
+    document.getElementById("modal-dia-add").onclick = () => { document.getElementById("modal-dia").hidden = true; abrirModalItemCalendario(null, dataIso); };
+    document.getElementById("modal-dia").hidden = false;
+  }
+
+  function abrirModalItemCalendario(item, dataPreenchida) {
+    document.getElementById("form-item-calendario").reset();
+    document.getElementById("modal-item-calendario-titulo").textContent = item ? "Editar item" : "Adicionar item";
+    document.getElementById("cal-id").value = item ? item.id : "";
+    document.getElementById("cal-titulo").value = item ? item.titulo : "";
+    document.getElementById("cal-marca").value = item ? (item.marca || "") : "";
+    document.getElementById("cal-tipo").value = item ? item.tipo : "gravar";
+    document.getElementById("cal-data").value = item ? item.data : (dataPreenchida || hojeISO());
+    document.getElementById("cal-status").value = item ? item.status : "a_fazer";
+    document.getElementById("cal-apagar").hidden = !item;
+    document.getElementById("modal-item-calendario").hidden = false;
+  }
+  document.getElementById("cal-apagar").addEventListener("click", async () => {
+    const id = document.getElementById("cal-id").value;
+    if (!id || !confirm("Apagar este item da agenda?")) return;
+    await salvarSeguro("calendario", sb.from("calendario").delete().eq("id", id));
+    document.getElementById("modal-item-calendario").hidden = true;
+    renderCalendarioCompleto();
+  });
+  document.getElementById("form-item-calendario").addEventListener("submit", async (evento) => {
+    evento.preventDefault();
+    const id = document.getElementById("cal-id").value;
+    const registro = {
+      titulo: document.getElementById("cal-titulo").value.trim(),
+      marca: document.getElementById("cal-marca").value.trim() || null,
+      tipo: document.getElementById("cal-tipo").value,
+      data: document.getElementById("cal-data").value,
+      status: document.getElementById("cal-status").value
+    };
+    if (id) await salvarSeguro("calendario", sb.from("calendario").update(registro).eq("id", id));
+    else await salvarSeguro("calendario", sb.from("calendario").insert(registro));
+    document.getElementById("modal-item-calendario").hidden = true;
+    renderCalendarioCompleto();
+  });
+
+  function renderAtrasados(atrasados) {
+    const alvo = document.getElementById("lista-atrasados");
+    if (atrasados.length === 0) {
+      alvo.innerHTML = '<p class="texto-vazio">Nada atrasado. 🎉</p>';
+      return;
+    }
+    const hoje = new Date(hojeISO());
+    alvo.innerHTML = atrasados.map(i => {
+      const dias = Math.round((hoje - new Date(i.data)) / 86400000);
+      return '<div class="item-atrasado"><span>' + i.titulo + (i.marca ? " · " + i.marca : "") + '</span><span class="item-atrasado-dias">há ' + dias + (dias === 1 ? " dia" : " dias") + "</span></div>";
+    }).join("");
+  }
+
+  document.getElementById("mes-anterior").addEventListener("click", () => { mesAtual--; if (mesAtual < 0) { mesAtual = 11; anoAtual--; } renderCalendarioCompleto(); });
+  document.getElementById("mes-seguinte").addEventListener("click", () => { mesAtual++; if (mesAtual > 11) { mesAtual = 0; anoAtual++; } renderCalendarioCompleto(); });
+  document.getElementById("botao-este-mes").addEventListener("click", () => { mesAtual = new Date().getMonth(); anoAtual = new Date().getFullYear(); renderCalendarioCompleto(); });
+  document.querySelectorAll("[data-tipo]").forEach(pill => {
+    pill.addEventListener("click", () => {
+      document.querySelectorAll("[data-tipo]").forEach(p => p.classList.remove("ativo"));
+      pill.classList.add("ativo");
+      filtroTipoAtual = pill.dataset.tipo;
+      renderGradeCalendario();
+    });
+  });
+
+  // ============================================================================
+  // ABA 4 — CAMPANHAS
+  // ============================================================================
+  const FUNIL_STATUS = ["Briefing", "Roteiro", "Aprovação Roteiro", "Gravação", "Edição", "Aprovado", "Entregue"];
+  let listaCampanhas = [];
+  let filtroCampanhaAtual = "todas";
+  let ordenacaoAtual = { coluna: null, direcao: 1 };
+
+  async function carregarCampanhas() {
+    listaCampanhas = await consultarSeguro("campanhas", sb.from("campanhas").select("*"));
+    renderStatsCampanhas();
+    renderTabelaCampanhas();
+  }
+  function renderStatsCampanhas() {
+    const total = listaCampanhas.length;
+    const ativas = listaCampanhas.filter(c => c.ativa).length;
+    const valorTotal = listaCampanhas.reduce((soma, c) => soma + Number(c.valor || 0), 0);
+    const qtdTotal = listaCampanhas.reduce((soma, c) => soma + Number(c.qtd || 0), 0);
+    const ticketMedio = qtdTotal > 0 ? valorTotal / qtdTotal : 0;
+    const aReceber = listaCampanhas.filter(c => c.pagamento === "pendente").reduce((soma, c) => soma + Number(c.valor || 0), 0);
+    const jaRecebido = listaCampanhas.filter(c => c.pagamento === "pago").reduce((soma, c) => soma + Number(c.valor || 0), 0);
+    document.getElementById("stats-campanhas").innerHTML = [
+      { rotulo: "Campanhas", valor: total },
+      { rotulo: "Ativas", valor: ativas },
+      { rotulo: "Valor total", valor: formatarMoeda(valorTotal), extra: "Ticket médio: " + formatarMoeda(ticketMedio) },
+      { rotulo: "A receber", valor: formatarMoeda(aReceber), extra: "Já recebido: " + formatarMoeda(jaRecebido) }
+    ].map(s => '<div class="stat-item"><div class="stat-valor">' + s.valor + (s.extra ? "<small>" + s.extra + "</small>" : "") + '</div><div class="stat-rotulo">' + s.rotulo + "</div></div>").join("");
+  }
+  function diasEntre(a, b) { return Math.round((new Date(a) - new Date(b)) / 86400000); }
+  function renderTabelaCampanhas() {
+    const termo = document.getElementById("busca-campanhas").value.trim().toLowerCase();
+    let linhas = listaCampanhas.filter(c => {
+      if (filtroCampanhaAtual === "ativas" && !c.ativa) return false;
+      if (filtroCampanhaAtual === "finalizadas" && c.status !== "Entregue") return false;
+      if (!termo) return true;
+      return (c.campanha || "").toLowerCase().includes(termo) || (c.cliente || "").toLowerCase().includes(termo);
+    });
+    if (ordenacaoAtual.coluna) {
+      const col = ordenacaoAtual.coluna;
+      linhas = linhas.slice().sort((a, b) => {
+        let va = a[col], vb = b[col];
+        if (col === "status") { va = FUNIL_STATUS.indexOf(va); vb = FUNIL_STATUS.indexOf(vb); }
+        else if (col === "valor" || col === "qtd") { va = Number(va || 0); vb = Number(vb || 0); }
+        else if (col === "prazo") { va = va || "9999"; vb = vb || "9999"; }
+        else { va = (va || "").toString().toLowerCase(); vb = (vb || "").toString().toLowerCase(); }
+        if (va < vb) return -1 * ordenacaoAtual.direcao;
+        if (va > vb) return 1 * ordenacaoAtual.direcao;
+        return 0;
+      });
+    }
+    document.querySelectorAll("#aba-campanhas .seta-ordem").forEach(s => { s.classList.remove("ativa"); s.textContent = "▾"; });
+    if (ordenacaoAtual.coluna) {
+      const th = document.querySelector('#aba-campanhas th[data-coluna="' + ordenacaoAtual.coluna + '"] .seta-ordem');
+      if (th) { th.classList.add("ativa"); th.textContent = ordenacaoAtual.direcao === 1 ? "▾" : "▴"; }
+    }
+
+    const corpo = document.getElementById("corpo-tabela-campanhas");
+    if (linhas.length === 0) {
+      corpo.innerHTML = '<tr><td colspan="9" class="texto-vazio">Nenhuma campanha encontrada.</td></tr>';
+      return;
+    }
+    const hoje = hojeISO();
+    corpo.innerHTML = linhas.map(c => {
+      let badge = "";
+      if (c.status !== "Entregue" && c.prazo) {
+        const dias = diasEntre(c.prazo, hoje);
+        if (dias < 0) badge = '<span class="badge-prazo badge-atrasado">' + Math.abs(dias) + "d atrasado</span>";
+        else if (dias <= 3) badge = '<span class="badge-prazo badge-vencendo">vence em ' + dias + "d</span>";
+      }
+      return '<tr class="' + (c.favorita ? "favorita" : "") + '" data-id="' + c.id + '">' +
+        '<td><button class="estrela-btn' + (c.favorita ? " marcada" : "") + '" data-id="' + c.id + '" data-favorita="' + c.favorita + '">★</button></td>' +
+        "<td>" + c.campanha + "</td>" +
+        "<td>" + c.cliente + "</td>" +
+        '<td><span class="pill" style="background:var(--fundo-acento);color:var(--acento)">' + c.tipo + "</span></td>" +
+        '<td><span class="pill" style="background:' + corStatus(c.status) + '">' + c.status + "</span></td>" +
+        "<td>" + c.qtd + "</td>" +
+        "<td>" + formatarMoeda(c.valor) + "</td>" +
+        "<td>" + (c.prazo ? formatarData(c.prazo) : "—") + badge + "</td>" +
+        '<td><span class="pill" style="background:' + (c.pagamento === "pago" ? "var(--fundo-sucesso);color:var(--sucesso)" : "var(--fundo-aviso);color:var(--aviso)") + '">' + (c.pagamento === "pago" ? "Pago" : "Pendente") + "</span></td>" +
+      "</tr>";
+    }).join("");
+
+    corpo.querySelectorAll(".estrela-btn").forEach(botao => {
+      botao.addEventListener("click", async (evento) => {
+        evento.stopPropagation();
+        await salvarSeguro("campanhas", sb.from("campanhas").update({ favorita: botao.dataset.favorita !== "true" }).eq("id", botao.dataset.id));
+        carregarCampanhas();
+      });
+    });
+    corpo.querySelectorAll("tr[data-id]").forEach(linha => {
+      linha.addEventListener("click", () => abrirModalCampanha(listaCampanhas.find(c => c.id === linha.dataset.id)));
+    });
+  }
+  function corStatus(status) {
+    const indice = FUNIL_STATUS.indexOf(status);
+    const paleta = ["rgba(138,138,138,0.16)", "rgba(176,137,0,0.14)", "rgba(176,137,0,0.22)", "rgba(166,79,3,0.16)", "rgba(166,79,3,0.26)", "rgba(45,122,79,0.16)", "rgba(45,122,79,0.26)"];
+    return paleta[indice] || paleta[0];
+  }
+  document.getElementById("busca-campanhas").addEventListener("input", renderTabelaCampanhas);
+  document.querySelectorAll("[data-filtro-campanha]").forEach(pill => {
+    pill.addEventListener("click", () => {
+      document.querySelectorAll("[data-filtro-campanha]").forEach(p => p.classList.remove("ativo"));
+      pill.classList.add("ativo");
+      filtroCampanhaAtual = pill.dataset.filtroCampanha;
+      renderTabelaCampanhas();
+    });
+  });
+  document.querySelectorAll("#aba-campanhas th.ordenavel").forEach(th => {
+    th.addEventListener("click", () => {
+      const coluna = th.dataset.coluna;
+      ordenacaoAtual.direcao = (ordenacaoAtual.coluna === coluna) ? ordenacaoAtual.direcao * -1 : 1;
+      ordenacaoAtual.coluna = coluna;
+      renderTabelaCampanhas();
+    });
+  });
+
+  const modalCampanha = document.getElementById("modal-campanha");
+  document.getElementById("botao-add-campanha").addEventListener("click", () => abrirModalCampanha(null));
+  function abrirModalCampanha(campanha) {
+    document.getElementById("form-campanha").reset();
+    document.getElementById("modal-campanha-titulo").textContent = campanha ? "Editar campanha" : "Adicionar campanha";
+    document.getElementById("camp-id").value = campanha ? campanha.id : "";
+    document.getElementById("camp-campanha").value = campanha ? campanha.campanha : "";
+    document.getElementById("camp-cliente").value = campanha ? campanha.cliente : "";
+    document.getElementById("camp-tipo").value = campanha ? campanha.tipo : "Conteúdo";
+    document.getElementById("camp-status").value = campanha ? campanha.status : "Briefing";
+    document.getElementById("camp-qtd").value = campanha ? campanha.qtd : 1;
+    document.getElementById("camp-valor").value = campanha ? campanha.valor : 0;
+    document.getElementById("camp-prazo").value = campanha ? (campanha.prazo || "") : "";
+    document.getElementById("camp-pagamento").value = campanha ? campanha.pagamento : "pendente";
+    document.getElementById("camp-ativa").checked = campanha ? campanha.ativa : true;
+    document.getElementById("camp-apagar").hidden = !campanha;
+    modalCampanha.hidden = false;
+  }
+  document.getElementById("camp-apagar").addEventListener("click", async () => {
+    const id = document.getElementById("camp-id").value;
+    if (!id || !confirm("Apagar esta campanha?")) return;
+    await salvarSeguro("campanhas", sb.from("campanhas").delete().eq("id", id));
+    modalCampanha.hidden = true;
+    carregarCampanhas();
+  });
+  document.getElementById("form-campanha").addEventListener("submit", async (evento) => {
+    evento.preventDefault();
+    const id = document.getElementById("camp-id").value;
+    const registro = {
+      campanha: document.getElementById("camp-campanha").value.trim(),
+      cliente: document.getElementById("camp-cliente").value.trim(),
+      tipo: document.getElementById("camp-tipo").value,
+      status: document.getElementById("camp-status").value,
+      qtd: Number(document.getElementById("camp-qtd").value),
+      valor: Number(document.getElementById("camp-valor").value),
+      prazo: document.getElementById("camp-prazo").value || null,
+      pagamento: document.getElementById("camp-pagamento").value,
+      ativa: document.getElementById("camp-ativa").checked
+    };
+    if (id) await salvarSeguro("campanhas", sb.from("campanhas").update(registro).eq("id", id));
+    else await salvarSeguro("campanhas", sb.from("campanhas").insert(registro));
+    modalCampanha.hidden = true;
+    carregarCampanhas();
+  });
+  document.getElementById("botao-exportar-campanhas").addEventListener("click", () => {
+    const linhas = listaCampanhas.map(c => [c.campanha, c.cliente, c.tipo, c.status, c.qtd, c.valor, c.prazo, c.pagamento, c.ativa ? "sim" : "não"]);
+    baixarCsv("campanhas.csv", ["Campanha", "Cliente", "Tipo", "Status", "Qtd", "Valor", "Prazo", "Pagamento", "Ativa"], linhas);
+  });
+
+  // ============================================================================
+  // ABA 5 — CHECKLIST (conteúdo vem de js/biblioteca.js, window.Biblioteca)
+  // ============================================================================
+  document.querySelectorAll(".subtab-btn").forEach(botao => {
+    botao.addEventListener("click", () => {
+      document.querySelectorAll(".subtab-btn").forEach(b => b.classList.remove("ativo"));
+      document.querySelectorAll(".subaba").forEach(s => s.classList.remove("ativa"));
+      botao.classList.add("ativo");
+      document.getElementById("subaba-" + botao.dataset.subaba).classList.add("ativa");
+    });
+  });
+
+  let marcadosChecklist = {};
+  async function carregarChecklist() {
+    if (!window.Biblioteca) {
+      avisar("Não consegui carregar o conteúdo do checklist agora. Verifique sua conexão e recarregue a página.");
+      return;
+    }
+    const marcados = await consultarSeguro("marcados", sb.from("marcados").select("chave,marcado"));
+    marcadosChecklist = {};
+    marcados.forEach(m => { marcadosChecklist[m.chave] = m.marcado; });
+    renderChecklistPortfolio();
+    renderReferencias();
+    renderRoteiros();
+    renderNichos();
+    renderRevisao();
+  }
+
+  function renderChecklistPortfolio() {
+    const B = window.Biblioteca;
+    let totalItens = 0, totalMarcados = 0;
+    const html = B.CHECKLIST.map(secao => {
+      const chaves = secao.itens.map((item, i) => "checklist:" + secao.id + ":" + i);
+      const marcadosSecao = chaves.filter(ch => marcadosChecklist[ch]).length;
+      totalItens += chaves.length;
+      totalMarcados += marcadosSecao;
+      const pct = Math.round((marcadosSecao / chaves.length) * 100);
+      return '<div class="secao-checklist" data-secao="' + secao.id + '">' +
+        '<div class="secao-cabecalho">' +
+          '<span class="secao-emoji">' + secao.emoji + '</span>' +
+          '<div class="secao-textos"><strong>' + secao.nome + '</strong><span>' + secao.resumo + '</span></div>' +
+          '<div class="secao-barra"><div class="barra-progresso-fundo"><div class="barra-progresso" style="width:' + pct + '%"></div></div></div>' +
+          '<span style="font-size:0.75rem;color:var(--texto-suave);width:34px;text-align:right;">' + pct + '%</span>' +
+        '</div>' +
+        '<div class="secao-corpo">' +
+          '<p class="secao-porque">' + secao.porque + '</p>' +
+          secao.itens.map((item, i) => {
+            const chave = "checklist:" + secao.id + ":" + i;
+            const marcado = !!marcadosChecklist[chave];
+            return '<label class="item-check' + (marcado ? " marcado" : "") + '"><input type="checkbox" data-chave="' + chave + '" ' + (marcado ? "checked" : "") + '><span class="item-check-textos"><strong>' + item.t + '</strong><span>' + item.d + '</span></span></label>';
+          }).join("") +
+        '</div>' +
+      '</div>';
+    }).join("");
+    document.getElementById("lista-secoes-checklist").innerHTML = html;
+    const pctGeral = totalItens > 0 ? Math.round((totalMarcados / totalItens) * 100) : 0;
+    document.getElementById("barra-progresso-geral").style.width = pctGeral + "%";
+    document.getElementById("texto-progresso-geral").textContent = pctGeral + "% completo";
+
+    document.querySelectorAll(".secao-cabecalho").forEach(cab => {
+      cab.addEventListener("click", () => cab.nextElementSibling.classList.toggle("aberta"));
+    });
+    document.querySelectorAll(".item-check input").forEach(input => {
+      input.addEventListener("click", (evento) => evento.stopPropagation());
+      input.addEventListener("change", async () => {
+        const chave = input.dataset.chave;
+        marcadosChecklist[chave] = input.checked;
+        input.closest(".item-check").classList.toggle("marcado", input.checked);
+        await salvarSeguro("marcados", sb.from("marcados").upsert({ chave, marcado: input.checked, atualizado_em: new Date().toISOString() }));
+        renderChecklistPortfolio();
+      });
+    });
+  }
+
+  const CORES_REFERENCIA = { coral: "#A64F03", rosa: "#B5615A", mostarda: "#B08900", terra: "#7A4735", oliva: "#6B7A3A", areia: "#8C7A5B" };
+  function renderReferencias() {
+    const B = window.Biblioteca;
+    const grade = document.getElementById("grade-referencias");
+    grade.innerHTML = B.REFERENCIAS.map((r, i) =>
+      '<button type="button" class="cartao-ref" style="background:' + (CORES_REFERENCIA[r.cor] || "#7A4735") + '" data-indice="' + i + '">' +
+        '<span class="cartao-ref-emoji">' + r.emoji + '</span>' +
+        '<div><div class="cartao-ref-titulo">' + r.titulo + '</div><div class="cartao-ref-meta">' + r.estilo + ' · ' + r.duracao + '<br>' + r.marca + '</div></div>' +
+      '</button>'
+    ).join("");
+    grade.querySelectorAll(".cartao-ref").forEach(cartao => {
+      cartao.addEventListener("click", () => abrirFichaReferencia(B.REFERENCIAS[Number(cartao.dataset.indice)]));
+    });
+  }
+  function abrirFichaReferencia(r) {
+    document.getElementById("ficha-ref-titulo").textContent = r.emoji + " " + r.titulo;
+    document.getElementById("ficha-ref-corpo").innerHTML =
+      '<div class="ficha-ref-bloco"><h4>Gancho</h4><p>' + r.gancho + '</p></div>' +
+      '<div class="ficha-ref-bloco"><h4>Por que funciona</h4><p>' + r.porque + '</p></div>' +
+      '<div class="ficha-ref-bloco"><h4>Diferencial</h4><p>' + r.diferencial + '</p></div>' +
+      '<div class="ficha-ref-bloco"><h4>Erro comum</h4><p>' + r.erro + '</p></div>' +
+      '<div class="ficha-ref-bloco"><h4>Roteiro</h4>' + r.roteiro.map(b => '<div class="roteiro-bloco"><div class="roteiro-tempo">' + b.t + '</div><div>' + b.o + '</div></div>').join("") + '</div>' +
+      '<a class="botao botao-principal" style="width:100%;justify-content:center;" target="_blank" rel="noopener" href="' + r.youtube + '">Assistir ao vídeo</a>';
+    document.getElementById("modal-ficha-referencia").hidden = false;
+  }
+
+  function renderRoteiros() {
+    const B = window.Biblioteca;
+    document.getElementById("lista-roteiros").innerHTML = B.TIPOS.map((tipo, i) =>
+      '<div class="acordeao-simples"><div class="acordeao-cabecalho" data-indice="' + i + '"><span>' + tipo.emoji + '</span><strong>' + tipo.nome + '</strong><span style="font-size:0.75rem;color:var(--texto-suave);">' + tipo.duracao + '</span></div>' +
+      '<div class="acordeao-corpo"><p class="secao-porque">' + tipo.porque + '</p>' +
+        tipo.beats.map(b => '<div class="roteiro-bloco"><div class="roteiro-tempo">' + b.t + '</div><div>' + b.o + '</div></div>').join("") +
+        (tipo.erros && tipo.erros.length ? '<ul class="lista-erros">' + tipo.erros.map(e => "<li>" + e + "</li>").join("") + "</ul>" : "") +
+      '</div></div>'
+    ).join("");
+    ligarAcordeoes("#lista-roteiros");
+  }
+
+  function renderNichos() {
+    const B = window.Biblioteca;
+    if (B.COMO_USAR && B.COMO_USAR.length) {
+      document.getElementById("caixa-como-usar").hidden = false;
+      document.getElementById("caixa-como-usar").innerHTML = "<strong>Como usar esses ganchos</strong><ul>" + B.COMO_USAR.map(t => "<li>" + t + "</li>").join("") + "</ul>";
+    }
+    document.getElementById("grade-nichos").innerHTML = B.NICHOS.map(n =>
+      '<div class="cartao-nicho"><h4>' + n.emoji + ' ' + n.nome + '</h4>' +
+      n.ideias.map(ideia => '<div class="ideia-item"><strong>' + ideia.t + '</strong><p>“' + ideia.gancho + '”</p></div>').join("") +
+      '</div>'
+    ).join("");
+  }
+
+  function renderRevisao() {
+    const B = window.Biblioteca;
+    document.getElementById("lista-revisao").innerHTML = B.REVISAO.map((bloco, indiceBloco) =>
+      '<div class="secao-checklist"><div class="secao-cabecalho" data-so-abre><span class="secao-emoji">' + bloco.emoji + '</span><div class="secao-textos"><strong>' + bloco.bloco + '</strong></div></div>' +
+      '<div class="secao-corpo aberta">' +
+        bloco.itens.map((item, i) => '<label class="item-check"><input type="checkbox" data-revisao="' + indiceBloco + "-" + i + '"><span class="item-check-textos"><strong>' + item.t + '</strong><span>' + item.d + '</span></span></label>').join("") +
+      '</div></div>'
+    ).join("");
+    document.querySelectorAll('#lista-revisao [data-so-abre]').forEach(cab => cab.addEventListener("click", () => cab.nextElementSibling.classList.toggle("aberta")));
+    document.querySelectorAll('#lista-revisao input[type="checkbox"]').forEach(input => {
+      input.addEventListener("click", (e) => e.stopPropagation());
+      input.addEventListener("change", () => input.closest(".item-check").classList.toggle("marcado", input.checked));
+    });
+  }
+
+  function ligarAcordeoes(seletorContainer) {
+    document.querySelectorAll(seletorContainer + " .acordeao-cabecalho").forEach(cab => {
+      cab.addEventListener("click", () => cab.nextElementSibling.classList.toggle("aberta"));
+    });
+  }
+
+  // ---- Ponto de partida: abre a aba do hash da URL, ou Portfólio por padrão. ----
+  abrirAba((window.location.hash || "#portfolio").replace("#", ""));
+})();
+</script>
+</body>
+</html>

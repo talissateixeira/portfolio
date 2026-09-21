@@ -558,6 +558,7 @@
     color: var(--texto-suave);
   }
   .categoria-subtitulo { font-family: var(--fonte-montserrat); font-style: italic; color: var(--texto-suave); margin: 4px 0 0; font-size: 0.92rem; }
+  .categorias-vazio { font-family: var(--fonte-montserrat); color: var(--texto-suave); text-align: center; padding: 32px 16px; }
   .categoria-setas { display: flex; gap: 8px; flex-shrink: 0; }
   .seta-btn {
     width: 38px; height: 38px;
@@ -1493,47 +1494,33 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="js/banco.js"></script>
 <script>
   /* ======================================================================
-     RASTREAMENTO (grava visitas, cliques, vídeos assistidos e mensagens no
-     painel administrativo, em talissamuller.com/login). Usa a mesma chave
-     "anon" do Supabase, que só tem permissão de INSERIR nas tabelas
-     portfolio_events e portfolio_leads, nunca de ler, editar ou apagar.
-     Quem lê esses dados é só o painel, depois do login.
+     BANCO DE DADOS: usa o mesmo cliente Supabase de js/banco.js (o mesmo
+     arquivo usado pelo login e pelo admin). A chave "anon" só tem permissão
+     de INSERIR em "marcas" e "visitas", e de LER os vídeos marcados como
+     visíveis — nunca de ler, editar ou apagar o resto. Quem lê tudo é só o
+     admin, depois do login (veja banco.sql).
   ====================================================================== */
-  const SUPABASE_URL_SITE = "https://evafozzxhackvtlguqpq.supabase.co";
-  const SUPABASE_ANON_KEY_SITE = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV2YWZvenp4aGFja3Z0bGd1cXBxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg0NDY3OTMsImV4cCI6MjEwNDAyMjc5M30.VIlphy_vB4suN-0wQ93jotNgzWZGZQL3jpyq5XS8yVc";
-  const sbSite = window.supabase.createClient(SUPABASE_URL_SITE, SUPABASE_ANON_KEY_SITE);
+  const sbSite = Banco.sb;
 
-  // Um session_id novo por aba/sessão do navegador, pra contar visitantes únicos.
-  function obterSessionId() {
-    let id = sessionStorage.getItem("session_id");
-    if (!id) {
-      id = (crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random());
-      sessionStorage.setItem("session_id", id);
-    }
-    return id;
-  }
-
-  // Grava um evento (visita, clique ou vídeo assistido). Não usa .select(),
-  // de propósito, porque o site só tem permissão de gravar, não de ler de volta.
-  function registrarEvento(tipo, nome, metadata) {
-    sbSite.from("portfolio_events").insert({
-      event_type: tipo,
-      event_name: nome || null,
-      session_id: obterSessionId(),
-      page_path: window.location.pathname,
-      metadata: metadata || null
-    }).then(({ error }) => {
-      if (error) console.warn("Não foi possível registrar o evento:", error.message);
+  // Grava uma visita simples nesta página, sem pedir nada pro visitante e
+  // sem nenhum serviço de fora. "origem" é o site de onde a pessoa veio
+  // (ex.: instagram.com), ou vazio quando ela digitou o link direto.
+  function registrarVisita() {
+    let origem = null;
+    try { origem = document.referrer ? new URL(document.referrer).hostname : null; } catch (erro) { origem = null; }
+    sbSite.from("visitas").insert({ pagina: window.location.pathname, origem: origem }).then(({ error }) => {
+      if (error) console.warn("Não foi possível registrar a visita:", error.message);
     });
   }
 
-  // Grava uma mensagem de contato vinda do formulário.
+  // Grava um novo contato na base de marcas do admin, sempre como "lead"
+  // (é a única situação que a chave pública tem permissão de gravar). Devolve
+  // a Promise pra quem chamou poder mostrar sucesso/erro na tela.
   function registrarLead(dados) {
-    sbSite.from("portfolio_leads").insert(dados).then(({ error }) => {
-      if (error) console.warn("Não foi possível registrar a mensagem:", error.message);
-    });
+    return sbSite.from("marcas").insert(Object.assign({ situacao: "lead" }, dados));
   }
 
   // EDITE AQUI sempre que trocar uma foto no computador por um arquivo de MESMO NOME: aumente
@@ -1590,56 +1577,8 @@
       { nome: "Full English", logo: "full-english.png", altura: 26 }
     ],
 
-    // EDITE AQUI: categorias com linha própria e sempre visível no portfólio.
-    // "capa" é o nome do arquivo de imagem dentro da pasta "capas-portfolio/".
-    // "youtubeId" (opcional): o código do vídeo não listado do YouTube (a parte final do link,
-    // depois de "/shorts/"). Se preenchido, o card fica clicável e abre esse vídeo num player
-    // por cima da página. Sem "youtubeId", o card fica só com a foto, como antes.
-    // "preview" (opcional): nome de um arquivo de vídeo curto e mudo dentro da pasta
-    // "videos-portfolio/" (ex.: "beyoung-1.mp4"). Se preenchido, o card toca esse clipe em loop,
-    // sem som, sozinho, assim que aparece na tela (efeito de prévia animada, tipo Reels/TikTok).
-    categorias: [
-      {
-        nome: "Skincare",
-        subtitulo: "Rotina de pele que gera confiança",
-        trabalhos: [
-          { marca: "Beyoung", capa: "beyoung-1.jpg", preview: "beyoung-1.mp4", youtubeId: "sfpTB2b1i_U" },
-          { marca: "Beyoung", capa: "beyoung-2.jpg", preview: "beyoung-2.mp4", youtubeId: "SXzC56EE0-M" },
-          { marca: "Beyoung", capa: "beyoung-3.jpg", preview: "beyoung-3.mp4", youtubeId: "A7AE62HxZT0" },
-          { marca: "Beyoung", capa: "beyoung-4.jpg", preview: "beyoung-4.mp4", youtubeId: "frx7bnLQgmg" },
-          { marca: "Beyoung", capa: "beyoung-5.jpg", preview: "beyoung-5.mp4", youtubeId: "K27GZeS6nwk" }
-        ]
-      },
-      {
-        nome: "Auto Cuidados",
-        subtitulo: "Momentos de pausa que viram conteúdo",
-        trabalhos: [
-          { marca: "Rosa Selvagem", capa: "body-splash.jpg", preview: "body-splash.mp4", youtubeId: "l4n0RHiJF4M" },
-          { marca: "Rosa Selvagem", capa: "rosa-selvagem-1.jpg", preview: "rosa-selvagem-1.mp4", youtubeId: "fsm1-NujM4E" },
-          { marca: "Rosa Selvagem", capa: "rosa-selvagem-pelo-encravado.jpg", preview: "rosa-selvagem-pelo-encravado.mp4", youtubeId: "WT3aTSHEwrY" },
-          { marca: "Rosa Selvagem", capa: "rosa-selvagem-3.jpg", preview: "rosa-selvagem-3.mp4", youtubeId: "Ul8vf57er9w" },
-          { marca: "Rosa Selvagem", capa: "rosa-selvagem-4.jpg", preview: "rosa-selvagem-4.mp4", youtubeId: "cQqoUutHA2w" }
-        ]
-      }
-    ],
-
-    // EDITE AQUI: a linha "Destaques", que reúne os demais nichos.
-    // Cada trabalho tem um "nicho": ao clicar num nicho no menu de filtros lá em cima, só os trabalhos daquele nicho aparecem aqui.
-    destaques: {
-      subtitulo: "Clique num nicho ali em cima para ver só aqueles trabalhos",
-      trabalhos: [
-        { marca: "Widi Care", capa: "widicare-juba.jpg", nicho: "Hair Care", preview: "widicare-juba.mp4", youtubeId: "W5-9s20jfb8" },
-        { marca: "Coala", capa: "coala.jpg", nicho: "Casa e Decoração", preview: "coala.mp4", youtubeId: "CUNMgC-bEaE" },
-        { marca: "Coala", capa: "coala-02.jpg", nicho: "Casa e Decoração", preview: "coala-02.mp4", youtubeId: "6YB4VU45G3w" },
-        { marca: "Azulim", capa: "azulim.jpg", nicho: "Casa e Decoração", preview: "azulim.mp4", youtubeId: "_i0G3bURBB4" },
-        { marca: "Mare Beauty", capa: "mare-beauty.jpg", nicho: "Unboxing", preview: "mare-beauty.mp4", youtubeId: "1A-qNlGnW5Y" },
-        { marca: "Vita Premium", capa: "melatonina.jpg", nicho: "Fitness e Wellness", preview: "melatonina.mp4", youtubeId: "Y2Ip24_amvo" },
-        { marca: "Vita Premium", capa: "vinagre-maca.jpg", nicho: "Fitness e Wellness", preview: "vinagre-maca.mp4", youtubeId: "7ofP4-PhqN8" },
-        { marca: "Miallegra", capa: "miallegra.jpg", nicho: "Moda e Acessórios", preview: "miallegra.mp4", youtubeId: "3BQErVgKPMM" },
-        { marca: "Full English", capa: "depoimento-aluno.jpg", nicho: "Educação", preview: "full-english.mp4", youtubeId: "a4JLSf0Ew3k" },
-        { marca: "Bela Gastro Bar", capa: "bela-gastro-bar.jpg", nicho: "Gastronomia", preview: "bela-gastro-bar.mp4", youtubeId: "k0tvIPNULyk" }
-      ]
-    },
+    // Os vídeos do portfólio (antes fixos aqui) agora vêm do banco de dados,
+    // editados pelo admin em talissamuller.com/admin — veja "videos.js" mais abaixo.
 
     // EDITE AQUI: a seção "Case de Conteúdo Orgânico", entre o portfólio e as fotos.
     // "capa": nome do arquivo de foto (frame do vídeo) dentro desta mesma pasta, mostrado antes de clicar.
@@ -1780,46 +1719,8 @@
       { nome: "Full English", logo: "full-english.png", altura: 26 }
     ],
 
-    categorias: [
-      {
-        nome: "Skincare",
-        subtitulo: "A skincare routine that builds trust",
-        trabalhos: [
-          { marca: "Beyoung", capa: "beyoung-1.jpg", preview: "beyoung-1.mp4", youtubeId: "sfpTB2b1i_U" },
-          { marca: "Beyoung", capa: "beyoung-2.jpg", preview: "beyoung-2.mp4", youtubeId: "SXzC56EE0-M" },
-          { marca: "Beyoung", capa: "beyoung-3.jpg", preview: "beyoung-3.mp4", youtubeId: "A7AE62HxZT0" },
-          { marca: "Beyoung", capa: "beyoung-4.jpg", preview: "beyoung-4.mp4", youtubeId: "frx7bnLQgmg" },
-          { marca: "Beyoung", capa: "beyoung-5.jpg", preview: "beyoung-5.mp4", youtubeId: "K27GZeS6nwk" }
-        ]
-      },
-      {
-        nome: "Self-Care",
-        subtitulo: "Moments of pause that become content",
-        trabalhos: [
-          { marca: "Rosa Selvagem", capa: "body-splash.jpg", preview: "body-splash.mp4", youtubeId: "l4n0RHiJF4M" },
-          { marca: "Rosa Selvagem", capa: "rosa-selvagem-1.jpg", preview: "rosa-selvagem-1.mp4", youtubeId: "fsm1-NujM4E" },
-          { marca: "Rosa Selvagem", capa: "rosa-selvagem-pelo-encravado.jpg", preview: "rosa-selvagem-pelo-encravado.mp4", youtubeId: "WT3aTSHEwrY" },
-          { marca: "Rosa Selvagem", capa: "rosa-selvagem-3.jpg", preview: "rosa-selvagem-3.mp4", youtubeId: "Ul8vf57er9w" },
-          { marca: "Rosa Selvagem", capa: "rosa-selvagem-4.jpg", preview: "rosa-selvagem-4.mp4", youtubeId: "cQqoUutHA2w" }
-        ]
-      }
-    ],
-
-    destaques: {
-      subtitulo: "Click a niche above to see only those projects",
-      trabalhos: [
-        { marca: "Widi Care", capa: "widicare-juba.jpg", nicho: "Hair Care", preview: "widicare-juba.mp4", youtubeId: "W5-9s20jfb8" },
-        { marca: "Coala", capa: "coala.jpg", nicho: "Home & Decor", preview: "coala.mp4", youtubeId: "CUNMgC-bEaE" },
-        { marca: "Coala", capa: "coala-02.jpg", nicho: "Home & Decor", preview: "coala-02.mp4", youtubeId: "6YB4VU45G3w" },
-        { marca: "Azulim", capa: "azulim.jpg", nicho: "Home & Decor", preview: "azulim.mp4", youtubeId: "_i0G3bURBB4" },
-        { marca: "Mare Beauty", capa: "mare-beauty.jpg", nicho: "Unboxing", preview: "mare-beauty.mp4", youtubeId: "1A-qNlGnW5Y" },
-        { marca: "Vita Premium", capa: "melatonina.jpg", nicho: "Fitness & Wellness", preview: "melatonina.mp4", youtubeId: "Y2Ip24_amvo" },
-        { marca: "Vita Premium", capa: "vinagre-maca.jpg", nicho: "Fitness & Wellness", preview: "vinagre-maca.mp4", youtubeId: "7ofP4-PhqN8" },
-        { marca: "Miallegra", capa: "miallegra.jpg", nicho: "Fashion & Accessories", preview: "miallegra.mp4", youtubeId: "3BQErVgKPMM" },
-        { marca: "Full English", capa: "depoimento-aluno.jpg", nicho: "Education", preview: "full-english.mp4", youtubeId: "a4JLSf0Ew3k" },
-        { marca: "Bela Gastro Bar", capa: "bela-gastro-bar.jpg", nicho: "Food & Drink", preview: "bela-gastro-bar.mp4", youtubeId: "k0tvIPNULyk" }
-      ]
-    },
+    // The portfolio videos (previously fixed here) now come from the database,
+    // edited from the admin at talissamuller.com/admin.
 
     caseOrganico: {
       titulo: "Organic<br>Content<br>Case",
@@ -1915,8 +1816,7 @@
   // Textinhos soltos usados direto no código (fora do CONFIG), tipo rótulos de botão e alt de imagem.
   const TEXTOS_JS = {
     pt: {
-      destaques: "Destaques",
-      todos: "Todos",
+      semVideos: "Em breve, novos trabalhos aparecem aqui.",
       verAnteriores: "Ver anteriores em ",
       verMais: "Ver mais em ",
       assistirVideo: "Assistir ao vídeo de ",
@@ -1935,8 +1835,7 @@
       separadorDecimal: ","
     },
     en: {
-      destaques: "Highlights",
-      todos: "All",
+      semVideos: "New work will appear here soon.",
       verAnteriores: "See previous in ",
       verMais: "See more in ",
       assistirVideo: "Watch the video of ",
@@ -2051,14 +1950,10 @@
     return m + ":" + String(s).padStart(2, "0");
   }
 
-  document.addEventListener("DOMContentLoaded", () => {
+  document.addEventListener("DOMContentLoaded", async () => {
 
     // ---- Rastreamento: registra a visita assim que a página carrega ----
-    registrarEvento("page_view");
-
-    // ---- Rastreamento: clique no botão principal do menu ("Trabalhe comigo") ----
-    const navCtaEl = document.querySelector(".nav-cta");
-    if (navCtaEl) navCtaEl.addEventListener("click", () => registrarEvento("button_click", "contact_nav_cta"));
+    registrarVisita();
 
     // ---- Player de vídeo (modal) ----
     // Abre um vídeo do YouTube (não listado) passando o "youtubeId", ou um arquivo de vídeo
@@ -2066,7 +1961,6 @@
     const videoModal = document.getElementById("video-modal");
     const videoModalPlayer = document.getElementById("video-modal-player");
     function abrirVideoModal({ youtubeId, arquivo }) {
-      registrarEvento("video_view", youtubeId || arquivo);
       videoModalPlayer.innerHTML = youtubeId
         ? '<iframe src="https://www.youtube-nocookie.com/embed/' + youtubeId + '?autoplay=1&rel=0" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen title="' + T.videoTitulo + '"></iframe>'
         : '<video controls playsinline autoplay src="' + arquivo + '"></video>';
@@ -2139,11 +2033,19 @@
       marcasBolhas.appendChild(img);
     });
 
-    // ---- Filtros rápidos + linhas de categorias fixas (Skincare, Auto Cuidados) ----
+    // ---- Vídeos do portfólio: vêm do banco (tabela "videos"), editados no admin.
+    // Uma linha por nicho, na ordem em que os vídeos aparecem (controlada lá no admin).
     const filtrosRapidos = document.getElementById("filtros-rapidos");
     const categoriasLinhas = document.getElementById("categorias-linhas");
 
-    function criarLinhaPortfolio(nome, subtitulo, trabalhos, slug) {
+    // Tira o ID do YouTube de um link (aceita watch?v=, youtu.be/ e /shorts/).
+    function extrairIdYoutube(link) {
+      if (!link) return null;
+      const m = link.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|shorts\/|embed\/))([A-Za-z0-9_-]{6,})/);
+      return m ? m[1] : null;
+    }
+
+    function criarLinhaPortfolio(nome, trabalhos, slug) {
       const linha = document.createElement("div");
       linha.className = "categoria-linha reveal";
       linha.id = slug;
@@ -2151,8 +2053,8 @@
       const cabecalho = document.createElement("div");
       cabecalho.className = "categoria-cabecalho-linha";
       cabecalho.innerHTML =
-        '<div><div class="categoria-titulo-grupo"><h3>' + nome + '</h3><span class="categoria-contagem" id="contagem-' + slug + '">' +
-        String(trabalhos.length).padStart(2, "0") + '</span></div><p class="categoria-subtitulo">' + subtitulo + "</p></div>" +
+        '<div><div class="categoria-titulo-grupo"><h3>' + nome + '</h3><span class="categoria-contagem">' +
+        String(trabalhos.length).padStart(2, "0") + '</span></div></div>' +
         '<div class="categoria-setas"><button type="button" class="seta-btn" data-direcao="-1" aria-label="' + T.verAnteriores + nome + '">‹</button>' +
         '<button type="button" class="seta-btn" data-direcao="1" aria-label="' + T.verMais + nome + '">›</button></div>';
       linha.appendChild(cabecalho);
@@ -2161,24 +2063,21 @@
       scrollWrap.className = "categoria-scroll";
       scrollWrap.id = "scroll-" + slug;
       trabalhos.forEach(trabalho => {
-        const rotuloLegenda = trabalho.nicho || nome;
-        const temVideo = trabalho.youtubeId || trabalho.video;
+        const idYoutube = extrairIdYoutube(trabalho.link);
+        const legendaTag = trabalho.marca + (trabalho.destaque ? " · " + trabalho.destaque : "");
         const card = document.createElement("div");
-        card.className = "trabalho-card" + (temVideo ? " tem-video" : "");
-        if (trabalho.nicho) card.dataset.nicho = trabalho.nicho;
+        card.className = "trabalho-card" + (idYoutube ? " tem-video" : "");
         card.innerHTML =
-          '<div class="trabalho-imagem-wrap"><span class="trabalho-tag">' + trabalho.marca + '</span>' +
-          '<img src="capas-portfolio/' + trabalho.capa + '?v=' + VERSAO_FOTOS + '" alt="' + T.trabalhoAlt(trabalho.marca, rotuloLegenda) + '" loading="lazy">' +
-          (trabalho.preview ? '<div class="trabalho-preview"><video muted loop playsinline preload="none" data-src="videos-portfolio/' + trabalho.preview + '?v=' + VERSAO_FOTOS + '"></video></div>' : "") +
-          (temVideo ? '<span class="trabalho-play-badge" aria-hidden="true">▶</span>' : "") +
+          '<div class="trabalho-imagem-wrap"><span class="trabalho-tag">' + legendaTag + '</span>' +
+          '<img src="' + trabalho.capa_url + '?v=' + VERSAO_FOTOS + '" alt="' + T.trabalhoAlt(trabalho.marca, trabalho.nicho || nome) + '" loading="lazy">' +
+          (trabalho.preview_url ? '<div class="trabalho-preview"><video muted loop playsinline preload="none" data-src="' + trabalho.preview_url + '?v=' + VERSAO_FOTOS + '"></video></div>' : "") +
+          (idYoutube ? '<span class="trabalho-play-badge" aria-hidden="true">▶</span>' : "") +
           "</div>";
-        if (temVideo) {
+        if (idYoutube) {
           card.setAttribute("role", "button");
           card.setAttribute("tabindex", "0");
           card.setAttribute("aria-label", T.assistirVideo + trabalho.marca);
-          const abrir = () => abrirVideoModal(trabalho.youtubeId
-            ? { youtubeId: trabalho.youtubeId }
-            : { arquivo: "videos-portfolio/" + trabalho.video + "?v=" + VERSAO_FOTOS });
+          const abrir = () => abrirVideoModal({ youtubeId: idYoutube });
           card.addEventListener("click", abrir);
           card.addEventListener("keydown", (evento) => {
             if (evento.key === "Enter" || evento.key === " ") { evento.preventDefault(); abrir(); }
@@ -2203,7 +2102,7 @@
       // a marca/nome do canal quando pausado.
       if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
         linha.addEventListener("mouseenter", () => {
-          linha.querySelectorAll(".trabalho-card:not([hidden]) .trabalho-preview").forEach(preview => {
+          linha.querySelectorAll(".trabalho-card .trabalho-preview").forEach(preview => {
             const video = preview.querySelector("video");
             if (!video) return;
             if (!video.src) video.src = video.dataset.src;
@@ -2225,55 +2124,39 @@
       return scrollWrap;
     }
 
-    // Linha "Destaques": aparece primeiro no portfólio. Os pills de nicho filtram o conteúdo dela, além de rolar até ela.
-    const nichosDestaques = [];
-    CONFIG.destaques.trabalhos.forEach(t => { if (t.nicho && !nichosDestaques.includes(t.nicho)) nichosDestaques.push(t.nicho); });
-
-    const destaquesScroll = criarLinhaPortfolio(T.destaques, CONFIG.destaques.subtitulo, CONFIG.destaques.trabalhos, "destaques");
-    const contagemDestaques = document.getElementById("contagem-destaques");
-
-    function filtrarDestaques(nicho, pillAtiva) {
-      let visiveis = 0;
-      destaquesScroll.querySelectorAll(".trabalho-card").forEach(card => {
-        const mostrar = nicho === "todos" || card.dataset.nicho === nicho;
-        card.hidden = !mostrar;
-        if (mostrar) visiveis++;
-      });
-      contagemDestaques.textContent = String(visiveis).padStart(2, "0");
-      filtrosRapidos.querySelectorAll(".filtro-pill[data-nicho]").forEach(p => p.classList.remove("ativo"));
-      if (pillAtiva) pillAtiva.classList.add("ativo");
+    // Busca os vídeos visíveis no banco, já na ordem definida no admin. Se der
+    // erro (banco fora do ar, tabela ainda não criada etc.), o portfólio não
+    // quebra: essa seção só fica vazia, com um aviso discreto no lugar.
+    let videosDb = [];
+    try {
+      const resposta = await sbSite.from("videos").select("*").eq("visivel", true).order("ordem", { ascending: true });
+      if (resposta.error) throw resposta.error;
+      videosDb = resposta.data || [];
+    } catch (erro) {
+      console.warn("Não foi possível carregar os vídeos do portfólio:", erro.message);
     }
 
-    // Pill "Todos" vem primeiro na lista de filtros.
-    const pillTodos = document.createElement("a");
-    pillTodos.className = "filtro-pill ativo";
-    pillTodos.href = "#destaques";
-    pillTodos.textContent = T.todos;
-    pillTodos.dataset.nicho = "todos";
-    pillTodos.addEventListener("click", () => filtrarDestaques("todos", pillTodos));
-    filtrosRapidos.appendChild(pillTodos);
-
-    // Linhas fixas (Skincare, Auto Cuidados), nessa ordem, logo abaixo de Destaques: pill simples que só rola até a linha.
-    CONFIG.categorias.forEach(categoria => {
-      const slug = "cat-" + slugificar(categoria.nome);
-      const pill = document.createElement("a");
-      pill.className = "filtro-pill";
-      pill.href = "#" + slug;
-      pill.textContent = categoria.nome;
-      filtrosRapidos.appendChild(pill);
-      criarLinhaPortfolio(categoria.nome, categoria.subtitulo, categoria.trabalhos, slug);
+    // Agrupa por nicho, mantendo a ordem em que cada nicho aparece pela primeira vez.
+    const nichosOrdenados = [];
+    const videosPorNicho = {};
+    videosDb.forEach(v => {
+      if (!videosPorNicho[v.nicho]) { videosPorNicho[v.nicho] = []; nichosOrdenados.push(v.nicho); }
+      videosPorNicho[v.nicho].push(v);
     });
 
-    // Demais pills de nicho, depois das categorias fixas.
-    nichosDestaques.forEach(nicho => {
-      const pill = document.createElement("a");
-      pill.className = "filtro-pill";
-      pill.href = "#destaques";
-      pill.textContent = nicho;
-      pill.dataset.nicho = nicho;
-      pill.addEventListener("click", () => filtrarDestaques(nicho, pill));
-      filtrosRapidos.appendChild(pill);
-    });
+    if (nichosOrdenados.length === 0) {
+      categoriasLinhas.innerHTML = '<p class="categorias-vazio">' + T.semVideos + "</p>";
+    } else {
+      nichosOrdenados.forEach(nicho => {
+        const slug = "nicho-" + slugificar(nicho);
+        const pill = document.createElement("a");
+        pill.className = "filtro-pill";
+        pill.href = "#" + slug;
+        pill.textContent = nicho;
+        filtrosRapidos.appendChild(pill);
+        criarLinhaPortfolio(nicho, videosPorNicho[nicho], slug);
+      });
+    }
 
     // ---- Case de Conteúdo Orgânico ----
     const caseCfg = CONFIG.caseOrganico;
@@ -2482,11 +2365,10 @@
       btnEnviarMensagem.disabled = true;
       btnEnviarMensagem.textContent = T.enviando;
 
-      sbSite.from("portfolio_leads").insert({
-        name: nome,
+      registrarLead({
+        marca: nome,
         email: email,
-        message: mensagem,
-        source: "contact"
+        obs: mensagem
       }).then(({ error }) => {
         btnEnviarMensagem.disabled = false;
         btnEnviarMensagem.textContent = textoOriginalBotao;
@@ -2496,7 +2378,6 @@
           mensagemConfirmacao.hidden = false;
           return;
         }
-        registrarEvento("button_click", "contact_form_submit");
         mensagemConfirmacao.textContent = T.sucessoEnvio;
         mensagemConfirmacao.hidden = false;
         formContato.reset();
@@ -2521,7 +2402,6 @@
         if (sessionStorage.getItem(CHAVE_POPUP_MOSTRADO)) return;
         sessionStorage.setItem(CHAVE_POPUP_MOSTRADO, "1");
         popup.hidden = false;
-        registrarEvento("button_click", "popup_boasvindas_exibido");
         observadorVideos.disconnect();
       }
 
@@ -2553,10 +2433,10 @@
         btnPopup.disabled = true;
         btnPopup.textContent = T.enviando;
 
-        sbSite.from("portfolio_leads").insert({
-          name: nome,
+        registrarLead({
+          marca: nome,
           email: email,
-          source: "popup"
+          obs: "Veio do pop-up de boas-vindas (mídia kit)"
         }).then(({ error }) => {
           btnPopup.disabled = false;
           btnPopup.textContent = textoOriginalPopup;
@@ -2566,7 +2446,6 @@
             mensagemPopup.hidden = false;
             return;
           }
-          registrarEvento("button_click", "popup_boasvindas_submit");
           formPopup.hidden = true;
           mensagemPopup.textContent = T.popupSucesso;
           mensagemPopup.hidden = false;
