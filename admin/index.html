@@ -732,7 +732,11 @@
         <div class="campo-form"><label>Marca</label><input type="text" id="video-marca" required></div>
       </div>
       <div class="linha-form-2">
-        <div class="campo-form"><label>Nicho</label><input type="text" id="video-nicho" required></div>
+        <div class="campo-form">
+          <label>Nicho</label>
+          <select id="video-nicho-select"></select>
+          <input type="text" id="video-nicho-novo" placeholder="Nome do novo nicho" hidden>
+        </div>
         <div class="campo-form"><label>Formato</label><input type="text" id="video-formato" placeholder="Vídeo, Reels..."></div>
       </div>
       <div class="campo-form"><label>Link do vídeo (YouTube)</label><input type="url" id="video-link" required></div>
@@ -1177,6 +1181,39 @@
   }
   async function carregarPortfolioForcado() { await carregarPortfolio(); }
 
+  // Nichos já usados em qualquer vídeo cadastrado, pra oferecer como lista
+  // no lugar de deixar a pessoa redigitar (e errar acento/maiúscula) toda vez.
+  const VALOR_NICHO_NOVO = "__novo__";
+  function nichosExistentes() {
+    const vistos = new Set();
+    listaVideos.forEach(v => { if (v.nicho) vistos.add(v.nicho); });
+    return [...vistos].sort((a, b) => a.localeCompare(b, "pt-BR"));
+  }
+  const selectNicho = document.getElementById("video-nicho-select");
+  const campoNichoNovo = document.getElementById("video-nicho-novo");
+  function preencherSelectNicho(nichoAtual) {
+    const opcoes = nichosExistentes();
+    selectNicho.innerHTML = opcoes.map(n => '<option value="' + n + '">' + n + "</option>").join("") +
+      '<option value="' + VALOR_NICHO_NOVO + '">+ Criar novo nicho...</option>';
+    if (nichoAtual && opcoes.includes(nichoAtual)) {
+      selectNicho.value = nichoAtual;
+      campoNichoNovo.hidden = true;
+      campoNichoNovo.value = "";
+    } else if (nichoAtual) {
+      selectNicho.value = VALOR_NICHO_NOVO;
+      campoNichoNovo.hidden = false;
+      campoNichoNovo.value = nichoAtual;
+    } else {
+      selectNicho.value = opcoes.length ? opcoes[0] : VALOR_NICHO_NOVO;
+      campoNichoNovo.hidden = selectNicho.value !== VALOR_NICHO_NOVO;
+    }
+  }
+  selectNicho.addEventListener("change", () => {
+    const criandoNovo = selectNicho.value === VALOR_NICHO_NOVO;
+    campoNichoNovo.hidden = !criandoNovo;
+    if (criandoNovo) campoNichoNovo.focus();
+  });
+
   const modalVideo = document.getElementById("modal-video");
   document.getElementById("botao-add-video").addEventListener("click", () => abrirModalVideo(null));
   function abrirModalVideo(video) {
@@ -1185,7 +1222,7 @@
     document.getElementById("video-id").value = video ? video.id : "";
     document.getElementById("video-titulo").value = video ? video.titulo : "";
     document.getElementById("video-marca").value = video ? video.marca : "";
-    document.getElementById("video-nicho").value = video ? video.nicho : "";
+    preencherSelectNicho(video ? video.nicho : "");
     document.getElementById("video-formato").value = video ? (video.formato || "") : "";
     document.getElementById("video-link").value = video ? video.link : "";
     document.getElementById("video-capa").value = video ? video.capa_url : "";
@@ -1204,11 +1241,15 @@
   });
   document.getElementById("form-video").addEventListener("submit", async (evento) => {
     evento.preventDefault();
+    if (selectNicho.value === VALOR_NICHO_NOVO && !campoNichoNovo.value.trim()) {
+      campoNichoNovo.focus();
+      return;
+    }
     const id = document.getElementById("video-id").value;
     const registro = {
       titulo: document.getElementById("video-titulo").value.trim(),
       marca: document.getElementById("video-marca").value.trim(),
-      nicho: document.getElementById("video-nicho").value.trim(),
+      nicho: (selectNicho.value === VALOR_NICHO_NOVO ? campoNichoNovo.value : selectNicho.value).trim(),
       formato: document.getElementById("video-formato").value.trim() || null,
       link: document.getElementById("video-link").value.trim(),
       capa_url: document.getElementById("video-capa").value.trim(),
