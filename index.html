@@ -1506,11 +1506,27 @@
   const sbSite = Banco.sb;
 
   // Grava uma visita simples nesta página, sem pedir nada pro visitante e
-  // sem nenhum serviço de fora. "origem" é o site de onde a pessoa veio
-  // (ex.: instagram.com), ou vazio quando ela digitou o link direto.
+  // sem nenhum serviço de fora. "origem" é de onde a pessoa veio: um link
+  // marcado manualmente com "?origem=..." (ex.: pra separar suas próprias
+  // visitas de teste), senão o site de onde ela clicou (normalizado pro
+  // Instagram, que costuma vir num subdomínio tipo l.instagram.com), senão
+  // "Direto" quando ela digitou o link ou abriu de um app que esconde a
+  // origem (comum em links abertos de dentro do Instagram/TikTok).
+  function registrarOrigem(texto) {
+    const limpo = texto.trim();
+    return limpo.charAt(0).toUpperCase() + limpo.slice(1).toLowerCase();
+  }
   function registrarVisita() {
-    let origem = null;
-    try { origem = document.referrer ? new URL(document.referrer).hostname : null; } catch (erro) { origem = null; }
+    let origem = "Direto";
+    try {
+      const origemManual = new URLSearchParams(window.location.search).get("origem");
+      if (origemManual) {
+        origem = registrarOrigem(origemManual);
+      } else if (document.referrer) {
+        const host = new URL(document.referrer).hostname.replace(/^www\./, "");
+        origem = host.toLowerCase().includes("instagram") ? "Instagram" : host;
+      }
+    } catch (erro) { origem = "Direto"; }
     sbSite.from("visitas").insert({ pagina: window.location.pathname, origem: origem }).then(({ error }) => {
       if (error) console.warn("Não foi possível registrar a visita:", error.message);
     });
