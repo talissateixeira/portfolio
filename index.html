@@ -1106,6 +1106,104 @@
   }
   .video-modal-fechar:hover, .video-modal-fechar:focus-visible { background: rgba(255,255,255,0.2); }
 
+  /* ===== POP-UP DE BOAS-VINDAS (mídia kit), disparado depois da seção de vídeos ===== */
+  .popup-boasvindas {
+    position: fixed;
+    inset: 0;
+    z-index: 2100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+  .popup-boasvindas[hidden] { display: none; }
+  .popup-boasvindas-fundo {
+    position: absolute;
+    inset: 0;
+    background: rgba(50, 31, 20, 0.55);
+    backdrop-filter: blur(2px);
+  }
+  .popup-boasvindas-caixa {
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 420px;
+    background: var(--creme);
+    border-radius: var(--raio-grande);
+    padding: 44px 36px 36px;
+    text-align: center;
+    box-shadow: 0 30px 60px rgba(50, 31, 20, 0.35);
+    animation: popup-boasvindas-entrada 0.35s ease;
+  }
+  @keyframes popup-boasvindas-entrada {
+    from { opacity: 0; transform: translateY(16px) scale(0.97); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  .popup-boasvindas-fechar {
+    position: absolute;
+    top: 16px; right: 16px;
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    border: 1px solid var(--borda);
+    background: transparent;
+    color: var(--texto);
+    font-size: 0.85rem;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: background var(--transicao);
+  }
+  .popup-boasvindas-fechar:hover, .popup-boasvindas-fechar:focus-visible { background: rgba(89, 25, 2, 0.08); }
+  .popup-boasvindas-selo {
+    display: inline-block;
+    padding: 8px 18px;
+    border-radius: 100px;
+    border: 1px solid var(--borda);
+    font-family: var(--fonte-base);
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--texto-suave);
+    margin-bottom: 20px;
+  }
+  .popup-boasvindas-titulo {
+    font-family: var(--fonte-titulo);
+    font-size: 1.9rem;
+    line-height: 1.25;
+    color: var(--preto);
+    margin: 0 0 14px;
+  }
+  .popup-boasvindas-titulo em { font-style: italic; color: var(--acento); }
+  .popup-boasvindas-texto {
+    font-family: var(--fonte-base);
+    color: var(--texto-suave);
+    font-size: 0.98rem;
+    line-height: 1.5;
+    margin: 0 0 26px;
+  }
+  .popup-boasvindas-form { display: flex; flex-direction: column; gap: 12px; }
+  .popup-boasvindas-form input {
+    padding: 14px 18px;
+    border-radius: 10px;
+    border: 1px solid var(--borda);
+    background: #fff;
+    color: var(--preto);
+    font-family: var(--fonte-base);
+    font-size: 0.95rem;
+  }
+  .popup-boasvindas-form input::placeholder { color: var(--texto-suave); opacity: 0.7; }
+  .popup-boasvindas-botao { width: 100%; margin-top: 6px; }
+  .popup-boasvindas-mensagem {
+    margin-top: 16px;
+    font-family: var(--fonte-base);
+    font-weight: 600;
+    color: var(--texto);
+    font-size: 0.92rem;
+  }
+  .popup-boasvindas-mensagem[hidden] { display: none; }
+  @media (max-width: 480px) {
+    .popup-boasvindas-caixa { padding: 36px 24px 28px; }
+    .popup-boasvindas-titulo { font-size: 1.6rem; }
+  }
+
   /* Ícone de "assistir" nos cards do portfólio que têm vídeo de verdade (ver CONFIG). */
   .trabalho-imagem-wrap { position: relative; }
   .trabalho-play-badge {
@@ -1373,6 +1471,24 @@
   <div class="video-modal-caixa">
     <button type="button" class="video-modal-fechar" id="video-modal-fechar" data-i18n-aria="aria_fechar_video" aria-label="Fechar vídeo">✕</button>
     <div class="video-modal-player" id="video-modal-player"></div>
+  </div>
+</div>
+
+<!-- Pop-up de boas-vindas (mídia kit): aparece uma vez, depois que a pessoa passa da seção
+     de vídeos (#categorias), oferecendo o mídia kit em troca do nome e e-mail. -->
+<div class="popup-boasvindas" id="popup-boasvindas" hidden>
+  <div class="popup-boasvindas-fundo" id="popup-boasvindas-fundo"></div>
+  <div class="popup-boasvindas-caixa" role="dialog" aria-modal="true" aria-labelledby="popup-boasvindas-titulo">
+    <button type="button" class="popup-boasvindas-fechar" id="popup-boasvindas-fechar" data-i18n-aria="aria_fechar_popup" aria-label="Fechar pop-up">✕</button>
+    <span class="popup-boasvindas-selo" data-i18n="popup_badge">✦ Oferta de boas-vindas</span>
+    <h2 class="popup-boasvindas-titulo" id="popup-boasvindas-titulo" data-i18n-html="popup_titulo">Quer meu <em>mídia kit</em> completo?</h2>
+    <p class="popup-boasvindas-texto" data-i18n="popup_texto">Deixa seu contato que te envio o PDF com valores e cases.</p>
+    <form class="popup-boasvindas-form" id="popup-boasvindas-form">
+      <input type="text" id="popup-campo-nome" data-i18n-placeholder="placeholder_nome" placeholder="Seu nome" required>
+      <input type="email" id="popup-campo-email" data-i18n-placeholder="placeholder_email" placeholder="Seu e-mail" required>
+      <button type="submit" class="btn btn-primario popup-boasvindas-botao" data-i18n="popup_botao">Quero receber</button>
+    </form>
+    <p class="popup-boasvindas-mensagem" id="popup-boasvindas-mensagem" hidden role="status"></p>
   </div>
 </div>
 
@@ -1815,6 +1931,7 @@
       enviando: "Enviando...",
       erroEnvio: "Não conseguimos enviar agora. Tenta de novo em instantes ou chama no WhatsApp/Instagram.",
       sucessoEnvio: "Obrigada pelo contato! Recebi sua mensagem e respondo em breve.",
+      popupSucesso: "Prontinho! Vou te mandar o mídia kit em instantes.",
       separadorDecimal: ","
     },
     en: {
@@ -1834,6 +1951,7 @@
       enviando: "Sending...",
       erroEnvio: "We couldn't send it right now. Try again in a bit or reach out on WhatsApp/Instagram.",
       sucessoEnvio: "Thanks for reaching out! I got your message and will reply soon.",
+      popupSucesso: "All set! I'll send you the media kit shortly.",
       separadorDecimal: "."
     }
   };
@@ -1869,7 +1987,12 @@
     label_mensagem: { pt: "Mensagem", en: "Message" },
     placeholder_mensagem: { pt: "Categoria, formato, prazo, objetivo da campanha...", en: "Category, format, deadline, campaign goal..." },
     btn_enviar: { pt: "Enviar mensagem ↗", en: "Send message ↗" },
-    rodape_cargo: { pt: "UGC Creator & Estrategista de Conteúdo", en: "UGC Creator & Content Strategist" }
+    rodape_cargo: { pt: "UGC Creator & Estrategista de Conteúdo", en: "UGC Creator & Content Strategist" },
+    aria_fechar_popup: { pt: "Fechar pop-up", en: "Close pop-up" },
+    popup_badge: { pt: "✦ Oferta de boas-vindas", en: "✦ Welcome offer" },
+    popup_titulo: { pt: "Quer meu <em>mídia kit</em> completo?", en: "Want my full <em>media kit</em>?" },
+    popup_texto: { pt: "Deixa seu contato que te envio o PDF com valores e cases.", en: "Leave your contact and I'll send you the PDF with rates and cases." },
+    popup_botao: { pt: "Quero receber", en: "I want it" }
   };
 
   function aplicarTextosEstaticos(idioma) {
@@ -2379,6 +2502,78 @@
         formContato.reset();
       });
     });
+
+    // ---- Pop-up de boas-vindas (mídia kit): aparece uma vez, depois que a pessoa passa
+    // da seção de vídeos (#categorias), oferecendo o mídia kit em troca do contato. ----
+    (function () {
+      const secaoVideos = document.getElementById("categorias");
+      const popup = document.getElementById("popup-boasvindas");
+      if (!secaoVideos || !popup) return;
+
+      const CHAVE_POPUP_MOSTRADO = "popupBoasVindasMostrado";
+      if (sessionStorage.getItem(CHAVE_POPUP_MOSTRADO)) return;
+
+      function fecharPopup() {
+        popup.hidden = true;
+      }
+
+      function mostrarPopup() {
+        if (sessionStorage.getItem(CHAVE_POPUP_MOSTRADO)) return;
+        sessionStorage.setItem(CHAVE_POPUP_MOSTRADO, "1");
+        popup.hidden = false;
+        registrarEvento("button_click", "popup_boasvindas_exibido");
+        observadorVideos.disconnect();
+      }
+
+      // Só dispara quando a seção de vídeos já ficou pra trás (saiu por cima da tela),
+      // não na primeira vez que ela aparece vindo de baixo.
+      const observadorVideos = new IntersectionObserver((entradas) => {
+        entradas.forEach((entrada) => {
+          if (!entrada.isIntersecting && entrada.boundingClientRect.top < 0) {
+            mostrarPopup();
+          }
+        });
+      }, { threshold: 0 });
+      observadorVideos.observe(secaoVideos);
+
+      document.getElementById("popup-boasvindas-fechar").addEventListener("click", fecharPopup);
+      document.getElementById("popup-boasvindas-fundo").addEventListener("click", fecharPopup);
+      document.addEventListener("keydown", (evento) => {
+        if (evento.key === "Escape" && !popup.hidden) fecharPopup();
+      });
+
+      const formPopup = document.getElementById("popup-boasvindas-form");
+      const mensagemPopup = document.getElementById("popup-boasvindas-mensagem");
+      formPopup.addEventListener("submit", (evento) => {
+        evento.preventDefault();
+        const nome = document.getElementById("popup-campo-nome").value;
+        const email = document.getElementById("popup-campo-email").value;
+        const btnPopup = formPopup.querySelector('button[type="submit"]');
+        const textoOriginalPopup = btnPopup.textContent;
+        btnPopup.disabled = true;
+        btnPopup.textContent = T.enviando;
+
+        sbSite.from("portfolio_leads").insert({
+          name: nome,
+          email: email,
+          source: "popup"
+        }).then(({ error }) => {
+          btnPopup.disabled = false;
+          btnPopup.textContent = textoOriginalPopup;
+          if (error) {
+            console.warn("Não foi possível registrar o contato do pop-up:", error.message);
+            mensagemPopup.textContent = T.erroEnvio;
+            mensagemPopup.hidden = false;
+            return;
+          }
+          registrarEvento("button_click", "popup_boasvindas_submit");
+          formPopup.hidden = true;
+          mensagemPopup.textContent = T.popupSucesso;
+          mensagemPopup.hidden = false;
+          setTimeout(fecharPopup, 2500);
+        });
+      });
+    })();
 
     // ---- Rodapé ----
     document.getElementById("rodape-links").innerHTML =
