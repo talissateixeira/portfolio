@@ -599,7 +599,13 @@
       <div class="grade-calendario" id="grade-calendario"></div>
 
       <div class="bloco-atrasados">
-        <h2 style="font-size:0.95rem;margin-bottom:10px;">Ficou pra trás</h2>
+        <div class="barra-acoes" style="margin-bottom:10px;">
+          <h2 style="font-size:0.95rem;">Ficou pra trás</h2>
+          <div class="barra-acoes-esquerda">
+            <button class="pill-filtro ativo" data-lista-tarefas="atrasadas">Ficou pra trás</button>
+            <button class="pill-filtro" data-lista-tarefas="proximas">Próximas tarefas</button>
+          </div>
+        </div>
         <div class="painel-branco" id="lista-atrasados"></div>
       </div>
     </section>
@@ -1274,20 +1280,35 @@
 
   async function carregarCalendario() { await renderCalendarioCompleto(); }
 
+  let listaAtrasados = [];
+  let listaProximas = [];
+  let modoListaTarefas = "atrasadas";
+
   async function renderCalendarioCompleto() {
     const inicioMes = new Date(anoAtual, mesAtual, 1);
     const fimMes = new Date(anoAtual, mesAtual + 1, 0);
-    const [itens, campanhas, atrasados] = await Promise.all([
+    const [itens, campanhas, atrasados, proximas] = await Promise.all([
       consultarSeguro("calendario", sb.from("calendario").select("*").gte("data", isoData(inicioMes)).lte("data", isoData(fimMes))),
       consultarSeguro("campanhas", sb.from("campanhas").select("id,campanha,cliente,prazo").not("prazo", "is", null).gte("prazo", isoData(inicioMes)).lte("prazo", isoData(fimMes))),
-      consultarSeguro("calendario", sb.from("calendario").select("*").eq("status", "a_fazer").lt("data", hojeISO()).order("data", { ascending: true }))
+      consultarSeguro("calendario", sb.from("calendario").select("*").eq("status", "a_fazer").lt("data", hojeISO()).order("data", { ascending: true })),
+      consultarSeguro("calendario", sb.from("calendario").select("*").eq("status", "a_fazer").gte("data", hojeISO()).order("data", { ascending: true }).limit(8))
     ]);
     listaCalendario = itens;
     listaPrazosCampanhas = campanhas;
+    listaAtrasados = atrasados;
+    listaProximas = proximas;
     document.getElementById("calendario-mes-nome").textContent = NOMES_MES[mesAtual] + " de " + anoAtual;
     renderGradeCalendario();
-    renderAtrasados(atrasados);
+    renderListaTarefas();
   }
+  document.querySelectorAll("[data-lista-tarefas]").forEach(botao => {
+    botao.addEventListener("click", () => {
+      document.querySelectorAll("[data-lista-tarefas]").forEach(b => b.classList.remove("ativo"));
+      botao.classList.add("ativo");
+      modoListaTarefas = botao.dataset.listaTarefas;
+      renderListaTarefas();
+    });
+  });
   function isoData(d) { return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); }
 
   function renderGradeCalendario() {
@@ -1395,17 +1416,49 @@
     renderCalendarioCompleto();
   });
 
-  function renderAtrasados(atrasados) {
+  function renderListaTarefas() {
     const alvo = document.getElementById("lista-atrasados");
-    if (atrasados.length === 0) {
-      alvo.innerHTML = '<p class="texto-vazio">Nada atrasado. 🎉</p>';
+    const itens = modoListaTarefas === "atrasadas" ? listaAtrasados : listaProximas;
+    if (itens.length === 0) {
+      alvo.innerHTML = modoListaTarefas === "atrasadas"
+        ? '<p class="texto-vazio">Nada atrasado. 🎉</p>'
+        : '<p class="texto-vazio">Nenhuma tarefa marcada pra frente ainda.</p>';
       return;
     }
     const hoje = new Date(hojeISO());
-    alvo.innerHTML = atrasados.map(i => {
-      const dias = Math.round((hoje - new Date(i.data)) / 86400000);
-      return '<div class="item-atrasado"><span>' + i.titulo + (i.marca ? " · " + i.marca : "") + '</span><span class="item-atrasado-dias">há ' + dias + (dias === 1 ? " dia" : " dias") + "</span></div>";
+    alvo.innerHTML = itens.map(i => {
+      const dias = Math.round((new Date(i.data) - hoje) / 86400000);
+      let rotuloDias;
+      if (modoListaTarefas === "atrasadas") {
+        rotuloDias = "há " + Math.abs(dias) + (Math.abs(dias) === 1 ? " dia" : " dias");
+      } else if (dias === 0) {
+        rotuloDias = "hoje";
+      } else if (dias === 1) {
+        rotuloDias = "amanhã";
+      } else {
+        rotuloDias = "em " + dias + " dias";
+      }
+      return '<div class="item-atrasado" data-id="' + i.id + '">' +
+        '<span>' + i.titulo + (i.marca ? " · " + i.marca : "") + '</span>' +
+        '<span style="display:flex;align-items:center;gap:10px;">' +
+          '<span class="item-atrasado-dias">' + rotuloDias + '</span>' +
+          '<button type="button" class="botao-icone botao-editar-tarefa" data-id="' + i.id + '" title="Editar"><span class="icone"><svg viewBox="0 0 24 24"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></span></button>' +
+          '<button type="button" class="botao-icone botao-concluir-tarefa" data-id="' + i.id + '" title="Concluir"><span class="icone"><svg viewBox="0 0 24 24"><path d="M4 12l5 5L20 6"/></svg></span></button>' +
+        '</span>' +
+      '</div>';
     }).join("");
+    alvo.querySelectorAll(".botao-editar-tarefa").forEach(botao => {
+      botao.addEventListener("click", () => {
+        const item = listaAtrasados.find(i => i.id === botao.dataset.id) || listaProximas.find(i => i.id === botao.dataset.id);
+        abrirModalItemCalendario(item);
+      });
+    });
+    alvo.querySelectorAll(".botao-concluir-tarefa").forEach(botao => {
+      botao.addEventListener("click", async () => {
+        await salvarSeguro("calendario", sb.from("calendario").update({ status: "feito" }).eq("id", botao.dataset.id));
+        renderCalendarioCompleto();
+      });
+    });
   }
 
   document.getElementById("mes-anterior").addEventListener("click", () => { mesAtual--; if (mesAtual < 0) { mesAtual = 11; anoAtual--; } renderCalendarioCompleto(); });
