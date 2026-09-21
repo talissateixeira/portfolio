@@ -600,10 +600,9 @@
 
       <div class="bloco-atrasados">
         <div class="barra-acoes" style="margin-bottom:10px;">
-          <h2 style="font-size:0.95rem;">Ficou pra trás</h2>
           <div class="barra-acoes-esquerda">
-            <button class="pill-filtro ativo" data-lista-tarefas="atrasadas">Ficou pra trás</button>
-            <button class="pill-filtro" data-lista-tarefas="proximas">Próximas tarefas</button>
+            <button class="pill-filtro ativo" data-lista-tarefas="proximas">Próximas tarefas</button>
+            <button class="pill-filtro" data-lista-tarefas="atrasadas">Ficou pra trás</button>
           </div>
         </div>
         <div class="painel-branco" id="lista-atrasados"></div>
@@ -1282,7 +1281,7 @@
 
   let listaAtrasados = [];
   let listaProximas = [];
-  let modoListaTarefas = "atrasadas";
+  let modoListaTarefas = "proximas";
 
   async function renderCalendarioCompleto() {
     const inicioMes = new Date(anoAtual, mesAtual, 1);
