@@ -814,9 +814,6 @@
           <select id="camp-pagamento"><option value="pendente">Pendente</option><option value="pago">Pago</option></select>
         </div>
       </div>
-      <div class="campo-form">
-        <label><input type="checkbox" id="camp-ativa" checked style="width:auto;display:inline;margin-right:6px;"> Campanha ativa</label>
-      </div>
       <div class="modal-acoes">
         <button type="button" class="link-apagar" id="camp-apagar" hidden>Apagar campanha</button>
         <div class="modal-acoes-direita">
@@ -1436,9 +1433,14 @@
     renderStatsCampanhas();
     renderTabelaCampanhas();
   }
+  // Uma campanha só é "finalizada" quando JÁ foi entregue E JÁ foi paga.
+  // Qualquer outra combinação (inclusive entregue mas ainda a receber) conta
+  // como ativa — não depende de nenhum campo marcado à mão.
+  function campanhaFinalizada(c) { return c.status === "Entregue" && c.pagamento === "pago"; }
+
   function renderStatsCampanhas() {
     const total = listaCampanhas.length;
-    const ativas = listaCampanhas.filter(c => c.ativa).length;
+    const ativas = listaCampanhas.filter(c => !campanhaFinalizada(c)).length;
     const valorTotal = listaCampanhas.reduce((soma, c) => soma + Number(c.valor || 0), 0);
     const qtdTotal = listaCampanhas.reduce((soma, c) => soma + Number(c.qtd || 0), 0);
     const ticketMedio = qtdTotal > 0 ? valorTotal / qtdTotal : 0;
@@ -1448,15 +1450,16 @@
       { rotulo: "Campanhas", valor: total },
       { rotulo: "Ativas", valor: ativas },
       { rotulo: "Valor total", valor: formatarMoeda(valorTotal), extra: "Ticket médio: " + formatarMoeda(ticketMedio) },
-      { rotulo: "A receber", valor: formatarMoeda(aReceber), extra: "Já recebido: " + formatarMoeda(jaRecebido) }
+      { rotulo: "A receber", valor: formatarMoeda(aReceber) },
+      { rotulo: "Já recebido", valor: formatarMoeda(jaRecebido) }
     ].map(s => '<div class="stat-item"><div class="stat-valor">' + s.valor + (s.extra ? "<small>" + s.extra + "</small>" : "") + '</div><div class="stat-rotulo">' + s.rotulo + "</div></div>").join("");
   }
   function diasEntre(a, b) { return Math.round((new Date(a) - new Date(b)) / 86400000); }
   function renderTabelaCampanhas() {
     const termo = document.getElementById("busca-campanhas").value.trim().toLowerCase();
     let linhas = listaCampanhas.filter(c => {
-      if (filtroCampanhaAtual === "ativas" && !c.ativa) return false;
-      if (filtroCampanhaAtual === "finalizadas" && c.status !== "Entregue") return false;
+      if (filtroCampanhaAtual === "ativas" && campanhaFinalizada(c)) return false;
+      if (filtroCampanhaAtual === "finalizadas" && !campanhaFinalizada(c)) return false;
       if (!termo) return true;
       return (c.campanha || "").toLowerCase().includes(termo) || (c.cliente || "").toLowerCase().includes(termo);
     });
@@ -1473,6 +1476,8 @@
         return 0;
       });
     }
+    // Favoritas sempre no topo, independente da ordenação escolhida.
+    linhas = linhas.slice().sort((a, b) => (b.favorita ? 1 : 0) - (a.favorita ? 1 : 0));
     document.querySelectorAll("#aba-campanhas .seta-ordem").forEach(s => { s.classList.remove("ativa"); s.textContent = "▾"; });
     if (ordenacaoAtual.coluna) {
       const th = document.querySelector('#aba-campanhas th[data-coluna="' + ordenacaoAtual.coluna + '"] .seta-ordem');
@@ -1553,7 +1558,6 @@
     document.getElementById("camp-valor").value = campanha ? campanha.valor : 0;
     document.getElementById("camp-prazo").value = campanha ? (campanha.prazo || "") : "";
     document.getElementById("camp-pagamento").value = campanha ? campanha.pagamento : "pendente";
-    document.getElementById("camp-ativa").checked = campanha ? campanha.ativa : true;
     document.getElementById("camp-apagar").hidden = !campanha;
     modalCampanha.hidden = false;
   }
@@ -1575,8 +1579,7 @@
       qtd: Number(document.getElementById("camp-qtd").value),
       valor: Number(document.getElementById("camp-valor").value),
       prazo: document.getElementById("camp-prazo").value || null,
-      pagamento: document.getElementById("camp-pagamento").value,
-      ativa: document.getElementById("camp-ativa").checked
+      pagamento: document.getElementById("camp-pagamento").value
     };
     if (id) await salvarSeguro("campanhas", sb.from("campanhas").update(registro).eq("id", id));
     else await salvarSeguro("campanhas", sb.from("campanhas").insert(registro));
@@ -1584,7 +1587,7 @@
     carregarCampanhas();
   });
   document.getElementById("botao-exportar-campanhas").addEventListener("click", () => {
-    const linhas = listaCampanhas.map(c => [c.campanha, c.cliente, c.tipo, c.status, c.qtd, c.valor, c.prazo, c.pagamento, c.ativa ? "sim" : "não"]);
+    const linhas = listaCampanhas.map(c => [c.campanha, c.cliente, c.tipo, c.status, c.qtd, c.valor, c.prazo, c.pagamento, campanhaFinalizada(c) ? "não" : "sim"]);
     baixarCsv("campanhas.csv", ["Campanha", "Cliente", "Tipo", "Status", "Qtd", "Valor", "Prazo", "Pagamento", "Ativa"], linhas);
   });
 
