@@ -868,18 +868,22 @@
 </div>
 
 <div class="modal-fundo" id="modal-transcricao" hidden>
-  <div class="modal-caixa" style="max-width:640px;">
+  <div class="modal-caixa" style="max-width:760px;">
     <h3 class="modal-titulo" id="modal-transcricao-titulo">Nova transcrição</h3>
     <form id="form-transcricao">
       <input type="hidden" id="transc-id">
       <div class="campo-form">
         <label>Link do vídeo (YouTube, Instagram ou TikTok)</label>
-        <div style="display:flex;gap:8px;">
-          <input type="url" id="transc-link" placeholder="https://..." required style="flex:1;">
-          <a class="botao botao-secundario" href="https://tokscript.com" target="_blank" rel="noopener" style="white-space:nowrap;">Abrir Tokscript ↗</a>
-        </div>
+        <input type="url" id="transc-link" placeholder="https://...">
       </div>
       <div id="transcricao-preview"></div>
+
+      <button type="button" class="botao botao-secundario" id="transc-toggle-tokscript" style="margin-bottom:14px;">Gerar roteiro no Tokscript, sem sair daqui ↓</button>
+      <div id="transcricao-tokscript-wrap" hidden style="margin-bottom:14px;">
+        <p style="font-size:0.78rem;color:var(--texto-suave);margin:0 0 8px;">Cole o link do vídeo ali no Tokscript, copie o texto que ele gerar, e cole no campo "Roteiro" logo abaixo.</p>
+        <iframe id="transcricao-tokscript-iframe" style="width:100%;height:520px;border:1px solid var(--borda);border-radius:var(--raio);"></iframe>
+      </div>
+
       <div class="campo-form">
         <label>Roteiro (transcrição)</label>
         <textarea id="transc-roteiro" class="campo-revisao" style="min-height:140px;margin-bottom:0;" placeholder="Cole aqui o roteiro gerado no Tokscript..."></textarea>
@@ -1944,9 +1948,22 @@
     document.getElementById("transc-obs").value = item ? (item.observacoes || "") : "";
     document.getElementById("transc-apagar").hidden = !item;
     renderPreviewTranscricao(item ? item.link : "");
+    // Some o Tokscript sempre fechado ao abrir/reabrir o modal, e só carrega
+    // o iframe (gasta rede) quando ela realmente clicar pra usar.
+    document.getElementById("transcricao-tokscript-wrap").hidden = true;
+    document.getElementById("transcricao-tokscript-iframe").removeAttribute("src");
+    document.getElementById("transc-toggle-tokscript").textContent = "Gerar roteiro no Tokscript, sem sair daqui ↓";
     modalTranscricao.hidden = false;
   }
   document.getElementById("transc-link").addEventListener("input", (evento) => renderPreviewTranscricao(evento.target.value.trim()));
+  document.getElementById("transc-toggle-tokscript").addEventListener("click", () => {
+    const wrap = document.getElementById("transcricao-tokscript-wrap");
+    const iframe = document.getElementById("transcricao-tokscript-iframe");
+    const botao = document.getElementById("transc-toggle-tokscript");
+    wrap.hidden = !wrap.hidden;
+    if (!wrap.hidden && !iframe.getAttribute("src")) iframe.src = "https://tokscript.com";
+    botao.textContent = wrap.hidden ? "Gerar roteiro no Tokscript, sem sair daqui ↓" : "Esconder o Tokscript ↑";
+  });
   document.getElementById("transc-apagar").addEventListener("click", async () => {
     const id = document.getElementById("transc-id").value;
     if (!id || !confirm("Apagar esta transcrição?")) return;
