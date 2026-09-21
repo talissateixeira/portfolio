@@ -447,9 +447,13 @@
 
   /* ===== TRANSCRIÇÕES ===== */
   .grade-transcricoes { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 14px; }
-  .cartao-transcricao { border: 1px solid var(--borda); border-radius: var(--raio); padding: 14px 16px; background: var(--branco); cursor: pointer; text-align: left; display: flex; flex-direction: column; gap: 6px; }
+  .cartao-transcricao { border: 1px solid var(--borda); border-radius: var(--raio); background: var(--branco); cursor: pointer; text-align: left; display: flex; flex-direction: column; overflow: hidden; }
   .cartao-transcricao:hover { background: rgba(89,25,2,0.03); }
+  .transcricao-capa { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; display: block; background: var(--fundo-acento); }
+  .transcricao-capa-placeholder { width: 100%; aspect-ratio: 16 / 9; display: flex; align-items: center; justify-content: center; background: var(--fundo-acento); color: var(--acento); font-size: 1.6rem; font-weight: 700; }
+  .transcricao-corpo { padding: 14px 16px; display: flex; flex-direction: column; gap: 6px; }
   .transcricao-plataforma { display: inline-flex; align-self: flex-start; padding: 2px 10px; border-radius: 100px; font-size: 0.68rem; font-weight: 700; background: var(--fundo-acento); color: var(--acento); }
+  .transcricao-nicho { display: inline-flex; align-self: flex-start; padding: 2px 10px; border-radius: 100px; font-size: 0.68rem; font-weight: 700; background: var(--fundo-sucesso); color: var(--sucesso); }
   .transcricao-link { font-size: 0.82rem; font-weight: 600; word-break: break-all; }
   .transcricao-trecho { font-size: 0.78rem; color: var(--texto-suave); overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
   .transcricao-data { font-size: 0.7rem; color: var(--texto-suave); }
@@ -889,6 +893,17 @@
         <label>Link do vídeo (YouTube, Instagram ou TikTok)</label>
         <input type="url" id="transc-link" placeholder="https://...">
       </div>
+      <div class="linha-form-2">
+        <div class="campo-form">
+          <label>Nicho</label>
+          <select id="transc-nicho-select"></select>
+          <input type="text" id="transc-nicho-novo" placeholder="Nome do novo nicho" hidden>
+        </div>
+        <div class="campo-form">
+          <label>Imagem de capa (opcional)</label>
+          <input type="text" id="transc-capa" placeholder="Do YouTube é automático">
+        </div>
+      </div>
       <div id="transcricao-preview"></div>
 
       <button type="button" class="botao botao-secundario" id="transc-toggle-tokscript" style="margin-bottom:14px;">Gerar roteiro no Tokscript, sem sair daqui ↓</button>
@@ -1182,38 +1197,47 @@
   }
   async function carregarPortfolioForcado() { await carregarPortfolio(); }
 
-  // Nichos já usados em qualquer vídeo cadastrado, pra oferecer como lista
-  // no lugar de deixar a pessoa redigitar (e errar acento/maiúscula) toda vez.
+  // Nichos já usados em qualquer vídeo OU transcrição salva, pra oferecer
+  // como lista no lugar de deixar a pessoa redigitar (e errar acento/
+  // maiúscula) toda vez. Reaproveitado pelos modais de vídeo e transcrição.
   const VALOR_NICHO_NOVO = "__novo__";
-  function nichosExistentes() {
+  function todosNichosExistentes() {
     const vistos = new Set();
     listaVideos.forEach(v => { if (v.nicho) vistos.add(v.nicho); });
+    listaTranscricoes.forEach(t => { if (t.nicho) vistos.add(t.nicho); });
     return [...vistos].sort((a, b) => a.localeCompare(b, "pt-BR"));
   }
-  const selectNicho = document.getElementById("video-nicho-select");
-  const campoNichoNovo = document.getElementById("video-nicho-novo");
-  function preencherSelectNicho(nichoAtual) {
-    const opcoes = nichosExistentes();
-    selectNicho.innerHTML = opcoes.map(n => '<option value="' + n + '">' + n + "</option>").join("") +
+  function configurarSeletorNicho(selectEl, campoNovoEl) {
+    selectEl.addEventListener("change", () => {
+      const criandoNovo = selectEl.value === VALOR_NICHO_NOVO;
+      campoNovoEl.hidden = !criandoNovo;
+      if (criandoNovo) campoNovoEl.focus();
+    });
+  }
+  function preencherSeletorNicho(selectEl, campoNovoEl, nichoAtual) {
+    const opcoes = todosNichosExistentes();
+    selectEl.innerHTML = opcoes.map(n => '<option value="' + n + '">' + n + "</option>").join("") +
       '<option value="' + VALOR_NICHO_NOVO + '">+ Criar novo nicho...</option>';
     if (nichoAtual && opcoes.includes(nichoAtual)) {
-      selectNicho.value = nichoAtual;
-      campoNichoNovo.hidden = true;
-      campoNichoNovo.value = "";
+      selectEl.value = nichoAtual;
+      campoNovoEl.hidden = true;
+      campoNovoEl.value = "";
     } else if (nichoAtual) {
-      selectNicho.value = VALOR_NICHO_NOVO;
-      campoNichoNovo.hidden = false;
-      campoNichoNovo.value = nichoAtual;
+      selectEl.value = VALOR_NICHO_NOVO;
+      campoNovoEl.hidden = false;
+      campoNovoEl.value = nichoAtual;
     } else {
-      selectNicho.value = opcoes.length ? opcoes[0] : VALOR_NICHO_NOVO;
-      campoNichoNovo.hidden = selectNicho.value !== VALOR_NICHO_NOVO;
+      selectEl.value = opcoes.length ? opcoes[0] : VALOR_NICHO_NOVO;
+      campoNovoEl.hidden = selectEl.value !== VALOR_NICHO_NOVO;
     }
   }
-  selectNicho.addEventListener("change", () => {
-    const criandoNovo = selectNicho.value === VALOR_NICHO_NOVO;
-    campoNichoNovo.hidden = !criandoNovo;
-    if (criandoNovo) campoNichoNovo.focus();
-  });
+  function valorNichoSelecionado(selectEl, campoNovoEl) {
+    return (selectEl.value === VALOR_NICHO_NOVO ? campoNovoEl.value : selectEl.value).trim();
+  }
+
+  const selectNicho = document.getElementById("video-nicho-select");
+  const campoNichoNovo = document.getElementById("video-nicho-novo");
+  configurarSeletorNicho(selectNicho, campoNichoNovo);
 
   const modalVideo = document.getElementById("modal-video");
   document.getElementById("botao-add-video").addEventListener("click", () => abrirModalVideo(null));
@@ -1223,7 +1247,7 @@
     document.getElementById("video-id").value = video ? video.id : "";
     document.getElementById("video-titulo").value = video ? video.titulo : "";
     document.getElementById("video-marca").value = video ? video.marca : "";
-    preencherSelectNicho(video ? video.nicho : "");
+    preencherSeletorNicho(selectNicho, campoNichoNovo, video ? video.nicho : "");
     document.getElementById("video-formato").value = video ? (video.formato || "") : "";
     document.getElementById("video-link").value = video ? video.link : "";
     document.getElementById("video-capa").value = video ? video.capa_url : "";
@@ -1954,6 +1978,20 @@
     }
   }
 
+  // Imagem do card: usa a capa manual se tiver uma; senão, pro YouTube dá
+  // pra montar a miniatura direto pelo id do vídeo (Instagram e TikTok não
+  // têm uma forma pública de pegar a miniatura sem login, por isso pedimos
+  // a capa manual pra esses casos).
+  function imagemTranscricao(t) {
+    if (t.capa_url) return t.capa_url;
+    const plataforma = t.plataforma || detectarPlataforma(t.link) || "outro";
+    if (plataforma === "youtube") {
+      const id = extrairIdYoutubeAdmin(t.link || "");
+      if (id) return "https://i.ytimg.com/vi/" + id + "/mqdefault.jpg";
+    }
+    return null;
+  }
+
   async function carregarTranscricoes() {
     listaTranscricoes = await consultarSeguro("transcricoes", sb.from("transcricoes").select("*").order("created_at", { ascending: false }));
     renderGradeTranscricoes();
@@ -1962,7 +2000,7 @@
     const termo = document.getElementById("busca-transcricoes").value.trim().toLowerCase();
     const filtradas = listaTranscricoes.filter(t => {
       if (!termo) return true;
-      return (t.link || "").toLowerCase().includes(termo) || (t.observacoes || "").toLowerCase().includes(termo);
+      return (t.link || "").toLowerCase().includes(termo) || (t.observacoes || "").toLowerCase().includes(termo) || (t.nicho || "").toLowerCase().includes(termo);
     });
     const alvo = document.getElementById("grade-transcricoes");
     if (filtradas.length === 0) {
@@ -1974,18 +2012,40 @@
     const NOMES_PLATAFORMA = { youtube: "YouTube", instagram: "Instagram", tiktok: "TikTok", outro: "Outro" };
     alvo.innerHTML = filtradas.map(t => {
       const plataforma = t.plataforma || detectarPlataforma(t.link) || "outro";
+      const nomePlataforma = NOMES_PLATAFORMA[plataforma] || plataforma;
+      const imagem = imagemTranscricao(t);
+      const capa = imagem
+        ? '<img class="transcricao-capa" src="' + escaparAtributo(imagem) + '" data-inicial="' + escaparAtributo(nomePlataforma.charAt(0)) + '" alt="" loading="lazy">'
+        : '<div class="transcricao-capa-placeholder">' + nomePlataforma.charAt(0) + "</div>";
       return '<button type="button" class="cartao-transcricao" data-id="' + t.id + '">' +
-        '<span class="transcricao-plataforma">' + (NOMES_PLATAFORMA[plataforma] || plataforma) + "</span>" +
-        '<span class="transcricao-link">' + t.link + "</span>" +
-        (t.observacoes ? '<span class="transcricao-trecho">' + t.observacoes + "</span>" : "") +
-        '<span class="transcricao-data">' + (t.created_at ? formatarData(t.created_at.slice(0, 10)) : "") + "</span>" +
+        capa +
+        '<span class="transcricao-corpo">' +
+          '<span class="transcricao-plataforma">' + nomePlataforma + "</span>" +
+          (t.nicho ? '<span class="transcricao-nicho">' + t.nicho + "</span>" : "") +
+          '<span class="transcricao-link">' + t.link + "</span>" +
+          (t.observacoes ? '<span class="transcricao-trecho">' + t.observacoes + "</span>" : "") +
+          '<span class="transcricao-data">' + (t.created_at ? formatarData(t.created_at.slice(0, 10)) : "") + "</span>" +
+        "</span>" +
       "</button>";
     }).join("");
     alvo.querySelectorAll(".cartao-transcricao").forEach(botao => {
       botao.addEventListener("click", () => abrirModalTranscricao(listaTranscricoes.find(t => t.id === botao.dataset.id)));
     });
+    // Miniatura hotlink-protegida ou fora do ar: troca pelo placeholder em vez de deixar o ícone de imagem quebrada.
+    alvo.querySelectorAll("img.transcricao-capa").forEach(img => {
+      img.addEventListener("error", () => {
+        const placeholder = document.createElement("div");
+        placeholder.className = "transcricao-capa-placeholder";
+        placeholder.textContent = img.dataset.inicial || "?";
+        img.replaceWith(placeholder);
+      }, { once: true });
+    });
   }
   document.getElementById("busca-transcricoes").addEventListener("input", renderGradeTranscricoes);
+
+  const selectTranscNicho = document.getElementById("transc-nicho-select");
+  const campoTranscNichoNovo = document.getElementById("transc-nicho-novo");
+  configurarSeletorNicho(selectTranscNicho, campoTranscNichoNovo);
 
   const modalTranscricao = document.getElementById("modal-transcricao");
   document.getElementById("botao-add-transcricao").addEventListener("click", () => abrirModalTranscricao(null));
@@ -1994,6 +2054,8 @@
     document.getElementById("modal-transcricao-titulo").textContent = item ? "Editar transcrição" : "Nova transcrição";
     document.getElementById("transc-id").value = item ? item.id : "";
     document.getElementById("transc-link").value = item ? item.link : "";
+    preencherSeletorNicho(selectTranscNicho, campoTranscNichoNovo, item ? item.nicho : "");
+    document.getElementById("transc-capa").value = item ? (item.capa_url || "") : "";
     document.getElementById("transc-roteiro").value = item ? (item.roteiro || "") : "";
     document.getElementById("transc-obs").value = item ? (item.observacoes || "") : "";
     document.getElementById("transc-apagar").hidden = !item;
@@ -2028,6 +2090,8 @@
     const registro = {
       link: link,
       plataforma: detectarPlataforma(link) || "outro",
+      nicho: valorNichoSelecionado(selectTranscNicho, campoTranscNichoNovo) || null,
+      capa_url: document.getElementById("transc-capa").value.trim() || null,
       roteiro: document.getElementById("transc-roteiro").value.trim() || null,
       observacoes: document.getElementById("transc-obs").value.trim() || null
     };
