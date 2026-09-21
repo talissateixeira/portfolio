@@ -1817,6 +1817,13 @@
   const TEXTOS_JS = {
     pt: {
       semVideos: "Em breve, novos trabalhos aparecem aqui.",
+      destaques: "Destaques",
+      todos: "Todos",
+      subtituloDestaques: "Clique num nicho ali em cima para ver só aqueles trabalhos",
+      subtitulosFixos: {
+        "Skincare": "Rotina de pele que gera confiança",
+        "Auto Cuidados": "Momentos de pausa que viram conteúdo"
+      },
       verAnteriores: "Ver anteriores em ",
       verMais: "Ver mais em ",
       assistirVideo: "Assistir ao vídeo de ",
@@ -1836,6 +1843,13 @@
     },
     en: {
       semVideos: "New work will appear here soon.",
+      destaques: "Highlights",
+      todos: "All",
+      subtituloDestaques: "Click a niche above to see only those projects",
+      subtitulosFixos: {
+        "Skincare": "A skincare routine that builds trust",
+        "Auto Cuidados": "Moments of pause that become content"
+      },
       verAnteriores: "See previous in ",
       verMais: "See more in ",
       assistirVideo: "Watch the video of ",
@@ -2045,7 +2059,7 @@
       return m ? m[1] : null;
     }
 
-    function criarLinhaPortfolio(nome, trabalhos, slug) {
+    function criarLinhaPortfolio(nome, subtitulo, trabalhos, slug) {
       const linha = document.createElement("div");
       linha.className = "categoria-linha reveal";
       linha.id = slug;
@@ -2053,8 +2067,8 @@
       const cabecalho = document.createElement("div");
       cabecalho.className = "categoria-cabecalho-linha";
       cabecalho.innerHTML =
-        '<div><div class="categoria-titulo-grupo"><h3>' + nome + '</h3><span class="categoria-contagem">' +
-        String(trabalhos.length).padStart(2, "0") + '</span></div></div>' +
+        '<div><div class="categoria-titulo-grupo"><h3>' + nome + '</h3><span class="categoria-contagem" id="contagem-' + slug + '">' +
+        String(trabalhos.length).padStart(2, "0") + '</span></div><p class="categoria-subtitulo">' + subtitulo + "</p></div>" +
         '<div class="categoria-setas"><button type="button" class="seta-btn" data-direcao="-1" aria-label="' + T.verAnteriores + nome + '">‹</button>' +
         '<button type="button" class="seta-btn" data-direcao="1" aria-label="' + T.verMais + nome + '">›</button></div>';
       linha.appendChild(cabecalho);
@@ -2067,6 +2081,7 @@
         const legendaTag = trabalho.marca + (trabalho.destaque ? " · " + trabalho.destaque : "");
         const card = document.createElement("div");
         card.className = "trabalho-card" + (idYoutube ? " tem-video" : "");
+        if (trabalho.nicho) card.dataset.nicho = trabalho.nicho;
         card.innerHTML =
           '<div class="trabalho-imagem-wrap"><span class="trabalho-tag">' + legendaTag + '</span>' +
           '<img src="' + trabalho.capa_url + '?v=' + VERSAO_FOTOS + '" alt="' + T.trabalhoAlt(trabalho.marca, trabalho.nicho || nome) + '" loading="lazy">' +
@@ -2136,25 +2151,75 @@
       console.warn("Não foi possível carregar os vídeos do portfólio:", erro.message);
     }
 
-    // Agrupa por nicho, mantendo a ordem em que cada nicho aparece pela primeira vez.
-    const nichosOrdenados = [];
-    const videosPorNicho = {};
-    videosDb.forEach(v => {
-      if (!videosPorNicho[v.nicho]) { videosPorNicho[v.nicho] = []; nichosOrdenados.push(v.nicho); }
-      videosPorNicho[v.nicho].push(v);
-    });
-
-    if (nichosOrdenados.length === 0) {
+    if (videosDb.length === 0) {
       categoriasLinhas.innerHTML = '<p class="categorias-vazio">' + T.semVideos + "</p>";
     } else {
-      nichosOrdenados.forEach(nicho => {
-        const slug = "nicho-" + slugificar(nicho);
+      // Nichos com fileira própria e sempre visível (nesta ordem). Qualquer outro
+      // nicho cai na fileira "Todos", que os pills de cima filtram.
+      const NICHOS_FIXOS = ["Skincare", "Auto Cuidados"];
+      const videosFixos = {};
+      const videosDestaques = [];
+      videosDb.forEach(v => {
+        if (NICHOS_FIXOS.includes(v.nicho)) {
+          if (!videosFixos[v.nicho]) videosFixos[v.nicho] = [];
+          videosFixos[v.nicho].push(v);
+        } else {
+          videosDestaques.push(v);
+        }
+      });
+
+      // Nichos únicos dentro de "Todos", na ordem em que aparecem pela primeira vez.
+      const nichosDestaques = [];
+      videosDestaques.forEach(v => { if (!nichosDestaques.includes(v.nicho)) nichosDestaques.push(v.nicho); });
+
+      let destaquesScroll = null;
+      let contagemDestaques = null;
+      if (videosDestaques.length > 0) {
+        destaquesScroll = criarLinhaPortfolio(T.destaques, T.subtituloDestaques, videosDestaques, "destaques");
+        contagemDestaques = document.getElementById("contagem-destaques");
+
+        const pillTodos = document.createElement("a");
+        pillTodos.className = "filtro-pill ativo";
+        pillTodos.href = "#destaques";
+        pillTodos.textContent = T.todos;
+        pillTodos.dataset.nicho = "todos";
+        pillTodos.addEventListener("click", () => filtrarDestaques("todos", pillTodos));
+        filtrosRapidos.appendChild(pillTodos);
+      }
+
+      function filtrarDestaques(nicho, pillAtiva) {
+        let visiveis = 0;
+        destaquesScroll.querySelectorAll(".trabalho-card").forEach(card => {
+          const mostrar = nicho === "todos" || card.dataset.nicho === nicho;
+          card.hidden = !mostrar;
+          if (mostrar) visiveis++;
+        });
+        contagemDestaques.textContent = String(visiveis).padStart(2, "0");
+        filtrosRapidos.querySelectorAll(".filtro-pill[data-nicho]").forEach(p => p.classList.remove("ativo"));
+        if (pillAtiva) pillAtiva.classList.add("ativo");
+      }
+
+      // Fileiras fixas (Skincare, Auto Cuidados), nessa ordem: pill simples que só rola até a linha.
+      NICHOS_FIXOS.forEach(nicho => {
+        if (!videosFixos[nicho]) return;
+        const slug = "cat-" + slugificar(nicho);
         const pill = document.createElement("a");
         pill.className = "filtro-pill";
         pill.href = "#" + slug;
         pill.textContent = nicho;
         filtrosRapidos.appendChild(pill);
-        criarLinhaPortfolio(nicho, videosPorNicho[nicho], slug);
+        criarLinhaPortfolio(nicho, T.subtitulosFixos[nicho] || "", videosFixos[nicho], slug);
+      });
+
+      // Demais pills de nicho (dentro de "Todos"), depois das fileiras fixas.
+      nichosDestaques.forEach(nicho => {
+        const pill = document.createElement("a");
+        pill.className = "filtro-pill";
+        pill.href = "#destaques";
+        pill.textContent = nicho;
+        pill.dataset.nicho = nicho;
+        pill.addEventListener("click", () => filtrarDestaques(nicho, pill));
+        filtrosRapidos.appendChild(pill);
       });
     }
 
