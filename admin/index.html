@@ -162,7 +162,8 @@
     border-radius: var(--raio);
     padding: 18px 20px;
   }
-  .grade-2-col { display: grid; grid-template-columns: 1.5fr 1fr; gap: 16px; margin-bottom: 20px; align-items: stretch; }
+  .bloco-portfolio { margin-bottom: 20px; }
+  .portfolio-subtitulo { color: var(--texto-suave); font-size: 0.88rem; margin: 4px 0 0; }
   .painel-titulo { font-size: 0.85rem; font-weight: 700; margin-bottom: 14px; }
   .texto-vazio { color: var(--texto-suave); font-size: 0.85rem; line-height: 1.6; padding: 10px 0; }
 
@@ -447,9 +448,6 @@
   #transcricao-preview blockquote { margin: 0; }
   .transcricao-sem-preview { font-size: 0.78rem; color: var(--texto-suave); padding: 10px 0; }
 
-  @media (max-width: 900px) {
-    .grade-2-col { grid-template-columns: 1fr; }
-  }
   @media (max-width: 780px) {
     .btn-menu-mobile { display: flex; }
     .sidebar { transform: translateX(-100%); box-shadow: 0 0 40px rgba(0,0,0,0.2); }
@@ -521,37 +519,37 @@
 
     <!-- ===================== ABA PORTFÓLIO ===================== -->
     <section class="aba" id="aba-portfolio">
-      <div class="stats-faixa" id="stats-portfolio"></div>
-
-      <div class="grade-2-col">
-        <div class="painel-branco">
-          <div class="painel-titulo">Visitas nos últimos 14 dias</div>
-          <div id="grafico-visitas"></div>
-        </div>
-        <div class="painel-branco">
-          <div class="painel-titulo">De onde vêm</div>
-          <div id="lista-origens"></div>
-        </div>
-      </div>
-
-      <div class="grade-2-col">
-        <div class="painel-branco">
-          <div class="painel-titulo">Vídeos mais clicados</div>
-          <div id="lista-videos-clicados"></div>
-        </div>
-        <div class="painel-branco">
-          <div class="painel-titulo">Do primeiro clique até a mensagem</div>
-          <div class="funil-linha" id="funil-conversao"></div>
-        </div>
-      </div>
-
       <div class="barra-acoes">
-        <h2 style="font-size:0.95rem;">Meus vídeos</h2>
+        <p class="portfolio-subtitulo">Como o seu site está indo e os vídeos que aparecem nele.</p>
         <button class="botao botao-principal" id="botao-add-video">
           <span class="icone" style="width:14px;height:14px;"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></span>
           Adicionar vídeo
         </button>
       </div>
+
+      <div class="stats-faixa" id="stats-portfolio"></div>
+
+      <div class="painel-branco bloco-portfolio">
+        <div class="painel-titulo">Visitas nos últimos 14 dias</div>
+        <div id="grafico-visitas"></div>
+      </div>
+
+      <div class="painel-branco bloco-portfolio">
+        <div class="painel-titulo">De onde vêm</div>
+        <div id="lista-origens"></div>
+      </div>
+
+      <div class="painel-branco bloco-portfolio">
+        <div class="painel-titulo">Vídeos mais clicados</div>
+        <div id="lista-videos-clicados"></div>
+      </div>
+
+      <div class="painel-branco bloco-portfolio">
+        <div class="painel-titulo">Do primeiro clique até a mensagem</div>
+        <div class="funil-linha" id="funil-conversao"></div>
+      </div>
+
+      <h2 style="font-size:0.95rem;margin-bottom:16px;">Meus vídeos</h2>
       <div class="painel-branco tabela-scroll">
         <table class="tabela">
           <thead>
