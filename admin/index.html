@@ -433,6 +433,20 @@
 
   textarea.campo-revisao { width: 100%; min-height: 160px; padding: 12px 14px; border-radius: var(--raio); border: 1px solid var(--borda); background: var(--branco); font-family: var(--fonte); font-size: 0.85rem; margin-bottom: 20px; }
 
+  /* ===== TRANSCRIÇÕES ===== */
+  .grade-transcricoes { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 14px; }
+  .cartao-transcricao { border: 1px solid var(--borda); border-radius: var(--raio); padding: 14px 16px; background: var(--branco); cursor: pointer; text-align: left; display: flex; flex-direction: column; gap: 6px; }
+  .cartao-transcricao:hover { background: rgba(89,25,2,0.03); }
+  .transcricao-plataforma { display: inline-flex; align-self: flex-start; padding: 2px 10px; border-radius: 100px; font-size: 0.68rem; font-weight: 700; background: var(--fundo-acento); color: var(--acento); }
+  .transcricao-link { font-size: 0.82rem; font-weight: 600; word-break: break-all; }
+  .transcricao-trecho { font-size: 0.78rem; color: var(--texto-suave); overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+  .transcricao-data { font-size: 0.7rem; color: var(--texto-suave); }
+
+  #transcricao-preview { margin-bottom: 14px; }
+  #transcricao-preview iframe { width: 100%; border-radius: var(--raio); border: none; }
+  #transcricao-preview blockquote { margin: 0; }
+  .transcricao-sem-preview { font-size: 0.78rem; color: var(--texto-suave); padding: 10px 0; }
+
   @media (max-width: 900px) {
     .grade-2-col { grid-template-columns: 1fr; }
   }
@@ -482,6 +496,10 @@
       <button class="nav-item" data-aba="checklist">
         <span class="icone"><svg viewBox="0 0 24 24"><path d="M9 11l2.2 2.2L15 9"/><rect x="3" y="3" width="18" height="18" rx="3"/></svg></span>
         Checklist
+      </button>
+      <button class="nav-item" data-aba="transcricoes">
+        <span class="icone"><svg viewBox="0 0 24 24"><path d="M8 4h8l4 4v12a1 1 0 0 1-1 1H8a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1Z"/><path d="M16 4v4h4M9 13h6M9 16h6M9 10h2"/></svg></span>
+        Transcrições
       </button>
     </nav>
 
@@ -681,6 +699,17 @@
         <div id="lista-revisao"></div>
       </div>
     </section>
+
+    <!-- ===================== ABA TRANSCRIÇÕES ===================== -->
+    <section class="aba" id="aba-transcricoes">
+      <div class="barra-acoes">
+        <div class="barra-acoes-esquerda">
+          <input type="text" class="campo-busca" id="busca-transcricoes" placeholder="Buscar por link ou observação...">
+        </div>
+        <button class="botao botao-principal" id="botao-add-transcricao">+ Nova transcrição</button>
+      </div>
+      <div class="grade-transcricoes" id="grade-transcricoes"></div>
+    </section>
   </main>
 </div>
 
@@ -838,6 +867,38 @@
   </div>
 </div>
 
+<div class="modal-fundo" id="modal-transcricao" hidden>
+  <div class="modal-caixa" style="max-width:640px;">
+    <h3 class="modal-titulo" id="modal-transcricao-titulo">Nova transcrição</h3>
+    <form id="form-transcricao">
+      <input type="hidden" id="transc-id">
+      <div class="campo-form">
+        <label>Link do vídeo (YouTube, Instagram ou TikTok)</label>
+        <div style="display:flex;gap:8px;">
+          <input type="url" id="transc-link" placeholder="https://..." required style="flex:1;">
+          <a class="botao botao-secundario" href="https://tokscript.com" target="_blank" rel="noopener" style="white-space:nowrap;">Abrir Tokscript ↗</a>
+        </div>
+      </div>
+      <div id="transcricao-preview"></div>
+      <div class="campo-form">
+        <label>Roteiro (transcrição)</label>
+        <textarea id="transc-roteiro" class="campo-revisao" style="min-height:140px;margin-bottom:0;" placeholder="Cole aqui o roteiro gerado no Tokscript..."></textarea>
+      </div>
+      <div class="campo-form">
+        <label>Observações</label>
+        <textarea id="transc-obs" placeholder="O que você achou, o que quer aproveitar dessa ideia..."></textarea>
+      </div>
+      <div class="modal-acoes">
+        <button type="button" class="link-apagar" id="transc-apagar" hidden>Apagar transcrição</button>
+        <div class="modal-acoes-direita">
+          <button type="button" class="botao botao-secundario" data-fechar-modal>Cancelar</button>
+          <button type="submit" class="botao botao-principal">Salvar</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="../js/banco.js"></script>
 <script src="../js/biblioteca.js"></script>
@@ -892,8 +953,8 @@
   }
 
   // ---- Navegação (abas + gaveta no celular) ----
-  const TITULOS_ABA = { portfolio: "Portfólio", marcas: "Marcas", calendario: "Calendário", campanhas: "Campanhas", checklist: "Checklist" };
-  const CARREGADORES_ABA = { portfolio: carregarPortfolio, marcas: carregarMarcas, calendario: carregarCalendario, campanhas: carregarCampanhas, checklist: carregarChecklist };
+  const TITULOS_ABA = { portfolio: "Portfólio", marcas: "Marcas", calendario: "Calendário", campanhas: "Campanhas", checklist: "Checklist", transcricoes: "Transcrições" };
+  const CARREGADORES_ABA = { portfolio: carregarPortfolio, marcas: carregarMarcas, calendario: carregarCalendario, campanhas: carregarCampanhas, checklist: carregarChecklist, transcricoes: carregarTranscricoes };
   const abasCarregadas = new Set();
 
   function abrirAba(nome) {
@@ -1788,6 +1849,126 @@
       cab.addEventListener("click", () => cab.nextElementSibling.classList.toggle("aberta"));
     });
   }
+
+  // ============================================================================
+  // ABA — TRANSCRIÇÕES (vídeos que você gosta, com link, roteiro e observações)
+  // ============================================================================
+  let listaTranscricoes = [];
+
+  function detectarPlataforma(link) {
+    if (!link) return null;
+    try {
+      const host = new URL(link).hostname.replace("www.", "");
+      if (host.includes("youtube.com") || host.includes("youtu.be")) return "youtube";
+      if (host.includes("instagram.com")) return "instagram";
+      if (host.includes("tiktok.com")) return "tiktok";
+      return "outro";
+    } catch (erro) { return null; }
+  }
+  function extrairIdYoutubeAdmin(link) {
+    const m = link.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|shorts\/|embed\/))([A-Za-z0-9_-]{6,})/);
+    return m ? m[1] : null;
+  }
+  function escaparAtributo(texto) { return (texto || "").replace(/"/g, "&quot;"); }
+
+  // Mostra uma prévia do vídeo dentro do modal, direto pelo link colado: embed
+  // de verdade pro YouTube, e o embed oficial (com o scriptzinho deles) pro
+  // Instagram e TikTok. Sem link reconhecido, só mostra um link pra abrir.
+  function renderPreviewTranscricao(link) {
+    const alvo = document.getElementById("transcricao-preview");
+    const plataforma = detectarPlataforma(link);
+    if (!link || !plataforma) { alvo.innerHTML = ""; return; }
+    if (plataforma === "youtube") {
+      const id = extrairIdYoutubeAdmin(link);
+      alvo.innerHTML = id
+        ? '<iframe src="https://www.youtube-nocookie.com/embed/' + id + '" height="340" allowfullscreen></iframe>'
+        : '<p class="transcricao-sem-preview">Não consegui reconhecer o vídeo nesse link do YouTube.</p>';
+    } else if (plataforma === "instagram") {
+      alvo.innerHTML = '<blockquote class="instagram-media" data-instgrm-captioned data-instgrm-permalink="' + escaparAtributo(link) + '" style="margin:0;width:100%;"></blockquote>';
+      const script = document.createElement("script");
+      script.async = true;
+      script.src = "https://www.instagram.com/embed.js";
+      alvo.appendChild(script);
+    } else if (plataforma === "tiktok") {
+      alvo.innerHTML = '<blockquote class="tiktok-embed" cite="' + escaparAtributo(link) + '" style="max-width:100%;margin:0;"><section></section></blockquote>';
+      const script = document.createElement("script");
+      script.async = true;
+      script.src = "https://www.tiktok.com/embed.js";
+      alvo.appendChild(script);
+    } else {
+      alvo.innerHTML = '<p class="transcricao-sem-preview">Não consegui identificar automaticamente esse link. <a href="' + escaparAtributo(link) + '" target="_blank" rel="noopener">Abrir o link ↗</a></p>';
+    }
+  }
+
+  async function carregarTranscricoes() {
+    listaTranscricoes = await consultarSeguro("transcricoes", sb.from("transcricoes").select("*").order("created_at", { ascending: false }));
+    renderGradeTranscricoes();
+  }
+  function renderGradeTranscricoes() {
+    const termo = document.getElementById("busca-transcricoes").value.trim().toLowerCase();
+    const filtradas = listaTranscricoes.filter(t => {
+      if (!termo) return true;
+      return (t.link || "").toLowerCase().includes(termo) || (t.observacoes || "").toLowerCase().includes(termo);
+    });
+    const alvo = document.getElementById("grade-transcricoes");
+    if (filtradas.length === 0) {
+      alvo.innerHTML = '<p class="texto-vazio">' + (listaTranscricoes.length === 0
+        ? 'Nenhuma transcrição salva ainda. Clique em "Nova transcrição" pra começar.'
+        : "Nenhuma transcrição encontrada.") + "</p>";
+      return;
+    }
+    const NOMES_PLATAFORMA = { youtube: "YouTube", instagram: "Instagram", tiktok: "TikTok", outro: "Outro" };
+    alvo.innerHTML = filtradas.map(t => {
+      const plataforma = t.plataforma || detectarPlataforma(t.link) || "outro";
+      return '<button type="button" class="cartao-transcricao" data-id="' + t.id + '">' +
+        '<span class="transcricao-plataforma">' + (NOMES_PLATAFORMA[plataforma] || plataforma) + "</span>" +
+        '<span class="transcricao-link">' + t.link + "</span>" +
+        (t.observacoes ? '<span class="transcricao-trecho">' + t.observacoes + "</span>" : "") +
+        '<span class="transcricao-data">' + (t.created_at ? formatarData(t.created_at.slice(0, 10)) : "") + "</span>" +
+      "</button>";
+    }).join("");
+    alvo.querySelectorAll(".cartao-transcricao").forEach(botao => {
+      botao.addEventListener("click", () => abrirModalTranscricao(listaTranscricoes.find(t => t.id === botao.dataset.id)));
+    });
+  }
+  document.getElementById("busca-transcricoes").addEventListener("input", renderGradeTranscricoes);
+
+  const modalTranscricao = document.getElementById("modal-transcricao");
+  document.getElementById("botao-add-transcricao").addEventListener("click", () => abrirModalTranscricao(null));
+  function abrirModalTranscricao(item) {
+    document.getElementById("form-transcricao").reset();
+    document.getElementById("modal-transcricao-titulo").textContent = item ? "Editar transcrição" : "Nova transcrição";
+    document.getElementById("transc-id").value = item ? item.id : "";
+    document.getElementById("transc-link").value = item ? item.link : "";
+    document.getElementById("transc-roteiro").value = item ? (item.roteiro || "") : "";
+    document.getElementById("transc-obs").value = item ? (item.observacoes || "") : "";
+    document.getElementById("transc-apagar").hidden = !item;
+    renderPreviewTranscricao(item ? item.link : "");
+    modalTranscricao.hidden = false;
+  }
+  document.getElementById("transc-link").addEventListener("input", (evento) => renderPreviewTranscricao(evento.target.value.trim()));
+  document.getElementById("transc-apagar").addEventListener("click", async () => {
+    const id = document.getElementById("transc-id").value;
+    if (!id || !confirm("Apagar esta transcrição?")) return;
+    await salvarSeguro("transcricoes", sb.from("transcricoes").delete().eq("id", id));
+    modalTranscricao.hidden = true;
+    carregarTranscricoes();
+  });
+  document.getElementById("form-transcricao").addEventListener("submit", async (evento) => {
+    evento.preventDefault();
+    const id = document.getElementById("transc-id").value;
+    const link = document.getElementById("transc-link").value.trim();
+    const registro = {
+      link: link,
+      plataforma: detectarPlataforma(link) || "outro",
+      roteiro: document.getElementById("transc-roteiro").value.trim() || null,
+      observacoes: document.getElementById("transc-obs").value.trim() || null
+    };
+    if (id) await salvarSeguro("transcricoes", sb.from("transcricoes").update(registro).eq("id", id));
+    else await salvarSeguro("transcricoes", sb.from("transcricoes").insert(registro));
+    modalTranscricao.hidden = true;
+    carregarTranscricoes();
+  });
 
   // ---- Ponto de partida: abre a aba do hash da URL, ou Portfólio por padrão. ----
   abrirAba((window.location.hash || "#portfolio").replace("#", ""));
