@@ -1964,7 +1964,7 @@
     return m + ":" + String(s).padStart(2, "0");
   }
 
-  document.addEventListener("DOMContentLoaded", async () => {
+  document.addEventListener("DOMContentLoaded", () => {
 
     // ---- Rastreamento: registra a visita assim que a página carrega ----
     registrarVisita();
@@ -2061,7 +2061,11 @@
 
     function criarLinhaPortfolio(nome, subtitulo, trabalhos, slug) {
       const linha = document.createElement("div");
-      linha.className = "categoria-linha reveal";
+      // Sem "reveal" simples aqui: essa linha só existe depois que os vídeos chegam
+      // do banco (mais tarde que o carregamento da página), então o observador de
+      // "aparecer suavemente" já rodou antes dela existir e nunca a veria. Ela
+      // aparece direto, já visível.
+      linha.className = "categoria-linha reveal visivel";
       linha.id = slug;
 
       const cabecalho = document.createElement("div");
@@ -2139,9 +2143,13 @@
       return scrollWrap;
     }
 
-    // Busca os vídeos visíveis no banco, já na ordem definida no admin. Se der
-    // erro (banco fora do ar, tabela ainda não criada etc.), o portfólio não
-    // quebra: essa seção só fica vazia, com um aviso discreto no lugar.
+    // Busca os vídeos visíveis no banco e monta as fileiras. Roda por conta própria
+    // (sem "await" aqui fora), pra essa busca na rede nunca atrasar o resto da
+    // página — sem isso, todo o efeito de "aparecer suavemente" do site ficava
+    // parado esperando o banco responder. Se der erro (banco fora do ar, tabela
+    // ainda não criada etc.), o portfólio não quebra: essa seção só fica vazia,
+    // com um aviso discreto no lugar.
+    (async function carregarVideosDoPortfolio() {
     let videosDb = [];
     try {
       const resposta = await sbSite.from("videos").select("*").eq("visivel", true).order("ordem", { ascending: true });
@@ -2222,6 +2230,7 @@
         filtrosRapidos.appendChild(pill);
       });
     }
+    })();
 
     // ---- Case de Conteúdo Orgânico ----
     const caseCfg = CONFIG.caseOrganico;
