@@ -212,6 +212,10 @@
   .bloco-portfolio { margin-bottom: 20px; }
   .painel-titulo-linha { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 14px; }
   .painel-titulo-linha-compacta { justify-content: flex-start; }
+  .filtros-tarefas-dash { display: flex; gap: 16px; }
+  .filtro-tarefa-dash { background: none; border: none; padding: 0; font-size: 0.82rem; font-weight: 600; color: var(--texto-suave); cursor: pointer; }
+  .filtro-tarefa-dash:hover { color: var(--texto); }
+  .filtro-tarefa-dash.ativo { color: var(--preto); text-decoration: underline; text-underline-offset: 3px; }
   .linha-dashboard-dupla { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
   .grafico-valor-mono { font-family: "SF Mono", Menlo, Consolas, monospace; }
   .grafico-barra-atual { background: var(--fundo-acento) !important; }
@@ -231,7 +235,11 @@
   .pill-prazo-normal { background: var(--fundo-pill-hoje); color: var(--pill-hoje); }
   .linha-tarefa-corpo { flex-grow: 1; min-width: 0; }
   .linha-tarefa-titulo { font-weight: 700; font-size: 0.95rem; }
-  .linha-tarefa-sub { font-size: 0.82rem; color: var(--texto-suave); margin-top: 2px; }
+  .linha-tarefa-sub { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; font-size: 0.82rem; color: var(--texto-suave); margin-top: 2px; }
+  .tag-prazo-mini { font-family: "SF Mono", Menlo, Consolas, monospace; font-size: 0.68rem; font-weight: 700; padding: 2px 8px; border-radius: 6px; white-space: nowrap; }
+  .tag-prazo-mini.atrasado { background: var(--fundo-pill-atrasado); color: var(--pill-atrasado); }
+  .tag-prazo-mini.amanha { background: var(--fundo-pill-amanha); color: var(--pill-amanha); }
+  .tag-prazo-mini.normal { background: var(--fundo-pill-hoje); color: var(--pill-hoje); }
   .linha-tarefa-acoes { display: flex; gap: 6px; flex-shrink: 0; }
   .portfolio-subtitulo { color: var(--texto-suave); font-size: 0.88rem; margin: 4px 0 20px; }
   .painel-titulo { font-size: 0.85rem; font-weight: 700; margin-bottom: 14px; }
@@ -800,7 +808,11 @@
       <div class="painel-branco bloco-portfolio">
         <div class="painel-titulo-linha painel-titulo-linha-compacta">
           <div class="painel-titulo">Precisa de você</div>
-          <span class="contagem-badge" id="contagem-tarefas-dash"></span>
+          <div class="filtros-tarefas-dash">
+            <button type="button" class="filtro-tarefa-dash" data-filtro-tarefa-dash="atrasadas">Atrasado</button>
+            <button type="button" class="filtro-tarefa-dash" data-filtro-tarefa-dash="hoje">Hoje</button>
+            <button type="button" class="filtro-tarefa-dash" data-filtro-tarefa-dash="proximas">Próximas</button>
+          </div>
         </div>
         <div id="lista-tarefas-unificada-dash"></div>
       </div>
@@ -1721,14 +1733,17 @@
   }
 
   const TIPO_CALENDARIO_LEGIVEL = { gravar: "gravação", editar: "edição", postar: "postagem" };
+  let tarefasDashAtrasadas = [];
+  let tarefasDashHoje = [];
+  let tarefasDashProximas = [];
+  let filtroCategoriaTarefasDash = "todas";
 
-  function linhaTarefaUnificadaHtml(i, pillTexto, pillClasse) {
+  function linhaTarefaUnificadaHtml(i, tagTexto, tagClasse) {
     const sub = (i.marca ? i.marca + " · " : "") + (TIPO_CALENDARIO_LEGIVEL[i.tipo] || i.tipo);
     return '<div class="linha-tarefa-unificada" data-id="' + i.id + '">' +
-      '<span class="pill-prazo ' + pillClasse + '">' + pillTexto + "</span>" +
       '<div class="linha-tarefa-corpo">' +
         '<div class="linha-tarefa-titulo">' + i.titulo + "</div>" +
-        '<div class="linha-tarefa-sub">' + sub + "</div>" +
+        '<div class="linha-tarefa-sub"><span>' + sub + '</span><span class="tag-prazo-mini ' + tagClasse + '">' + tagTexto + "</span></div>" +
       "</div>" +
       '<div class="linha-tarefa-acoes">' +
         '<button type="button" class="botao-icone botao-concluir-tarefa-dash" data-id="' + i.id + '" title="Concluir"><span class="icone"><svg viewBox="0 0 24 24"><path d="M4 12l5 5L20 6"/></svg></span></button>' +
@@ -1737,26 +1752,41 @@
   }
 
   function renderTarefasUnificadasDash(atrasadas, hoje, proximas) {
-    const total = atrasadas.length + hoje.length + proximas.length;
-    document.getElementById("contagem-tarefas-dash").textContent = total + (total === 1 ? " item" : " itens");
+    tarefasDashAtrasadas = atrasadas;
+    tarefasDashHoje = hoje;
+    tarefasDashProximas = proximas;
+    renderListaTarefasDash();
+  }
 
+  function renderListaTarefasDash() {
+    const total = tarefasDashAtrasadas.length + tarefasDashHoje.length + tarefasDashProximas.length;
     const alvo = document.getElementById("lista-tarefas-unificada-dash");
     if (total === 0) {
       alvo.innerHTML = '<p class="texto-vazio">Nada pendente por aqui. 🎉</p>';
       return;
     }
 
+    let atrasadas = tarefasDashAtrasadas, hoje = tarefasDashHoje, proximas = tarefasDashProximas;
+    if (filtroCategoriaTarefasDash === "atrasadas") { hoje = []; proximas = []; }
+    else if (filtroCategoriaTarefasDash === "hoje") { atrasadas = []; proximas = []; }
+    else if (filtroCategoriaTarefasDash === "proximas") { atrasadas = []; hoje = []; }
+
+    if (atrasadas.length + hoje.length + proximas.length === 0) {
+      alvo.innerHTML = '<p class="texto-vazio">Nada nessa categoria por agora.</p>';
+      return;
+    }
+
     const hojeData = new Date(hojeISO());
     const htmlAtrasadas = atrasadas.map(i => {
       const dias = Math.round((hojeData - new Date(i.data)) / 86400000);
-      return linhaTarefaUnificadaHtml(i, "atrasado " + dias + (dias === 1 ? " dia" : " dias"), "pill-prazo-atrasado");
+      return linhaTarefaUnificadaHtml(i, "atrasado " + dias + (dias === 1 ? " dia" : " dias"), "atrasado");
     }).join("");
-    const htmlHoje = hoje.map(i => linhaTarefaUnificadaHtml(i, "hoje", "pill-prazo-normal")).join("");
+    const htmlHoje = hoje.map(i => linhaTarefaUnificadaHtml(i, "hoje", "normal")).join("");
     const htmlProximas = proximas.map(i => {
       const dias = Math.round((new Date(i.data) - hojeData) / 86400000);
       const ehAmanha = dias === 1;
       const rotulo = ehAmanha ? "amanhã" : "em " + dias + " dias";
-      return linhaTarefaUnificadaHtml(i, rotulo, ehAmanha ? "pill-prazo-amanha" : "pill-prazo-normal");
+      return linhaTarefaUnificadaHtml(i, rotulo, ehAmanha ? "amanha" : "normal");
     }).join("");
 
     alvo.innerHTML = htmlAtrasadas + htmlHoje + htmlProximas;
@@ -1767,6 +1797,14 @@
       });
     });
   }
+  document.querySelectorAll("[data-filtro-tarefa-dash]").forEach(botao => {
+    botao.addEventListener("click", () => {
+      const valor = botao.dataset.filtroTarefaDash;
+      filtroCategoriaTarefasDash = filtroCategoriaTarefasDash === valor ? "todas" : valor;
+      document.querySelectorAll("[data-filtro-tarefa-dash]").forEach(b => b.classList.toggle("ativo", b.dataset.filtroTarefaDash === filtroCategoriaTarefasDash));
+      renderListaTarefasDash();
+    });
+  });
 
   // ============================================================================
   // ABA 1 — PORTFÓLIO
