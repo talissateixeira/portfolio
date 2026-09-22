@@ -144,6 +144,7 @@
     max-width: 1180px;
   }
   .conteudo-topo { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; margin-bottom: 22px; }
+  .conteudo-topo-compacta { margin-bottom: 4px; min-height: 0; }
   .dashboard-relogio { display: flex; align-items: center; gap: 8px; font-size: 0.78rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: var(--texto-suave); }
   .ponto-vivo { width: 8px; height: 8px; border-radius: 50%; background: var(--sucesso); animation: pulsar 2s infinite; }
   @keyframes pulsar {
@@ -726,8 +727,6 @@
 
     <!-- ===================== ABA DASHBOARD ===================== -->
     <section class="aba" id="aba-dashboard">
-      <p class="portfolio-subtitulo">Seu resumo do dia.</p>
-
       <p class="dashboard-saudacao-label" id="dashboard-saudacao-label">Boa tarde</p>
       <h2 class="dashboard-saudacao-titulo" id="dashboard-saudacao-titulo">Carregando...</h2>
 
@@ -1264,9 +1263,10 @@
     document.querySelectorAll(".nav-item").forEach(b => b.classList.toggle("ativo", b.dataset.aba === nome));
     document.querySelectorAll(".aba").forEach(s => s.classList.toggle("ativa", s.id === "aba-" + nome));
     const tituloEl = document.getElementById("titulo-aba");
-    tituloEl.textContent = TITULOS_ABA[nome];
+    tituloEl.textContent = nome === "dashboard" ? "" : TITULOS_ABA[nome];
     tituloEl.classList.toggle("titulo-grande", nome === "portfolio");
     document.getElementById("dashboard-relogio").hidden = nome !== "dashboard";
+    document.querySelector(".conteudo-topo").classList.toggle("conteudo-topo-compacta", nome === "dashboard");
     window.location.hash = nome;
     fecharGaveta();
     if (!abasCarregadas.has(nome)) {
