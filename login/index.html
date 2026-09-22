@@ -10,12 +10,13 @@
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root {
-    --creme: #FFFCF9;
-    --preto: #321F14;
-    --texto: #591902;
-    --texto-suave: #7A4735;
-    --acento: #A64F03;
-    --borda: rgba(89, 25, 2, 0.18);
+    --creme: #FAF8F4;
+    --preto: #262220;
+    --texto: #3A342E;
+    --texto-suave: #79736A;
+    --acento: #B08A3E;
+    --acento-escuro: #8F6E2E;
+    --borda: rgba(58, 52, 46, 0.16);
     --erro: #C4453C;
     --raio: 20px;
     --fonte-titulo: "Fraunces", "Georgia", serif;
@@ -79,7 +80,7 @@
     margin-top: 6px;
     border: none;
     border-radius: 100px;
-    background: var(--preto);
+    background: var(--acento);
     color: #fff;
     font-family: var(--fonte-base);
     font-weight: 600;
@@ -87,7 +88,7 @@
     cursor: pointer;
     transition: background 0.2s ease;
   }
-  .botao-entrar:hover { background: #1f130b; }
+  .botao-entrar:hover { background: var(--acento-escuro); }
   .botao-entrar:disabled { opacity: 0.6; cursor: default; }
   .faixa-erro {
     background: rgba(196, 69, 60, 0.1);

@@ -10,16 +10,21 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root {
-    --creme: #FFFCF9;
-    --preto: #321F14;
-    --texto: #591902;
-    --texto-suave: #7A4735;
-    --acento: #A64F03;
-    --borda: rgba(89, 25, 2, 0.16);
-    --fundo-acento: rgba(166, 79, 3, 0.1);
+    /* Paleta sóbria: mostarda e sálvia (referência 02) no lugar do laranja
+       vivo de antes; textos em cinza-quente neutro em vez de marrom-avermelhado. */
+    --creme: #FAF8F4;
+    --creme-destaque: #E8DEC7;
+    --creme-destaque-texto: #4A4030;
+    --preto: #262220;
+    --texto: #3A342E;
+    --texto-suave: #79736A;
+    --acento: #B08A3E;
+    --acento-escuro: #8F6E2E;
+    --borda: rgba(58, 52, 46, 0.14);
+    --fundo-acento: rgba(176, 138, 62, 0.14);
     --branco: #FFFFFF;
-    --sucesso: #2D7A4F;
-    --fundo-sucesso: rgba(45, 122, 79, 0.1);
+    --sucesso: #74907B;
+    --fundo-sucesso: rgba(116, 144, 123, 0.16);
     --erro: #C4453C;
     --fundo-erro: rgba(196, 69, 60, 0.1);
     --aviso: #B08900;
@@ -30,6 +35,13 @@
     --raio-grande: 20px;
     --sidebar-largura: 234px;
     --fonte: "Inter", "Segoe UI", system-ui, sans-serif;
+    /* Barra lateral escura (referência 01) */
+    --sidebar-fundo: #211D19;
+    --sidebar-borda: rgba(255, 255, 255, 0.08);
+    --sidebar-texto: #F3EEE6;
+    --sidebar-texto-suave: rgba(243, 238, 230, 0.58);
+    --sidebar-hover: rgba(255, 255, 255, 0.06);
+    --sidebar-ativo-fundo: rgba(255, 255, 255, 0.14);
   }
   * { box-sizing: border-box; }
   html, body { height: 100%; }
@@ -56,8 +68,8 @@
   .sidebar {
     width: var(--sidebar-largura);
     flex-shrink: 0;
-    background: var(--branco);
-    border-right: 1px solid var(--borda);
+    background: var(--sidebar-fundo);
+    border-right: none;
     display: flex;
     flex-direction: column;
     padding: 22px 14px;
@@ -66,43 +78,43 @@
     z-index: 300;
     transition: transform 0.25s ease;
   }
-  .sidebar-marca { padding: 0 8px 20px; font-weight: 700; font-size: 0.95rem; }
-  .sidebar-marca span { display: block; font-size: 0.72rem; font-weight: 500; color: var(--texto-suave); margin-top: 2px; }
+  .sidebar-marca { padding: 0 8px 20px; font-weight: 700; font-size: 0.95rem; color: var(--sidebar-texto); }
+  .sidebar-marca span { display: block; font-size: 0.72rem; font-weight: 500; color: var(--sidebar-texto-suave); margin-top: 2px; }
   .nav-grupo { margin-bottom: 18px; }
-  .nav-grupo-titulo { font-size: 0.68rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--texto-suave); padding: 0 10px; margin-bottom: 6px; }
+  .nav-grupo-titulo { font-size: 0.68rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--sidebar-texto-suave); padding: 0 10px; margin-bottom: 6px; }
   .nav-item {
     display: flex; align-items: center; gap: 10px;
     width: 100%;
     padding: 9px 10px;
     border: none; background: none;
     border-radius: 10px;
-    color: var(--texto);
+    color: var(--sidebar-texto-suave);
     font-size: 0.88rem;
     font-weight: 500;
     text-align: left;
     cursor: pointer;
-    transition: background 0.15s ease;
+    transition: background 0.15s ease, color 0.15s ease;
   }
-  .nav-item:hover { background: rgba(89, 25, 2, 0.05); }
-  .nav-item.ativo { background: var(--fundo-acento); color: var(--acento); font-weight: 700; }
+  .nav-item:hover { background: var(--sidebar-hover); color: var(--sidebar-texto); }
+  .nav-item.ativo { background: var(--sidebar-ativo-fundo); color: var(--sidebar-texto); font-weight: 700; }
   .sidebar-rodape {
     margin-top: auto;
     padding: 12px 10px 0;
-    border-top: 1px solid var(--borda);
+    border-top: 1px solid var(--sidebar-borda);
   }
-  .sidebar-email { font-size: 0.76rem; color: var(--texto-suave); word-break: break-all; margin-bottom: 8px; }
+  .sidebar-email { font-size: 0.76rem; color: var(--sidebar-texto-suave); word-break: break-all; margin-bottom: 8px; }
   .botao-sair {
     display: flex; align-items: center; gap: 8px;
     width: 100%;
     padding: 8px 10px;
-    border: 1px solid var(--borda);
+    border: 1px solid var(--sidebar-borda);
     border-radius: 10px;
     background: none;
-    color: var(--texto);
+    color: var(--sidebar-texto-suave);
     font-size: 0.82rem;
     cursor: pointer;
   }
-  .botao-sair:hover { background: rgba(89, 25, 2, 0.05); }
+  .botao-sair:hover { background: var(--sidebar-hover); color: var(--sidebar-texto); }
 
   .btn-menu-mobile {
     display: none;
@@ -111,8 +123,9 @@
     z-index: 320;
     width: 38px; height: 38px;
     border-radius: 10px;
-    border: 1px solid var(--borda);
-    background: var(--branco);
+    border: none;
+    background: var(--sidebar-fundo);
+    color: var(--sidebar-texto);
     align-items: center; justify-content: center;
     cursor: pointer;
   }
@@ -155,6 +168,17 @@
   .stat-valor { font-size: 1.4rem; font-weight: 700; }
   .stat-valor small { font-size: 0.8rem; font-weight: 600; color: var(--texto-suave); display: block; margin-top: 2px; }
   .stat-rotulo { font-size: 0.74rem; color: var(--texto-suave); margin-top: 2px; }
+  /* Três tons que se repetem nas faixas de números (referência 02), sempre
+     na mesma ordem, pra dar variedade sem virar bagunça. */
+  .stat-item-cor-1 { background: var(--acento); }
+  .stat-item-cor-1 .stat-rotulo, .stat-item-cor-1 .stat-valor small { color: rgba(255,255,255,0.78); }
+  .stat-item-cor-1 .stat-valor { color: var(--branco); }
+  .stat-item-cor-2 { background: var(--creme-destaque); }
+  .stat-item-cor-2 .stat-rotulo, .stat-item-cor-2 .stat-valor small { color: rgba(74,64,48,0.68); }
+  .stat-item-cor-2 .stat-valor { color: var(--creme-destaque-texto); }
+  .stat-item-cor-3 { background: var(--sucesso); }
+  .stat-item-cor-3 .stat-rotulo, .stat-item-cor-3 .stat-valor small { color: rgba(255,255,255,0.78); }
+  .stat-item-cor-3 .stat-valor { color: var(--branco); }
 
   .painel-branco {
     background: var(--branco);
@@ -1284,7 +1308,7 @@
       { rotulo: "Tarefas atrasadas", valor: qtdAtrasadas },
       { rotulo: "Recebido este mês", valor: formatarMoeda(recebidoMes) },
       { rotulo: "A receber este mês", valor: formatarMoeda(aReceberMes) }
-    ].map(s => '<div class="stat-item"><div class="stat-valor">' + s.valor + '</div><div class="stat-rotulo">' + s.rotulo + "</div></div>").join("");
+    ].map((s, i) => '<div class="stat-item stat-item-cor-' + ((i % 3) + 1) + '"><div class="stat-valor">' + s.valor + '</div><div class="stat-rotulo">' + s.rotulo + "</div></div>").join("");
   }
 
   function renderMetaCrm() {
@@ -1424,8 +1448,8 @@
       { rotulo: "Nicho mais forte", valor: nichoTop ? nichoTop[0] : "—", extra: nichoTop ? nichoTop[1] + " vídeos" : "" },
       { rotulo: "De onde mais vêm", valor: origemTop ? origemTop[0] : "—", extra: origemTop ? origemTop[1] + " visitas" : "" }
     ];
-    document.getElementById("stats-portfolio").innerHTML = stats.map(s =>
-      '<div class="stat-item"><div class="stat-valor">' + s.valor + (s.extra ? "<small>" + s.extra + "</small>" : "") + '</div><div class="stat-rotulo">' + s.rotulo + "</div></div>"
+    document.getElementById("stats-portfolio").innerHTML = stats.map((s, i) =>
+      '<div class="stat-item stat-item-cor-' + ((i % 3) + 1) + '"><div class="stat-valor">' + s.valor + (s.extra ? "<small>" + s.extra + "</small>" : "") + '</div><div class="stat-rotulo">' + s.rotulo + "</div></div>"
     ).join("");
   }
 
@@ -1998,7 +2022,7 @@
       { rotulo: "Valor total", valor: formatarMoeda(valorTotal), extra: "Ticket médio: " + formatarMoeda(ticketMedio) },
       { rotulo: "A receber", valor: formatarMoeda(aReceber) },
       { rotulo: "Já recebido", valor: formatarMoeda(jaRecebido) }
-    ].map(s => '<div class="stat-item"><div class="stat-valor">' + s.valor + (s.extra ? "<small>" + s.extra + "</small>" : "") + '</div><div class="stat-rotulo">' + s.rotulo + "</div></div>").join("");
+    ].map((s, i) => '<div class="stat-item stat-item-cor-' + ((i % 3) + 1) + '"><div class="stat-valor">' + s.valor + (s.extra ? "<small>" + s.extra + "</small>" : "") + '</div><div class="stat-rotulo">' + s.rotulo + "</div></div>").join("");
   }
   function diasEntre(a, b) { return Math.round((new Date(a) - new Date(b)) / 86400000); }
   function renderTabelaCampanhas() {
