@@ -493,6 +493,74 @@
   #transcricao-preview blockquote { margin: 0; }
   .transcricao-sem-preview { font-size: 0.78rem; color: var(--texto-suave); padding: 10px 0; }
 
+  /* ---- Transcrição automática (Supadata) ---- */
+  .config-supadata {
+    background: var(--fundo-acento);
+    border-radius: var(--raio);
+    padding: 12px 16px;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    font-size: 0.83rem;
+  }
+  .config-supadata-vazia { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; width: 100%; }
+  .config-supadata-vazia input { flex: 1; min-width: 200px; }
+  .config-supadata-dica { font-size: 0.76rem; color: var(--texto-suave); width: 100%; margin: 0; }
+  .config-supadata-saldo { color: var(--texto-suave); }
+
+  .linha-transcrever { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
+  .linha-transcrever input[type="url"] { flex: 1; min-width: 220px; }
+
+  .aviso-transcrever {
+    background: var(--fundo-aviso);
+    border: 1px solid rgba(176, 137, 0, 0.3);
+    color: var(--aviso);
+    padding: 9px 14px;
+    border-radius: 10px;
+    font-size: 0.8rem;
+    margin-bottom: 14px;
+  }
+  .aviso-transcrever.erro { background: var(--fundo-erro); border-color: rgba(196,69,60,0.3); color: var(--erro); }
+  .aviso-transcrever.sucesso { background: var(--fundo-sucesso); border-color: rgba(45,122,79,0.3); color: var(--sucesso); }
+
+  .transcricao-badge-quem { display: inline-flex; align-self: flex-start; padding: 2px 10px; border-radius: 100px; font-size: 0.68rem; font-weight: 700; }
+  .transcricao-badge-minha { background: var(--fundo-acento); color: var(--acento); }
+  .transcricao-badge-outra { background: var(--fundo-sucesso); color: var(--sucesso); }
+  .transcricao-tags { display: flex; flex-wrap: wrap; gap: 5px; }
+  .transcricao-tag { font-size: 0.66rem; background: var(--fundo-cinza); color: var(--texto-suave); padding: 2px 8px; border-radius: 100px; }
+  .transcricao-status-processando { color: var(--aviso); display: flex; align-items: center; gap: 5px; font-size: 0.78rem; }
+  .transcricao-status-falhou { color: var(--erro); font-size: 0.78rem; }
+  .relogio-girando { display: inline-block; animation: girar 2s linear infinite; }
+  @keyframes girar { to { transform: rotate(360deg); } }
+
+  .transcricao-corpo-acoes { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+  .btn-mini-transc {
+    padding: 5px 11px;
+    border-radius: 100px;
+    border: 1px solid var(--borda);
+    background: var(--branco);
+    color: var(--texto);
+    font-size: 0.72rem;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .btn-mini-transc:hover { background: rgba(89,25,2,0.05); }
+
+  .transcricao-video-wrap { position: relative; }
+  .btn-ver-video-transc {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    background: rgba(50,31,20,0.45);
+    color: #fff;
+    border: none;
+    font-size: 0.76rem;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .transcricao-embed-full { width: 100%; aspect-ratio: 16/9; border: none; display: block; background: var(--preto); }
+
   @media (max-width: 780px) {
     .btn-menu-mobile { display: flex; }
     .sidebar { transform: translateX(-100%); box-shadow: 0 0 40px rgba(0,0,0,0.2); }
@@ -500,6 +568,8 @@
     .drawer-fundo.ativo { display: block; }
     .conteudo { margin-left: 0; padding: 70px 16px 60px; }
     .linha-form-2 { grid-template-columns: 1fr; }
+    .linha-transcrever { flex-direction: column; }
+    .linha-transcrever input, .linha-transcrever select, .linha-transcrever button { width: 100%; }
   }
 </style>
 </head>
@@ -745,12 +815,31 @@
 
     <!-- ===================== ABA TRANSCRIÇÕES ===================== -->
     <section class="aba" id="aba-transcricoes">
+      <p class="portfolio-subtitulo">Cole o link de um reel e eu transcrevo sozinha. Serve pros seus vídeos e pros de outras creators, com etiqueta pra você separar.</p>
+
+      <div class="config-supadata" id="config-supadata"></div>
+
+      <div class="linha-transcrever">
+        <input type="url" id="transcrever-link" placeholder="Cole aqui: instagram.com/reel/... · tiktok.com/... · youtube.com/...">
+        <select id="transcrever-dequem" class="campo-busca">
+          <option value="outra">De outra pessoa</option>
+          <option value="minha">Meu</option>
+        </select>
+        <button class="botao botao-principal" id="botao-transcrever" type="button">🎧 Transcrever</button>
+        <button class="botao botao-secundario" id="botao-add-transcricao" type="button">+ Escrever na mão</button>
+      </div>
+      <div class="aviso-transcrever" id="aviso-transcrever" hidden></div>
+
       <div class="barra-acoes">
         <div class="barra-acoes-esquerda">
-          <input type="text" class="campo-busca" id="busca-transcricoes" placeholder="Buscar por link ou observação...">
+          <input type="text" class="campo-busca" id="busca-transcricoes" placeholder="Buscar por link, título, perfil ou observação...">
+          <button class="pill-filtro ativo" data-filtro-quem="todas">Todos</button>
+          <button class="pill-filtro" data-filtro-quem="minha">Meus</button>
+          <button class="pill-filtro" data-filtro-quem="outra">De outras</button>
         </div>
-        <button class="botao botao-principal" id="botao-add-transcricao">+ Nova transcrição</button>
+        <button class="botao botao-secundario" id="botao-estudar-claude" type="button">🧠 Estudar com o Claude</button>
       </div>
+      <div class="barra-acoes-esquerda" id="chips-tags-transcricoes" style="margin-bottom:14px;"></div>
       <div class="grade-transcricoes" id="grade-transcricoes"></div>
     </section>
   </main>
@@ -917,8 +1006,32 @@
 <div class="modal-fundo" id="modal-transcricao" hidden>
   <div class="modal-caixa" style="max-width:760px;">
     <h3 class="modal-titulo" id="modal-transcricao-titulo">Nova transcrição</h3>
+    <p class="aviso-transcrever sucesso" id="modal-transcricao-aviso" hidden></p>
     <form id="form-transcricao">
       <input type="hidden" id="transc-id">
+      <div class="linha-form-2">
+        <div class="campo-form">
+          <label>Título</label>
+          <input type="text" id="transc-titulo" placeholder="Ex.: Roteiro sobre skincare de inverno">
+        </div>
+        <div class="campo-form">
+          <label>De quem</label>
+          <select id="transc-dequem">
+            <option value="outra">De outra pessoa</option>
+            <option value="minha">Meu</option>
+          </select>
+        </div>
+      </div>
+      <div class="linha-form-2">
+        <div class="campo-form">
+          <label>Perfil (@)</label>
+          <input type="text" id="transc-perfil" placeholder="Ex.: nomedoperfil">
+        </div>
+        <div class="campo-form">
+          <label>Tags (separadas por vírgula)</label>
+          <input type="text" id="transc-tags" placeholder="Ex.: skincare, gancho, storytime">
+        </div>
+      </div>
       <div class="campo-form">
         <label>Link do vídeo (YouTube, Instagram ou TikTok)</label>
         <input type="url" id="transc-link" placeholder="https://...">
@@ -1965,6 +2078,10 @@
   // ABA — TRANSCRIÇÕES (vídeos que você gosta, com link, roteiro e observações)
   // ============================================================================
   let listaTranscricoes = [];
+  let filtroQuemTranscricoes = "todas";
+  let filtroTagTranscricao = null;
+  let chaveSupadata = null;
+  let chaveSupadataCarregada = false;
 
   function detectarPlataforma(link) {
     if (!link) return null;
@@ -2025,20 +2142,309 @@
     return null;
   }
 
+  // ---- Transcrição automática via Supadata ----
+  const SUPADATA_BASE = "https://api.supadata.ai/v1";
+
+  function limparLinkTranscrever(bruto) {
+    let url = (bruto || "").trim();
+    url = url.replace("/reels/", "/reel/");
+    try {
+      const u = new URL(url);
+      [...u.searchParams.keys()].forEach(k => {
+        if (k === "igsh" || k.startsWith("utm_")) u.searchParams.delete(k);
+      });
+      const busca = u.searchParams.toString();
+      url = u.origin + u.pathname + (busca ? "?" + busca : "");
+    } catch (erro) { /* não é uma URL válida; segue com o texto limpo mesmo assim */ }
+    return url;
+  }
+
+  function detectarPerfilTranscricao(url, plataforma) {
+    if (plataforma === "instagram") {
+      const m = url.match(/instagram\.com\/([a-zA-Z0-9_.]+)\/reel/);
+      return m ? m[1] : null;
+    }
+    if (plataforma === "tiktok") {
+      const m = url.match(/tiktok\.com\/@([a-zA-Z0-9_.]+)/);
+      return m ? m[1] : null;
+    }
+    return null;
+  }
+
+  function erroSupadata(dados, status) {
+    const codigo = dados && dados.error;
+    const detalhes = ((dados && dados.details) || "").toLowerCase();
+    if (codigo === "limit-exceeded") {
+      if (detalhes.includes("plan usage limit")) return new Error("Seus créditos da Supadata acabaram por este mês. Espera o próximo ciclo ou faz upgrade em supadata.ai.");
+      if (detalhes.includes("request rate limit")) return new Error("Muitas chamadas seguidas pra Supadata. Espera 1 minuto e tenta de novo.");
+      return new Error("Limite da Supadata atingido. Espera um pouco e tenta de novo.");
+    }
+    if (status === 401 || status === 403) return new Error("Sua chave da Supadata não foi aceita. Confere se colou certinho.");
+    return new Error("Não consegui transcrever esse vídeo agora. Tenta de novo em instantes.");
+  }
+
+  function extrairTextoSupadata(dados) {
+    if (!dados) return "";
+    if (typeof dados.content === "string") return dados.content.trim();
+    if (Array.isArray(dados.content)) return dados.content.map(s => s.text || "").join(" ").trim();
+    return "";
+  }
+
+  async function chamarSupadata(url, onProgresso) {
+    const inicio = Date.now();
+    const resp = await fetch(SUPADATA_BASE + "/transcript?url=" + encodeURIComponent(url) + "&mode=auto&text=true&lang=pt", {
+      headers: { "x-api-key": chaveSupadata }
+    });
+    let dados = {};
+    try { dados = await resp.json(); } catch (erro) { /* resposta sem corpo */ }
+    if (resp.status === 202 && dados.jobId) return await esperarJobSupadata(dados.jobId, inicio, onProgresso);
+    if (!resp.ok) throw erroSupadata(dados, resp.status);
+    return dados;
+  }
+
+  async function esperarJobSupadata(jobId, inicio, onProgresso) {
+    const LIMITE_MS = 6 * 60 * 1000;
+    while (Date.now() - inicio < LIMITE_MS) {
+      await new Promise(r => setTimeout(r, 5000));
+      const passado = Math.round((Date.now() - inicio) / 1000);
+      if (onProgresso) onProgresso(passado);
+      const resp = await fetch(SUPADATA_BASE + "/transcript/" + jobId, { headers: { "x-api-key": chaveSupadata } });
+      let dados = {};
+      try { dados = await resp.json(); } catch (erro) { /* resposta sem corpo */ }
+      if (!resp.ok) throw erroSupadata(dados, resp.status);
+      if (dados.status === "completed") return dados;
+      if (dados.status === "failed") throw new Error("Não consegui transcrever esse vídeo.");
+    }
+    throw new Error("Demorou mais de 6 minutos e eu desisti. Tenta de novo daqui a pouco.");
+  }
+
+  async function buscarSaldoSupadata() {
+    if (!chaveSupadata) return null;
+    try {
+      const resp = await fetch(SUPADATA_BASE + "/me", { headers: { "x-api-key": chaveSupadata } });
+      if (!resp.ok) return null;
+      return await resp.json();
+    } catch (erro) { return null; }
+  }
+
+  async function carregarChaveSupadata() {
+    const { data, error } = await sb.from("configuracoes").select("valor").eq("chave", "supadata_api_key").maybeSingle();
+    if (error) return null;
+    return data ? data.valor : null;
+  }
+  async function salvarChaveSupadata(valor) {
+    const { error } = await sb.from("configuracoes").upsert({ chave: "supadata_api_key", valor: valor, updated_at: new Date().toISOString() });
+    if (error) throw error;
+  }
+
+  function mostrarAvisoTranscrever(texto, tipo) {
+    const el = document.getElementById("aviso-transcrever");
+    el.hidden = false;
+    el.textContent = texto;
+    el.className = "aviso-transcrever" + (tipo === "erro" ? " erro" : tipo === "sucesso" ? " sucesso" : "");
+  }
+  function esconderAvisoTranscrever() { document.getElementById("aviso-transcrever").hidden = true; }
+
+  function renderConfigSupadata() {
+    const alvo = document.getElementById("config-supadata");
+    if (!chaveSupadata) {
+      alvo.innerHTML =
+        '<div class="config-supadata-vazia">' +
+          '<input type="password" id="campo-chave-supadata" class="campo-busca" placeholder="Cole aqui a sua chave da Supadata">' +
+          '<button class="botao botao-principal" id="botao-salvar-chave-supadata" type="button">Salvar chave</button>' +
+        "</div>" +
+        '<p class="config-supadata-dica">Ainda não tem uma chave? Crie uma conta grátis em <strong>supadata.ai</strong> (100 créditos por mês, sem cartão), copie a "API key" e cole aqui.</p>';
+      document.getElementById("botao-salvar-chave-supadata").addEventListener("click", async () => {
+        const valor = document.getElementById("campo-chave-supadata").value.trim();
+        if (!valor) return;
+        try {
+          await salvarChaveSupadata(valor);
+          chaveSupadata = valor;
+          renderConfigSupadata();
+        } catch (erro) {
+          mostrarAvisoTranscrever("Não consegui salvar a chave agora. Tenta de novo.", "erro");
+        }
+      });
+    } else {
+      const ultimos4 = chaveSupadata.slice(-4);
+      alvo.innerHTML =
+        '<span>🔑 Chave salva: •••• ' + ultimos4 + "</span>" +
+        '<span class="config-supadata-saldo" id="saldo-supadata">Carregando saldo...</span>' +
+        '<button class="botao botao-secundario" id="botao-trocar-chave-supadata" type="button">Trocar chave</button>';
+      document.getElementById("botao-trocar-chave-supadata").addEventListener("click", () => {
+        chaveSupadata = null;
+        renderConfigSupadata();
+      });
+      buscarSaldoSupadata().then(info => {
+        const el = document.getElementById("saldo-supadata");
+        if (el) el.textContent = info ? info.usedCredits + " de " + info.maxCredits + " créditos usados" : "";
+      });
+    }
+  }
+
+  async function iniciarTranscricaoAutomatica(id, url) {
+    mostrarAvisoTranscrever("🎧 Ouvindo o vídeo… 0s. Costuma levar de 30 segundos a 4 minutos, pode deixar a aba aberta.");
+    try {
+      const dados = await chamarSupadata(url, (passado) => {
+        mostrarAvisoTranscrever("🎧 Ouvindo o vídeo… " + passado + "s. Costuma levar de 3 a 4 minutos, pode deixar a aba aberta.");
+      });
+      const texto = extrairTextoSupadata(dados);
+      if (!texto || dados.lang === "none") {
+        await salvarSeguro("transcricoes", sb.from("transcricoes").update({
+          status: "falhou",
+          erro: "Não achei fala nesse vídeo. Costuma ser reel só com música ou só com texto na tela."
+        }).eq("id", id));
+      } else {
+        await salvarSeguro("transcricoes", sb.from("transcricoes").update({
+          status: "pronto",
+          roteiro: texto,
+          segmentos: Array.isArray(dados.content) ? dados.content : null
+        }).eq("id", id));
+      }
+    } catch (erro) {
+      await salvarSeguro("transcricoes", sb.from("transcricoes").update({ status: "falhou", erro: erro.message }).eq("id", id));
+    } finally {
+      esconderAvisoTranscrever();
+      await carregarTranscricoes();
+      const item = listaTranscricoes.find(t => t.id === id);
+      if (item && item.status === "pronto") abrirModalTranscricao(item, "✅ Pronto. Revisa, dá um nome e salva.");
+    }
+  }
+
+  document.getElementById("botao-transcrever").addEventListener("click", async () => {
+    const campoLink = document.getElementById("transcrever-link");
+    const bruto = campoLink.value.trim();
+    if (!chaveSupadata) {
+      mostrarAvisoTranscrever('Antes de transcrever, cola a sua chave da Supadata ali em cima. Se ainda não tiver uma, crie uma conta grátis em supadata.ai (100 créditos por mês, sem cartão) e copie a "API key".', "erro");
+      return;
+    }
+    if (!/^https?:\/\//i.test(bruto)) {
+      mostrarAvisoTranscrever("Esse link não parece válido. Copia de novo direto do Instagram, TikTok ou YouTube.", "erro");
+      return;
+    }
+    const url = limparLinkTranscrever(bruto);
+    const plataforma = detectarPlataforma(url) || "outro";
+    const deQuem = document.getElementById("transcrever-dequem").value;
+
+    const existente = listaTranscricoes.find(t => t.link === url);
+    if (existente && !confirm("Esse link já está na sua biblioteca. Quer transcrever de novo mesmo assim?")) return;
+
+    const perfil = detectarPerfilTranscricao(url, plataforma);
+    const botao = document.getElementById("botao-transcrever");
+    botao.disabled = true;
+    campoLink.value = "";
+
+    const novo = await salvarSeguro("transcricoes", sb.from("transcricoes").insert({
+      link: url, plataforma: plataforma, perfil: perfil, de_quem: deQuem, status: "processando"
+    }).select().single());
+    botao.disabled = false;
+    if (!novo) return;
+    listaTranscricoes.unshift(novo);
+    renderGradeTranscricoes();
+    iniciarTranscricaoAutomatica(novo.id, url);
+  });
+
+  async function tentarDeNovoTranscricao(id) {
+    const item = listaTranscricoes.find(t => t.id === id);
+    if (!item || !item.link) return;
+    if (!chaveSupadata) {
+      mostrarAvisoTranscrever("Antes de tentar de novo, cola a sua chave da Supadata ali em cima.", "erro");
+      return;
+    }
+    await salvarSeguro("transcricoes", sb.from("transcricoes").update({ status: "processando", erro: null }).eq("id", id));
+    await carregarTranscricoes();
+    iniciarTranscricaoAutomatica(id, item.link);
+  }
+
+  function montarPromptEstudoTranscricoes() {
+    const outros = listaTranscricoes.filter(t => t.de_quem === "outra" && t.roteiro).slice(0, 10);
+    if (outros.length === 0) return null;
+    let texto = "Aqui estão roteiros transcritos de reels de outras creators. Quero que você:\n";
+    texto += "1. Aponte os assuntos que estão em alta entre eles.\n";
+    texto += '2. Liste expressões ou frases que estão se repetindo, que estão "prendendo" a atenção.\n';
+    texto += "3. Identifique padrões de gancho (a abertura do vídeo), com um exemplo real de cada padrão.\n";
+    texto += "4. Crie 5 roteiros novos, no MEU assunto, reaproveitando a estrutura desses roteiros, não o conteúdo, sem ficar robotizado.\n\n";
+    texto += "Roteiros:\n\n";
+    outros.forEach((t, i) => {
+      texto += "Roteiro " + (i + 1) + ", perfil @" + (t.perfil || "desconhecido") + ":\n" + t.roteiro + "\n\n";
+    });
+    return texto;
+  }
+  document.getElementById("botao-estudar-claude").addEventListener("click", async () => {
+    const prompt = montarPromptEstudoTranscricoes();
+    if (!prompt) {
+      mostrarAvisoTranscrever('Ainda não tem transcrições marcadas como "De outra" com roteiro pra estudar.', "erro");
+      return;
+    }
+    try {
+      await navigator.clipboard.writeText(prompt);
+      mostrarAvisoTranscrever("✅ Prompt copiado. Agora é só colar no Claude.", "sucesso");
+    } catch (erro) {
+      alert("Não consegui copiar. Copia manualmente o texto gerado.");
+    }
+  });
+
+  document.querySelectorAll("[data-filtro-quem]").forEach(botao => {
+    botao.addEventListener("click", () => {
+      filtroQuemTranscricoes = botao.dataset.filtroQuem;
+      filtroTagTranscricao = null;
+      document.querySelectorAll("[data-filtro-quem]").forEach(b => b.classList.toggle("ativo", b === botao));
+      renderGradeTranscricoes();
+    });
+  });
+
   async function carregarTranscricoes() {
+    if (!chaveSupadataCarregada) {
+      chaveSupadataCarregada = true;
+      chaveSupadata = await carregarChaveSupadata();
+      renderConfigSupadata();
+    }
     listaTranscricoes = await consultarSeguro("transcricoes", sb.from("transcricoes").select("*").order("created_at", { ascending: false }));
     renderGradeTranscricoes();
   }
-  function renderGradeTranscricoes() {
-    const termo = document.getElementById("busca-transcricoes").value.trim().toLowerCase();
-    const filtradas = listaTranscricoes.filter(t => {
-      if (!termo) return true;
-      return (t.link || "").toLowerCase().includes(termo) || (t.observacoes || "").toLowerCase().includes(termo) || (t.nicho || "").toLowerCase().includes(termo);
+
+  function todasTagsTranscricoes() {
+    const set = new Set();
+    listaTranscricoes.forEach(t => (t.tags || []).forEach(tag => set.add(tag)));
+    return [...set].sort();
+  }
+  function renderChipsTagsTranscricoes() {
+    const alvo = document.getElementById("chips-tags-transcricoes");
+    const tags = todasTagsTranscricoes();
+    if (tags.length === 0) { alvo.innerHTML = ""; return; }
+    alvo.innerHTML = tags.map(tag =>
+      '<button type="button" class="pill-filtro' + (filtroTagTranscricao === tag ? " ativo" : "") + '" data-filtro-tag="' + escaparAtributo(tag) + '">#' + tag + "</button>"
+    ).join("");
+    alvo.querySelectorAll("[data-filtro-tag]").forEach(botao => {
+      botao.addEventListener("click", () => {
+        filtroTagTranscricao = filtroTagTranscricao === botao.dataset.filtroTag ? null : botao.dataset.filtroTag;
+        renderGradeTranscricoes();
+      });
     });
+  }
+
+  function renderGradeTranscricoes() {
+    renderChipsTagsTranscricoes();
+    const termo = document.getElementById("busca-transcricoes").value.trim().toLowerCase();
+    let filtradas = listaTranscricoes;
+    if (filtroTagTranscricao) {
+      filtradas = filtradas.filter(t => (t.tags || []).includes(filtroTagTranscricao));
+    } else if (filtroQuemTranscricoes !== "todas") {
+      filtradas = filtradas.filter(t => t.de_quem === filtroQuemTranscricoes);
+    }
+    if (termo) {
+      filtradas = filtradas.filter(t =>
+        (t.link || "").toLowerCase().includes(termo) ||
+        (t.observacoes || "").toLowerCase().includes(termo) ||
+        (t.nicho || "").toLowerCase().includes(termo) ||
+        (t.titulo || "").toLowerCase().includes(termo) ||
+        (t.perfil || "").toLowerCase().includes(termo)
+      );
+    }
     const alvo = document.getElementById("grade-transcricoes");
     if (filtradas.length === 0) {
       alvo.innerHTML = '<p class="texto-vazio">' + (listaTranscricoes.length === 0
-        ? 'Nenhuma transcrição salva ainda. Clique em "Nova transcrição" pra começar.'
+        ? "Nenhuma transcrição salva ainda. Cole um link ali em cima pra começar."
         : "Nenhuma transcrição encontrada.") + "</p>";
       return;
     }
@@ -2050,19 +2456,65 @@
       const capa = imagem
         ? '<img class="transcricao-capa" src="' + escaparAtributo(imagem) + '" data-inicial="' + escaparAtributo(nomePlataforma.charAt(0)) + '" alt="" loading="lazy">'
         : '<div class="transcricao-capa-placeholder">' + nomePlataforma.charAt(0) + "</div>";
-      return '<button type="button" class="cartao-transcricao" data-id="' + t.id + '">' +
+      const badgeQuem = t.de_quem === "minha"
+        ? '<span class="transcricao-badge-quem transcricao-badge-minha">Meu</span>'
+        : '<span class="transcricao-badge-quem transcricao-badge-outra">De outra</span>';
+      const tags = (t.tags || []).map(tag => '<span class="transcricao-tag">#' + escaparAtributo(tag) + "</span>").join("");
+
+      let statusBloco = "";
+      let acoes = '<button type="button" class="btn-mini-transc" data-acao="apagar-rapido" data-id="' + t.id + '">Apagar</button>';
+      if (t.status === "processando") {
+        statusBloco = '<span class="transcricao-status-processando"><span class="relogio-girando">🕐</span> Ainda processando...</span>';
+        acoes = '<button type="button" class="btn-mini-transc" data-acao="tentar-de-novo" data-id="' + t.id + '">Tentar de novo</button>' + acoes;
+      } else if (t.status === "falhou") {
+        statusBloco = '<span class="transcricao-status-falhou">⚠️ ' + escaparAtributo(t.erro || "Não consegui transcrever esse vídeo.") + "</span>";
+        acoes = '<button type="button" class="btn-mini-transc" data-acao="tentar-de-novo" data-id="' + t.id + '">Tentar de novo</button>' + acoes;
+      } else if (t.roteiro) {
+        acoes = '<button type="button" class="btn-mini-transc" data-acao="copiar" data-id="' + t.id + '">Copiar roteiro</button>' + acoes;
+      }
+
+      return '<div class="cartao-transcricao" data-id="' + t.id + '">' +
         capa +
         '<span class="transcricao-corpo">' +
-          '<span class="transcricao-plataforma">' + nomePlataforma + "</span>" +
+          badgeQuem +
+          '<span class="transcricao-plataforma">' + nomePlataforma + (t.perfil ? " · @" + escaparAtributo(t.perfil) : "") + "</span>" +
           (t.nicho ? '<span class="transcricao-nicho">' + t.nicho + "</span>" : "") +
+          (t.titulo ? '<strong style="font-size:0.85rem;">' + escaparAtributo(t.titulo) + "</strong>" : "") +
           '<span class="transcricao-link">' + t.link + "</span>" +
+          (tags ? '<span class="transcricao-tags">' + tags + "</span>" : "") +
           (t.observacoes ? '<span class="transcricao-trecho">' + t.observacoes + "</span>" : "") +
+          statusBloco +
           '<span class="transcricao-data">' + (t.created_at ? formatarData(t.created_at.slice(0, 10)) : "") + "</span>" +
+          '<span class="transcricao-corpo-acoes">' + acoes + "</span>" +
         "</span>" +
-      "</button>";
+      "</div>";
     }).join("");
-    alvo.querySelectorAll(".cartao-transcricao").forEach(botao => {
-      botao.addEventListener("click", () => abrirModalTranscricao(listaTranscricoes.find(t => t.id === botao.dataset.id)));
+    alvo.querySelectorAll(".cartao-transcricao").forEach(cartao => {
+      cartao.addEventListener("click", (evento) => {
+        if (evento.target.closest("[data-acao]")) return;
+        abrirModalTranscricao(listaTranscricoes.find(t => t.id === cartao.dataset.id));
+      });
+    });
+    alvo.querySelectorAll("[data-acao]").forEach(botao => {
+      botao.addEventListener("click", (evento) => {
+        evento.stopPropagation();
+        const id = botao.dataset.id;
+        const acao = botao.dataset.acao;
+        if (acao === "apagar-rapido") {
+          if (!confirm("Apagar esta transcrição?")) return;
+          salvarSeguro("transcricoes", sb.from("transcricoes").delete().eq("id", id)).then(carregarTranscricoes);
+        } else if (acao === "tentar-de-novo") {
+          tentarDeNovoTranscricao(id);
+        } else if (acao === "copiar") {
+          const item = listaTranscricoes.find(t => t.id === id);
+          if (item && item.roteiro) {
+            navigator.clipboard.writeText(item.roteiro).then(() => {
+              botao.textContent = "copiado ✓";
+              setTimeout(() => { botao.textContent = "Copiar roteiro"; }, 1800);
+            });
+          }
+        }
+      });
     });
     // Miniatura hotlink-protegida ou fora do ar: troca pelo placeholder em vez de deixar o ícone de imagem quebrada.
     alvo.querySelectorAll("img.transcricao-capa").forEach(img => {
@@ -2082,16 +2534,22 @@
 
   const modalTranscricao = document.getElementById("modal-transcricao");
   document.getElementById("botao-add-transcricao").addEventListener("click", () => abrirModalTranscricao(null));
-  function abrirModalTranscricao(item) {
+  function abrirModalTranscricao(item, mensagem) {
     document.getElementById("form-transcricao").reset();
     document.getElementById("modal-transcricao-titulo").textContent = item ? "Editar transcrição" : "Nova transcrição";
     document.getElementById("transc-id").value = item ? item.id : "";
+    document.getElementById("transc-titulo").value = item ? (item.titulo || "") : "";
+    document.getElementById("transc-dequem").value = item ? item.de_quem : "outra";
+    document.getElementById("transc-perfil").value = item ? (item.perfil || "") : "";
+    document.getElementById("transc-tags").value = item && item.tags ? item.tags.join(", ") : "";
     document.getElementById("transc-link").value = item ? item.link : "";
     preencherSeletorNicho(selectTranscNicho, campoTranscNichoNovo, item ? item.nicho : "");
     document.getElementById("transc-capa").value = item ? (item.capa_url || "") : "";
     document.getElementById("transc-roteiro").value = item ? (item.roteiro || "") : "";
     document.getElementById("transc-obs").value = item ? (item.observacoes || "") : "";
     document.getElementById("transc-apagar").hidden = !item;
+    const avisoModal = document.getElementById("modal-transcricao-aviso");
+    if (mensagem) { avisoModal.hidden = false; avisoModal.textContent = mensagem; } else { avisoModal.hidden = true; }
     renderPreviewTranscricao(item ? item.link : "");
     // Some o Tokscript sempre fechado ao abrir/reabrir o modal, e só carrega
     // o iframe (gasta rede) quando ela realmente clicar pra usar.
@@ -2121,12 +2579,18 @@
     const id = document.getElementById("transc-id").value;
     const link = document.getElementById("transc-link").value.trim();
     const registro = {
+      titulo: document.getElementById("transc-titulo").value.trim() || null,
+      de_quem: document.getElementById("transc-dequem").value,
+      perfil: document.getElementById("transc-perfil").value.trim() || null,
+      tags: document.getElementById("transc-tags").value.split(",").map(s => s.trim()).filter(Boolean),
       link: link,
       plataforma: detectarPlataforma(link) || "outro",
       nicho: valorNichoSelecionado(selectTranscNicho, campoTranscNichoNovo) || null,
       capa_url: document.getElementById("transc-capa").value.trim() || null,
       roteiro: document.getElementById("transc-roteiro").value.trim() || null,
-      observacoes: document.getElementById("transc-obs").value.trim() || null
+      observacoes: document.getElementById("transc-obs").value.trim() || null,
+      status: "pronto",
+      erro: null
     };
     if (id) await salvarSeguro("transcricoes", sb.from("transcricoes").update(registro).eq("id", id));
     else await salvarSeguro("transcricoes", sb.from("transcricoes").insert(registro));
