@@ -26,6 +26,7 @@
     --sucesso: #74907B;
     --fundo-sucesso: rgba(116, 144, 123, 0.16);
     --erro: #C4453C;
+    --destaque-hoje: #C1613A;
     --fundo-erro: rgba(196, 69, 60, 0.1);
     --aviso: #B08900;
     --fundo-aviso: rgba(176, 137, 0, 0.12);
@@ -183,6 +184,7 @@
   }
   .stat-item { background: var(--branco); border: 1px solid var(--borda); border-radius: var(--raio); padding: 16px 18px; }
   .stat-valor { font-size: 1.4rem; font-weight: 700; }
+  .stat-valor-destaque { color: var(--destaque-hoje); }
   .stat-valor small { font-size: 0.8rem; font-weight: 600; color: var(--texto-suave); display: block; margin-top: 2px; }
   .stat-rotulo { font-size: 0.74rem; color: var(--texto-suave); margin-top: 2px; }
   /* Três tons que se repetem nas faixas de números (referência 02), sempre
@@ -1556,12 +1558,12 @@
 
   function renderStatsPortfolio(videos, visitas7, visitasHoje) {
     const stats = [
-      { rotulo: "Visitas hoje", valor: visitasHoje.length },
+      { rotulo: "Visitas hoje", valor: visitasHoje.length, destaque: true },
       { rotulo: "Visitas em 7 dias", valor: visitas7.length },
       { rotulo: "Vídeos no site", valor: videos.length }
     ];
     document.getElementById("stats-portfolio").innerHTML = stats.map(s =>
-      '<div class="stat-item"><div class="stat-valor">' + s.valor + '</div><div class="stat-rotulo">' + s.rotulo + "</div></div>"
+      '<div class="stat-item"><div class="stat-rotulo">' + s.rotulo + '</div><div class="stat-valor' + (s.destaque ? " stat-valor-destaque" : "") + '">' + s.valor + "</div></div>"
     ).join("");
   }
 
@@ -2134,7 +2136,7 @@
       { rotulo: "Valor total", valor: formatarMoeda(valorTotal), extra: "Ticket médio: " + formatarMoeda(ticketMedio) },
       { rotulo: "A receber", valor: formatarMoeda(aReceber) },
       { rotulo: "Já recebido", valor: formatarMoeda(jaRecebido) }
-    ].map((s, i) => '<div class="stat-item stat-item-cor-' + ((i % 3) + 1) + '"><div class="stat-valor">' + s.valor + (s.extra ? "<small>" + s.extra + "</small>" : "") + '</div><div class="stat-rotulo">' + s.rotulo + "</div></div>").join("");
+    ].map((s, i) => '<div class="stat-item stat-item-cor-' + ((i % 3) + 1) + '"><div class="stat-rotulo">' + s.rotulo + '</div><div class="stat-valor">' + s.valor + (s.extra ? "<small>" + s.extra + "</small>" : "") + "</div></div>").join("");
   }
   function diasEntre(a, b) { return Math.round((new Date(a) - new Date(b)) / 86400000); }
   function renderTabelaCampanhas() {
