@@ -765,24 +765,25 @@
 
       <div class="stats-faixa" id="stats-portfolio"></div>
 
-      <div class="painel-branco bloco-portfolio">
-        <div class="painel-titulo">Visitas nos últimos 14 dias</div>
-        <div id="grafico-visitas"></div>
-      </div>
-
-      <div class="painel-branco bloco-portfolio">
-        <div class="painel-titulo">De onde vêm</div>
-        <div id="lista-origens"></div>
-      </div>
-
-      <div class="painel-branco bloco-portfolio">
-        <div class="painel-titulo">Vídeos mais clicados</div>
-        <div id="lista-videos-clicados"></div>
+      <div class="linha-dashboard-dupla bloco-portfolio">
+        <div class="painel-branco">
+          <div class="painel-titulo">Visitas nos últimos 7 dias</div>
+          <div id="grafico-visitas"></div>
+        </div>
+        <div class="painel-branco">
+          <div class="painel-titulo">De onde vêm</div>
+          <div id="lista-origens"></div>
+        </div>
       </div>
 
       <div class="painel-branco bloco-portfolio">
         <div class="painel-titulo">Do primeiro clique até a mensagem</div>
         <div class="funil-linha" id="funil-conversao"></div>
+      </div>
+
+      <div class="painel-branco bloco-portfolio">
+        <div class="painel-titulo">Vídeos mais clicados</div>
+        <div id="lista-videos-clicados"></div>
       </div>
 
       <div class="barra-acoes">
@@ -1544,9 +1545,9 @@
   async function carregarPortfolio() {
     const [videos, visitas14, visitasHoje, eventos14] = await Promise.all([
       consultarSeguro("videos", sb.from("videos").select("*").order("ordem", { ascending: true })),
-      consultarSeguro("visitas", sb.from("visitas").select("data,pagina,origem").gte("data", new Date(Date.now() - 13 * 86400000).toISOString())),
+      consultarSeguro("visitas", sb.from("visitas").select("data,pagina,origem").gte("data", new Date(Date.now() - 6 * 86400000).toISOString())),
       consultarSeguro("visitas", sb.from("visitas").select("id").gte("data", hojeISO() + "T00:00:00")),
-      consultarSeguro("eventos", sb.from("eventos").select("tipo,video_titulo").gte("data", new Date(Date.now() - 13 * 86400000).toISOString()))
+      consultarSeguro("eventos", sb.from("eventos").select("tipo,video_titulo").gte("data", new Date(Date.now() - 6 * 86400000).toISOString()))
     ]);
     listaVideos = videos;
     renderStatsPortfolio(videos, visitas14, visitasHoje);
@@ -1557,34 +1558,24 @@
     renderTabelaVideos();
   }
 
-  function renderStatsPortfolio(videos, visitas14, visitasHoje) {
-    const videosNoAr = videos.filter(v => v.visivel).length;
-    const contagemNicho = {};
-    videos.filter(v => v.visivel).forEach(v => { contagemNicho[v.nicho] = (contagemNicho[v.nicho] || 0) + 1; });
-    const nichoTop = Object.entries(contagemNicho).sort((a, b) => b[1] - a[1])[0];
-    const contagemOrigem = {};
-    visitas14.forEach(v => { const o = v.origem || "Direto"; contagemOrigem[o] = (contagemOrigem[o] || 0) + 1; });
-    const origemTop = Object.entries(contagemOrigem).sort((a, b) => b[1] - a[1])[0];
-
+  function renderStatsPortfolio(videos, visitas7, visitasHoje) {
     const stats = [
-      { rotulo: "Visitas em 14 dias", valor: visitas14.length },
       { rotulo: "Visitas hoje", valor: visitasHoje.length },
-      { rotulo: "Vídeos no ar", valor: videosNoAr, extra: videos.length + " no total" },
-      { rotulo: "Nicho mais forte", valor: nichoTop ? nichoTop[0] : "—", extra: nichoTop ? nichoTop[1] + " vídeos" : "" },
-      { rotulo: "De onde mais vêm", valor: origemTop ? origemTop[0] : "—", extra: origemTop ? origemTop[1] + " visitas" : "" }
+      { rotulo: "Visitas em 7 dias", valor: visitas7.length },
+      { rotulo: "Vídeos no site", valor: videos.length }
     ];
-    document.getElementById("stats-portfolio").innerHTML = stats.map((s, i) =>
-      '<div class="stat-item stat-item-cor-' + ((i % 3) + 1) + '"><div class="stat-valor">' + s.valor + (s.extra ? "<small>" + s.extra + "</small>" : "") + '</div><div class="stat-rotulo">' + s.rotulo + "</div></div>"
+    document.getElementById("stats-portfolio").innerHTML = stats.map(s =>
+      '<div class="stat-item"><div class="stat-valor">' + s.valor + '</div><div class="stat-rotulo">' + s.rotulo + "</div></div>"
     ).join("");
   }
 
-  // "Vídeos mais clicados": conta os eventos "clique_video" dos últimos 14 dias,
+  // "Vídeos mais clicados": conta os eventos "clique_video" dos últimos 7 dias,
   // agrupados pelo título do vídeo, do mais clicado pro menos.
   function renderVideosClicados(eventos14) {
     const alvo = document.getElementById("lista-videos-clicados");
     const cliques = eventos14.filter(e => e.tipo === "clique_video");
     if (cliques.length === 0) {
-      alvo.innerHTML = '<p class="texto-vazio">Ainda não há cliques em vídeo registrados nos últimos 14 dias.</p>';
+      alvo.innerHTML = '<p class="texto-vazio">Ainda não há cliques em vídeo registrados nos últimos 7 dias.</p>';
       return;
     }
     const contagem = {};
@@ -1597,7 +1588,7 @@
   }
 
   // Funil "visita -> rolou até o formulário -> mandou mensagem", com o
-  // percentual de cada etapa em cima do total de visitas dos últimos 14 dias.
+  // percentual de cada etapa em cima do total de visitas dos últimos 7 dias.
   function renderFunil(visitas14, eventos14) {
     const alvo = document.getElementById("funil-conversao");
     const totalVisitas = visitas14.length;
@@ -1617,11 +1608,11 @@
   function renderGraficoVisitas(visitas14) {
     const alvo = document.getElementById("grafico-visitas");
     if (visitas14.length === 0) {
-      alvo.innerHTML = '<p class="texto-vazio">Ainda não há visitas registradas. Assim que as pessoas começarem a visitar o seu site, este gráfico vai mostrar os últimos 14 dias.</p>';
+      alvo.innerHTML = '<p class="texto-vazio">Ainda não há visitas registradas. Assim que as pessoas começarem a visitar o seu site, este gráfico vai mostrar os últimos 7 dias.</p>';
       return;
     }
     const dias = [];
-    for (let i = 13; i >= 0; i--) {
+    for (let i = 6; i >= 0; i--) {
       const d = new Date(Date.now() - i * 86400000);
       dias.push({ chave: d.toISOString().slice(0, 10), rotulo: String(d.getDate()).padStart(2, "0") + "/" + String(d.getMonth() + 1).padStart(2, "0"), total: 0 });
     }
