@@ -163,6 +163,7 @@
     padding: 18px 20px;
   }
   .bloco-portfolio { margin-bottom: 20px; }
+  .linha-dashboard-tarefas { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
   .portfolio-subtitulo { color: var(--texto-suave); font-size: 0.88rem; margin: 4px 0 20px; }
   .painel-titulo { font-size: 0.85rem; font-weight: 700; margin-bottom: 14px; }
   .texto-vazio { color: var(--texto-suave); font-size: 0.85rem; line-height: 1.6; padding: 10px 0; }
@@ -581,6 +582,7 @@
     .linha-form-2 { grid-template-columns: 1fr; }
     .linha-transcrever { flex-direction: column; }
     .linha-transcrever input, .linha-transcrever select, .linha-transcrever button { width: 100%; }
+    .linha-dashboard-tarefas { grid-template-columns: 1fr; }
   }
 </style>
 </head>
@@ -594,6 +596,14 @@
 <div class="layout">
   <aside class="sidebar" id="sidebar">
     <div class="sidebar-marca">Talissa Müller<span>Painel administrativo</span></div>
+
+    <nav class="nav-grupo">
+      <div class="nav-grupo-titulo">Visão geral</div>
+      <button class="nav-item" data-aba="dashboard">
+        <span class="icone"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="8" height="8" rx="1.5"/><rect x="13" y="3" width="8" height="5" rx="1.5"/><rect x="13" y="10" width="8" height="11" rx="1.5"/><rect x="3" y="13" width="8" height="8" rx="1.5"/></svg></span>
+        Dashboard
+      </button>
+    </nav>
 
     <nav class="nav-grupo">
       <div class="nav-grupo-titulo">Meu site</div>
@@ -642,6 +652,34 @@
     </div>
 
     <div class="avisos" id="avisos" hidden></div>
+
+    <!-- ===================== ABA DASHBOARD ===================== -->
+    <section class="aba" id="aba-dashboard">
+      <p class="portfolio-subtitulo">Um resumo rápido do seu dia, das campanhas e das finanças.</p>
+
+      <div class="stats-faixa" id="stats-dashboard"></div>
+
+      <div class="painel-branco bloco-portfolio">
+        <div class="painel-titulo">Resumo do CRM: meta de fechamento do mês</div>
+        <div id="meta-crm-conteudo"></div>
+      </div>
+
+      <div class="painel-branco bloco-portfolio">
+        <div class="painel-titulo">Faturamento dos últimos meses</div>
+        <div id="grafico-faturamento"></div>
+      </div>
+
+      <div class="linha-dashboard-tarefas">
+        <div class="painel-branco">
+          <div class="painel-titulo">Tarefas de hoje e atrasadas</div>
+          <div id="lista-tarefas-hoje-dash"></div>
+        </div>
+        <div class="painel-branco">
+          <div class="painel-titulo">Próximas tarefas</div>
+          <div id="lista-proximas-dash"></div>
+        </div>
+      </div>
+    </section>
 
     <!-- ===================== ABA PORTFÓLIO ===================== -->
     <section class="aba" id="aba-portfolio">
@@ -1139,12 +1177,12 @@
   }
 
   // ---- Navegação (abas + gaveta no celular) ----
-  const TITULOS_ABA = { portfolio: "Portfólio", marcas: "Marcas", calendario: "Calendário", campanhas: "Campanhas", checklist: "Checklist", transcricoes: "Transcrições" };
-  const CARREGADORES_ABA = { portfolio: carregarPortfolio, marcas: carregarMarcas, calendario: carregarCalendario, campanhas: carregarCampanhas, checklist: carregarChecklist, transcricoes: carregarTranscricoes };
+  const TITULOS_ABA = { dashboard: "Dashboard", portfolio: "Portfólio", marcas: "Marcas", calendario: "Calendário", campanhas: "Campanhas", checklist: "Checklist", transcricoes: "Transcrições" };
+  const CARREGADORES_ABA = { dashboard: carregarDashboard, portfolio: carregarPortfolio, marcas: carregarMarcas, calendario: carregarCalendario, campanhas: carregarCampanhas, checklist: carregarChecklist, transcricoes: carregarTranscricoes };
   const abasCarregadas = new Set();
 
   function abrirAba(nome) {
-    if (!TITULOS_ABA[nome]) nome = "portfolio";
+    if (!TITULOS_ABA[nome]) nome = "dashboard";
     document.querySelectorAll(".nav-item").forEach(b => b.classList.toggle("ativo", b.dataset.aba === nome));
     document.querySelectorAll(".aba").forEach(s => s.classList.toggle("ativa", s.id === "aba-" + nome));
     document.getElementById("titulo-aba").textContent = TITULOS_ABA[nome];
@@ -1187,6 +1225,166 @@
   function hojeISO() {
     const d = new Date();
     return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+  }
+
+  // ============================================================================
+  // ABA 0 — DASHBOARD
+  // ============================================================================
+  let metaFechamentoMes = null;
+  let metaCrmEditando = false;
+  let valorFechadoMesAtual = 0;
+
+  async function carregarMetaFechamento() {
+    const { data, error } = await sb.from("configuracoes").select("valor").eq("chave", "meta_fechamento_mes").maybeSingle();
+    if (error) return null;
+    return data && data.valor ? Number(data.valor) : null;
+  }
+  async function salvarMetaFechamento(valor) {
+    const { error } = await sb.from("configuracoes").upsert({ chave: "meta_fechamento_mes", valor: String(valor), updated_at: new Date().toISOString() });
+    if (error) throw error;
+  }
+
+  async function carregarDashboard() {
+    const inicioMes = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+    const fimMes = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0);
+    const inicioMesIso = isoData(inicioMes);
+    const fimMesIso = isoData(fimMes);
+    const inicioMesCriacao = inicioMes.toISOString();
+
+    const [campanhas, tarefasHoje, tarefasAtrasadas, tarefasProximas, meta] = await Promise.all([
+      consultarSeguro("campanhas", sb.from("campanhas").select("*")),
+      consultarSeguro("calendario", sb.from("calendario").select("*").eq("status", "a_fazer").eq("data", hojeISO()).order("data", { ascending: true })),
+      consultarSeguro("calendario", sb.from("calendario").select("*").eq("status", "a_fazer").lt("data", hojeISO()).order("data", { ascending: true })),
+      consultarSeguro("calendario", sb.from("calendario").select("*").eq("status", "a_fazer").gt("data", hojeISO()).order("data", { ascending: true }).limit(8)),
+      carregarMetaFechamento()
+    ]);
+    metaFechamentoMes = meta;
+
+    const campanhasAtivas = campanhas.filter(c => !campanhaFinalizada(c)).length;
+    // "Recebido/a receber este mês" olha o PRAZO da campanha (quando o
+    // dinheiro é devido), não a data em que ela foi criada.
+    const campanhasDoMesPorPrazo = campanhas.filter(c => c.prazo && c.prazo >= inicioMesIso && c.prazo <= fimMesIso);
+    const recebidoMes = campanhasDoMesPorPrazo.filter(c => c.pagamento === "pago").reduce((s, c) => s + Number(c.valor || 0), 0);
+    const aReceberMes = campanhasDoMesPorPrazo.filter(c => c.pagamento === "pendente").reduce((s, c) => s + Number(c.valor || 0), 0);
+    // Já "valor fechado este mês" (resumo do CRM) olha quando a campanha
+    // ENTROU (foi fechada), não quando o pagamento vence.
+    valorFechadoMesAtual = campanhas.filter(c => c.created_at >= inicioMesCriacao).reduce((s, c) => s + Number(c.valor || 0), 0);
+
+    renderStatsDashboard(campanhasAtivas, tarefasHoje.length, tarefasAtrasadas.length, recebidoMes, aReceberMes);
+    renderMetaCrm();
+    renderGraficoFaturamento(campanhas);
+    renderTarefasHojeDash(tarefasHoje, tarefasAtrasadas);
+    renderProximasDash(tarefasProximas);
+  }
+
+  function renderStatsDashboard(campanhasAtivas, qtdHoje, qtdAtrasadas, recebidoMes, aReceberMes) {
+    document.getElementById("stats-dashboard").innerHTML = [
+      { rotulo: "Campanhas ativas", valor: campanhasAtivas },
+      { rotulo: "Tarefas de hoje", valor: qtdHoje },
+      { rotulo: "Tarefas atrasadas", valor: qtdAtrasadas },
+      { rotulo: "Recebido este mês", valor: formatarMoeda(recebidoMes) },
+      { rotulo: "A receber este mês", valor: formatarMoeda(aReceberMes) }
+    ].map(s => '<div class="stat-item"><div class="stat-valor">' + s.valor + '</div><div class="stat-rotulo">' + s.rotulo + "</div></div>").join("");
+  }
+
+  function renderMetaCrm() {
+    const alvo = document.getElementById("meta-crm-conteudo");
+    const meta = metaFechamentoMes;
+    if (metaCrmEditando) {
+      alvo.innerHTML =
+        '<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">' +
+          '<input type="number" id="input-meta-crm" class="campo-busca" style="width:160px;" placeholder="Valor da meta" value="' + (meta || "") + '">' +
+          '<button class="botao botao-principal" id="botao-salvar-meta" type="button">Salvar</button>' +
+          '<button class="botao botao-secundario" id="botao-cancelar-meta" type="button">Cancelar</button>' +
+        "</div>";
+      document.getElementById("botao-salvar-meta").addEventListener("click", async () => {
+        const valor = Number(document.getElementById("input-meta-crm").value);
+        if (!valor || valor <= 0) return;
+        await salvarMetaFechamento(valor);
+        metaFechamentoMes = valor;
+        metaCrmEditando = false;
+        renderMetaCrm();
+      });
+      document.getElementById("botao-cancelar-meta").addEventListener("click", () => { metaCrmEditando = false; renderMetaCrm(); });
+      return;
+    }
+    const pct = meta > 0 ? Math.min(100, Math.round((valorFechadoMesAtual / meta) * 100)) : 0;
+    alvo.innerHTML =
+      '<p style="margin:0 0 10px;font-size:0.85rem;color:var(--texto-suave);">' + formatarMoeda(valorFechadoMesAtual) + " fechados" +
+      (meta ? " de meta de " + formatarMoeda(meta) : " (ainda sem meta definida)") + "</p>" +
+      '<div class="barra-progresso-fundo"><div class="barra-progresso" style="width:' + pct + '%;"></div></div>' +
+      '<div style="margin-top:10px;"><button class="botao botao-secundario" id="botao-editar-meta" type="button">' + (meta ? "Editar meta" : "Definir meta") + "</button></div>";
+    document.getElementById("botao-editar-meta").addEventListener("click", () => { metaCrmEditando = true; renderMetaCrm(); });
+  }
+
+  function renderGraficoFaturamento(campanhas) {
+    const alvo = document.getElementById("grafico-faturamento");
+    const comPrazo = campanhas.filter(c => c.prazo);
+    if (comPrazo.length === 0) {
+      alvo.innerHTML = '<p class="texto-vazio">Ainda não há campanhas com prazo definido pra montar o gráfico.</p>';
+      return;
+    }
+    const hoje = new Date();
+    const meses = [];
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date(hoje.getFullYear(), hoje.getMonth() - i, 1);
+      meses.push({ ano: d.getFullYear(), mes: d.getMonth(), rotulo: NOMES_MES[d.getMonth()].slice(0, 3), total: 0 });
+    }
+    comPrazo.forEach(c => {
+      const d = new Date(c.prazo + "T00:00:00");
+      const alvoMes = meses.find(m => m.ano === d.getFullYear() && m.mes === d.getMonth());
+      if (alvoMes) alvoMes.total += Number(c.valor || 0);
+    });
+    const max = Math.max(...meses.map(m => m.total), 0);
+    alvo.innerHTML = '<div class="grafico-barras">' + meses.map(m => {
+      return '<div class="grafico-coluna"><div class="grafico-barra" style="height:' + (max > 0 ? (m.total / max) * 100 : 0) + '%">' +
+        '<span class="grafico-tooltip">' + m.rotulo + ": " + formatarMoeda(m.total) + "</span>" +
+      "</div><div class=\"grafico-rotulo\">" + m.rotulo + "</div></div>";
+    }).join("") + "</div>";
+  }
+
+  function itemTarefaDashHtml(i, rotuloDias) {
+    return '<div class="item-atrasado" data-id="' + i.id + '">' +
+      "<span>" + i.titulo + (i.marca ? " · " + i.marca : "") + "</span>" +
+      '<span style="display:flex;align-items:center;gap:10px;">' +
+        '<span class="item-atrasado-dias">' + rotuloDias + "</span>" +
+        '<button type="button" class="botao-icone botao-concluir-tarefa-dash" data-id="' + i.id + '" title="Concluir"><span class="icone"><svg viewBox="0 0 24 24"><path d="M4 12l5 5L20 6"/></svg></span></button>' +
+      "</span>" +
+    "</div>";
+  }
+  function ligarConcluirTarefaDash(alvo) {
+    alvo.querySelectorAll(".botao-concluir-tarefa-dash").forEach(botao => {
+      botao.addEventListener("click", async () => {
+        await salvarSeguro("calendario", sb.from("calendario").update({ status: "feito" }).eq("id", botao.dataset.id));
+        carregarDashboard();
+      });
+    });
+  }
+  function renderTarefasHojeDash(hoje, atrasadas) {
+    const alvo = document.getElementById("lista-tarefas-hoje-dash");
+    if (hoje.length === 0 && atrasadas.length === 0) {
+      alvo.innerHTML = '<p class="texto-vazio">Nada marcado pra hoje, e nada atrasado. 🎉</p>';
+      return;
+    }
+    alvo.innerHTML = hoje.map(i => itemTarefaDashHtml(i, "hoje")).join("") + atrasadas.map(i => {
+      const dias = Math.round((new Date(hojeISO()) - new Date(i.data)) / 86400000);
+      return itemTarefaDashHtml(i, "há " + dias + (dias === 1 ? " dia" : " dias"));
+    }).join("");
+    ligarConcluirTarefaDash(alvo);
+  }
+  function renderProximasDash(proximas) {
+    const alvo = document.getElementById("lista-proximas-dash");
+    if (proximas.length === 0) {
+      alvo.innerHTML = '<p class="texto-vazio">Nenhuma tarefa marcada pra frente ainda.</p>';
+      return;
+    }
+    const hoje = new Date(hojeISO());
+    alvo.innerHTML = proximas.map(i => {
+      const dias = Math.round((new Date(i.data) - hoje) / 86400000);
+      const rotulo = dias === 1 ? "amanhã" : "em " + dias + " dias";
+      return itemTarefaDashHtml(i, rotulo);
+    }).join("");
+    ligarConcluirTarefaDash(alvo);
   }
 
   // ============================================================================
@@ -2712,7 +2910,7 @@
   });
 
   // ---- Ponto de partida: abre a aba do hash da URL, ou Portfólio por padrão. ----
-  abrirAba((window.location.hash || "#portfolio").replace("#", ""));
+  abrirAba((window.location.hash || "#dashboard").replace("#", ""));
 })();
 </script>
 </body>
