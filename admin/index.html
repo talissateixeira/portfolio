@@ -31,6 +31,11 @@
     --fundo-aviso: rgba(176, 137, 0, 0.12);
     --cinza: #8A8A8A;
     --fundo-cinza: rgba(138, 138, 138, 0.14);
+    /* Selos de prazo (mesma família tonal do verde, só mudando o matiz) */
+    --pill-amanha: #A58C50;
+    --fundo-pill-amanha: rgba(165, 140, 80, 0.16);
+    --pill-atrasado: #A16B63;
+    --fundo-pill-atrasado: rgba(161, 107, 99, 0.16);
     --raio: 14px;
     --raio-grande: 20px;
     --sidebar-largura: 234px;
@@ -218,7 +223,8 @@
   .linha-tarefa-unificada { display: flex; align-items: center; gap: 16px; padding: 14px 0; border-bottom: 1px solid var(--borda); }
   .linha-tarefa-unificada:last-child { border-bottom: none; }
   .pill-prazo { font-family: "SF Mono", Menlo, Consolas, monospace; font-size: 0.76rem; font-weight: 600; padding: 6px 12px; border-radius: 8px; white-space: nowrap; flex-shrink: 0; }
-  .pill-prazo-atrasado { background: var(--fundo-erro); color: var(--erro); }
+  .pill-prazo-atrasado { background: var(--fundo-pill-atrasado); color: var(--pill-atrasado); }
+  .pill-prazo-amanha { background: var(--fundo-pill-amanha); color: var(--pill-amanha); }
   .pill-prazo-normal { background: var(--fundo-acento); color: var(--acento-escuro); }
   .linha-tarefa-corpo { flex-grow: 1; min-width: 0; }
   .linha-tarefa-titulo { font-weight: 700; font-size: 0.95rem; }
@@ -1516,8 +1522,9 @@
     const htmlHoje = hoje.map(i => linhaTarefaUnificadaHtml(i, "hoje", "pill-prazo-normal")).join("");
     const htmlProximas = proximas.map(i => {
       const dias = Math.round((new Date(i.data) - hojeData) / 86400000);
-      const rotulo = dias === 1 ? "amanhã" : "em " + dias + " dias";
-      return linhaTarefaUnificadaHtml(i, rotulo, "pill-prazo-normal");
+      const ehAmanha = dias === 1;
+      const rotulo = ehAmanha ? "amanhã" : "em " + dias + " dias";
+      return linhaTarefaUnificadaHtml(i, rotulo, ehAmanha ? "pill-prazo-amanha" : "pill-prazo-normal");
     }).join("");
 
     alvo.innerHTML = htmlAtrasadas + htmlHoje + htmlProximas;
