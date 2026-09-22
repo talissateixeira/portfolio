@@ -1370,7 +1370,9 @@
     // dinheiro é devido), não a data em que ela foi criada.
     const campanhasDoMesPorPrazo = campanhas.filter(c => c.prazo && c.prazo >= inicioMesIso && c.prazo <= fimMesIso);
     const recebidoMes = campanhasDoMesPorPrazo.filter(c => c.pagamento === "pago").reduce((s, c) => s + Number(c.valor || 0), 0);
-    const aReceberMes = campanhasDoMesPorPrazo.filter(c => c.pagamento === "pendente").reduce((s, c) => s + Number(c.valor || 0), 0);
+    // "A receber" soma TODOS os trabalhos já fechados e ainda não pagos, sem
+    // filtro de mês (diferente do "Recebido", que é só do mês corrente).
+    const aReceberTotal = campanhas.filter(c => c.pagamento === "pendente").reduce((s, c) => s + Number(c.valor || 0), 0);
 
     const abertas = campanhas.filter(c => !campanhaFinalizada(c));
     const abertasComPrazo = abertas.filter(c => c.prazo && c.prazo >= hoje).sort((a, b) => a.prazo < b.prazo ? -1 : 1);
@@ -1379,13 +1381,13 @@
     const leadsMes = leadsLista.filter(l => l.created_at >= inicioMesCriacao).length;
 
     renderSaudacaoDashboard(tarefasHoje.length);
-    renderCartoesResumoTopo(recebidoMes, aReceberMes, meta, abertas.length, diasPrazoMaisProximo, leadsLista.length, leadsMes);
+    renderCartoesResumoTopo(recebidoMes, aReceberTotal, meta, abertas.length, diasPrazoMaisProximo, leadsLista.length, leadsMes);
     renderGraficoFaturamento(campanhas);
     renderFunilCrmDash(marcasTodas);
     renderTarefasUnificadasDash(tarefasAtrasadas, tarefasHoje, tarefasProximas);
   }
 
-  function renderCartoesResumoTopo(recebidoMes, aReceberMes, meta, campanhasAbertas, diasPrazo, totalLeads, leadsMes) {
+  function renderCartoesResumoTopo(recebidoMes, aReceberTotal, meta, campanhasAbertas, diasPrazo, totalLeads, leadsMes) {
     const mesNome = NOMES_MES[new Date().getMonth()];
     const pct = meta > 0 ? Math.min(100, Math.round((recebidoMes / meta) * 100)) : 0;
     const rotuloPrazo = diasPrazo == null ? "sem prazo marcado"
@@ -1407,7 +1409,7 @@
       "</div>" +
       '<div class="cartao-resumo">' +
         '<div class="cartao-resumo-rotulo">A receber</div>' +
-        '<div class="cartao-resumo-valor">' + formatarMoeda(aReceberMes) + '</div>' +
+        '<div class="cartao-resumo-valor">' + formatarMoeda(aReceberTotal) + '</div>' +
         '<div class="cartao-resumo-extra">de trabalhos já fechados</div>' +
       "</div>" +
       '<div class="cartao-resumo">' +
