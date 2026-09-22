@@ -203,7 +203,18 @@
     padding: 18px 20px;
   }
   .bloco-portfolio { margin-bottom: 20px; }
-  .linha-dashboard-tarefas { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .painel-titulo-linha { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+  .painel-titulo-linha .painel-titulo { margin-bottom: 0; }
+  .contagem-badge { display: inline-flex; align-items: center; padding: 4px 12px; border-radius: 100px; background: var(--fundo-acento); color: var(--acento-escuro); font-size: 0.78rem; font-weight: 700; }
+  .linha-tarefa-unificada { display: flex; align-items: center; gap: 16px; padding: 14px 0; border-bottom: 1px solid var(--borda); }
+  .linha-tarefa-unificada:last-child { border-bottom: none; }
+  .pill-prazo { font-family: "SF Mono", Menlo, Consolas, monospace; font-size: 0.76rem; font-weight: 600; padding: 6px 12px; border-radius: 8px; white-space: nowrap; flex-shrink: 0; }
+  .pill-prazo-atrasado { background: var(--fundo-erro); color: var(--erro); }
+  .pill-prazo-normal { background: var(--fundo-acento); color: var(--acento-escuro); }
+  .linha-tarefa-corpo { flex-grow: 1; min-width: 0; }
+  .linha-tarefa-titulo { font-weight: 700; font-size: 0.95rem; }
+  .linha-tarefa-sub { font-size: 0.82rem; color: var(--texto-suave); margin-top: 2px; }
+  .linha-tarefa-acoes { display: flex; gap: 6px; flex-shrink: 0; }
   .portfolio-subtitulo { color: var(--texto-suave); font-size: 0.88rem; margin: 4px 0 20px; }
   .painel-titulo { font-size: 0.85rem; font-weight: 700; margin-bottom: 14px; }
   .texto-vazio { color: var(--texto-suave); font-size: 0.85rem; line-height: 1.6; padding: 10px 0; }
@@ -622,7 +633,7 @@
     .linha-form-2 { grid-template-columns: 1fr; }
     .linha-transcrever { flex-direction: column; }
     .linha-transcrever input, .linha-transcrever select, .linha-transcrever button { width: 100%; }
-    .linha-dashboard-tarefas { grid-template-columns: 1fr; }
+    .linha-tarefa-unificada { flex-wrap: wrap; }
   }
 </style>
 </head>
@@ -711,15 +722,12 @@
         <div id="grafico-faturamento"></div>
       </div>
 
-      <div class="linha-dashboard-tarefas">
-        <div class="painel-branco">
-          <div class="painel-titulo">Tarefas de hoje e atrasadas</div>
-          <div id="lista-tarefas-hoje-dash"></div>
+      <div class="painel-branco bloco-portfolio">
+        <div class="painel-titulo-linha">
+          <div class="painel-titulo">Precisa de você</div>
+          <span class="contagem-badge" id="contagem-tarefas-dash"></span>
         </div>
-        <div class="painel-branco">
-          <div class="painel-titulo">Próximas tarefas</div>
-          <div id="lista-proximas-dash"></div>
-        </div>
+        <div id="lista-tarefas-unificada-dash"></div>
       </div>
     </section>
 
@@ -1345,8 +1353,7 @@
     renderSaudacaoDashboard(tarefasHoje.length);
     renderCartoesResumoTopo(recebidoMes, aReceberMes, meta, abertas.length, diasPrazoMaisProximo, leads.length, leadsMes);
     renderGraficoFaturamento(campanhas);
-    renderTarefasHojeDash(tarefasHoje, tarefasAtrasadas);
-    renderProximasDash(tarefasProximas);
+    renderTarefasUnificadasDash(tarefasAtrasadas, tarefasHoje, tarefasProximas);
   }
 
   function renderCartoesResumoTopo(recebidoMes, aReceberMes, meta, campanhasAbertas, diasPrazo, totalLeads, leadsMes) {
@@ -1419,48 +1426,51 @@
     }).join("") + "</div>";
   }
 
-  function itemTarefaDashHtml(i, rotuloDias) {
-    return '<div class="item-atrasado" data-id="' + i.id + '">' +
-      "<span>" + i.titulo + (i.marca ? " · " + i.marca : "") + "</span>" +
-      '<span style="display:flex;align-items:center;gap:10px;">' +
-        '<span class="item-atrasado-dias">' + rotuloDias + "</span>" +
+  const TIPO_CALENDARIO_LEGIVEL = { gravar: "gravação", editar: "edição", postar: "postagem" };
+
+  function linhaTarefaUnificadaHtml(i, pillTexto, pillClasse) {
+    const sub = (i.marca ? i.marca + " · " : "") + (TIPO_CALENDARIO_LEGIVEL[i.tipo] || i.tipo);
+    return '<div class="linha-tarefa-unificada" data-id="' + i.id + '">' +
+      '<span class="pill-prazo ' + pillClasse + '">' + pillTexto + "</span>" +
+      '<div class="linha-tarefa-corpo">' +
+        '<div class="linha-tarefa-titulo">' + i.titulo + "</div>" +
+        '<div class="linha-tarefa-sub">' + sub + "</div>" +
+      "</div>" +
+      '<div class="linha-tarefa-acoes">' +
         '<button type="button" class="botao-icone botao-concluir-tarefa-dash" data-id="' + i.id + '" title="Concluir"><span class="icone"><svg viewBox="0 0 24 24"><path d="M4 12l5 5L20 6"/></svg></span></button>' +
-      "</span>" +
+      "</div>" +
     "</div>";
   }
-  function ligarConcluirTarefaDash(alvo) {
+
+  function renderTarefasUnificadasDash(atrasadas, hoje, proximas) {
+    const total = atrasadas.length + hoje.length + proximas.length;
+    document.getElementById("contagem-tarefas-dash").textContent = total + (total === 1 ? " item" : " itens");
+
+    const alvo = document.getElementById("lista-tarefas-unificada-dash");
+    if (total === 0) {
+      alvo.innerHTML = '<p class="texto-vazio">Nada pendente por aqui. 🎉</p>';
+      return;
+    }
+
+    const hojeData = new Date(hojeISO());
+    const htmlAtrasadas = atrasadas.map(i => {
+      const dias = Math.round((hojeData - new Date(i.data)) / 86400000);
+      return linhaTarefaUnificadaHtml(i, "atrasado " + dias + (dias === 1 ? " dia" : " dias"), "pill-prazo-atrasado");
+    }).join("");
+    const htmlHoje = hoje.map(i => linhaTarefaUnificadaHtml(i, "hoje", "pill-prazo-normal")).join("");
+    const htmlProximas = proximas.map(i => {
+      const dias = Math.round((new Date(i.data) - hojeData) / 86400000);
+      const rotulo = dias === 1 ? "amanhã" : "em " + dias + " dias";
+      return linhaTarefaUnificadaHtml(i, rotulo, "pill-prazo-normal");
+    }).join("");
+
+    alvo.innerHTML = htmlAtrasadas + htmlHoje + htmlProximas;
     alvo.querySelectorAll(".botao-concluir-tarefa-dash").forEach(botao => {
       botao.addEventListener("click", async () => {
         await salvarSeguro("calendario", sb.from("calendario").update({ status: "feito" }).eq("id", botao.dataset.id));
         carregarDashboard();
       });
     });
-  }
-  function renderTarefasHojeDash(hoje, atrasadas) {
-    const alvo = document.getElementById("lista-tarefas-hoje-dash");
-    if (hoje.length === 0 && atrasadas.length === 0) {
-      alvo.innerHTML = '<p class="texto-vazio">Nada marcado pra hoje, e nada atrasado. 🎉</p>';
-      return;
-    }
-    alvo.innerHTML = hoje.map(i => itemTarefaDashHtml(i, "hoje")).join("") + atrasadas.map(i => {
-      const dias = Math.round((new Date(hojeISO()) - new Date(i.data)) / 86400000);
-      return itemTarefaDashHtml(i, "há " + dias + (dias === 1 ? " dia" : " dias"));
-    }).join("");
-    ligarConcluirTarefaDash(alvo);
-  }
-  function renderProximasDash(proximas) {
-    const alvo = document.getElementById("lista-proximas-dash");
-    if (proximas.length === 0) {
-      alvo.innerHTML = '<p class="texto-vazio">Nenhuma tarefa marcada pra frente ainda.</p>';
-      return;
-    }
-    const hoje = new Date(hojeISO());
-    alvo.innerHTML = proximas.map(i => {
-      const dias = Math.round((new Date(i.data) - hoje) / 86400000);
-      const rotulo = dias === 1 ? "amanhã" : "em " + dias + " dias";
-      return itemTarefaDashHtml(i, rotulo);
-    }).join("");
-    ligarConcluirTarefaDash(alvo);
   }
 
   // ============================================================================
