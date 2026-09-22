@@ -161,6 +161,7 @@
   .cartao-resumo .barra-progresso-fundo { margin-top: 10px; }
   .link-discreto { background: none; border: none; padding: 0; margin-top: 6px; color: var(--texto-suave); text-decoration: underline; font-size: 0.74rem; cursor: pointer; }
   .conteudo-titulo { font-size: 1.25rem; }
+  .conteudo-titulo.titulo-grande { font-size: 1.7rem; }
 
   .avisos { margin-bottom: 16px; display: flex; flex-direction: column; gap: 8px; }
   .aviso-linha {
@@ -1254,7 +1255,7 @@
   }
 
   // ---- Navegação (abas + gaveta no celular) ----
-  const TITULOS_ABA = { dashboard: "👋 Início", portfolio: "Portfólio", marcas: "Marcas", calendario: "Calendário", campanhas: "Campanhas", checklist: "Checklist", transcricoes: "Transcrições" };
+  const TITULOS_ABA = { dashboard: "👋 Início", portfolio: "Suas Métricas", marcas: "Marcas", calendario: "Calendário", campanhas: "Campanhas", checklist: "Checklist", transcricoes: "Transcrições" };
   const CARREGADORES_ABA = { dashboard: carregarDashboard, portfolio: carregarPortfolio, marcas: carregarMarcas, calendario: carregarCalendario, campanhas: carregarCampanhas, checklist: carregarChecklist, transcricoes: carregarTranscricoes };
   const abasCarregadas = new Set();
 
@@ -1262,7 +1263,9 @@
     if (!TITULOS_ABA[nome]) nome = "dashboard";
     document.querySelectorAll(".nav-item").forEach(b => b.classList.toggle("ativo", b.dataset.aba === nome));
     document.querySelectorAll(".aba").forEach(s => s.classList.toggle("ativa", s.id === "aba-" + nome));
-    document.getElementById("titulo-aba").textContent = TITULOS_ABA[nome];
+    const tituloEl = document.getElementById("titulo-aba");
+    tituloEl.textContent = TITULOS_ABA[nome];
+    tituloEl.classList.toggle("titulo-grande", nome === "portfolio");
     document.getElementById("dashboard-relogio").hidden = nome !== "dashboard";
     window.location.hash = nome;
     fecharGaveta();
