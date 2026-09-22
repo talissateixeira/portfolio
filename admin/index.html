@@ -479,8 +479,8 @@
 
   /* ===== CHECKLIST ===== */
   .subtabs { display: flex; gap: 6px; margin-bottom: 18px; flex-wrap: wrap; }
-  .subtab-btn { padding: 7px 14px; border-radius: 100px; border: 1px solid var(--borda); background: var(--branco); font-size: 0.8rem; font-weight: 600; color: var(--texto-suave); cursor: pointer; }
-  .subtab-btn.ativo { background: var(--fundo-acento); border-color: var(--acento); color: var(--acento); }
+  .subtab-btn, .subtab-btn-producao { padding: 7px 14px; border-radius: 100px; border: 1px solid var(--borda); background: var(--branco); font-size: 0.8rem; font-weight: 600; color: var(--texto-suave); cursor: pointer; }
+  .subtab-btn.ativo, .subtab-btn-producao.ativo { background: var(--fundo-acento); border-color: var(--acento); color: var(--acento); }
   .subaba { display: none; }
   .subaba.ativa { display: block; }
 
@@ -646,6 +646,58 @@
   }
   .transcricao-embed-full { width: 100%; aspect-ratio: 16/9; border: none; display: block; background: var(--preto); }
 
+  /* ===== PRODUÇÃO ===== */
+  .subaba-producao { display: none; }
+  .subaba-producao.ativa { display: block; }
+
+  .grade-projetos-producao { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
+  .cartao-projeto-producao { background: var(--branco); border: 1px solid var(--borda); border-radius: var(--raio); padding: 18px 20px; cursor: pointer; display: flex; flex-direction: column; gap: 10px; text-align: left; }
+  .cartao-projeto-producao:hover { background: rgba(89,25,2,0.03); }
+  .cartao-projeto-producao-topo { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+  .cartao-projeto-producao-marca { font-weight: 700; font-size: 0.98rem; }
+  .cartao-projeto-producao-meta { font-size: 0.78rem; color: var(--texto-suave); }
+  .cartao-projeto-producao-acoes { display: flex; gap: 4px; flex-shrink: 0; }
+  .selo-status-projeto { font-size: 0.66rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; padding: 2px 9px; border-radius: 100px; background: var(--fundo-cinza); color: var(--cinza); align-self: flex-start; }
+  .selo-status-projeto.status-ativo { background: var(--fundo-acento); color: var(--acento-escuro); }
+  .selo-status-projeto.status-concluido { background: var(--fundo-pill-hoje); color: var(--pill-hoje); }
+
+  .quadro-producao-titulo { font-size: 1.05rem; }
+  .quadro-kanban { display: flex; gap: 14px; overflow-x: auto; padding-bottom: 14px; align-items: flex-start; }
+  .coluna-kanban { background: var(--creme); border-radius: var(--raio); min-width: 260px; max-width: 260px; flex-shrink: 0; display: flex; flex-direction: column; max-height: calc(100vh - 280px); min-height: 160px; transition: background 0.15s ease; }
+  .coluna-kanban.arrasto-sobre { background: var(--fundo-acento); }
+  .coluna-kanban-topo { display: flex; justify-content: space-between; align-items: center; padding: 12px 14px 8px; font-weight: 700; font-size: 0.83rem; }
+  .coluna-kanban-contagem { font-size: 0.72rem; font-weight: 700; color: var(--texto-suave); background: var(--branco); border-radius: 100px; padding: 1px 8px; }
+  .coluna-kanban-corpo { padding: 0 10px 8px; display: flex; flex-direction: column; gap: 8px; overflow-y: auto; flex-grow: 1; min-height: 40px; }
+  .coluna-kanban-add { margin: 0 10px 12px; background: none; border: 1px dashed var(--borda); border-radius: 8px; padding: 7px; font-size: 0.78rem; color: var(--texto-suave); cursor: pointer; text-align: center; }
+  .coluna-kanban-add:hover { color: var(--acento-escuro); border-color: var(--acento); }
+
+  .card-kanban { background: var(--branco); border: 1px solid var(--borda); border-radius: 10px; padding: 10px 12px; cursor: grab; display: flex; flex-direction: column; gap: 6px; touch-action: none; user-select: none; }
+  .card-kanban.arrastando { opacity: 0.35; }
+  .card-kanban-fantasma { position: fixed; z-index: 500; pointer-events: none; opacity: 0.95; box-shadow: 0 12px 30px rgba(0,0,0,0.22); width: 236px; }
+  .card-kanban-titulo { font-weight: 600; font-size: 0.85rem; line-height: 1.3; }
+  .card-kanban-marca { font-size: 0.68rem; color: var(--acento-escuro); font-weight: 700; text-transform: uppercase; letter-spacing: 0.03em; }
+  .card-kanban-rodape { display: flex; justify-content: space-between; align-items: center; font-size: 0.7rem; color: var(--texto-suave); gap: 6px; }
+  .card-kanban-prazo.atrasado { color: var(--erro); font-weight: 700; }
+  .card-kanban-prazo.proximo { color: var(--aviso); font-weight: 700; }
+  .pill-formato { font-size: 0.64rem; font-weight: 700; padding: 2px 8px; border-radius: 100px; background: var(--fundo-acento); color: var(--acento-escuro); align-self: flex-start; }
+  .ponto-prioridade { width: 8px; height: 8px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
+  .ponto-prioridade-alta { background: var(--erro); }
+  .ponto-prioridade-media { background: var(--pill-amanha); }
+  .ponto-prioridade-baixa { background: var(--cinza); }
+
+  .linha-entrega-form { display: flex; gap: 8px; align-items: center; margin-bottom: 8px; }
+  .linha-entrega-form select { flex: 2; }
+  .linha-entrega-form input { flex: 1; }
+
+  .checklist-item-producao { display: flex; align-items: center; gap: 8px; padding: 4px 0; font-size: 0.85rem; }
+  .checklist-item-producao input[type="text"] { display: none; }
+  .checklist-item-producao.marcado span { text-decoration: line-through; color: var(--texto-suave); }
+  .checklist-item-producao span { flex-grow: 1; }
+
+  .comentario-producao { padding: 8px 0; border-top: 1px solid var(--borda); font-size: 0.84rem; }
+  .comentario-producao:first-child { border-top: none; }
+  .comentario-producao-data { font-size: 0.7rem; color: var(--texto-suave); margin-top: 2px; }
+
   @media (max-width: 780px) {
     .btn-menu-mobile { display: flex; }
     .sidebar { transform: translateX(-100%); box-shadow: 0 0 40px rgba(0,0,0,0.2); }
@@ -700,6 +752,10 @@
       <button class="nav-item" data-aba="campanhas">
         <span class="icone"><svg viewBox="0 0 24 24"><rect x="3" y="7.5" width="18" height="12.5" rx="2.2"/><path d="M8 7.5V6a2.5 2.5 0 0 1 2.5-2.5h3A2.5 2.5 0 0 1 16 6v1.5M3 13h18"/></svg></span>
         Campanhas
+      </button>
+      <button class="nav-item" data-aba="producao">
+        <span class="icone"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="5" height="16" rx="1.3"/><rect x="9.5" y="4" width="5" height="10" rx="1.3"/><rect x="16" y="4" width="5" height="13" rx="1.3"/></svg></span>
+        Produção
       </button>
       <button class="nav-item" data-aba="checklist">
         <span class="icone"><svg viewBox="0 0 24 24"><path d="M9 11l2.2 2.2L15 9"/><rect x="3" y="3" width="18" height="18" rx="3"/></svg></span>
@@ -908,6 +964,57 @@
       </div>
     </section>
 
+    <!-- ===================== ABA PRODUÇÃO ===================== -->
+    <section class="aba" id="aba-producao">
+      <div class="subtabs">
+        <button type="button" class="subtab-btn-producao ativo" data-subaba-producao="projetos">Projetos</button>
+        <button type="button" class="subtab-btn-producao" data-subaba-producao="todas">Todas as tarefas</button>
+      </div>
+
+      <!-- ---- Visão: lista de projetos ---- -->
+      <div class="subaba-producao ativa" id="producao-view-projetos">
+        <div class="barra-acoes">
+          <div class="barra-acoes-esquerda">
+            <button class="pill-filtro ativo" data-filtro-projeto="ativo">Ativos</button>
+            <button class="pill-filtro" data-filtro-projeto="concluido">Concluídos</button>
+            <button class="pill-filtro" data-filtro-projeto="arquivado">Arquivados</button>
+          </div>
+          <button type="button" class="botao botao-principal" id="botao-add-projeto">+ Novo projeto</button>
+        </div>
+        <div class="grade-projetos-producao" id="grade-projetos-producao"></div>
+      </div>
+
+      <!-- ---- Visão: quadro de um projeto ---- -->
+      <div class="subaba-producao" id="producao-view-quadro">
+        <div class="barra-acoes">
+          <div class="barra-acoes-esquerda">
+            <button type="button" class="botao botao-secundario" id="botao-voltar-projetos">← Projetos</button>
+            <h2 class="quadro-producao-titulo" id="quadro-producao-titulo"></h2>
+          </div>
+          <div class="barra-acoes-direita">
+            <button type="button" class="botao botao-secundario" id="botao-editar-projeto-atual">Editar projeto</button>
+            <button type="button" class="botao botao-principal" id="botao-add-card-topo">+ Nova tarefa</button>
+          </div>
+        </div>
+        <div class="quadro-kanban" id="quadro-kanban-projeto"></div>
+      </div>
+
+      <!-- ---- Visão: todas as tarefas ---- -->
+      <div class="subaba-producao" id="producao-view-todas">
+        <div class="barra-acoes">
+          <div class="barra-acoes-esquerda">
+            <select class="campo-busca" id="filtro-todas-projeto"><option value="">Todos os projetos</option></select>
+            <button class="pill-filtro ativo" data-filtro-prioridade="todas">Qualquer prioridade</button>
+            <button class="pill-filtro" data-filtro-prioridade="alta">Alta</button>
+            <button class="pill-filtro" data-filtro-prioridade="media">Média</button>
+            <button class="pill-filtro" data-filtro-prioridade="baixa">Baixa</button>
+            <button class="pill-filtro" id="filtro-todas-atrasadas">Só atrasadas</button>
+          </div>
+        </div>
+        <div class="quadro-kanban" id="quadro-kanban-todas"></div>
+      </div>
+    </section>
+
     <!-- ===================== ABA CHECKLIST ===================== -->
     <section class="aba" id="aba-checklist">
       <div class="subtabs">
@@ -978,6 +1085,120 @@
 </div>
 
 <!-- ===================== MODAIS ===================== -->
+<div class="modal-fundo" id="modal-projeto-producao" hidden>
+  <div class="modal-caixa" style="max-width:620px;">
+    <h3 class="modal-titulo" id="modal-projeto-producao-titulo">Novo projeto</h3>
+    <form id="form-projeto-producao">
+      <input type="hidden" id="proj-id">
+      <div class="linha-form-2">
+        <div class="campo-form"><label>Marca</label><input type="text" id="proj-marca" required></div>
+        <div class="campo-form"><label>Contato / responsável</label><input type="text" id="proj-contato"></div>
+      </div>
+      <div class="linha-form-2">
+        <div class="campo-form"><label>Prazo final</label><input type="date" id="proj-prazo"></div>
+        <div class="campo-form"><label>Valor da campanha (opcional)</label><input type="number" step="0.01" min="0" id="proj-valor"></div>
+      </div>
+      <div class="campo-form"><label>Link do briefing (opcional)</label><input type="url" id="proj-briefing" placeholder="https://..."></div>
+      <div class="campo-form"><label>Observações</label><textarea id="proj-obs"></textarea></div>
+
+      <div class="campo-form" id="bloco-entregas-fechadas">
+        <label>Entregas fechadas</label>
+        <div id="lista-entregas-form"></div>
+        <button type="button" class="botao botao-secundario" id="botao-add-linha-entrega" style="margin-top:4px;">+ adicionar entrega</button>
+      </div>
+
+      <div class="campo-form" id="bloco-status-projeto" hidden>
+        <label>Status</label>
+        <select id="proj-status">
+          <option value="ativo">Ativo</option>
+          <option value="concluido">Concluído</option>
+          <option value="arquivado">Arquivado</option>
+        </select>
+      </div>
+
+      <div class="modal-acoes">
+        <div style="display:flex;gap:14px;">
+          <button type="button" class="link-apagar" id="proj-apagar" hidden>Excluir</button>
+        </div>
+        <div class="modal-acoes-direita">
+          <button type="button" class="botao botao-secundario" data-fechar-modal>Cancelar</button>
+          <button type="submit" class="botao botao-principal">Salvar</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="modal-fundo" id="modal-card-producao" hidden>
+  <div class="modal-caixa" style="max-width:700px;">
+    <h3 class="modal-titulo" id="modal-card-producao-titulo">Nova tarefa</h3>
+    <form id="form-card-producao">
+      <input type="hidden" id="card-id">
+      <input type="hidden" id="card-projeto-id">
+      <div class="campo-form"><label>Título</label><input type="text" id="card-titulo" required></div>
+      <div class="linha-form-2">
+        <div class="campo-form">
+          <label>Formato</label>
+          <select id="card-formato">
+            <option>Reels</option><option>TikTok</option><option>Stories</option><option>Foto</option><option>Carrossel</option><option>Outro</option>
+          </select>
+        </div>
+        <div class="campo-form">
+          <label>Etapa</label>
+          <select id="card-coluna">
+            <option>Briefing</option><option>Roteiro</option><option>Aprovação do roteiro</option><option>Gravação</option>
+            <option>Edição</option><option>Revisão</option><option>Envio pra marca</option><option>Aprovação</option><option>Concluído</option>
+          </select>
+        </div>
+      </div>
+      <div class="linha-form-2">
+        <div class="campo-form"><label>Prazo</label><input type="date" id="card-prazo"></div>
+        <div class="campo-form">
+          <label>Prioridade</label>
+          <select id="card-prioridade">
+            <option value="baixa">Baixa</option><option value="media" selected>Média</option><option value="alta">Alta</option>
+          </select>
+        </div>
+      </div>
+      <div class="campo-form"><label>Descrição</label><textarea id="card-descricao"></textarea></div>
+
+      <div class="campo-form">
+        <label>Checklist</label>
+        <div id="lista-checklist-card"></div>
+        <div style="display:flex;gap:8px;margin-top:4px;">
+          <input type="text" id="novo-item-checklist" class="campo-busca" placeholder="Novo item..." style="flex:1;">
+          <button type="button" class="botao botao-secundario" id="botao-add-item-checklist">+ item</button>
+        </div>
+      </div>
+
+      <div class="linha-form-2">
+        <div class="campo-form"><label>Link do roteiro</label><input type="url" id="card-link-roteiro" placeholder="https://..."></div>
+        <div class="campo-form"><label>Link dos arquivos brutos</label><input type="url" id="card-link-brutos" placeholder="https://..."></div>
+      </div>
+      <div class="campo-form"><label>Link do vídeo final</label><input type="url" id="card-link-final" placeholder="https://..."></div>
+
+      <div class="campo-form">
+        <label>Comentários</label>
+        <div id="lista-comentarios-card"></div>
+        <div style="display:flex;gap:8px;margin-top:4px;">
+          <input type="text" id="novo-comentario" class="campo-busca" placeholder="Escrever um comentário..." style="flex:1;">
+          <button type="button" class="botao botao-secundario" id="botao-add-comentario">Adicionar</button>
+        </div>
+      </div>
+
+      <p class="texto-vazio" id="card-datas-info" style="margin:4px 0 0;"></p>
+
+      <div class="modal-acoes">
+        <button type="button" class="link-apagar" id="card-apagar" hidden>Excluir tarefa</button>
+        <div class="modal-acoes-direita">
+          <button type="button" class="botao botao-secundario" data-fechar-modal>Cancelar</button>
+          <button type="submit" class="botao botao-principal">Salvar</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
 <div class="modal-fundo" id="modal-video" hidden>
   <div class="modal-caixa">
     <h3 class="modal-titulo" id="modal-video-titulo">Adicionar vídeo</h3>
@@ -1260,8 +1481,8 @@
   }
 
   // ---- Navegação (abas + gaveta no celular) ----
-  const TITULOS_ABA = { dashboard: "👋 Início", portfolio: "Suas Métricas", marcas: "Marcas", calendario: "Calendário", campanhas: "Campanhas", checklist: "Checklist", transcricoes: "Transcrições" };
-  const CARREGADORES_ABA = { dashboard: carregarDashboard, portfolio: carregarPortfolio, marcas: carregarMarcas, calendario: carregarCalendario, campanhas: carregarCampanhas, checklist: carregarChecklist, transcricoes: carregarTranscricoes };
+  const TITULOS_ABA = { dashboard: "👋 Início", portfolio: "Suas Métricas", marcas: "Marcas", calendario: "Calendário", campanhas: "Campanhas", producao: "Produção", checklist: "Checklist", transcricoes: "Transcrições" };
+  const CARREGADORES_ABA = { dashboard: carregarDashboard, portfolio: carregarPortfolio, marcas: carregarMarcas, calendario: carregarCalendario, campanhas: carregarCampanhas, producao: carregarProducao, checklist: carregarChecklist, transcricoes: carregarTranscricoes };
   const abasCarregadas = new Set();
 
   function abrirAba(nome) {
@@ -2282,6 +2503,532 @@
   document.getElementById("botao-exportar-campanhas").addEventListener("click", () => {
     const linhas = listaCampanhas.map(c => [c.campanha, c.cliente, c.tipo, c.status, c.qtd, c.valor, c.prazo, c.pagamento, campanhaFinalizada(c) ? "não" : "sim"]);
     baixarCsv("campanhas.csv", ["Campanha", "Cliente", "Tipo", "Status", "Qtd", "Valor", "Prazo", "Pagamento", "Ativa"], linhas);
+  });
+
+  // ============================================================================
+  // ABA — PRODUÇÃO (quadro Kanban de entregas por projeto/marca)
+  // ============================================================================
+  const COLUNAS_PRODUCAO = ["Briefing", "Roteiro", "Aprovação do roteiro", "Gravação", "Edição", "Revisão", "Envio pra marca", "Aprovação", "Concluído"];
+  const FORMATOS_PRODUCAO = ["Reels", "TikTok", "Stories", "Foto", "Carrossel", "Outro"];
+  let listaProjetosProducao = [];
+  let listaTarefasProducao = [];
+  let filtroProjetoStatus = "ativo";
+  let projetoAtualId = null;
+  let filtroPrioridadeTodas = "todas";
+  let filtroTodasProjetoIdAtual = "";
+  let filtroTodasSoAtrasadas = false;
+  let checklistEditando = [];
+  let comentariosEditando = [];
+  let dragProducao = null;
+
+  function formatarDataHora(iso) {
+    if (!iso) return "";
+    const d = new Date(iso);
+    return d.toLocaleDateString("pt-BR") + " às " + d.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
+  }
+
+  async function carregarProducao() {
+    await carregarDadosProducao();
+  }
+  async function carregarDadosProducao() {
+    const [projetos, tarefas] = await Promise.all([
+      consultarSeguro("projetos_producao", sb.from("projetos_producao").select("*").order("created_at", { ascending: false })),
+      consultarSeguro("tarefas_producao", sb.from("tarefas_producao").select("*"))
+    ]);
+    listaProjetosProducao = projetos;
+    listaTarefasProducao = tarefas;
+    popularFiltroProjetoTodas();
+    rerenderizarProducao();
+  }
+  function rerenderizarProducao() {
+    renderGradeProjetos();
+    if (projetoAtualId) renderKanbanEm("quadro-kanban-projeto", listaTarefasProducao.filter(t => t.projeto_id === projetoAtualId), false);
+    renderTarefasFiltradasTodas();
+  }
+
+  // ---- Lista de projetos ----
+  function progressoProjeto(projetoId) {
+    const tarefas = listaTarefasProducao.filter(t => t.projeto_id === projetoId);
+    const total = tarefas.length;
+    const feitas = tarefas.filter(t => t.coluna === "Concluído").length;
+    return { total, feitas, pct: total > 0 ? Math.round((feitas / total) * 100) : 0 };
+  }
+  const ROTULO_STATUS_PROJETO = { ativo: "Ativo", concluido: "Concluído", arquivado: "Arquivado" };
+  function renderGradeProjetos() {
+    const alvo = document.getElementById("grade-projetos-producao");
+    const filtrados = listaProjetosProducao.filter(p => p.status === filtroProjetoStatus);
+    if (filtrados.length === 0) {
+      alvo.innerHTML = '<p class="texto-vazio">Nenhum projeto ' + ROTULO_STATUS_PROJETO[filtroProjetoStatus].toLowerCase() + " ainda.</p>";
+      return;
+    }
+    alvo.innerHTML = filtrados.map(p => {
+      const prog = progressoProjeto(p.id);
+      return '<div class="cartao-projeto-producao" data-id="' + p.id + '">' +
+        '<div class="cartao-projeto-producao-topo">' +
+          '<span class="selo-status-projeto status-' + p.status + '">' + ROTULO_STATUS_PROJETO[p.status] + "</span>" +
+          '<div class="cartao-projeto-producao-acoes"><button type="button" class="botao-icone" data-editar-projeto="' + p.id + '" title="Editar projeto"><span class="icone"><svg viewBox="0 0 24 24"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></span></button></div>' +
+        "</div>" +
+        '<div class="cartao-projeto-producao-marca">' + escaparAtributo(p.marca) + "</div>" +
+        '<div class="cartao-projeto-producao-meta">' + (p.prazo_final ? "Prazo: " + formatarData(p.prazo_final) : "Sem prazo definido") + " · " + prog.total + (prog.total === 1 ? " entrega" : " entregas") + "</div>" +
+        '<div class="barra-progresso-fundo"><div class="barra-progresso" style="width:' + prog.pct + '%;"></div></div>' +
+        '<div class="cartao-projeto-producao-meta">' + prog.feitas + " de " + prog.total + " concluídas (" + prog.pct + "%)</div>" +
+      "</div>";
+    }).join("");
+    alvo.querySelectorAll(".cartao-projeto-producao").forEach(cartao => {
+      cartao.addEventListener("click", (evento) => {
+        if (evento.target.closest("[data-editar-projeto]")) return;
+        abrirQuadroProjeto(cartao.dataset.id);
+      });
+    });
+    alvo.querySelectorAll("[data-editar-projeto]").forEach(botao => {
+      botao.addEventListener("click", (evento) => {
+        evento.stopPropagation();
+        abrirModalProjeto(listaProjetosProducao.find(p => p.id === botao.dataset.editarProjeto));
+      });
+    });
+  }
+  document.querySelectorAll("[data-filtro-projeto]").forEach(botao => {
+    botao.addEventListener("click", () => {
+      document.querySelectorAll("[data-filtro-projeto]").forEach(b => b.classList.remove("ativo"));
+      botao.classList.add("ativo");
+      filtroProjetoStatus = botao.dataset.filtroProjeto;
+      renderGradeProjetos();
+    });
+  });
+
+  // ---- Navegação entre Projetos / Quadro / Todas as tarefas ----
+  function abrirQuadroProjeto(projetoId) {
+    projetoAtualId = projetoId;
+    const projeto = listaProjetosProducao.find(p => p.id === projetoId);
+    document.getElementById("quadro-producao-titulo").textContent = projeto ? projeto.marca : "";
+    document.querySelectorAll(".subaba-producao").forEach(s => s.classList.remove("ativa"));
+    document.getElementById("producao-view-quadro").classList.add("ativa");
+    document.querySelectorAll(".subtab-btn-producao").forEach(b => b.classList.remove("ativo"));
+    renderKanbanEm("quadro-kanban-projeto", listaTarefasProducao.filter(t => t.projeto_id === projetoId), false);
+  }
+  document.getElementById("botao-voltar-projetos").addEventListener("click", () => {
+    projetoAtualId = null;
+    document.querySelectorAll(".subaba-producao").forEach(s => s.classList.remove("ativa"));
+    document.getElementById("producao-view-projetos").classList.add("ativa");
+    document.querySelector('.subtab-btn-producao[data-subaba-producao="projetos"]').classList.add("ativo");
+  });
+  document.getElementById("botao-editar-projeto-atual").addEventListener("click", () => {
+    abrirModalProjeto(listaProjetosProducao.find(p => p.id === projetoAtualId));
+  });
+  document.getElementById("botao-add-card-topo").addEventListener("click", () => {
+    if (projetoAtualId) abrirModalCard(null, projetoAtualId, "Briefing");
+  });
+  document.querySelectorAll(".subtab-btn-producao").forEach(botao => {
+    botao.addEventListener("click", () => {
+      document.querySelectorAll(".subtab-btn-producao").forEach(b => b.classList.remove("ativo"));
+      botao.classList.add("ativo");
+      document.querySelectorAll(".subaba-producao").forEach(s => s.classList.remove("ativa"));
+      document.getElementById("producao-view-" + botao.dataset.subabaProducao).classList.add("ativa");
+      if (botao.dataset.subabaProducao === "todas") renderTarefasFiltradasTodas();
+    });
+  });
+
+  // ---- "Todas as tarefas" ----
+  function popularFiltroProjetoTodas() {
+    const select = document.getElementById("filtro-todas-projeto");
+    const valorAtual = select.value;
+    select.innerHTML = '<option value="">Todos os projetos</option>' +
+      listaProjetosProducao.map(p => '<option value="' + p.id + '">' + escaparAtributo(p.marca) + "</option>").join("");
+    if ([...select.options].some(o => o.value === valorAtual)) select.value = valorAtual;
+  }
+  function renderTarefasFiltradasTodas() {
+    if (!document.getElementById("producao-view-todas").classList.contains("ativa")) return;
+    let tarefas = listaTarefasProducao;
+    if (filtroTodasProjetoIdAtual) tarefas = tarefas.filter(t => t.projeto_id === filtroTodasProjetoIdAtual);
+    if (filtroPrioridadeTodas !== "todas") tarefas = tarefas.filter(t => t.prioridade === filtroPrioridadeTodas);
+    if (filtroTodasSoAtrasadas) tarefas = tarefas.filter(t => t.prazo && t.prazo < hojeISO());
+    renderKanbanEm("quadro-kanban-todas", tarefas, true);
+  }
+  document.getElementById("filtro-todas-projeto").addEventListener("change", (evento) => {
+    filtroTodasProjetoIdAtual = evento.target.value;
+    renderTarefasFiltradasTodas();
+  });
+  document.querySelectorAll("[data-filtro-prioridade]").forEach(botao => {
+    botao.addEventListener("click", () => {
+      document.querySelectorAll("[data-filtro-prioridade]").forEach(b => b.classList.remove("ativo"));
+      botao.classList.add("ativo");
+      filtroPrioridadeTodas = botao.dataset.filtroPrioridade;
+      renderTarefasFiltradasTodas();
+    });
+  });
+  document.getElementById("filtro-todas-atrasadas").addEventListener("click", (evento) => {
+    filtroTodasSoAtrasadas = !filtroTodasSoAtrasadas;
+    evento.target.classList.toggle("ativo", filtroTodasSoAtrasadas);
+    renderTarefasFiltradasTodas();
+  });
+
+  // ---- Quadro Kanban (compartilhado entre "um projeto" e "todas as tarefas") ----
+  function diasAtePrazo(dataIso) { return Math.round((new Date(dataIso) - new Date(hojeISO())) / 86400000); }
+  function tarefasOrdenadasPorColuna(tarefas, coluna) {
+    return tarefas.filter(t => t.coluna === coluna).sort((a, b) => (a.ordem || 0) - (b.ordem || 0));
+  }
+  function cardKanbanHtml(t, mostrarMarca, mapaProjetos) {
+    let prazoHtml = "";
+    if (t.prazo) {
+      const dias = diasAtePrazo(t.prazo);
+      const classe = dias < 0 ? "atrasado" : (dias <= 2 ? "proximo" : "");
+      prazoHtml = '<span class="card-kanban-prazo ' + classe + '">' + formatarData(t.prazo) + "</span>";
+    }
+    const projeto = mapaProjetos[t.projeto_id];
+    const marcaHtml = mostrarMarca && projeto ? '<span class="card-kanban-marca">' + escaparAtributo(projeto.marca) + "</span>" : "";
+    return '<div class="card-kanban" data-id="' + t.id + '">' +
+      marcaHtml +
+      '<span class="pill-formato">' + t.formato + "</span>" +
+      '<span class="card-kanban-titulo">' + escaparAtributo(t.titulo) + "</span>" +
+      '<div class="card-kanban-rodape">' +
+        '<span class="ponto-prioridade ponto-prioridade-' + t.prioridade + '" title="Prioridade ' + t.prioridade + '"></span>' +
+        prazoHtml +
+      "</div>" +
+    "</div>";
+  }
+  function renderKanbanEm(elId, tarefas, mostrarMarca) {
+    const alvo = document.getElementById(elId);
+    const mapaProjetos = {};
+    listaProjetosProducao.forEach(p => { mapaProjetos[p.id] = p; });
+    alvo.innerHTML = COLUNAS_PRODUCAO.map(coluna => {
+      const itens = tarefasOrdenadasPorColuna(tarefas, coluna);
+      const corpo = itens.length === 0
+        ? '<p class="texto-vazio" style="padding:4px 2px;">Nenhuma tarefa aqui ainda.</p>'
+        : itens.map(t => cardKanbanHtml(t, mostrarMarca, mapaProjetos)).join("");
+      return '<div class="coluna-kanban" data-coluna="' + escaparAtributo(coluna) + '">' +
+        '<div class="coluna-kanban-topo"><span>' + coluna + '</span><span class="coluna-kanban-contagem">' + itens.length + "</span></div>" +
+        '<div class="coluna-kanban-corpo">' + corpo + "</div>" +
+        '<button type="button" class="coluna-kanban-add" data-coluna-add="' + escaparAtributo(coluna) + '">+ nova tarefa</button>' +
+      "</div>";
+    }).join("");
+    alvo.querySelectorAll(".card-kanban").forEach(cardEl => {
+      const tarefa = tarefas.find(t => t.id === cardEl.dataset.id);
+      if (tarefa) wireCardDrag(cardEl, tarefa);
+    });
+    alvo.querySelectorAll("[data-coluna-add]").forEach(botao => {
+      botao.addEventListener("click", () => {
+        const projetoParaNova = elId === "quadro-kanban-projeto" ? projetoAtualId : filtroTodasProjetoIdAtual;
+        if (!projetoParaNova) { alert('Escolha um projeto no filtro "Todos os projetos" pra saber onde adicionar a tarefa.'); return; }
+        abrirModalCard(null, projetoParaNova, botao.dataset.colunaAdd);
+      });
+    });
+  }
+  function rerenderizarQuadroAtivo() {
+    if (projetoAtualId && document.getElementById("producao-view-quadro").classList.contains("ativa")) {
+      renderKanbanEm("quadro-kanban-projeto", listaTarefasProducao.filter(t => t.projeto_id === projetoAtualId), false);
+    }
+    renderTarefasFiltradasTodas();
+    renderGradeProjetos();
+  }
+
+  // ---- Arrastar e soltar (mouse e toque, via Pointer Events) ----
+  function colunaSobPonteiro(x, y) {
+    const els = document.elementsFromPoint(x, y);
+    return els.find(el => el.classList && el.classList.contains("coluna-kanban")) || null;
+  }
+  function wireCardDrag(cardEl, tarefa) {
+    cardEl.addEventListener("pointerdown", (evento) => {
+      if (evento.button !== 0 && evento.pointerType === "mouse") return;
+      const rect = cardEl.getBoundingClientRect();
+      dragProducao = {
+        tarefaId: tarefa.id,
+        origemEl: cardEl,
+        pointerId: evento.pointerId,
+        startX: evento.clientX,
+        startY: evento.clientY,
+        offsetX: evento.clientX - rect.left,
+        offsetY: evento.clientY - rect.top,
+        largura: rect.width,
+        moveu: false,
+        fantasma: null
+      };
+      cardEl.setPointerCapture(evento.pointerId);
+      cardEl.addEventListener("pointermove", onCardPointerMove);
+      cardEl.addEventListener("pointerup", onCardPointerUp);
+      cardEl.addEventListener("pointercancel", onCardPointerUp);
+    });
+  }
+  function onCardPointerMove(evento) {
+    if (!dragProducao || evento.pointerId !== dragProducao.pointerId) return;
+    const dx = evento.clientX - dragProducao.startX;
+    const dy = evento.clientY - dragProducao.startY;
+    if (!dragProducao.moveu && Math.hypot(dx, dy) > 6) {
+      dragProducao.moveu = true;
+      dragProducao.origemEl.classList.add("arrastando");
+      const fantasma = dragProducao.origemEl.cloneNode(true);
+      fantasma.classList.add("card-kanban-fantasma");
+      fantasma.classList.remove("arrastando");
+      fantasma.style.width = dragProducao.largura + "px";
+      document.body.appendChild(fantasma);
+      dragProducao.fantasma = fantasma;
+    }
+    if (dragProducao.moveu && dragProducao.fantasma) {
+      dragProducao.fantasma.style.left = (evento.clientX - dragProducao.offsetX) + "px";
+      dragProducao.fantasma.style.top = (evento.clientY - dragProducao.offsetY) + "px";
+      document.querySelectorAll(".coluna-kanban").forEach(c => c.classList.remove("arrasto-sobre"));
+      const colunaAlvo = colunaSobPonteiro(evento.clientX, evento.clientY);
+      if (colunaAlvo) colunaAlvo.classList.add("arrasto-sobre");
+    }
+  }
+  async function onCardPointerUp(evento) {
+    if (!dragProducao || evento.pointerId !== dragProducao.pointerId) return;
+    const { origemEl, tarefaId, moveu, fantasma } = dragProducao;
+    origemEl.removeEventListener("pointermove", onCardPointerMove);
+    origemEl.removeEventListener("pointerup", onCardPointerUp);
+    origemEl.removeEventListener("pointercancel", onCardPointerUp);
+    try { origemEl.releasePointerCapture(evento.pointerId); } catch (erro) { /* já liberado */ }
+    origemEl.classList.remove("arrastando");
+    document.querySelectorAll(".coluna-kanban").forEach(c => c.classList.remove("arrasto-sobre"));
+    if (fantasma) fantasma.remove();
+
+    if (!moveu) {
+      dragProducao = null;
+      abrirModalCard(listaTarefasProducao.find(t => t.id === tarefaId));
+      return;
+    }
+
+    const colunaAlvoEl = colunaSobPonteiro(evento.clientX, evento.clientY);
+    dragProducao = null;
+    if (!colunaAlvoEl) return;
+    const novaColuna = colunaAlvoEl.dataset.coluna;
+    const tarefa = listaTarefasProducao.find(t => t.id === tarefaId);
+    if (!tarefa) return;
+
+    const corpo = colunaAlvoEl.querySelector(".coluna-kanban-corpo");
+    const cardsIrmaos = [...corpo.querySelectorAll(".card-kanban")].filter(c => c.dataset.id !== tarefaId);
+    let indiceInsercao = cardsIrmaos.length;
+    for (let i = 0; i < cardsIrmaos.length; i++) {
+      const rect = cardsIrmaos[i].getBoundingClientRect();
+      if (evento.clientY < rect.top + rect.height / 2) { indiceInsercao = i; break; }
+    }
+
+    const mudouColuna = tarefa.coluna !== novaColuna;
+    const idsNaColuna = cardsIrmaos.map(c => c.dataset.id);
+    idsNaColuna.splice(indiceInsercao, 0, tarefaId);
+
+    const registroTarefa = { coluna: novaColuna };
+    if (mudouColuna && novaColuna === "Concluído") registroTarefa.concluido_em = new Date().toISOString();
+    else if (mudouColuna && tarefa.coluna === "Concluído" && novaColuna !== "Concluído") registroTarefa.concluido_em = null;
+
+    tarefa.coluna = novaColuna;
+    if (registroTarefa.concluido_em !== undefined) tarefa.concluido_em = registroTarefa.concluido_em;
+    idsNaColuna.forEach((id, ordem) => {
+      const t = listaTarefasProducao.find(x => x.id === id);
+      if (t) t.ordem = ordem;
+    });
+    rerenderizarQuadroAtivo();
+
+    await salvarSeguro("tarefas_producao", sb.from("tarefas_producao").update(registroTarefa).eq("id", tarefaId));
+    await Promise.all(idsNaColuna.map((id, ordem) =>
+      salvarSeguro("tarefas_producao", sb.from("tarefas_producao").update({ ordem: ordem }).eq("id", id))
+    ));
+  }
+
+  // ---- Modal: projeto ----
+  const modalProjeto = document.getElementById("modal-projeto-producao");
+  function lerLinhasEntregas() {
+    return [...document.querySelectorAll("#lista-entregas-form .linha-entrega-form")].map(linha => ({
+      formato: linha.querySelector(".entrega-formato").value,
+      quantidade: Math.max(1, parseInt(linha.querySelector(".entrega-qtd").value, 10) || 1)
+    }));
+  }
+  function adicionarLinhaEntrega() {
+    const div = document.createElement("div");
+    div.className = "linha-entrega-form";
+    div.innerHTML =
+      '<select class="entrega-formato">' + FORMATOS_PRODUCAO.map(f => "<option>" + f + "</option>").join("") + "</select>" +
+      '<input type="number" class="entrega-qtd" min="1" value="1">' +
+      '<button type="button" class="botao-icone remover-linha-entrega" title="Remover"><span class="icone"><svg viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></span></button>';
+    div.querySelector(".remover-linha-entrega").addEventListener("click", () => div.remove());
+    document.getElementById("lista-entregas-form").appendChild(div);
+  }
+  async function criarTarefasDoTemplate(projetoId, prazoFinal, entregas) {
+    const contagemPorFormato = {};
+    const linhas = [];
+    entregas.forEach(({ formato, quantidade }) => {
+      for (let i = 0; i < quantidade; i++) {
+        contagemPorFormato[formato] = (contagemPorFormato[formato] || 0) + 1;
+        linhas.push({
+          projeto_id: projetoId,
+          titulo: formato + " " + contagemPorFormato[formato],
+          formato: formato,
+          coluna: "Briefing",
+          ordem: linhas.length,
+          prazo: prazoFinal || null,
+          prioridade: "media"
+        });
+      }
+    });
+    if (linhas.length === 0) return;
+    await salvarSeguro("tarefas_producao", sb.from("tarefas_producao").insert(linhas));
+  }
+  function abrirModalProjeto(item) {
+    document.getElementById("form-projeto-producao").reset();
+    document.getElementById("lista-entregas-form").innerHTML = "";
+    document.getElementById("modal-projeto-producao-titulo").textContent = item ? "Editar projeto" : "Novo projeto";
+    document.getElementById("proj-id").value = item ? item.id : "";
+    document.getElementById("proj-marca").value = item ? item.marca : "";
+    document.getElementById("proj-contato").value = item ? (item.contato || "") : "";
+    document.getElementById("proj-prazo").value = item ? (item.prazo_final || "") : "";
+    document.getElementById("proj-valor").value = item ? (item.valor || "") : "";
+    document.getElementById("proj-briefing").value = item ? (item.link_briefing || "") : "";
+    document.getElementById("proj-obs").value = item ? (item.observacoes || "") : "";
+    document.getElementById("proj-status").value = item ? item.status : "ativo";
+    document.getElementById("bloco-status-projeto").hidden = !item;
+    document.getElementById("proj-apagar").hidden = !item;
+    document.getElementById("bloco-entregas-fechadas").hidden = !!item;
+    if (!item) adicionarLinhaEntrega();
+    modalProjeto.hidden = false;
+  }
+  document.getElementById("botao-add-projeto").addEventListener("click", () => abrirModalProjeto(null));
+  document.getElementById("botao-add-linha-entrega").addEventListener("click", adicionarLinhaEntrega);
+  document.getElementById("proj-apagar").addEventListener("click", async () => {
+    const id = document.getElementById("proj-id").value;
+    if (!id || !confirm("Excluir este projeto e todas as tarefas dele? Não dá pra desfazer.")) return;
+    await salvarSeguro("projetos_producao", sb.from("projetos_producao").delete().eq("id", id));
+    modalProjeto.hidden = true;
+    if (projetoAtualId === id) document.getElementById("botao-voltar-projetos").click();
+    carregarDadosProducao();
+  });
+  document.getElementById("form-projeto-producao").addEventListener("submit", async (evento) => {
+    evento.preventDefault();
+    const id = document.getElementById("proj-id").value;
+    const registro = {
+      marca: document.getElementById("proj-marca").value.trim(),
+      contato: document.getElementById("proj-contato").value.trim() || null,
+      prazo_final: document.getElementById("proj-prazo").value || null,
+      valor: document.getElementById("proj-valor").value ? Number(document.getElementById("proj-valor").value) : null,
+      link_briefing: document.getElementById("proj-briefing").value.trim() || null,
+      observacoes: document.getElementById("proj-obs").value.trim() || null
+    };
+    if (id) {
+      registro.status = document.getElementById("proj-status").value;
+      await salvarSeguro("projetos_producao", sb.from("projetos_producao").update(registro).eq("id", id));
+    } else {
+      const novo = await salvarSeguro("projetos_producao", sb.from("projetos_producao").insert(registro).select().single());
+      if (novo) await criarTarefasDoTemplate(novo.id, registro.prazo_final, lerLinhasEntregas());
+    }
+    modalProjeto.hidden = true;
+    carregarDadosProducao();
+  });
+
+  // ---- Modal: card/tarefa ----
+  const modalCard = document.getElementById("modal-card-producao");
+  function renderChecklistModal() {
+    const alvo = document.getElementById("lista-checklist-card");
+    if (checklistEditando.length === 0) {
+      alvo.innerHTML = '<p class="texto-vazio" style="padding:4px 0;">Nenhum item ainda.</p>';
+      return;
+    }
+    alvo.innerHTML = checklistEditando.map((item, i) =>
+      '<div class="checklist-item-producao' + (item.feito ? " marcado" : "") + '">' +
+        '<input type="checkbox" data-indice-check="' + i + '"' + (item.feito ? " checked" : "") + '>' +
+        '<span>' + escaparAtributo(item.texto) + "</span>" +
+        '<button type="button" class="botao-icone" data-indice-remover-check="' + i + '" title="Remover"><span class="icone"><svg viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></span></button>' +
+      "</div>"
+    ).join("");
+    alvo.querySelectorAll("[data-indice-check]").forEach(chk => {
+      chk.addEventListener("change", () => { checklistEditando[Number(chk.dataset.indiceCheck)].feito = chk.checked; renderChecklistModal(); });
+    });
+    alvo.querySelectorAll("[data-indice-remover-check]").forEach(botao => {
+      botao.addEventListener("click", () => { checklistEditando.splice(Number(botao.dataset.indiceRemoverCheck), 1); renderChecklistModal(); });
+    });
+  }
+  document.getElementById("botao-add-item-checklist").addEventListener("click", () => {
+    const campo = document.getElementById("novo-item-checklist");
+    const texto = campo.value.trim();
+    if (!texto) return;
+    checklistEditando.push({ texto: texto, feito: false });
+    campo.value = "";
+    renderChecklistModal();
+  });
+  function renderComentariosModal() {
+    const alvo = document.getElementById("lista-comentarios-card");
+    if (comentariosEditando.length === 0) {
+      alvo.innerHTML = '<p class="texto-vazio" style="padding:4px 0;">Nenhum comentário ainda.</p>';
+      return;
+    }
+    const ordenados = comentariosEditando.slice().sort((a, b) => new Date(b.data) - new Date(a.data));
+    alvo.innerHTML = ordenados.map(c =>
+      '<div class="comentario-producao"><div>' + escaparAtributo(c.texto) + '</div><div class="comentario-producao-data">' + formatarDataHora(c.data) + "</div></div>"
+    ).join("");
+  }
+  document.getElementById("botao-add-comentario").addEventListener("click", () => {
+    const campo = document.getElementById("novo-comentario");
+    const texto = campo.value.trim();
+    if (!texto) return;
+    comentariosEditando.push({ texto: texto, data: new Date().toISOString() });
+    campo.value = "";
+    renderComentariosModal();
+  });
+  function abrirModalCard(tarefa, projetoIdParaNova, colunaParaNova) {
+    document.getElementById("form-card-producao").reset();
+    document.getElementById("modal-card-producao-titulo").textContent = tarefa ? "Editar tarefa" : "Nova tarefa";
+    document.getElementById("card-id").value = tarefa ? tarefa.id : "";
+    document.getElementById("card-projeto-id").value = tarefa ? tarefa.projeto_id : projetoIdParaNova;
+    document.getElementById("card-titulo").value = tarefa ? tarefa.titulo : "";
+    document.getElementById("card-formato").value = tarefa ? tarefa.formato : "Outro";
+    document.getElementById("card-coluna").value = tarefa ? tarefa.coluna : (colunaParaNova || "Briefing");
+    document.getElementById("card-prazo").value = tarefa ? (tarefa.prazo || "") : "";
+    document.getElementById("card-prioridade").value = tarefa ? tarefa.prioridade : "media";
+    document.getElementById("card-descricao").value = tarefa ? (tarefa.descricao || "") : "";
+    document.getElementById("card-link-roteiro").value = tarefa ? (tarefa.link_roteiro || "") : "";
+    document.getElementById("card-link-brutos").value = tarefa ? (tarefa.link_arquivos_brutos || "") : "";
+    document.getElementById("card-link-final").value = tarefa ? (tarefa.link_video_final || "") : "";
+    document.getElementById("card-apagar").hidden = !tarefa;
+    checklistEditando = tarefa && Array.isArray(tarefa.checklist) ? JSON.parse(JSON.stringify(tarefa.checklist)) : [];
+    comentariosEditando = tarefa && Array.isArray(tarefa.comentarios) ? JSON.parse(JSON.stringify(tarefa.comentarios)) : [];
+    renderChecklistModal();
+    renderComentariosModal();
+    document.getElementById("card-datas-info").textContent = tarefa
+      ? "Criada em " + formatarDataHora(tarefa.created_at) + (tarefa.concluido_em ? " · Concluída em " + formatarDataHora(tarefa.concluido_em) : "")
+      : "";
+    modalCard.hidden = false;
+  }
+  document.getElementById("card-apagar").addEventListener("click", async () => {
+    const id = document.getElementById("card-id").value;
+    if (!id || !confirm("Excluir esta tarefa?")) return;
+    await salvarSeguro("tarefas_producao", sb.from("tarefas_producao").delete().eq("id", id));
+    modalCard.hidden = true;
+    carregarDadosProducao();
+  });
+  document.getElementById("form-card-producao").addEventListener("submit", async (evento) => {
+    evento.preventDefault();
+    const id = document.getElementById("card-id").value;
+    const colunaEscolhida = document.getElementById("card-coluna").value;
+    const tarefaAntiga = id ? listaTarefasProducao.find(t => t.id === id) : null;
+    const registro = {
+      projeto_id: document.getElementById("card-projeto-id").value,
+      titulo: document.getElementById("card-titulo").value.trim(),
+      formato: document.getElementById("card-formato").value,
+      coluna: colunaEscolhida,
+      prazo: document.getElementById("card-prazo").value || null,
+      prioridade: document.getElementById("card-prioridade").value,
+      descricao: document.getElementById("card-descricao").value.trim() || null,
+      checklist: checklistEditando,
+      link_roteiro: document.getElementById("card-link-roteiro").value.trim() || null,
+      link_arquivos_brutos: document.getElementById("card-link-brutos").value.trim() || null,
+      link_video_final: document.getElementById("card-link-final").value.trim() || null,
+      comentarios: comentariosEditando
+    };
+    if (colunaEscolhida === "Concluído" && (!tarefaAntiga || tarefaAntiga.coluna !== "Concluído")) {
+      registro.concluido_em = new Date().toISOString();
+    } else if (colunaEscolhida !== "Concluído" && tarefaAntiga && tarefaAntiga.coluna === "Concluído") {
+      registro.concluido_em = null;
+    }
+    if (id) {
+      if (tarefaAntiga && tarefaAntiga.coluna !== colunaEscolhida) {
+        const maxOrdem = Math.max(0, ...listaTarefasProducao.filter(t => t.coluna === colunaEscolhida && t.id !== id).map(t => t.ordem || 0));
+        registro.ordem = maxOrdem + 1;
+      }
+      await salvarSeguro("tarefas_producao", sb.from("tarefas_producao").update(registro).eq("id", id));
+    } else {
+      const maxOrdem = Math.max(0, ...listaTarefasProducao.filter(t => t.coluna === colunaEscolhida && t.projeto_id === registro.projeto_id).map(t => t.ordem || 0));
+      registro.ordem = maxOrdem + 1;
+      await salvarSeguro("tarefas_producao", sb.from("tarefas_producao").insert(registro));
+    }
+    modalCard.hidden = true;
+    carregarDadosProducao();
   });
 
   // ============================================================================
