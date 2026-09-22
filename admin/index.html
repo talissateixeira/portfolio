@@ -477,11 +477,22 @@
 
   /* ===== TRANSCRIÇÕES ===== */
   .grade-transcricoes { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 14px; }
-  .cartao-transcricao { border: 1px solid var(--borda); border-radius: var(--raio); background: var(--branco); cursor: pointer; text-align: left; display: flex; flex-direction: column; overflow: hidden; }
+  .cartao-transcricao { border: 1px solid var(--borda); border-radius: var(--raio); background: var(--branco); cursor: pointer; text-align: left; display: flex; flex-direction: row; overflow: hidden; }
   .cartao-transcricao:hover { background: rgba(89,25,2,0.03); }
-  .transcricao-capa { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; display: block; background: var(--fundo-acento); }
-  .transcricao-capa-placeholder { width: 100%; aspect-ratio: 16 / 9; display: flex; align-items: center; justify-content: center; background: var(--fundo-acento); color: var(--acento); font-size: 1.6rem; font-weight: 700; }
-  .transcricao-corpo { padding: 14px 16px; display: flex; flex-direction: column; gap: 6px; }
+  .transcricao-capa-wrap { position: relative; width: 96px; aspect-ratio: 4 / 5; flex-shrink: 0; overflow: hidden; background: var(--fundo-acento); }
+  .transcricao-capa { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .transcricao-capa-placeholder { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; }
+  .btn-ver-video-mini {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    border: none;
+    background: rgba(50,31,20,0.35);
+    color: #fff;
+    font-size: 1.1rem;
+    cursor: pointer;
+  }
+  .btn-ver-video-mini:hover { background: rgba(50,31,20,0.5); }
+  .transcricao-corpo { padding: 14px 16px; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
   .transcricao-plataforma { display: inline-flex; align-self: flex-start; padding: 2px 10px; border-radius: 100px; font-size: 0.68rem; font-weight: 700; background: var(--fundo-acento); color: var(--acento); }
   .transcricao-nicho { display: inline-flex; align-self: flex-start; padding: 2px 10px; border-radius: 100px; font-size: 0.68rem; font-weight: 700; background: var(--fundo-sucesso); color: var(--sucesso); }
   .transcricao-link { font-size: 0.82rem; font-weight: 600; word-break: break-all; }
@@ -2128,18 +2139,85 @@
     }
   }
 
-  // Imagem do card: usa a capa manual se tiver uma; senão, pro YouTube dá
-  // pra montar a miniatura direto pelo id do vídeo (Instagram e TikTok não
-  // têm uma forma pública de pegar a miniatura sem login, por isso pedimos
-  // a capa manual pra esses casos).
+  // Imagem do card: a coluna capa_url é preenchida sozinha (ao salvar cada
+  // transcrição nova e, uma vez só, pras que já existiam) por
+  // calcularCapaAutomatica() logo abaixo.
   function imagemTranscricao(t) {
-    if (t.capa_url) return t.capa_url;
-    const plataforma = t.plataforma || detectarPlataforma(t.link) || "outro";
+    return t.capa_url || null;
+  }
+
+  const EMOJI_PLATAFORMA = { youtube: "▶️", instagram: "📷", tiktok: "🎵", outro: "📝" };
+
+  function idInstagramCapa(link) {
+    const m = (link || "").match(/instagram\.com\/(reel|p)\/([a-zA-Z0-9_-]+)/);
+    return m ? { tipo: m[1], id: m[2] } : null;
+  }
+  function idTiktokNumerico(link) {
+    const m = (link || "").match(/video\/(\d+)/);
+    return m ? m[1] : null;
+  }
+
+  // Monta a capa sem token e sem função no servidor: Instagram via um proxy
+  // gratuito de imagem (o CDN deles recusa pedido direto do navegador),
+  // YouTube direto pela miniatura pública, e TikTok via oEmbed público deles.
+  function montarCapaInstagram(link) {
+    const info = idInstagramCapa(link);
+    if (!info) return null;
+    return "https://images.weserv.nl/?url=instagram.com/p/" + info.id + "/media/?size=l&w=480&h=600&fit=cover&output=webp";
+  }
+  function montarCapaYoutube(link) {
+    const id = extrairIdYoutubeAdmin(link || "");
+    return id ? "https://i.ytimg.com/vi/" + id + "/hqdefault.jpg" : null;
+  }
+  async function buscarCapaTiktok(link) {
+    try {
+      const resp = await fetch("https://www.tiktok.com/oembed?url=" + encodeURIComponent(link));
+      if (!resp.ok) return null;
+      const dados = await resp.json();
+      return dados.thumbnail_url || null;
+    } catch (erro) { return null; }
+  }
+  // Capas síncronas (Instagram e YouTube são só montar a URL); TikTok precisa
+  // de uma chamada (oEmbed), por isso fica de fora e é tratado à parte.
+  function calcularCapaSincrona(link, plataforma) {
+    if (plataforma === "instagram") return montarCapaInstagram(link);
+    if (plataforma === "youtube") return montarCapaYoutube(link);
+    return null;
+  }
+
+  // URL de embed pequeno, pro botão "▶️ ver vídeo" trocar a capa do card
+  // sem precisar de script externo nenhum.
+  function embedMiniUrl(link, plataforma) {
     if (plataforma === "youtube") {
-      const id = extrairIdYoutubeAdmin(t.link || "");
-      if (id) return "https://i.ytimg.com/vi/" + id + "/mqdefault.jpg";
+      const id = extrairIdYoutubeAdmin(link || "");
+      return id ? "https://www.youtube-nocookie.com/embed/" + id : null;
+    }
+    if (plataforma === "instagram") {
+      const info = idInstagramCapa(link);
+      return info ? "https://www.instagram.com/" + info.tipo + "/" + info.id + "/embed" : null;
+    }
+    if (plataforma === "tiktok") {
+      const id = idTiktokNumerico(link);
+      return id ? "https://www.tiktok.com/embed/v2/" + id : null;
     }
     return null;
+  }
+
+  // Preenche a capa das transcrições que já existiam, uma vez só por sessão.
+  let capasFaltantesPreenchidas = false;
+  async function preencherCapasFaltantes() {
+    if (capasFaltantesPreenchidas) return;
+    capasFaltantesPreenchidas = true;
+    const semCapa = listaTranscricoes.filter(t => !t.capa_url && t.link);
+    for (const t of semCapa) {
+      const plataforma = t.plataforma || detectarPlataforma(t.link) || "outro";
+      const capa = plataforma === "tiktok" ? await buscarCapaTiktok(t.link) : calcularCapaSincrona(t.link, plataforma);
+      if (capa) {
+        t.capa_url = capa;
+        await salvarSeguro("transcricoes", sb.from("transcricoes").update({ capa_url: capa }).eq("id", t.id));
+      }
+    }
+    renderGradeTranscricoes();
   }
 
   // ---- Transcrição automática via Supadata ----
@@ -2330,17 +2408,28 @@
     if (existente && !confirm("Esse link já está na sua biblioteca. Quer transcrever de novo mesmo assim?")) return;
 
     const perfil = detectarPerfilTranscricao(url, plataforma);
+    const capaInicial = calcularCapaSincrona(url, plataforma);
     const botao = document.getElementById("botao-transcrever");
     botao.disabled = true;
     campoLink.value = "";
 
     const novo = await salvarSeguro("transcricoes", sb.from("transcricoes").insert({
-      link: url, plataforma: plataforma, perfil: perfil, de_quem: deQuem, status: "processando"
+      link: url, plataforma: plataforma, perfil: perfil, de_quem: deQuem, status: "processando", capa_url: capaInicial
     }).select().single());
     botao.disabled = false;
     if (!novo) return;
     listaTranscricoes.unshift(novo);
     renderGradeTranscricoes();
+    if (plataforma === "tiktok") {
+      buscarCapaTiktok(url).then(capa => {
+        if (!capa) return;
+        salvarSeguro("transcricoes", sb.from("transcricoes").update({ capa_url: capa }).eq("id", novo.id)).then(() => {
+          const item = listaTranscricoes.find(t => t.id === novo.id);
+          if (item) item.capa_url = capa;
+          renderGradeTranscricoes();
+        });
+      });
+    }
     iniciarTranscricaoAutomatica(novo.id, url);
   });
 
@@ -2401,6 +2490,7 @@
     }
     listaTranscricoes = await consultarSeguro("transcricoes", sb.from("transcricoes").select("*").order("created_at", { ascending: false }));
     renderGradeTranscricoes();
+    preencherCapasFaltantes();
   }
 
   function todasTagsTranscricoes() {
@@ -2452,10 +2542,16 @@
     alvo.innerHTML = filtradas.map(t => {
       const plataforma = t.plataforma || detectarPlataforma(t.link) || "outro";
       const nomePlataforma = NOMES_PLATAFORMA[plataforma] || plataforma;
+      const emojiPlataforma = EMOJI_PLATAFORMA[plataforma] || "📝";
       const imagem = imagemTranscricao(t);
-      const capa = imagem
-        ? '<img class="transcricao-capa" src="' + escaparAtributo(imagem) + '" data-inicial="' + escaparAtributo(nomePlataforma.charAt(0)) + '" alt="" loading="lazy">'
-        : '<div class="transcricao-capa-placeholder">' + nomePlataforma.charAt(0) + "</div>";
+      const miolo = imagem
+        ? '<img class="transcricao-capa" src="' + escaparAtributo(imagem) + '" data-emoji="' + emojiPlataforma + '" alt="" loading="lazy">'
+        : '<div class="transcricao-capa-placeholder">' + emojiPlataforma + "</div>";
+      const temEmbedMini = !!embedMiniUrl(t.link, plataforma);
+      const capa = '<div class="transcricao-capa-wrap" data-id="' + t.id + '">' +
+        miolo +
+        (temEmbedMini ? '<button type="button" class="btn-ver-video-mini" data-acao="ver-video" data-id="' + t.id + '" title="Ver vídeo">▶️</button>' : "") +
+      "</div>";
       const badgeQuem = t.de_quem === "minha"
         ? '<span class="transcricao-badge-quem transcricao-badge-minha">Meu</span>'
         : '<span class="transcricao-badge-quem transcricao-badge-outra">De outra</span>';
@@ -2513,6 +2609,15 @@
               setTimeout(() => { botao.textContent = "Copiar roteiro"; }, 1800);
             });
           }
+        } else if (acao === "ver-video") {
+          const item = listaTranscricoes.find(t => t.id === id);
+          if (!item) return;
+          const plataforma = item.plataforma || detectarPlataforma(item.link) || "outro";
+          const src = embedMiniUrl(item.link, plataforma);
+          const wrap = alvo.querySelector('.transcricao-capa-wrap[data-id="' + id + '"]');
+          if (src && wrap) {
+            wrap.innerHTML = '<iframe src="' + src + '" loading="lazy" allowfullscreen frameborder="0" style="width:100%;height:100%;border:0;"></iframe>';
+          }
         }
       });
     });
@@ -2521,7 +2626,7 @@
       img.addEventListener("error", () => {
         const placeholder = document.createElement("div");
         placeholder.className = "transcricao-capa-placeholder";
-        placeholder.textContent = img.dataset.inicial || "?";
+        placeholder.textContent = img.dataset.emoji || "📝";
         img.replaceWith(placeholder);
       }, { once: true });
     });
@@ -2578,24 +2683,32 @@
     evento.preventDefault();
     const id = document.getElementById("transc-id").value;
     const link = document.getElementById("transc-link").value.trim();
+    const plataforma = detectarPlataforma(link) || "outro";
+    const capaManual = document.getElementById("transc-capa").value.trim();
     const registro = {
       titulo: document.getElementById("transc-titulo").value.trim() || null,
       de_quem: document.getElementById("transc-dequem").value,
       perfil: document.getElementById("transc-perfil").value.trim() || null,
       tags: document.getElementById("transc-tags").value.split(",").map(s => s.trim()).filter(Boolean),
       link: link,
-      plataforma: detectarPlataforma(link) || "outro",
+      plataforma: plataforma,
       nicho: valorNichoSelecionado(selectTranscNicho, campoTranscNichoNovo) || null,
-      capa_url: document.getElementById("transc-capa").value.trim() || null,
+      capa_url: capaManual || (link ? calcularCapaSincrona(link, plataforma) : null),
       roteiro: document.getElementById("transc-roteiro").value.trim() || null,
       observacoes: document.getElementById("transc-obs").value.trim() || null,
       status: "pronto",
       erro: null
     };
-    if (id) await salvarSeguro("transcricoes", sb.from("transcricoes").update(registro).eq("id", id));
-    else await salvarSeguro("transcricoes", sb.from("transcricoes").insert(registro));
+    const salvo = id
+      ? await salvarSeguro("transcricoes", sb.from("transcricoes").update(registro).eq("id", id).select().single())
+      : await salvarSeguro("transcricoes", sb.from("transcricoes").insert(registro).select().single());
     modalTranscricao.hidden = true;
     carregarTranscricoes();
+    if (!capaManual && plataforma === "tiktok" && link && salvo) {
+      buscarCapaTiktok(link).then(capa => {
+        if (capa) salvarSeguro("transcricoes", sb.from("transcricoes").update({ capa_url: capa }).eq("id", salvo.id)).then(carregarTranscricoes);
+      });
+    }
   });
 
   // ---- Ponto de partida: abre a aba do hash da URL, ou Portfólio por padrão. ----
