@@ -203,7 +203,16 @@
     padding: 18px 20px;
   }
   .bloco-portfolio { margin-bottom: 20px; }
-  .painel-titulo-linha { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+  .painel-titulo-linha { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 14px; }
+  .linha-dashboard-dupla { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .grafico-valor-mono { font-family: "SF Mono", Menlo, Consolas, monospace; }
+  .grafico-barra-atual { background: var(--fundo-acento) !important; }
+  .grafico-legenda-atual { font-size: 0.78rem; color: var(--texto-suave); margin: 14px 0 0; }
+  .funil-linha-crm { margin-bottom: 16px; }
+  .funil-linha-crm:last-child { margin-bottom: 0; }
+  .funil-linha-crm-topo { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px; }
+  .funil-linha-crm-nome { font-weight: 700; font-size: 0.9rem; }
+  .funil-linha-crm-qtd { font-weight: 700; font-size: 0.9rem; }
   .painel-titulo-linha .painel-titulo { margin-bottom: 0; }
   .contagem-badge { display: inline-flex; align-items: center; padding: 4px 12px; border-radius: 100px; background: var(--fundo-acento); color: var(--acento-escuro); font-size: 0.78rem; font-weight: 700; }
   .linha-tarefa-unificada { display: flex; align-items: center; gap: 16px; padding: 14px 0; border-bottom: 1px solid var(--borda); }
@@ -220,11 +229,12 @@
   .texto-vazio { color: var(--texto-suave); font-size: 0.85rem; line-height: 1.6; padding: 10px 0; }
 
   /* Gráfico de barras simples, sem biblioteca */
-  .grafico-barras { display: flex; align-items: flex-end; gap: 6px; height: 130px; }
+  .grafico-barras { display: flex; align-items: flex-end; gap: 6px; height: 175px; }
   .grafico-coluna { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; gap: 6px; }
   .grafico-barra { position: relative; width: 100%; max-width: 22px; background: var(--acento); border-radius: 4px 4px 0 0; min-height: 2px; transition: opacity 0.15s ease; }
   .grafico-barra:hover { opacity: 0.8; }
   .grafico-rotulo { font-size: 0.62rem; color: var(--texto-suave); }
+  .grafico-valor-topo { font-size: 0.72rem; font-weight: 600; color: var(--texto); white-space: nowrap; }
 
   /* Tooltip com o número de visitas do dia, ao passar o mouse na barra. */
   .grafico-tooltip {
@@ -634,6 +644,7 @@
     .linha-transcrever { flex-direction: column; }
     .linha-transcrever input, .linha-transcrever select, .linha-transcrever button { width: 100%; }
     .linha-tarefa-unificada { flex-wrap: wrap; }
+    .linha-dashboard-dupla { grid-template-columns: 1fr; }
   }
 </style>
 </head>
@@ -718,16 +729,27 @@
       <div class="cartoes-resumo-topo" id="cartoes-resumo-topo"></div>
 
       <div class="painel-branco bloco-portfolio">
-        <div class="painel-titulo">Faturamento dos últimos meses</div>
-        <div id="grafico-faturamento"></div>
-      </div>
-
-      <div class="painel-branco bloco-portfolio">
         <div class="painel-titulo-linha">
           <div class="painel-titulo">Precisa de você</div>
           <span class="contagem-badge" id="contagem-tarefas-dash"></span>
         </div>
         <div id="lista-tarefas-unificada-dash"></div>
+      </div>
+
+      <div class="linha-dashboard-dupla">
+        <div class="painel-branco">
+          <div class="painel-titulo-linha">
+            <div class="painel-titulo">Faturamento dos últimos meses</div>
+            <button type="button" class="botao botao-secundario" id="botao-ver-tudo-faturamento">Ver tudo</button>
+          </div>
+          <div id="grafico-faturamento"></div>
+        </div>
+        <div class="painel-branco">
+          <div class="painel-titulo-linha">
+            <div class="painel-titulo">Seu funil agora</div>
+          </div>
+          <div id="funil-crm-dash"></div>
+        </div>
       </div>
     </section>
 
@@ -1268,6 +1290,9 @@
   function formatarMoeda(valor) {
     return (valor || 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
   }
+  function formatarMoedaSemCentavos(valor) {
+    return (valor || 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL", minimumFractionDigits: 0, maximumFractionDigits: 0 });
+  }
   function formatarData(dataIso) {
     if (!dataIso) return "";
     const [ano, mes, dia] = dataIso.split("-");
@@ -1311,6 +1336,7 @@
     setInterval(atualizar, 30000);
   }
   iniciarRelogioDashboard();
+  document.getElementById("botao-ver-tudo-faturamento").addEventListener("click", () => abrirAba("campanhas"));
 
   function renderSaudacaoDashboard(qtdHoje) {
     const hora = new Date().getHours();
@@ -1334,9 +1360,11 @@
       consultarSeguro("calendario", sb.from("calendario").select("*").eq("status", "a_fazer").lt("data", hoje).order("data", { ascending: true })),
       consultarSeguro("calendario", sb.from("calendario").select("*").eq("status", "a_fazer").gt("data", hoje).order("data", { ascending: true }).limit(8)),
       carregarMetaFechamento(),
-      consultarSeguro("marcas", sb.from("marcas").select("id,created_at").eq("situacao", "lead"))
+      consultarSeguro("marcas", sb.from("marcas").select("id,situacao,created_at"))
     ]);
     metaFechamentoMes = meta;
+    const marcasTodas = leads;
+    const leadsLista = marcasTodas.filter(m => m.situacao === "lead");
 
     // "Recebido/a receber este mês" olha o PRAZO da campanha (quando o
     // dinheiro é devido), não a data em que ela foi criada.
@@ -1348,11 +1376,12 @@
     const abertasComPrazo = abertas.filter(c => c.prazo && c.prazo >= hoje).sort((a, b) => a.prazo < b.prazo ? -1 : 1);
     const diasPrazoMaisProximo = abertasComPrazo.length > 0 ? Math.round((new Date(abertasComPrazo[0].prazo) - new Date(hoje)) / 86400000) : null;
 
-    const leadsMes = leads.filter(l => l.created_at >= inicioMesCriacao).length;
+    const leadsMes = leadsLista.filter(l => l.created_at >= inicioMesCriacao).length;
 
     renderSaudacaoDashboard(tarefasHoje.length);
-    renderCartoesResumoTopo(recebidoMes, aReceberMes, meta, abertas.length, diasPrazoMaisProximo, leads.length, leadsMes);
+    renderCartoesResumoTopo(recebidoMes, aReceberMes, meta, abertas.length, diasPrazoMaisProximo, leadsLista.length, leadsMes);
     renderGraficoFaturamento(campanhas);
+    renderFunilCrmDash(marcasTodas);
     renderTarefasUnificadasDash(tarefasAtrasadas, tarefasHoje, tarefasProximas);
   }
 
@@ -1419,11 +1448,36 @@
       if (alvoMes) alvoMes.total += Number(c.valor || 0);
     });
     const max = Math.max(...meses.map(m => m.total), 0);
-    alvo.innerHTML = '<div class="grafico-barras">' + meses.map(m => {
-      return '<div class="grafico-coluna"><div class="grafico-barra" style="height:' + (max > 0 ? (m.total / max) * 100 : 0) + '%">' +
-        '<span class="grafico-tooltip">' + m.rotulo + ": " + formatarMoeda(m.total) + "</span>" +
-      "</div><div class=\"grafico-rotulo\">" + m.rotulo + "</div></div>";
-    }).join("") + "</div>";
+    alvo.innerHTML = '<div class="grafico-barras">' + meses.map((m, i) => {
+      const ehMesAtual = i === meses.length - 1;
+      // Deixa 22% de folga no topo pra sempre caber o valor em cima da barra,
+      // mesmo quando ela é a mais alta do gráfico.
+      const altura = max > 0 ? (m.total / max) * 78 : 0;
+      return '<div class="grafico-coluna">' +
+        '<span class="grafico-valor-topo grafico-valor-mono">' + formatarMoedaSemCentavos(m.total) + '</span>' +
+        '<div class="grafico-barra' + (ehMesAtual ? " grafico-barra-atual" : "") + '" style="height:' + altura + '%">' +
+          '<span class="grafico-tooltip">' + m.rotulo + ": " + formatarMoeda(m.total) + "</span>" +
+        "</div><div class=\"grafico-rotulo\">" + m.rotulo + "</div></div>";
+    }).join("") + "</div>" +
+    '<p class="grafico-legenda-atual">O mês atual aparece mais claro porque ainda está correndo.</p>';
+  }
+
+  function renderFunilCrmDash(marcas) {
+    const ETAPAS_CRM = [
+      { chave: "lead", rotulo: "Lead" },
+      { chave: "conversando", rotulo: "Conversando" },
+      { chave: "cliente", rotulo: "Cliente" },
+      { chave: "parada", rotulo: "Parada" }
+    ];
+    const contagens = ETAPAS_CRM.map(e => ({ ...e, qtd: marcas.filter(m => m.situacao === e.chave).length }));
+    const max = Math.max(...contagens.map(e => e.qtd), 1);
+    document.getElementById("funil-crm-dash").innerHTML = contagens.map(e => {
+      const pct = Math.round((e.qtd / max) * 100);
+      return '<div class="funil-linha-crm">' +
+        '<div class="funil-linha-crm-topo"><span class="funil-linha-crm-nome">' + e.rotulo + '</span><span class="funil-linha-crm-qtd">' + e.qtd + "</span></div>" +
+        '<div class="barra-progresso-fundo"><div class="barra-progresso" style="width:' + pct + '%;"></div></div>' +
+      "</div>";
+    }).join("");
   }
 
   const TIPO_CALENDARIO_LEGIVEL = { gravar: "gravação", editar: "edição", postar: "postagem" };
