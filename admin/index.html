@@ -137,7 +137,23 @@
     padding: 28px 32px 60px;
     max-width: 1180px;
   }
-  .conteudo-topo { margin-bottom: 22px; }
+  .conteudo-topo { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; margin-bottom: 22px; }
+  .dashboard-relogio { display: flex; align-items: center; gap: 8px; font-size: 0.78rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: var(--texto-suave); }
+  .ponto-vivo { width: 8px; height: 8px; border-radius: 50%; background: var(--sucesso); animation: pulsar 2s infinite; }
+  @keyframes pulsar {
+    0% { box-shadow: 0 0 0 0 rgba(116, 144, 123, 0.5); }
+    70% { box-shadow: 0 0 0 6px rgba(116, 144, 123, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(116, 144, 123, 0); }
+  }
+  .dashboard-saudacao-label { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--texto-suave); margin: 0 0 6px; }
+  .dashboard-saudacao-titulo { font-size: 1.7rem; margin: 0 0 22px; }
+  .cartoes-resumo-topo { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 16px; margin-bottom: 20px; }
+  .cartao-resumo { background: var(--branco); border: 1px solid var(--borda); border-radius: var(--raio); padding: 18px 20px; }
+  .cartao-resumo-rotulo { font-size: 0.68rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--texto-suave); margin-bottom: 8px; }
+  .cartao-resumo-valor { font-size: 1.5rem; font-weight: 700; color: var(--preto); }
+  .cartao-resumo-extra { font-size: 0.78rem; color: var(--texto-suave); margin-top: 6px; }
+  .cartao-resumo .barra-progresso-fundo { margin-top: 10px; }
+  .link-discreto { background: none; border: none; padding: 0; margin-top: 6px; color: var(--texto-suave); text-decoration: underline; font-size: 0.74rem; cursor: pointer; }
   .conteudo-titulo { font-size: 1.25rem; }
 
   .avisos { margin-bottom: 16px; display: flex; flex-direction: column; gap: 8px; }
@@ -625,7 +641,7 @@
       <div class="nav-grupo-titulo">Visão geral</div>
       <button class="nav-item" data-aba="dashboard">
         <span class="icone"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="8" height="8" rx="1.5"/><rect x="13" y="3" width="8" height="5" rx="1.5"/><rect x="13" y="10" width="8" height="11" rx="1.5"/><rect x="3" y="13" width="8" height="8" rx="1.5"/></svg></span>
-        Dashboard
+        Início
       </button>
     </nav>
 
@@ -673,20 +689,22 @@
   <main class="conteudo">
     <div class="conteudo-topo">
       <h1 class="conteudo-titulo" id="titulo-aba">Portfólio</h1>
+      <div class="dashboard-relogio" id="dashboard-relogio" hidden>
+        <span class="ponto-vivo"></span>
+        <span id="dashboard-relogio-texto"></span>
+      </div>
     </div>
 
     <div class="avisos" id="avisos" hidden></div>
 
     <!-- ===================== ABA DASHBOARD ===================== -->
     <section class="aba" id="aba-dashboard">
-      <p class="portfolio-subtitulo">Um resumo rápido do seu dia, das campanhas e das finanças.</p>
+      <p class="portfolio-subtitulo">Seu resumo do dia.</p>
 
-      <div class="stats-faixa" id="stats-dashboard"></div>
+      <p class="dashboard-saudacao-label" id="dashboard-saudacao-label">Boa tarde</p>
+      <h2 class="dashboard-saudacao-titulo" id="dashboard-saudacao-titulo">Carregando...</h2>
 
-      <div class="painel-branco bloco-portfolio">
-        <div class="painel-titulo">Resumo do CRM: meta de fechamento do mês</div>
-        <div id="meta-crm-conteudo"></div>
-      </div>
+      <div class="cartoes-resumo-topo" id="cartoes-resumo-topo"></div>
 
       <div class="painel-branco bloco-portfolio">
         <div class="painel-titulo">Faturamento dos últimos meses</div>
@@ -1201,7 +1219,7 @@
   }
 
   // ---- Navegação (abas + gaveta no celular) ----
-  const TITULOS_ABA = { dashboard: "Dashboard", portfolio: "Portfólio", marcas: "Marcas", calendario: "Calendário", campanhas: "Campanhas", checklist: "Checklist", transcricoes: "Transcrições" };
+  const TITULOS_ABA = { dashboard: "👋 Início", portfolio: "Portfólio", marcas: "Marcas", calendario: "Calendário", campanhas: "Campanhas", checklist: "Checklist", transcricoes: "Transcrições" };
   const CARREGADORES_ABA = { dashboard: carregarDashboard, portfolio: carregarPortfolio, marcas: carregarMarcas, calendario: carregarCalendario, campanhas: carregarCampanhas, checklist: carregarChecklist, transcricoes: carregarTranscricoes };
   const abasCarregadas = new Set();
 
@@ -1210,6 +1228,7 @@
     document.querySelectorAll(".nav-item").forEach(b => b.classList.toggle("ativo", b.dataset.aba === nome));
     document.querySelectorAll(".aba").forEach(s => s.classList.toggle("ativa", s.id === "aba-" + nome));
     document.getElementById("titulo-aba").textContent = TITULOS_ABA[nome];
+    document.getElementById("dashboard-relogio").hidden = nome !== "dashboard";
     window.location.hash = nome;
     fecharGaveta();
     if (!abasCarregadas.has(nome)) {
@@ -1255,8 +1274,8 @@
   // ABA 0 — DASHBOARD
   // ============================================================================
   let metaFechamentoMes = null;
-  let metaCrmEditando = false;
-  let valorFechadoMesAtual = 0;
+  const DIAS_SEMANA_ABREV = ["DOM", "SEG", "TER", "QUA", "QUI", "SEX", "SÁB"];
+  const MESES_ABREV = ["JAN", "FEV", "MAR", "ABR", "MAI", "JUN", "JUL", "AGO", "SET", "OUT", "NOV", "DEZ"];
 
   async function carregarMetaFechamento() {
     const { data, error } = await sb.from("configuracoes").select("valor").eq("chave", "meta_fechamento_mes").maybeSingle();
@@ -1268,77 +1287,110 @@
     if (error) throw error;
   }
 
+  // Relógio do topo: só aparece na aba Início, mas já deixamos rodando desde
+  // o início pra não ter atraso quando a pessoa clicar na aba.
+  function textoRelogioDashboard() {
+    const d = new Date();
+    return DIAS_SEMANA_ABREV[d.getDay()] + ", " + String(d.getDate()).padStart(2, "0") + " DE " + MESES_ABREV[d.getMonth()] +
+      " · " + String(d.getHours()).padStart(2, "0") + ":" + String(d.getMinutes()).padStart(2, "0");
+  }
+  function iniciarRelogioDashboard() {
+    const atualizar = () => {
+      const el = document.getElementById("dashboard-relogio-texto");
+      if (el) el.textContent = textoRelogioDashboard();
+    };
+    atualizar();
+    setInterval(atualizar, 30000);
+  }
+  iniciarRelogioDashboard();
+
+  function renderSaudacaoDashboard(qtdHoje) {
+    const hora = new Date().getHours();
+    document.getElementById("dashboard-saudacao-label").textContent = hora < 12 ? "Bom dia" : hora < 18 ? "Boa tarde" : "Boa noite";
+    document.getElementById("dashboard-saudacao-titulo").textContent = qtdHoje === 0
+      ? "Tali, nada marcado pra hoje. 🎉"
+      : "Tali, você tem " + qtdHoje + (qtdHoje === 1 ? " coisa" : " coisas") + " pra resolver hoje.";
+  }
+
   async function carregarDashboard() {
     const inicioMes = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
     const fimMes = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0);
     const inicioMesIso = isoData(inicioMes);
     const fimMesIso = isoData(fimMes);
     const inicioMesCriacao = inicioMes.toISOString();
+    const hoje = hojeISO();
 
-    const [campanhas, tarefasHoje, tarefasAtrasadas, tarefasProximas, meta] = await Promise.all([
+    const [campanhas, tarefasHoje, tarefasAtrasadas, tarefasProximas, meta, leads] = await Promise.all([
       consultarSeguro("campanhas", sb.from("campanhas").select("*")),
-      consultarSeguro("calendario", sb.from("calendario").select("*").eq("status", "a_fazer").eq("data", hojeISO()).order("data", { ascending: true })),
-      consultarSeguro("calendario", sb.from("calendario").select("*").eq("status", "a_fazer").lt("data", hojeISO()).order("data", { ascending: true })),
-      consultarSeguro("calendario", sb.from("calendario").select("*").eq("status", "a_fazer").gt("data", hojeISO()).order("data", { ascending: true }).limit(8)),
-      carregarMetaFechamento()
+      consultarSeguro("calendario", sb.from("calendario").select("*").eq("status", "a_fazer").eq("data", hoje).order("data", { ascending: true })),
+      consultarSeguro("calendario", sb.from("calendario").select("*").eq("status", "a_fazer").lt("data", hoje).order("data", { ascending: true })),
+      consultarSeguro("calendario", sb.from("calendario").select("*").eq("status", "a_fazer").gt("data", hoje).order("data", { ascending: true }).limit(8)),
+      carregarMetaFechamento(),
+      consultarSeguro("marcas", sb.from("marcas").select("id,created_at").eq("situacao", "lead"))
     ]);
     metaFechamentoMes = meta;
 
-    const campanhasAtivas = campanhas.filter(c => !campanhaFinalizada(c)).length;
     // "Recebido/a receber este mês" olha o PRAZO da campanha (quando o
     // dinheiro é devido), não a data em que ela foi criada.
     const campanhasDoMesPorPrazo = campanhas.filter(c => c.prazo && c.prazo >= inicioMesIso && c.prazo <= fimMesIso);
     const recebidoMes = campanhasDoMesPorPrazo.filter(c => c.pagamento === "pago").reduce((s, c) => s + Number(c.valor || 0), 0);
     const aReceberMes = campanhasDoMesPorPrazo.filter(c => c.pagamento === "pendente").reduce((s, c) => s + Number(c.valor || 0), 0);
-    // Já "valor fechado este mês" (resumo do CRM) olha quando a campanha
-    // ENTROU (foi fechada), não quando o pagamento vence.
-    valorFechadoMesAtual = campanhas.filter(c => c.created_at >= inicioMesCriacao).reduce((s, c) => s + Number(c.valor || 0), 0);
 
-    renderStatsDashboard(campanhasAtivas, tarefasHoje.length, tarefasAtrasadas.length, recebidoMes, aReceberMes);
-    renderMetaCrm();
+    const abertas = campanhas.filter(c => !campanhaFinalizada(c));
+    const abertasComPrazo = abertas.filter(c => c.prazo && c.prazo >= hoje).sort((a, b) => a.prazo < b.prazo ? -1 : 1);
+    const diasPrazoMaisProximo = abertasComPrazo.length > 0 ? Math.round((new Date(abertasComPrazo[0].prazo) - new Date(hoje)) / 86400000) : null;
+
+    const leadsMes = leads.filter(l => l.created_at >= inicioMesCriacao).length;
+
+    renderSaudacaoDashboard(tarefasHoje.length);
+    renderCartoesResumoTopo(recebidoMes, aReceberMes, meta, abertas.length, diasPrazoMaisProximo, leads.length, leadsMes);
     renderGraficoFaturamento(campanhas);
     renderTarefasHojeDash(tarefasHoje, tarefasAtrasadas);
     renderProximasDash(tarefasProximas);
   }
 
-  function renderStatsDashboard(campanhasAtivas, qtdHoje, qtdAtrasadas, recebidoMes, aReceberMes) {
-    document.getElementById("stats-dashboard").innerHTML = [
-      { rotulo: "Campanhas ativas", valor: campanhasAtivas },
-      { rotulo: "Tarefas de hoje", valor: qtdHoje },
-      { rotulo: "Tarefas atrasadas", valor: qtdAtrasadas },
-      { rotulo: "Recebido este mês", valor: formatarMoeda(recebidoMes) },
-      { rotulo: "A receber este mês", valor: formatarMoeda(aReceberMes) }
-    ].map((s, i) => '<div class="stat-item stat-item-cor-' + ((i % 3) + 1) + '"><div class="stat-valor">' + s.valor + '</div><div class="stat-rotulo">' + s.rotulo + "</div></div>").join("");
-  }
+  function renderCartoesResumoTopo(recebidoMes, aReceberMes, meta, campanhasAbertas, diasPrazo, totalLeads, leadsMes) {
+    const mesNome = NOMES_MES[new Date().getMonth()];
+    const pct = meta > 0 ? Math.min(100, Math.round((recebidoMes / meta) * 100)) : 0;
+    const rotuloPrazo = diasPrazo == null ? "sem prazo marcado"
+      : diasPrazo === 0 ? "a mais próxima é hoje"
+      : diasPrazo === 1 ? "a mais próxima é amanhã"
+      : "a mais próxima em " + diasPrazo + " dias";
 
-  function renderMetaCrm() {
-    const alvo = document.getElementById("meta-crm-conteudo");
-    const meta = metaFechamentoMes;
-    if (metaCrmEditando) {
-      alvo.innerHTML =
-        '<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">' +
-          '<input type="number" id="input-meta-crm" class="campo-busca" style="width:160px;" placeholder="Valor da meta" value="' + (meta || "") + '">' +
-          '<button class="botao botao-principal" id="botao-salvar-meta" type="button">Salvar</button>' +
-          '<button class="botao botao-secundario" id="botao-cancelar-meta" type="button">Cancelar</button>' +
-        "</div>";
-      document.getElementById("botao-salvar-meta").addEventListener("click", async () => {
-        const valor = Number(document.getElementById("input-meta-crm").value);
-        if (!valor || valor <= 0) return;
-        await salvarMetaFechamento(valor);
-        metaFechamentoMes = valor;
-        metaCrmEditando = false;
-        renderMetaCrm();
-      });
-      document.getElementById("botao-cancelar-meta").addEventListener("click", () => { metaCrmEditando = false; renderMetaCrm(); });
-      return;
-    }
-    const pct = meta > 0 ? Math.min(100, Math.round((valorFechadoMesAtual / meta) * 100)) : 0;
-    alvo.innerHTML =
-      '<p style="margin:0 0 10px;font-size:0.85rem;color:var(--texto-suave);">' + formatarMoeda(valorFechadoMesAtual) + " fechados" +
-      (meta ? " de meta de " + formatarMoeda(meta) : " (ainda sem meta definida)") + "</p>" +
-      '<div class="barra-progresso-fundo"><div class="barra-progresso" style="width:' + pct + '%;"></div></div>' +
-      '<div style="margin-top:10px;"><button class="botao botao-secundario" id="botao-editar-meta" type="button">' + (meta ? "Editar meta" : "Definir meta") + "</button></div>";
-    document.getElementById("botao-editar-meta").addEventListener("click", () => { metaCrmEditando = true; renderMetaCrm(); });
+    document.getElementById("cartoes-resumo-topo").innerHTML =
+      '<div class="cartao-resumo">' +
+        '<div class="cartao-resumo-rotulo">Recebido em ' + mesNome + '</div>' +
+        '<div class="cartao-resumo-valor">' + formatarMoeda(recebidoMes) + '</div>' +
+        (meta
+          ? '<div class="cartao-resumo-extra">meta de ' + formatarMoeda(meta) + '</div>' +
+            '<div class="barra-progresso-fundo"><div class="barra-progresso" style="width:' + pct + '%;"></div></div>' +
+            '<div class="cartao-resumo-extra">' + pct + '% da meta</div>' +
+            '<button type="button" class="link-discreto" id="botao-editar-meta-topo">editar meta</button>'
+          : '<button type="button" class="link-discreto" id="botao-editar-meta-topo">definir meta do mês</button>'
+        ) +
+      "</div>" +
+      '<div class="cartao-resumo">' +
+        '<div class="cartao-resumo-rotulo">A receber</div>' +
+        '<div class="cartao-resumo-valor">' + formatarMoeda(aReceberMes) + '</div>' +
+        '<div class="cartao-resumo-extra">de trabalhos já fechados</div>' +
+      "</div>" +
+      '<div class="cartao-resumo">' +
+        '<div class="cartao-resumo-rotulo">Campanhas em aberto</div>' +
+        '<div class="cartao-resumo-valor">' + campanhasAbertas + '</div>' +
+        '<div class="cartao-resumo-extra">' + rotuloPrazo + '</div>' +
+      "</div>" +
+      '<div class="cartao-resumo">' +
+        '<div class="cartao-resumo-rotulo">Leads</div>' +
+        '<div class="cartao-resumo-valor">' + totalLeads + '</div>' +
+        '<div class="cartao-resumo-extra">+' + leadsMes + ' este mês</div>' +
+      "</div>";
+
+    document.getElementById("botao-editar-meta-topo").addEventListener("click", async () => {
+      const valor = Number(prompt("Qual a meta de valor recebido este mês (em R$)?", meta || ""));
+      if (!valor || valor <= 0) return;
+      await salvarMetaFechamento(valor);
+      carregarDashboard();
+    });
   }
 
   function renderGraficoFaturamento(campanhas) {
