@@ -33,10 +33,12 @@
     --cinza: #8A8A8A;
     --fundo-cinza: rgba(138, 138, 138, 0.14);
     /* Selos de prazo (mesma família tonal do verde, só mudando o matiz) */
-    --pill-amanha: #A58C50;
-    --fundo-pill-amanha: rgba(165, 140, 80, 0.16);
-    --pill-atrasado: #A16B63;
-    --fundo-pill-atrasado: rgba(161, 107, 99, 0.16);
+    --pill-amanha: #C9A227;
+    --fundo-pill-amanha: rgba(201, 162, 39, 0.18);
+    --pill-atrasado: #C1613A;
+    --fundo-pill-atrasado: rgba(193, 97, 58, 0.16);
+    --pill-hoje: #3F8557;
+    --fundo-pill-hoje: rgba(63, 133, 87, 0.16);
     --raio: 14px;
     --raio-grande: 20px;
     --sidebar-largura: 234px;
@@ -225,7 +227,7 @@
   .pill-prazo { font-family: "SF Mono", Menlo, Consolas, monospace; font-size: 0.76rem; font-weight: 600; padding: 6px 12px; border-radius: 8px; white-space: nowrap; flex-shrink: 0; }
   .pill-prazo-atrasado { background: var(--fundo-pill-atrasado); color: var(--pill-atrasado); }
   .pill-prazo-amanha { background: var(--fundo-pill-amanha); color: var(--pill-amanha); }
-  .pill-prazo-normal { background: var(--fundo-acento); color: var(--acento-escuro); }
+  .pill-prazo-normal { background: var(--fundo-pill-hoje); color: var(--pill-hoje); }
   .linha-tarefa-corpo { flex-grow: 1; min-width: 0; }
   .linha-tarefa-titulo { font-weight: 700; font-size: 0.95rem; }
   .linha-tarefa-sub { font-size: 0.82rem; color: var(--texto-suave); margin-top: 2px; }
