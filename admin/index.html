@@ -84,7 +84,7 @@
     position: fixed;
     top: 0; left: 0; bottom: 0;
     z-index: 300;
-    transition: transform 0.25s ease;
+    transition: transform 0.25s ease, width 0.2s ease;
   }
   .sidebar-marca { padding: 0 8px 20px; font-weight: 700; font-size: 0.95rem; color: var(--sidebar-texto); }
   .sidebar-marca span { display: block; font-size: 0.72rem; font-weight: 500; color: var(--sidebar-texto-suave); margin-top: 2px; }
@@ -124,6 +124,31 @@
   }
   .botao-sair:hover { background: var(--sidebar-hover); color: var(--sidebar-texto); }
 
+  .botao-colapsar-sidebar {
+    display: flex; align-items: center; gap: 10px;
+    width: 100%;
+    padding: 8px 10px;
+    margin-bottom: 8px;
+    border: none;
+    border-radius: 10px;
+    background: none;
+    color: var(--sidebar-texto-suave);
+    font-size: 0.82rem;
+    cursor: pointer;
+  }
+  .botao-colapsar-sidebar:hover { background: var(--sidebar-hover); color: var(--sidebar-texto); }
+
+  /* ===== BARRA LATERAL RECOLHIDA ===== */
+  .layout.sidebar-colapsada .sidebar { width: 68px; }
+  .layout.sidebar-colapsada .conteudo { margin-left: 68px; }
+  .layout.sidebar-colapsada .rotulo-nav { display: none; }
+  .layout.sidebar-colapsada .sidebar-marca { text-align: center; padding: 0 0 20px; }
+  .layout.sidebar-colapsada .nav-grupo-titulo { display: none; }
+  .layout.sidebar-colapsada .nav-item,
+  .layout.sidebar-colapsada .botao-sair,
+  .layout.sidebar-colapsada .botao-colapsar-sidebar { justify-content: center; padding: 10px; }
+  .layout.sidebar-colapsada .botao-colapsar-sidebar .icone svg { transform: rotate(180deg); }
+
   .btn-menu-mobile {
     display: none;
     position: fixed;
@@ -144,6 +169,7 @@
     margin-left: var(--sidebar-largura);
     padding: 28px 32px 60px;
     max-width: 1180px;
+    transition: margin-left 0.2s ease;
   }
   .conteudo-topo { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; margin-bottom: 22px; }
   .conteudo-topo-compacta { margin-bottom: 4px; min-height: 0; }
@@ -682,7 +708,7 @@
   .coluna-kanban-add-topo:hover { background: var(--branco); color: var(--preto); }
   .coluna-kanban-corpo { padding: 0 10px 12px; display: flex; flex-direction: column; gap: 8px; overflow-y: auto; flex-grow: 1; min-height: 40px; }
 
-  .card-kanban { background: var(--branco); border: 1px solid var(--borda); border-radius: 10px; padding: 10px 12px; cursor: grab; display: flex; flex-direction: column; gap: 6px; touch-action: none; user-select: none; }
+  .card-kanban { background: var(--branco); border: 1.5px solid rgba(58, 52, 46, 0.28); border-radius: 10px; padding: 10px 12px; cursor: grab; display: flex; flex-direction: column; gap: 6px; touch-action: none; user-select: none; }
   .card-kanban.arrastando { opacity: 0.35; }
   .card-kanban-fantasma { position: fixed; z-index: 500; pointer-events: none; opacity: 0.95; box-shadow: 0 12px 30px rgba(0,0,0,0.22); width: 236px; }
   .card-kanban-titulo { font-weight: 600; font-size: 0.85rem; line-height: 1.3; }
@@ -715,6 +741,11 @@
     .sidebar.aberta { transform: translateX(0); }
     .drawer-fundo.ativo { display: block; }
     .conteudo { margin-left: 0; padding: 70px 16px 60px; }
+    .layout.sidebar-colapsada .sidebar { width: var(--sidebar-largura); }
+    .layout.sidebar-colapsada .conteudo { margin-left: 0; }
+    .layout.sidebar-colapsada .rotulo-nav { display: initial; }
+    .layout.sidebar-colapsada .nav-grupo-titulo { display: block; }
+    .botao-colapsar-sidebar { display: none; }
     .linha-form-2 { grid-template-columns: 1fr; }
     .linha-transcrever { flex-direction: column; }
     .linha-transcrever input, .linha-transcrever select, .linha-transcrever button { width: 100%; }
@@ -730,59 +761,63 @@
 </button>
 <div class="drawer-fundo" id="drawer-fundo"></div>
 
-<div class="layout">
+<div class="layout" id="layout">
   <aside class="sidebar" id="sidebar">
-    <div class="sidebar-marca">Talissa Müller<span>Painel administrativo</span></div>
+    <div class="sidebar-marca"><span class="rotulo-nav">Talissa Müller</span><span>Painel administrativo</span></div>
 
     <nav class="nav-grupo">
       <div class="nav-grupo-titulo">Visão geral</div>
-      <button class="nav-item" data-aba="dashboard">
+      <button class="nav-item" data-aba="dashboard" title="Início">
         <span class="icone"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="8" height="8" rx="1.5"/><rect x="13" y="3" width="8" height="5" rx="1.5"/><rect x="13" y="10" width="8" height="11" rx="1.5"/><rect x="3" y="13" width="8" height="8" rx="1.5"/></svg></span>
-        Início
+        <span class="rotulo-nav">Início</span>
       </button>
     </nav>
 
     <nav class="nav-grupo">
       <div class="nav-grupo-titulo">Meu site</div>
-      <button class="nav-item" data-aba="portfolio">
+      <button class="nav-item" data-aba="portfolio" title="Portfólio">
         <span class="icone"><svg viewBox="0 0 24 24"><path d="M4 19V9M10 19V5M16 19v-7M22 19H2"/></svg></span>
-        Portfólio
+        <span class="rotulo-nav">Portfólio</span>
       </button>
-      <button class="nav-item" data-aba="marcas">
+      <button class="nav-item" data-aba="marcas" title="Marcas">
         <span class="icone"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M2.5 20c0-3.6 2.9-6.2 6.5-6.2s6.5 2.6 6.5 6.2M16 8.3c1.6.3 2.8 1.6 2.8 3.2 0 1.5-1 2.7-2.4 3.1M17.5 14c2.6.5 4 2.4 4 5"/></svg></span>
-        Marcas
+        <span class="rotulo-nav">Marcas</span>
       </button>
     </nav>
 
     <nav class="nav-grupo">
       <div class="nav-grupo-titulo">Minha rotina</div>
-      <button class="nav-item" data-aba="calendario">
+      <button class="nav-item" data-aba="calendario" title="Calendário">
         <span class="icone"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2.5"/><path d="M8 3v4M16 3v4M3 10h18"/></svg></span>
-        Calendário
+        <span class="rotulo-nav">Calendário</span>
       </button>
-      <button class="nav-item" data-aba="campanhas">
+      <button class="nav-item" data-aba="campanhas" title="Campanhas">
         <span class="icone"><svg viewBox="0 0 24 24"><rect x="3" y="7.5" width="18" height="12.5" rx="2.2"/><path d="M8 7.5V6a2.5 2.5 0 0 1 2.5-2.5h3A2.5 2.5 0 0 1 16 6v1.5M3 13h18"/></svg></span>
-        Campanhas
+        <span class="rotulo-nav">Campanhas</span>
       </button>
-      <button class="nav-item" data-aba="producao">
+      <button class="nav-item" data-aba="producao" title="Produção">
         <span class="icone"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="5" height="16" rx="1.3"/><rect x="9.5" y="4" width="5" height="10" rx="1.3"/><rect x="16" y="4" width="5" height="13" rx="1.3"/></svg></span>
-        Produção
+        <span class="rotulo-nav">Produção</span>
       </button>
-      <button class="nav-item" data-aba="checklist">
+      <button class="nav-item" data-aba="checklist" title="Checklist">
         <span class="icone"><svg viewBox="0 0 24 24"><path d="M9 11l2.2 2.2L15 9"/><rect x="3" y="3" width="18" height="18" rx="3"/></svg></span>
-        Checklist
+        <span class="rotulo-nav">Checklist</span>
       </button>
-      <button class="nav-item" data-aba="transcricoes">
+      <button class="nav-item" data-aba="transcricoes" title="Transcrições">
         <span class="icone"><svg viewBox="0 0 24 24"><path d="M8 4h8l4 4v12a1 1 0 0 1-1 1H8a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1Z"/><path d="M16 4v4h4M9 13h6M9 16h6M9 10h2"/></svg></span>
-        Transcrições
+        <span class="rotulo-nav">Transcrições</span>
       </button>
     </nav>
 
     <div class="sidebar-rodape">
-      <div class="sidebar-email" id="sidebar-email">...</div>
-      <button class="botao-sair" id="botao-sair">
+      <button type="button" class="botao-colapsar-sidebar" id="botao-colapsar-sidebar" title="Recolher menu">
+        <span class="icone"><svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg></span>
+        <span class="rotulo-nav">Recolher menu</span>
+      </button>
+      <div class="sidebar-email rotulo-nav" id="sidebar-email">...</div>
+      <button class="botao-sair" id="botao-sair" title="Sair">
         <span class="icone"><svg viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg></span>
-        Sair
+        <span class="rotulo-nav">Sair</span>
       </button>
     </div>
   </aside>
@@ -1528,6 +1563,22 @@
   drawerFundo.addEventListener("click", fecharGaveta);
 
   document.getElementById("botao-sair").addEventListener("click", () => Banco.sair("../login/index.html"));
+
+  // ---- Recolher a barra lateral (preferência lembrada por navegador) ----
+  const layoutEl = document.getElementById("layout");
+  const botaoColapsar = document.getElementById("botao-colapsar-sidebar");
+  function aplicarColapsoSidebar(colapsada) {
+    layoutEl.classList.toggle("sidebar-colapsada", colapsada);
+    botaoColapsar.title = colapsada ? "Expandir menu" : "Recolher menu";
+  }
+  let colapsoSalvo = false;
+  try { colapsoSalvo = localStorage.getItem("sidebarColapsada") === "1"; } catch (erro) { /* sem acesso ao localStorage, segue expandida */ }
+  aplicarColapsoSidebar(colapsoSalvo);
+  botaoColapsar.addEventListener("click", () => {
+    const novoEstado = !layoutEl.classList.contains("sidebar-colapsada");
+    aplicarColapsoSidebar(novoEstado);
+    try { localStorage.setItem("sidebarColapsada", novoEstado ? "1" : "0"); } catch (erro) { /* ignora, só não vai lembrar da próxima vez */ }
+  });
 
   // Modais: fecham no botão "Cancelar/Fechar" ou clicando fora da caixa.
   document.querySelectorAll("[data-fechar-modal]").forEach(botao => {
