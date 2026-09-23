@@ -17,6 +17,11 @@ create table if not exists projetos_producao (
   link_briefing text,
   observacoes text,
   status text not null default 'ativo' check (status in ('ativo', 'concluido', 'arquivado')),
+  fixado boolean not null default false,
+  -- Quando o projeto nasce de uma campanha (ver banco-atualizacao-campanha-
+  -- producao-link.sql), guarda de qual campanha veio. "on delete cascade":
+  -- apagar a campanha apaga o projeto (e as tarefas dele) junto.
+  campanha_id uuid references campanhas(id) on delete cascade,
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );

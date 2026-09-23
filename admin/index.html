@@ -125,6 +125,7 @@
   .icone-subitem { width: 15px; height: 15px; flex-shrink: 0; }
   .icone-subitem svg { width: 100%; height: 100%; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
   .nav-subitem-projeto { padding-left: 20px; font-size: 0.8rem; }
+  .icone-fixado { width: 12px; height: 12px; margin-left: auto; opacity: 0.65; }
   .layout.sidebar-colapsada .nav-arvore-filhos { display: none; }
   .nav-arvore-filhos.recolhida { display: none; }
 
@@ -370,6 +371,7 @@
     color: var(--texto);
   }
   .botao-icone:hover { background: rgba(89,25,2,0.05); }
+  .botao-fixar-projeto.fixado { color: var(--acento); }
 
   .barra-acoes { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
   .barra-acoes-esquerda { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
@@ -2679,13 +2681,14 @@
     modalCampanha.hidden = false;
   }
   document.getElementById("botao-add-linha-entrega-campanha").addEventListener("click", () => adicionarLinhaEntrega("lista-entregas-campanha-form"));
-  async function criarProjetoDeCampanhaEAbrir(nomeCampanha, cliente, prazo, valor, entregas) {
+  async function criarProjetoDeCampanhaEAbrir(campanhaId, nomeCampanha, cliente, prazo, valor, entregas) {
     const novoProjeto = await salvarSeguro("projetos_producao", sb.from("projetos_producao").insert({
       marca: cliente,
       observacoes: nomeCampanha ? "Campanha: " + nomeCampanha : null,
       prazo_final: prazo || null,
       valor: valor || null,
-      status: "ativo"
+      status: "ativo",
+      campanha_id: campanhaId || null
     }).select().single());
     if (!novoProjeto) return;
     const criadas = await criarTarefasDoTemplate(novoProjeto.id, prazo, entregas);
@@ -2697,7 +2700,7 @@
   }
   document.getElementById("camp-apagar").addEventListener("click", async () => {
     const id = document.getElementById("camp-id").value;
-    if (!id || !confirm("Apagar esta campanha?")) return;
+    if (!id || !confirm("Apagar esta campanha? Se ela tiver um projeto de Produção ligado, ele (e as tarefas dele) também será apagado.")) return;
     await salvarSeguro("campanhas", sb.from("campanhas").delete().eq("id", id));
     modalCampanha.hidden = true;
     carregarCampanhas();
@@ -2722,13 +2725,13 @@
       modalCampanha.hidden = true;
       carregarCampanhas();
     } else {
-      await salvarSeguro("campanhas", sb.from("campanhas").insert(registro));
+      const novaCampanha = await salvarSeguro("campanhas", sb.from("campanhas").insert(registro).select().single());
       modalCampanha.hidden = true;
       carregarCampanhas();
       // Cria o projeto em Produção sozinho, com um card por entrega, e já
       // abre no primeiro card (na coluna Briefing) pronto pra editar.
       if (entregasCampanha.length > 0) {
-        await criarProjetoDeCampanhaEAbrir(registro.campanha, registro.cliente, registro.prazo, registro.valor, entregasCampanha);
+        await criarProjetoDeCampanhaEAbrir(novaCampanha ? novaCampanha.id : null, registro.campanha, registro.cliente, registro.prazo, registro.valor, entregasCampanha);
       }
     }
   });
@@ -2802,14 +2805,21 @@
     rerenderizarProducao();
   }
 
+  // Projetos fixados (p.fixado) sempre vêm primeiro; o sort é estável, então
+  // dentro de cada grupo (fixados / não fixados) mantém a ordem original.
+  function comFixadosPrimeiro(lista) {
+    return lista.slice().sort((a, b) => (b.fixado ? 1 : 0) - (a.fixado ? 1 : 0));
+  }
+
   // ---- Árvore "Produção > Projetos > cada projeto" na barra lateral ----
   function renderSidebarProjetos() {
     const alvo = document.getElementById("nav-lista-projetos-sidebar");
-    const ativos = listaProjetosProducao.filter(p => p.status === "ativo");
+    const ativos = comFixadosPrimeiro(listaProjetosProducao.filter(p => p.status === "ativo"));
     alvo.innerHTML = ativos.map(p =>
       '<button type="button" class="nav-subitem nav-subitem-projeto" data-nav-producao-projeto-id="' + p.id + '" title="' + escaparAtributo(p.marca) + '">' +
         '<span class="icone-subitem"><svg viewBox="0 0 24 24"><path d="M9 11l2.2 2.2L15 9"/><rect x="3" y="3" width="18" height="18" rx="3"/></svg></span>' +
         '<span class="rotulo-nav">' + escaparAtributo(p.marca) + "</span>" +
+        (p.fixado ? '<span class="icone-subitem icone-fixado" title="Fixado"><svg viewBox="0 0 24 24"><path d="M12 21s7-6.5 7-11a7 7 0 1 0-14 0c0 4.5 7 11 7 11Z"/><circle cx="12" cy="10" r="2.3"/></svg></span>' : "") +
       "</button>"
     ).join("");
     alvo.querySelectorAll("[data-nav-producao-projeto-id]").forEach(botao => {
@@ -2878,14 +2888,14 @@
   const ROTULO_STATUS_PROJETO = { ativo: "Ativo", concluido: "Concluído", arquivado: "Arquivado" };
   function renderGradeProjetos() {
     const alvo = document.getElementById("grade-projetos-producao");
-    const filtrados = listaProjetosProducao.filter(p => p.status === filtroProjetoStatus);
+    const filtrados = comFixadosPrimeiro(listaProjetosProducao.filter(p => p.status === filtroProjetoStatus));
     if (filtrados.length === 0) {
       alvo.innerHTML = '<p class="texto-vazio">Nenhum projeto ' + ROTULO_STATUS_PROJETO[filtroProjetoStatus].toLowerCase() + " ainda.</p>";
       return;
     }
     alvo.innerHTML = filtrados.map(p => {
       const prog = progressoProjeto(p.id);
-      return '<div class="cartao-projeto-producao" data-id="' + p.id + '">' +
+      return '<div class="cartao-projeto-producao' + (p.fixado ? " fixado" : "") + '" data-id="' + p.id + '">' +
         '<div class="cartao-projeto-producao-topo">' +
           '<span class="selo-status-projeto status-' + p.status + '">' + ROTULO_STATUS_PROJETO[p.status] + "</span>" +
         "</div>" +
@@ -2897,12 +2907,15 @@
           '<div class="barra-progresso-fundo"><div class="barra-progresso" style="width:' + prog.pct + '%;"></div></div>' +
           '<div class="cartao-projeto-producao-meta">' + prog.feitas + " de " + prog.total + " concluídas (" + prog.pct + "%)</div>" +
         "</div>" +
-        '<div class="cartao-projeto-producao-acoes"><button type="button" class="botao-icone" data-editar-projeto="' + p.id + '" title="Editar projeto"><span class="icone"><svg viewBox="0 0 24 24"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></span></button></div>' +
+        '<div class="cartao-projeto-producao-acoes">' +
+          '<button type="button" class="botao-icone botao-fixar-projeto' + (p.fixado ? " fixado" : "") + '" data-fixar-projeto="' + p.id + '" data-fixado="' + p.fixado + '" title="' + (p.fixado ? "Desfixar do topo" : "Fixar no topo") + '"><span class="icone"><svg viewBox="0 0 24 24"><path d="M12 21s7-6.5 7-11a7 7 0 1 0-14 0c0 4.5 7 11 7 11Z"/><circle cx="12" cy="10" r="2.5"/></svg></span></button>' +
+          '<button type="button" class="botao-icone" data-editar-projeto="' + p.id + '" title="Editar projeto"><span class="icone"><svg viewBox="0 0 24 24"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></span></button>' +
+        "</div>" +
       "</div>";
     }).join("");
     alvo.querySelectorAll(".cartao-projeto-producao").forEach(cartao => {
       cartao.addEventListener("click", (evento) => {
-        if (evento.target.closest("[data-editar-projeto]")) return;
+        if (evento.target.closest("[data-editar-projeto]") || evento.target.closest("[data-fixar-projeto]")) return;
         abrirQuadroProjeto(cartao.dataset.id);
       });
     });
@@ -2910,6 +2923,17 @@
       botao.addEventListener("click", (evento) => {
         evento.stopPropagation();
         abrirModalProjeto(listaProjetosProducao.find(p => p.id === botao.dataset.editarProjeto));
+      });
+    });
+    alvo.querySelectorAll("[data-fixar-projeto]").forEach(botao => {
+      botao.addEventListener("click", async (evento) => {
+        evento.stopPropagation();
+        const novoFixado = botao.dataset.fixado !== "true";
+        await salvarSeguro("projetos_producao", sb.from("projetos_producao").update({ fixado: novoFixado }).eq("id", botao.dataset.fixarProjeto));
+        const projeto = listaProjetosProducao.find(p => p.id === botao.dataset.fixarProjeto);
+        if (projeto) projeto.fixado = novoFixado;
+        renderGradeProjetos();
+        renderSidebarProjetos();
       });
     });
   }
