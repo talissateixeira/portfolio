@@ -448,7 +448,7 @@
     overflow-y: auto;
   }
   .modal-fundo[hidden] { display: none; }
-  #bloco-entregas-fechadas[hidden], #bloco-status-projeto[hidden] { display: none; }
+  #bloco-entregas-fechadas[hidden], #bloco-status-projeto[hidden], #bloco-campanha-qtd-manual[hidden], #bloco-campanha-entregas[hidden] { display: none; }
   .modal-caixa {
     width: 100%; max-width: 460px;
     background: var(--branco);
@@ -1415,7 +1415,10 @@
         </div>
       </div>
       <div class="linha-form-2">
-        <div class="campo-form"><label>Quantidade de vídeos</label><input type="number" id="camp-qtd" min="1" value="1" required></div>
+        <div class="campo-form" id="bloco-campanha-qtd-manual" hidden>
+          <label>Quantidade de vídeos</label>
+          <input type="number" id="camp-qtd" min="1" value="1">
+        </div>
         <div class="campo-form"><label>Valor total (R$)</label><input type="number" id="camp-valor" min="0" step="0.01" value="0" required></div>
       </div>
       <div class="linha-form-2">
@@ -1423,6 +1426,11 @@
         <div class="campo-form"><label>Pagamento</label>
           <select id="camp-pagamento"><option value="pendente">Pendente</option><option value="pago">Pago</option></select>
         </div>
+      </div>
+      <div class="campo-form" id="bloco-campanha-entregas">
+        <label>Entregas / serviços (cria o projeto no Produção sozinho)</label>
+        <div id="lista-entregas-campanha-form"></div>
+        <button type="button" class="botao botao-secundario" id="botao-add-linha-entrega-campanha" style="margin-top:4px;">+ adicionar entrega</button>
       </div>
       <div class="modal-acoes">
         <button type="button" class="link-apagar" id="camp-apagar" hidden>Apagar campanha</button>
@@ -2495,7 +2503,7 @@
       { rotulo: "Valor total", valor: formatarMoeda(valorTotal), extra: "Ticket médio: " + formatarMoeda(ticketMedio) },
       { rotulo: "A receber", valor: formatarMoeda(aReceber) },
       { rotulo: "Já recebido", valor: formatarMoeda(jaRecebido) }
-    ].map((s, i) => '<div class="stat-item stat-item-cor-' + ((i % 3) + 1) + '"><div class="stat-rotulo">' + s.rotulo + '</div><div class="stat-valor">' + s.valor + (s.extra ? "<small>" + s.extra + "</small>" : "") + "</div></div>").join("");
+    ].map((s, i, arr) => '<div class="stat-item' + (i === arr.length - 1 ? " stat-item-cor-3" : "") + '"><div class="stat-rotulo">' + s.rotulo + '</div><div class="stat-valor">' + s.valor + (s.extra ? "<small>" + s.extra + "</small>" : "") + "</div></div>").join("");
   }
   function diasEntre(a, b) { return Math.round((new Date(a) - new Date(b)) / 86400000); }
   function renderTabelaCampanhas() {
@@ -2602,7 +2610,28 @@
     document.getElementById("camp-prazo").value = campanha ? (campanha.prazo || "") : "";
     document.getElementById("camp-pagamento").value = campanha ? campanha.pagamento : "pendente";
     document.getElementById("camp-apagar").hidden = !campanha;
+    document.getElementById("bloco-campanha-qtd-manual").hidden = !campanha;
+    document.getElementById("bloco-campanha-entregas").hidden = !!campanha;
+    document.getElementById("lista-entregas-campanha-form").innerHTML = "";
+    if (!campanha) adicionarLinhaEntrega("lista-entregas-campanha-form");
     modalCampanha.hidden = false;
+  }
+  document.getElementById("botao-add-linha-entrega-campanha").addEventListener("click", () => adicionarLinhaEntrega("lista-entregas-campanha-form"));
+  async function criarProjetoDeCampanhaEAbrir(nomeCampanha, cliente, prazo, valor, entregas) {
+    const novoProjeto = await salvarSeguro("projetos_producao", sb.from("projetos_producao").insert({
+      marca: nomeCampanha,
+      contato: cliente || null,
+      prazo_final: prazo || null,
+      valor: valor || null,
+      status: "ativo"
+    }).select().single());
+    if (!novoProjeto) return;
+    const criadas = await criarTarefasDoTemplate(novoProjeto.id, prazo, entregas);
+    await carregarDadosProducao();
+    abrirAba("producao");
+    abrirQuadroProjeto(novoProjeto.id);
+    const primeira = criadas.slice().sort((a, b) => (a.ordem || 0) - (b.ordem || 0))[0];
+    if (primeira) abrirModalCard(listaTarefasProducao.find(t => t.id === primeira.id) || primeira);
   }
   document.getElementById("camp-apagar").addEventListener("click", async () => {
     const id = document.getElementById("camp-id").value;
@@ -2614,20 +2643,32 @@
   document.getElementById("form-campanha").addEventListener("submit", async (evento) => {
     evento.preventDefault();
     const id = document.getElementById("camp-id").value;
+    const entregasCampanha = id ? [] : lerLinhasEntregas("lista-entregas-campanha-form");
+    const qtdCalculada = entregasCampanha.reduce((soma, e) => soma + e.quantidade, 0);
     const registro = {
       campanha: document.getElementById("camp-campanha").value.trim(),
       cliente: document.getElementById("camp-cliente").value.trim(),
       tipo: document.getElementById("camp-tipo").value,
       status: document.getElementById("camp-status").value,
-      qtd: Number(document.getElementById("camp-qtd").value),
+      qtd: id ? Number(document.getElementById("camp-qtd").value) : Math.max(1, qtdCalculada),
       valor: Number(document.getElementById("camp-valor").value),
       prazo: document.getElementById("camp-prazo").value || null,
       pagamento: document.getElementById("camp-pagamento").value
     };
-    if (id) await salvarSeguro("campanhas", sb.from("campanhas").update(registro).eq("id", id));
-    else await salvarSeguro("campanhas", sb.from("campanhas").insert(registro));
-    modalCampanha.hidden = true;
-    carregarCampanhas();
+    if (id) {
+      await salvarSeguro("campanhas", sb.from("campanhas").update(registro).eq("id", id));
+      modalCampanha.hidden = true;
+      carregarCampanhas();
+    } else {
+      await salvarSeguro("campanhas", sb.from("campanhas").insert(registro));
+      modalCampanha.hidden = true;
+      carregarCampanhas();
+      // Cria o projeto em Produção sozinho, com um card por entrega, e já
+      // abre no primeiro card (na coluna Briefing) pronto pra editar.
+      if (entregasCampanha.length > 0) {
+        await criarProjetoDeCampanhaEAbrir(registro.campanha, registro.cliente, registro.prazo, registro.valor, entregasCampanha);
+      }
+    }
   });
   document.getElementById("botao-exportar-campanhas").addEventListener("click", () => {
     const linhas = listaCampanhas.map(c => [c.campanha, c.cliente, c.tipo, c.status, c.qtd, c.valor, c.prazo, c.pagamento, campanhaFinalizada(c) ? "não" : "sim"]);
@@ -3013,13 +3054,13 @@
 
   // ---- Modal: projeto ----
   const modalProjeto = document.getElementById("modal-projeto-producao");
-  function lerLinhasEntregas() {
-    return [...document.querySelectorAll("#lista-entregas-form .linha-entrega-form")].map(linha => ({
+  function lerLinhasEntregas(containerId) {
+    return [...document.querySelectorAll("#" + containerId + " .linha-entrega-form")].map(linha => ({
       formato: linha.querySelector(".entrega-formato").value,
       quantidade: Math.max(1, parseInt(linha.querySelector(".entrega-qtd").value, 10) || 1)
     }));
   }
-  function adicionarLinhaEntrega() {
+  function adicionarLinhaEntrega(containerId) {
     const div = document.createElement("div");
     div.className = "linha-entrega-form";
     div.innerHTML =
@@ -3027,7 +3068,7 @@
       '<input type="number" class="entrega-qtd" min="1" value="1">' +
       '<button type="button" class="botao-icone remover-linha-entrega" title="Remover"><span class="icone"><svg viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></span></button>';
     div.querySelector(".remover-linha-entrega").addEventListener("click", () => div.remove());
-    document.getElementById("lista-entregas-form").appendChild(div);
+    document.getElementById(containerId).appendChild(div);
   }
   async function criarTarefasDoTemplate(projetoId, prazoFinal, entregas) {
     const contagemPorFormato = {};
@@ -3046,8 +3087,9 @@
         });
       }
     });
-    if (linhas.length === 0) return;
-    await salvarSeguro("tarefas_producao", sb.from("tarefas_producao").insert(linhas));
+    if (linhas.length === 0) return [];
+    const criadas = await salvarSeguro("tarefas_producao", sb.from("tarefas_producao").insert(linhas).select());
+    return criadas || [];
   }
   function abrirModalProjeto(item) {
     document.getElementById("form-projeto-producao").reset();
@@ -3064,11 +3106,11 @@
     document.getElementById("bloco-status-projeto").hidden = !item;
     document.getElementById("proj-apagar").hidden = !item;
     document.getElementById("bloco-entregas-fechadas").hidden = !!item;
-    if (!item) adicionarLinhaEntrega();
+    if (!item) adicionarLinhaEntrega("lista-entregas-form");
     modalProjeto.hidden = false;
   }
   document.getElementById("botao-add-projeto").addEventListener("click", () => abrirModalProjeto(null));
-  document.getElementById("botao-add-linha-entrega").addEventListener("click", adicionarLinhaEntrega);
+  document.getElementById("botao-add-linha-entrega").addEventListener("click", () => adicionarLinhaEntrega("lista-entregas-form"));
   document.getElementById("proj-apagar").addEventListener("click", async () => {
     const id = document.getElementById("proj-id").value;
     if (!id || !confirm("Excluir este projeto e todas as tarefas dele? Não dá pra desfazer.")) return;
@@ -3093,7 +3135,7 @@
       await salvarSeguro("projetos_producao", sb.from("projetos_producao").update(registro).eq("id", id));
     } else {
       const novo = await salvarSeguro("projetos_producao", sb.from("projetos_producao").insert(registro).select().single());
-      if (novo) await criarTarefasDoTemplate(novo.id, registro.prazo_final, lerLinhasEntregas());
+      if (novo) await criarTarefasDoTemplate(novo.id, registro.prazo_final, lerLinhasEntregas("lista-entregas-form"));
     }
     modalProjeto.hidden = true;
     carregarDadosProducao();
