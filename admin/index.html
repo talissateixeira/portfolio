@@ -106,6 +106,27 @@
   }
   .nav-item:hover { background: var(--sidebar-hover); color: var(--sidebar-texto); }
   .nav-item.ativo { background: var(--sidebar-ativo-fundo); color: var(--sidebar-texto); font-weight: 700; }
+
+  .nav-arvore-filhos { display: flex; flex-direction: column; margin-left: 17px; padding-left: 10px; border-left: 1px solid var(--sidebar-borda); margin-bottom: 2px; }
+  .nav-subitem {
+    display: flex; align-items: center; gap: 8px;
+    width: 100%;
+    padding: 7px 10px;
+    border: none; background: none;
+    border-radius: 8px;
+    color: var(--sidebar-texto-suave);
+    font-size: 0.82rem;
+    font-weight: 500;
+    text-align: left;
+    cursor: pointer;
+  }
+  .nav-subitem:hover { background: var(--sidebar-hover); color: var(--sidebar-texto); }
+  .nav-subitem.ativo { color: var(--sidebar-texto); font-weight: 700; }
+  .icone-subitem { width: 15px; height: 15px; flex-shrink: 0; }
+  .icone-subitem svg { width: 100%; height: 100%; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+  .nav-subitem-projeto { padding-left: 20px; font-size: 0.8rem; }
+  .layout.sidebar-colapsada .nav-arvore-filhos { display: none; }
+
   .sidebar-rodape {
     margin-top: auto;
     padding: 12px 10px 0;
@@ -802,10 +823,17 @@
         <span class="icone"><svg viewBox="0 0 24 24"><rect x="3" y="7.5" width="18" height="12.5" rx="2.2"/><path d="M8 7.5V6a2.5 2.5 0 0 1 2.5-2.5h3A2.5 2.5 0 0 1 16 6v1.5M3 13h18"/></svg></span>
         <span class="rotulo-nav">Campanhas</span>
       </button>
-      <button class="nav-item" data-aba="producao" title="Produção">
+      <button class="nav-item" data-aba="producao" data-nav-producao-raiz title="Produção">
         <span class="icone"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="5" height="16" rx="1.3"/><rect x="9.5" y="4" width="5" height="10" rx="1.3"/><rect x="16" y="4" width="5" height="13" rx="1.3"/></svg></span>
         <span class="rotulo-nav">Produção</span>
       </button>
+      <div class="nav-arvore-filhos" id="nav-arvore-producao">
+        <button class="nav-subitem" data-nav-producao-projetos title="Projetos">
+          <span class="icone-subitem"><svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2Z"/></svg></span>
+          <span class="rotulo-nav">Projetos</span>
+        </button>
+        <div id="nav-lista-projetos-sidebar"></div>
+      </div>
       <button class="nav-item" data-aba="checklist" title="Checklist">
         <span class="icone"><svg viewBox="0 0 24 24"><path d="M9 11l2.2 2.2L15 9"/><rect x="3" y="3" width="18" height="18" rx="3"/></svg></span>
         <span class="rotulo-nav">Checklist</span>
@@ -2639,8 +2667,60 @@
     listaProjetosProducao = projetos;
     listaTarefasProducao = tarefas;
     popularFiltroProjetoTodas();
+    renderSidebarProjetos();
     rerenderizarProducao();
   }
+
+  // ---- Árvore "Produção > Projetos > cada projeto" na barra lateral ----
+  function renderSidebarProjetos() {
+    const alvo = document.getElementById("nav-lista-projetos-sidebar");
+    const ativos = listaProjetosProducao.filter(p => p.status === "ativo");
+    alvo.innerHTML = ativos.map(p =>
+      '<button type="button" class="nav-subitem nav-subitem-projeto" data-nav-producao-projeto-id="' + p.id + '" title="' + escaparAtributo(p.marca) + '">' +
+        '<span class="icone-subitem"><svg viewBox="0 0 24 24"><path d="M9 11l2.2 2.2L15 9"/><rect x="3" y="3" width="18" height="18" rx="3"/></svg></span>' +
+        '<span class="rotulo-nav">' + escaparAtributo(p.marca) + "</span>" +
+      "</button>"
+    ).join("");
+    alvo.querySelectorAll("[data-nav-producao-projeto-id]").forEach(botao => {
+      botao.addEventListener("click", () => {
+        abrirAba("producao");
+        abrirQuadroProjeto(botao.dataset.navProducaoProjetoId);
+        fecharGaveta();
+      });
+    });
+    atualizarSidebarProducaoAtiva();
+  }
+  function atualizarSidebarProducaoAtiva() {
+    const emProjetos = document.getElementById("producao-view-projetos").classList.contains("ativa");
+    const emQuadro = document.getElementById("producao-view-quadro").classList.contains("ativa");
+    const itemProjetos = document.querySelector("[data-nav-producao-projetos]");
+    if (itemProjetos) itemProjetos.classList.toggle("ativo", emProjetos);
+    document.querySelectorAll("[data-nav-producao-projeto-id]").forEach(botao => {
+      botao.classList.toggle("ativo", emQuadro && botao.dataset.navProducaoProjetoId === projetoAtualId);
+    });
+  }
+  function voltarParaListaProjetos() {
+    projetoAtualId = null;
+    document.querySelectorAll(".subaba-producao").forEach(s => s.classList.remove("ativa"));
+    document.getElementById("producao-view-projetos").classList.add("ativa");
+    document.querySelectorAll(".subtab-btn-producao").forEach(b => b.classList.toggle("ativo", b.dataset.subabaProducao === "projetos"));
+    atualizarSidebarProducaoAtiva();
+  }
+  document.querySelector("[data-nav-producao-projetos]").addEventListener("click", () => {
+    abrirAba("producao");
+    voltarParaListaProjetos();
+    fecharGaveta();
+  });
+  document.querySelector("[data-nav-producao-raiz]").addEventListener("click", voltarParaListaProjetos);
+
+  // Carrega só a lista de projetos (leve) assim que a página abre, pra árvore
+  // da barra lateral já aparecer mesmo antes de entrar na aba Produção.
+  (async function carregarProjetosSidebarCedo() {
+    if (listaProjetosProducao.length === 0) {
+      listaProjetosProducao = await consultarSeguro("projetos_producao", sb.from("projetos_producao").select("*").order("created_at", { ascending: false }));
+      renderSidebarProjetos();
+    }
+  })();
   function rerenderizarProducao() {
     renderGradeProjetos();
     if (projetoAtualId) renderKanbanEm("quadro-kanban-projeto", listaTarefasProducao.filter(t => t.projeto_id === projetoAtualId), false);
@@ -2710,13 +2790,9 @@
     document.getElementById("producao-view-quadro").classList.add("ativa");
     document.querySelectorAll(".subtab-btn-producao").forEach(b => b.classList.remove("ativo"));
     renderKanbanEm("quadro-kanban-projeto", listaTarefasProducao.filter(t => t.projeto_id === projetoId), false);
+    atualizarSidebarProducaoAtiva();
   }
-  document.getElementById("botao-voltar-projetos").addEventListener("click", () => {
-    projetoAtualId = null;
-    document.querySelectorAll(".subaba-producao").forEach(s => s.classList.remove("ativa"));
-    document.getElementById("producao-view-projetos").classList.add("ativa");
-    document.querySelector('.subtab-btn-producao[data-subaba-producao="projetos"]').classList.add("ativo");
-  });
+  document.getElementById("botao-voltar-projetos").addEventListener("click", voltarParaListaProjetos);
   document.getElementById("botao-editar-projeto-atual").addEventListener("click", () => {
     abrirModalProjeto(listaProjetosProducao.find(p => p.id === projetoAtualId));
   });
