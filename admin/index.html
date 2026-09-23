@@ -2503,7 +2503,7 @@
       { rotulo: "Valor total", valor: formatarMoeda(valorTotal), extra: "Ticket médio: " + formatarMoeda(ticketMedio) },
       { rotulo: "A receber", valor: formatarMoeda(aReceber) },
       { rotulo: "Já recebido", valor: formatarMoeda(jaRecebido) }
-    ].map((s, i, arr) => '<div class="stat-item' + (i === arr.length - 1 ? " stat-item-cor-3" : "") + '"><div class="stat-rotulo">' + s.rotulo + '</div><div class="stat-valor">' + s.valor + (s.extra ? "<small>" + s.extra + "</small>" : "") + "</div></div>").join("");
+    ].map((s, i, arr) => '<div class="stat-item' + ((i === 2 || i === arr.length - 1) ? " stat-item-cor-3" : "") + '"><div class="stat-rotulo">' + s.rotulo + '</div><div class="stat-valor">' + s.valor + (s.extra ? "<small>" + s.extra + "</small>" : "") + "</div></div>").join("");
   }
   function diasEntre(a, b) { return Math.round((new Date(a) - new Date(b)) / 86400000); }
   function renderTabelaCampanhas() {
