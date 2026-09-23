@@ -760,6 +760,9 @@
   .comentario-producao { padding: 8px 0; border-top: 1px solid var(--borda); font-size: 0.84rem; }
   .comentario-producao:first-child { border-top: none; }
   .comentario-producao-data { font-size: 0.7rem; color: var(--texto-suave); margin-top: 2px; }
+  .anexo-producao-linha { display: flex; align-items: center; gap: 10px; font-size: 0.85rem; margin-top: 8px; }
+  .anexo-producao-preview { width: 100%; height: 420px; border: 1px solid var(--borda); border-radius: 8px; margin-top: 8px; }
+  .anexo-producao-imagem { max-width: 100%; border-radius: 8px; margin-top: 8px; display: block; }
 
   @media (max-width: 780px) {
     .btn-menu-mobile { display: flex; }
@@ -1263,6 +1266,12 @@
         <div class="campo-form"><label>Link dos arquivos brutos</label><input type="url" id="card-link-brutos" placeholder="https://..."></div>
       </div>
       <div class="campo-form"><label>Link do vídeo final</label><input type="url" id="card-link-final" placeholder="https://..."></div>
+
+      <div class="campo-form">
+        <label>Anexo (PDF, imagem...)</label>
+        <input type="file" id="card-anexo-input" accept=".pdf,image/*">
+        <div id="card-anexo-atual"></div>
+      </div>
 
       <div class="campo-form">
         <label>Comentários</label>
@@ -2688,6 +2697,7 @@
   let filtroTodasProjetoIdAtual = "";
   let filtroTodasSoAtrasadas = false;
   let checklistEditando = [];
+  let anexoTarefaAtual = null;
   let comentariosEditando = [];
   let dragProducao = null;
 
@@ -3190,6 +3200,39 @@
     campo.value = "";
     renderComentariosModal();
   });
+  // ---- Anexo da tarefa (PDF ou imagem, aberto na hora, sem baixar) ----
+  function renderAnexoTarefaModal() {
+    const alvo = document.getElementById("card-anexo-atual");
+    if (!anexoTarefaAtual) { alvo.innerHTML = ""; return; }
+    const ehPdf = /\.pdf(\?|$)/i.test(anexoTarefaAtual.url);
+    const preview = ehPdf
+      ? '<iframe src="' + escaparAtributo(anexoTarefaAtual.url) + '" class="anexo-producao-preview"></iframe>'
+      : '<img src="' + escaparAtributo(anexoTarefaAtual.url) + '" class="anexo-producao-imagem" alt="">';
+    alvo.innerHTML =
+      '<div class="anexo-producao-linha">' +
+        '<span>📎 ' + escaparAtributo(anexoTarefaAtual.nome) + '</span>' +
+        '<button type="button" class="link-apagar" id="botao-remover-anexo-tarefa">Remover</button>' +
+      "</div>" + preview;
+    document.getElementById("botao-remover-anexo-tarefa").addEventListener("click", () => {
+      anexoTarefaAtual = null;
+      renderAnexoTarefaModal();
+    });
+  }
+  async function uploadAnexoTarefa(arquivo) {
+    const nomeArquivo = Date.now() + "-" + arquivo.name.replace(/[^a-zA-Z0-9.\-_]/g, "_");
+    const { error } = await sb.storage.from("producao-arquivos").upload(nomeArquivo, arquivo, { upsert: true });
+    if (error) { alert("Não consegui enviar o arquivo: " + error.message); return null; }
+    const { data } = sb.storage.from("producao-arquivos").getPublicUrl(nomeArquivo);
+    return { url: data.publicUrl, nome: arquivo.name };
+  }
+  document.getElementById("card-anexo-input").addEventListener("change", async (evento) => {
+    const arquivo = evento.target.files[0];
+    evento.target.value = "";
+    if (!arquivo) return;
+    const enviado = await uploadAnexoTarefa(arquivo);
+    if (enviado) { anexoTarefaAtual = enviado; renderAnexoTarefaModal(); }
+  });
+
   function abrirModalCard(tarefa, projetoIdParaNova, colunaParaNova) {
     document.getElementById("form-card-producao").reset();
     document.getElementById("modal-card-producao-titulo").textContent = tarefa ? "Editar tarefa" : "Nova tarefa";
@@ -3207,8 +3250,10 @@
     document.getElementById("card-apagar").hidden = !tarefa;
     checklistEditando = tarefa && Array.isArray(tarefa.checklist) ? JSON.parse(JSON.stringify(tarefa.checklist)) : [];
     comentariosEditando = tarefa && Array.isArray(tarefa.comentarios) ? JSON.parse(JSON.stringify(tarefa.comentarios)) : [];
+    anexoTarefaAtual = tarefa && tarefa.anexo_url ? { url: tarefa.anexo_url, nome: tarefa.anexo_nome || "arquivo" } : null;
     renderChecklistModal();
     renderComentariosModal();
+    renderAnexoTarefaModal();
     document.getElementById("card-datas-info").textContent = tarefa
       ? "Criada em " + formatarDataHora(tarefa.created_at) + (tarefa.concluido_em ? " · Concluída em " + formatarDataHora(tarefa.concluido_em) : "")
       : "";
@@ -3238,7 +3283,9 @@
       link_roteiro: document.getElementById("card-link-roteiro").value.trim() || null,
       link_arquivos_brutos: document.getElementById("card-link-brutos").value.trim() || null,
       link_video_final: document.getElementById("card-link-final").value.trim() || null,
-      comentarios: comentariosEditando
+      comentarios: comentariosEditando,
+      anexo_url: anexoTarefaAtual ? anexoTarefaAtual.url : null,
+      anexo_nome: anexoTarefaAtual ? anexoTarefaAtual.nome : null
     };
     if (colunaEscolhida === "Concluído" && (!tarefaAntiga || tarefaAntiga.coluna !== "Concluído")) {
       registro.concluido_em = new Date().toISOString();
