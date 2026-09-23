@@ -1094,6 +1094,7 @@
           </div>
           <div class="barra-acoes-direita">
             <button type="button" class="botao botao-secundario" id="botao-editar-projeto-atual">Editar projeto</button>
+            <button type="button" class="botao botao-secundario" id="botao-add-coluna-producao">+ Nova coluna</button>
             <button type="button" class="botao botao-principal" id="botao-add-card-topo">+ Nova tarefa</button>
           </div>
         </div>
@@ -1246,10 +1247,7 @@
         </div>
         <div class="campo-form">
           <label>Etapa</label>
-          <select id="card-coluna">
-            <option>Briefing</option><option>Roteiro</option><option>Aprovação do roteiro</option><option>Gravação</option>
-            <option>Edição</option><option>Revisão</option><option>Envio pra marca</option><option>Aprovação</option><option>Concluído</option>
-          </select>
+          <select id="card-coluna"></select>
         </div>
       </div>
       <div class="linha-form-2">
@@ -2717,7 +2715,7 @@
   // ============================================================================
   // ABA — PRODUÇÃO (quadro Kanban de entregas por projeto/marca)
   // ============================================================================
-  const COLUNAS_PRODUCAO = ["Briefing", "Roteiro", "Aprovação do roteiro", "Gravação", "Edição", "Revisão", "Envio pra marca", "Aprovação", "Concluído"];
+  let COLUNAS_PRODUCAO = ["To Do", "Briefing", "Roteiro", "Aprovação do roteiro", "Gravação", "Edição", "Revisão", "Envio pra marca", "Aprovação", "Concluído"];
   const FORMATOS_PRODUCAO = ["Reels", "TikTok", "Stories", "Foto", "Carrossel", "Outro"];
   let listaProjetosProducao = [];
   let listaTarefasProducao = [];
@@ -2740,8 +2738,35 @@
   async function carregarProducao() {
     await carregarDadosProducao();
   }
+  async function carregarColunasProducao() {
+    const { data } = await sb.from("configuracoes").select("valor").eq("chave", "colunas_producao").maybeSingle();
+    if (data && data.valor) {
+      try {
+        const colunas = JSON.parse(data.valor);
+        if (Array.isArray(colunas) && colunas.length > 0) COLUNAS_PRODUCAO = colunas;
+      } catch (erro) { /* mantém o padrão se o valor salvo estiver corrompido */ }
+    }
+    popularSelectColunaCard();
+  }
+  async function salvarColunasProducao() {
+    await sb.from("configuracoes").upsert({ chave: "colunas_producao", valor: JSON.stringify(COLUNAS_PRODUCAO), updated_at: new Date().toISOString() });
+  }
+  function popularSelectColunaCard() {
+    document.getElementById("card-coluna").innerHTML = COLUNAS_PRODUCAO.map(c => "<option>" + escaparAtributo(c) + "</option>").join("");
+  }
+  document.getElementById("botao-add-coluna-producao").addEventListener("click", async () => {
+    const nome = prompt("Nome da nova coluna:");
+    if (!nome || !nome.trim()) return;
+    const nomeLimpo = nome.trim();
+    if (COLUNAS_PRODUCAO.some(c => c.toLowerCase() === nomeLimpo.toLowerCase())) { alert("Já existe uma coluna com esse nome."); return; }
+    COLUNAS_PRODUCAO.splice(COLUNAS_PRODUCAO.length - 1, 0, nomeLimpo);
+    await salvarColunasProducao();
+    popularSelectColunaCard();
+    rerenderizarQuadroAtivo();
+  });
   async function carregarDadosProducao() {
-    const [projetos, tarefas] = await Promise.all([
+    const [, projetos, tarefas] = await Promise.all([
+      carregarColunasProducao(),
       consultarSeguro("projetos_producao", sb.from("projetos_producao").select("*").order("created_at", { ascending: false })),
       consultarSeguro("tarefas_producao", sb.from("tarefas_producao").select("*"))
     ]);
@@ -2888,7 +2913,7 @@
     abrirModalProjeto(listaProjetosProducao.find(p => p.id === projetoAtualId));
   });
   document.getElementById("botao-add-card-topo").addEventListener("click", () => {
-    if (projetoAtualId) abrirModalCard(null, projetoAtualId, "Briefing");
+    if (projetoAtualId) abrirModalCard(null, projetoAtualId, COLUNAS_PRODUCAO[0]);
   });
   document.querySelectorAll(".subtab-btn-producao").forEach(botao => {
     botao.addEventListener("click", () => {
@@ -2958,14 +2983,14 @@
       "</div>" +
     "</div>";
   }
-  const CORES_COLUNA_PRODUCAO = ["#8A8578", "#3F8557", "#C9A227", "#3F8557", "#C1613A", "#8A8578", "#C9A227", "#C1613A", "#3F8557"];
+  const PALETA_CORES_COLUNA = ["#8A8578", "#3F8557", "#C9A227", "#C1613A"];
   function renderKanbanEm(elId, tarefas, mostrarMarca) {
     const alvo = document.getElementById(elId);
     const mapaProjetos = {};
     listaProjetosProducao.forEach(p => { mapaProjetos[p.id] = p; });
     alvo.innerHTML = COLUNAS_PRODUCAO.map((coluna, i) => {
       const itens = tarefasOrdenadasPorColuna(tarefas, coluna);
-      const cor = CORES_COLUNA_PRODUCAO[i];
+      const cor = PALETA_CORES_COLUNA[i % PALETA_CORES_COLUNA.length];
       const corpo = itens.length === 0
         ? '<p class="texto-vazio" style="padding:4px 2px;">Nenhuma tarefa aqui ainda.</p>'
         : itens.map(t => cardKanbanHtml(t, mostrarMarca, mapaProjetos)).join("");
@@ -3280,7 +3305,7 @@
     document.getElementById("card-projeto-id").value = tarefa ? tarefa.projeto_id : projetoIdParaNova;
     document.getElementById("card-titulo").value = tarefa ? tarefa.titulo : "";
     document.getElementById("card-formato").value = tarefa ? tarefa.formato : "Outro";
-    document.getElementById("card-coluna").value = tarefa ? tarefa.coluna : (colunaParaNova || "Briefing");
+    document.getElementById("card-coluna").value = tarefa ? tarefa.coluna : (colunaParaNova || COLUNAS_PRODUCAO[0]);
     document.getElementById("card-prazo").value = tarefa ? (tarefa.prazo || "") : "";
     document.getElementById("card-prioridade").value = tarefa ? tarefa.prioridade : "media";
     document.getElementById("card-descricao").value = tarefa ? (tarefa.descricao || "") : "";
