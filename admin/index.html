@@ -141,7 +141,7 @@
 
   /* ===== BARRA LATERAL RECOLHIDA ===== */
   .layout.sidebar-colapsada .sidebar { width: 68px; }
-  .layout.sidebar-colapsada .conteudo { margin-left: 68px; }
+  .layout.sidebar-colapsada .conteudo { margin-left: 68px; max-width: none; }
   .layout.sidebar-colapsada .rotulo-nav { display: none; }
   .layout.sidebar-colapsada .sidebar-marca { text-align: center; padding: 0 0 20px; }
   .layout.sidebar-colapsada .nav-grupo-titulo { display: none; }
@@ -709,7 +709,7 @@
   .coluna-kanban-add-topo:hover { background: var(--branco); color: var(--preto); }
   .coluna-kanban-corpo { padding: 0 10px 12px; display: flex; flex-direction: column; gap: 8px; overflow-y: auto; flex-grow: 1; min-height: 40px; }
 
-  .card-kanban { background: var(--branco); border: 1.5px solid rgba(38, 34, 32, 0.55); border-radius: 10px; padding: 10px 12px; cursor: grab; display: flex; flex-direction: column; gap: 6px; touch-action: none; user-select: none; }
+  .card-kanban { background: var(--branco); border: 1px solid rgba(38, 34, 32, 0.14); box-shadow: 0 1px 2px rgba(38, 34, 32, 0.06); border-radius: 10px; padding: 10px 12px; cursor: grab; display: flex; flex-direction: column; gap: 6px; touch-action: none; user-select: none; }
   .card-kanban.arrastando { opacity: 0.35; }
   .card-kanban-fantasma { position: fixed; z-index: 500; pointer-events: none; opacity: 0.95; box-shadow: 0 12px 30px rgba(0,0,0,0.22); width: 236px; }
   .card-kanban-titulo { font-weight: 600; font-size: 0.85rem; line-height: 1.3; }
@@ -717,7 +717,9 @@
   .card-kanban-rodape { display: flex; justify-content: space-between; align-items: center; font-size: 0.7rem; color: var(--texto-suave); gap: 6px; }
   .card-kanban-prazo.atrasado { color: var(--erro); font-weight: 700; }
   .card-kanban-prazo.proximo { color: var(--aviso); font-weight: 700; }
-  .pill-formato { font-size: 0.64rem; font-weight: 700; padding: 2px 8px; border-radius: 100px; background: var(--fundo-acento); color: var(--acento-escuro); align-self: flex-start; }
+  .card-kanban-tags { display: flex; align-items: center; gap: 6px; }
+  .icone-tag-mini { font-size: 0.7rem; opacity: 0.5; }
+  .pill-formato { font-size: 0.64rem; font-weight: 700; padding: 2px 8px; border-radius: 100px; background: var(--fundo-acento); color: var(--acento-escuro); }
   .ponto-prioridade { width: 8px; height: 8px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
   .ponto-prioridade-alta { background: var(--erro); }
   .ponto-prioridade-media { background: var(--pill-amanha); }
@@ -2771,8 +2773,11 @@
     const marcaHtml = mostrarMarca && projeto ? '<span class="card-kanban-marca">' + escaparAtributo(projeto.marca) + "</span>" : "";
     return '<div class="card-kanban" data-id="' + t.id + '">' +
       marcaHtml +
-      '<span class="pill-formato">' + t.formato + "</span>" +
       '<span class="card-kanban-titulo">' + escaparAtributo(t.titulo) + "</span>" +
+      '<div class="card-kanban-tags">' +
+        '<span class="icone-tag-mini">🏷</span>' +
+        '<span class="pill-formato">' + t.formato + "</span>" +
+      "</div>" +
       '<div class="card-kanban-rodape">' +
         '<span class="ponto-prioridade ponto-prioridade-' + t.prioridade + '" title="Prioridade ' + t.prioridade + '"></span>' +
         prazoHtml +
