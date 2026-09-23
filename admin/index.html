@@ -2628,8 +2628,8 @@
   document.getElementById("botao-add-linha-entrega-campanha").addEventListener("click", () => adicionarLinhaEntrega("lista-entregas-campanha-form"));
   async function criarProjetoDeCampanhaEAbrir(nomeCampanha, cliente, prazo, valor, entregas) {
     const novoProjeto = await salvarSeguro("projetos_producao", sb.from("projetos_producao").insert({
-      marca: nomeCampanha,
-      contato: cliente || null,
+      marca: cliente,
+      observacoes: nomeCampanha ? "Campanha: " + nomeCampanha : null,
       prazo_final: prazo || null,
       valor: valor || null,
       status: "ativo"
