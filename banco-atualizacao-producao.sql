@@ -39,10 +39,10 @@ create table if not exists tarefas_producao (
   projeto_id uuid not null references projetos_producao(id) on delete cascade,
   titulo text not null,
   formato text not null default 'Outro' check (formato in ('Reels', 'TikTok', 'Stories', 'Foto', 'Carrossel', 'Outro')),
-  coluna text not null default 'Briefing' check (coluna in (
-    'Briefing', 'Roteiro', 'Aprovação do roteiro', 'Gravação', 'Edição',
-    'Revisão', 'Envio pra marca', 'Aprovação', 'Concluído'
-  )),
+  -- Sem check constraint de propósito: dá pra criar colunas novas direto no
+  -- site (veja banco-atualizacao-colunas-livres.sql), então o texto aqui
+  -- precisa aceitar qualquer nome de etapa.
+  coluna text not null default 'To Do',
   ordem integer not null default 0,
   prazo date,
   prioridade text not null default 'media' check (prioridade in ('baixa', 'media', 'alta')),
