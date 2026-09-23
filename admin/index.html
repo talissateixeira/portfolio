@@ -686,12 +686,16 @@
   .subaba-producao { display: none; }
   .subaba-producao.ativa { display: block; }
 
-  .grade-projetos-producao { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
-  .cartao-projeto-producao { background: var(--branco); border: 1px solid var(--borda); border-radius: var(--raio); padding: 18px 20px; cursor: pointer; display: flex; flex-direction: column; gap: 10px; text-align: left; }
+  .grade-projetos-producao { display: flex; flex-direction: column; }
+  .cartao-projeto-producao { background: none; border: none; border-bottom: 1px solid var(--borda); border-radius: 0; padding: 16px 4px; cursor: pointer; display: flex; align-items: center; gap: 18px; text-align: left; width: 100%; }
+  .cartao-projeto-producao:last-child { border-bottom: none; }
   .cartao-projeto-producao:hover { background: rgba(89,25,2,0.03); }
-  .cartao-projeto-producao-topo { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
-  .cartao-projeto-producao-marca { font-weight: 700; font-size: 0.98rem; }
+  .cartao-projeto-producao-topo { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; flex-shrink: 0; width: 90px; }
+  .cartao-projeto-producao-corpo { flex: 1 1 220px; min-width: 0; }
+  .cartao-projeto-producao-marca { font-weight: 700; font-size: 0.92rem; }
   .cartao-projeto-producao-meta { font-size: 0.78rem; color: var(--texto-suave); }
+  .cartao-projeto-producao-progresso { flex: 1 1 200px; min-width: 140px; }
+  .cartao-projeto-producao-progresso .cartao-projeto-producao-meta { margin-top: 6px; }
   .cartao-projeto-producao-acoes { display: flex; gap: 4px; flex-shrink: 0; }
   .selo-status-projeto { font-size: 0.66rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; padding: 2px 9px; border-radius: 100px; background: var(--fundo-cinza); color: var(--cinza); align-self: flex-start; }
   .selo-status-projeto.status-ativo { background: var(--fundo-acento); color: var(--acento-escuro); }
@@ -751,6 +755,8 @@
     .linha-transcrever { flex-direction: column; }
     .linha-transcrever input, .linha-transcrever select, .linha-transcrever button { width: 100%; }
     .linha-tarefa-unificada { flex-wrap: wrap; }
+    .cartao-projeto-producao { flex-wrap: wrap; }
+    .cartao-projeto-producao-topo { width: auto; }
     .linha-dashboard-dupla { grid-template-columns: 1fr; }
   }
 </style>
@@ -1032,7 +1038,9 @@
           </div>
           <button type="button" class="botao botao-principal" id="botao-add-projeto">+ Novo projeto</button>
         </div>
-        <div class="grade-projetos-producao" id="grade-projetos-producao"></div>
+        <div class="painel-branco">
+          <div class="grade-projetos-producao" id="grade-projetos-producao"></div>
+        </div>
       </div>
 
       <!-- ---- Visão: quadro de um projeto ---- -->
@@ -2659,12 +2667,16 @@
       return '<div class="cartao-projeto-producao" data-id="' + p.id + '">' +
         '<div class="cartao-projeto-producao-topo">' +
           '<span class="selo-status-projeto status-' + p.status + '">' + ROTULO_STATUS_PROJETO[p.status] + "</span>" +
-          '<div class="cartao-projeto-producao-acoes"><button type="button" class="botao-icone" data-editar-projeto="' + p.id + '" title="Editar projeto"><span class="icone"><svg viewBox="0 0 24 24"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></span></button></div>' +
         "</div>" +
-        '<div class="cartao-projeto-producao-marca">' + escaparAtributo(p.marca) + "</div>" +
-        '<div class="cartao-projeto-producao-meta">' + (p.prazo_final ? "Prazo: " + formatarData(p.prazo_final) : "Sem prazo definido") + " · " + prog.total + (prog.total === 1 ? " entrega" : " entregas") + "</div>" +
-        '<div class="barra-progresso-fundo"><div class="barra-progresso" style="width:' + prog.pct + '%;"></div></div>' +
-        '<div class="cartao-projeto-producao-meta">' + prog.feitas + " de " + prog.total + " concluídas (" + prog.pct + "%)</div>" +
+        '<div class="cartao-projeto-producao-corpo">' +
+          '<div class="cartao-projeto-producao-marca">' + escaparAtributo(p.marca) + "</div>" +
+          '<div class="cartao-projeto-producao-meta">' + (p.prazo_final ? "Prazo: " + formatarData(p.prazo_final) : "Sem prazo definido") + " · " + prog.total + (prog.total === 1 ? " entrega" : " entregas") + "</div>" +
+        "</div>" +
+        '<div class="cartao-projeto-producao-progresso">' +
+          '<div class="barra-progresso-fundo"><div class="barra-progresso" style="width:' + prog.pct + '%;"></div></div>' +
+          '<div class="cartao-projeto-producao-meta">' + prog.feitas + " de " + prog.total + " concluídas (" + prog.pct + "%)</div>" +
+        "</div>" +
+        '<div class="cartao-projeto-producao-acoes"><button type="button" class="botao-icone" data-editar-projeto="' + p.id + '" title="Editar projeto"><span class="icone"><svg viewBox="0 0 24 24"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></span></button></div>' +
       "</div>";
     }).join("");
     alvo.querySelectorAll(".cartao-projeto-producao").forEach(cartao => {
