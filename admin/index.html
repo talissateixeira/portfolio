@@ -126,6 +126,7 @@
   .icone-subitem svg { width: 100%; height: 100%; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
   .nav-subitem-projeto { padding-left: 20px; font-size: 0.8rem; }
   .layout.sidebar-colapsada .nav-arvore-filhos { display: none; }
+  .nav-arvore-filhos.recolhida { display: none; }
 
   .sidebar-rodape {
     margin-top: auto;
@@ -481,7 +482,17 @@
   }
   .linha-form-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
   .modal-acoes { display: flex; justify-content: space-between; align-items: center; margin-top: 18px; gap: 8px; }
-  .link-apagar { color: var(--erro); background: none; border: none; font-size: 0.8rem; cursor: pointer; text-decoration: underline; }
+  .link-apagar {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 30px; height: 30px;
+    border-radius: 8px;
+    border: none;
+    background: none;
+    cursor: pointer;
+    color: var(--erro);
+  }
+  .link-apagar:hover { background: rgba(196, 69, 60, 0.1); }
+  .link-apagar .icone { width: 17px; height: 17px; }
   .modal-acoes-direita { display: flex; gap: 8px; margin-left: auto; }
 
   /* ===== CALENDÁRIO ===== */
@@ -1208,7 +1219,7 @@
 
       <div class="modal-acoes">
         <div style="display:flex;gap:14px;">
-          <button type="button" class="link-apagar" id="proj-apagar" hidden>Excluir</button>
+          <button type="button" class="link-apagar" id="proj-apagar" hidden title="Excluir projeto"><span class="icone"><svg viewBox="0 0 24 24"><path d="M4 7h16M9 7V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v3m3 0-1 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L6 7h12Z"/><path d="M10 11v6M14 11v6"/></svg></span></button>
         </div>
         <div class="modal-acoes-direita">
           <button type="button" class="botao botao-secundario" data-fechar-modal>Cancelar</button>
@@ -1285,7 +1296,7 @@
       <p class="texto-vazio" id="card-datas-info" style="margin:4px 0 0;"></p>
 
       <div class="modal-acoes">
-        <button type="button" class="link-apagar" id="card-apagar" hidden>Excluir tarefa</button>
+        <button type="button" class="link-apagar" id="card-apagar" hidden title="Excluir tarefa"><span class="icone"><svg viewBox="0 0 24 24"><path d="M4 7h16M9 7V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v3m3 0-1 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L6 7h12Z"/><path d="M10 11v6M14 11v6"/></svg></span></button>
         <div class="modal-acoes-direita">
           <button type="button" class="botao botao-secundario" data-fechar-modal>Cancelar</button>
           <button type="submit" class="botao botao-principal">Salvar</button>
@@ -1322,7 +1333,7 @@
         </div>
       </div>
       <div class="modal-acoes">
-        <button type="button" class="link-apagar" id="video-apagar" hidden>Apagar vídeo</button>
+        <button type="button" class="link-apagar" id="video-apagar" hidden title="Apagar vídeo"><span class="icone"><svg viewBox="0 0 24 24"><path d="M4 7h16M9 7V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v3m3 0-1 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L6 7h12Z"/><path d="M10 11v6M14 11v6"/></svg></span></button>
         <div class="modal-acoes-direita">
           <button type="button" class="botao botao-secundario" data-fechar-modal>Cancelar</button>
           <button type="submit" class="botao botao-principal">Salvar</button>
@@ -1356,7 +1367,7 @@
       </div>
       <div class="campo-form"><label>Observação</label><textarea id="marca-obs"></textarea></div>
       <div class="modal-acoes">
-        <button type="button" class="link-apagar" id="marca-apagar" hidden>Apagar marca</button>
+        <button type="button" class="link-apagar" id="marca-apagar" hidden title="Apagar marca"><span class="icone"><svg viewBox="0 0 24 24"><path d="M4 7h16M9 7V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v3m3 0-1 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L6 7h12Z"/><path d="M10 11v6M14 11v6"/></svg></span></button>
         <div class="modal-acoes-direita">
           <button type="button" class="botao botao-secundario" data-fechar-modal>Cancelar</button>
           <button type="submit" class="botao botao-principal">Salvar</button>
@@ -1393,7 +1404,7 @@
         </div>
       </div>
       <div class="modal-acoes">
-        <button type="button" class="link-apagar" id="cal-apagar" hidden>Apagar item</button>
+        <button type="button" class="link-apagar" id="cal-apagar" hidden title="Apagar item"><span class="icone"><svg viewBox="0 0 24 24"><path d="M4 7h16M9 7V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v3m3 0-1 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L6 7h12Z"/><path d="M10 11v6M14 11v6"/></svg></span></button>
         <div class="modal-acoes-direita">
           <button type="button" class="botao botao-secundario" data-fechar-modal>Cancelar</button>
           <button type="submit" class="botao botao-principal">Salvar</button>
@@ -1442,7 +1453,7 @@
         <button type="button" class="botao botao-secundario" id="botao-add-linha-entrega-campanha" style="margin-top:4px;">+ adicionar entrega</button>
       </div>
       <div class="modal-acoes">
-        <button type="button" class="link-apagar" id="camp-apagar" hidden>Apagar campanha</button>
+        <button type="button" class="link-apagar" id="camp-apagar" hidden title="Apagar campanha"><span class="icone"><svg viewBox="0 0 24 24"><path d="M4 7h16M9 7V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v3m3 0-1 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L6 7h12Z"/><path d="M10 11v6M14 11v6"/></svg></span></button>
         <div class="modal-acoes-direita">
           <button type="button" class="botao botao-secundario" data-fechar-modal>Cancelar</button>
           <button type="submit" class="botao botao-principal">Salvar</button>
@@ -1521,7 +1532,7 @@
         <textarea id="transc-obs" placeholder="O que você achou, o que quer aproveitar dessa ideia..."></textarea>
       </div>
       <div class="modal-acoes">
-        <button type="button" class="link-apagar" id="transc-apagar" hidden>Apagar transcrição</button>
+        <button type="button" class="link-apagar" id="transc-apagar" hidden title="Apagar transcrição"><span class="icone"><svg viewBox="0 0 24 24"><path d="M4 7h16M9 7V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v3m3 0-1 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L6 7h12Z"/><path d="M10 11v6M14 11v6"/></svg></span></button>
         <div class="modal-acoes-direita">
           <button type="button" class="botao botao-secundario" data-fechar-modal>Cancelar</button>
           <button type="submit" class="botao botao-principal">Salvar</button>
@@ -1606,6 +1617,7 @@
     }
   }
   document.querySelectorAll(".nav-item").forEach(botao => {
+    if (botao.hasAttribute("data-nav-producao-raiz")) return;
     botao.addEventListener("click", () => abrirAba(botao.dataset.aba));
   });
 
@@ -1709,17 +1721,30 @@
     const inicioMesCriacao = inicioMes.toISOString();
     const hoje = hojeISO();
 
-    const [campanhas, tarefasHoje, tarefasAtrasadas, tarefasProximas, meta, leads] = await Promise.all([
+    const [campanhas, tarefasHojeRaw, tarefasAtrasadasRaw, tarefasProximasRaw, meta, leads, tarefasProducaoPendentes, projetosParaMarca] = await Promise.all([
       consultarSeguro("campanhas", sb.from("campanhas").select("*")),
       consultarSeguro("calendario", sb.from("calendario").select("*").eq("status", "a_fazer").eq("data", hoje).order("data", { ascending: true })),
       consultarSeguro("calendario", sb.from("calendario").select("*").eq("status", "a_fazer").lt("data", hoje).order("data", { ascending: true })),
       consultarSeguro("calendario", sb.from("calendario").select("*").eq("status", "a_fazer").gt("data", hoje).order("data", { ascending: true }).limit(8)),
       carregarMetaFechamento(),
-      consultarSeguro("marcas", sb.from("marcas").select("id,situacao,created_at"))
+      consultarSeguro("marcas", sb.from("marcas").select("id,situacao,created_at")),
+      consultarSeguro("tarefas_producao", sb.from("tarefas_producao").select("id,titulo,prazo,coluna,projeto_id").not("prazo", "is", null).neq("coluna", "Concluído")),
+      consultarSeguro("projetos_producao", sb.from("projetos_producao").select("id,marca"))
     ]);
     metaFechamentoMes = meta;
     const marcasTodas = leads;
     const leadsLista = marcasTodas.filter(m => m.situacao === "lead");
+
+    // Junta as tarefas do quadro de Produção (com prazo, ainda não concluídas)
+    // na mesma lista unificada de "Precisa de você" do calendário.
+    const mapaMarcaProjeto = {};
+    projetosParaMarca.forEach(p => { mapaMarcaProjeto[p.id] = p.marca; });
+    const itensProducaoDash = tarefasProducaoPendentes.map(t => ({
+      id: t.id, data: t.prazo, marca: mapaMarcaProjeto[t.projeto_id] || "", tipo: t.coluna, titulo: t.titulo, origem: "producao"
+    }));
+    const tarefasHoje = tarefasHojeRaw.concat(itensProducaoDash.filter(i => i.data === hoje));
+    const tarefasAtrasadas = tarefasAtrasadasRaw.concat(itensProducaoDash.filter(i => i.data < hoje)).sort((a, b) => a.data < b.data ? -1 : 1);
+    const tarefasProximas = tarefasProximasRaw.concat(itensProducaoDash.filter(i => i.data > hoje)).sort((a, b) => a.data < b.data ? -1 : 1).slice(0, 8);
 
     // "Recebido/a receber este mês" olha o PRAZO da campanha (quando o
     // dinheiro é devido), não a data em que ela foi criada.
@@ -1845,13 +1870,14 @@
 
   function linhaTarefaUnificadaHtml(i, tagTexto, tagClasse) {
     const sub = (i.marca ? i.marca + " · " : "") + (TIPO_CALENDARIO_LEGIVEL[i.tipo] || i.tipo);
-    return '<div class="linha-tarefa-unificada" data-id="' + i.id + '">' +
+    const origem = i.origem || "calendario";
+    return '<div class="linha-tarefa-unificada" data-id="' + i.id + '" data-origem="' + origem + '">' +
       '<div class="linha-tarefa-corpo">' +
         '<div class="linha-tarefa-titulo">' + i.titulo + "</div>" +
         '<div class="linha-tarefa-sub"><span>' + sub + '</span><span class="tag-prazo-mini ' + tagClasse + '">' + tagTexto + "</span></div>" +
       "</div>" +
       '<div class="linha-tarefa-acoes">' +
-        '<button type="button" class="botao-icone botao-concluir-tarefa-dash" data-id="' + i.id + '" title="Concluir"><span class="icone"><svg viewBox="0 0 24 24"><path d="M4 12l5 5L20 6"/></svg></span></button>' +
+        '<button type="button" class="botao-icone botao-concluir-tarefa-dash" data-id="' + i.id + '" data-origem="' + origem + '" title="Concluir"><span class="icone"><svg viewBox="0 0 24 24"><path d="M4 12l5 5L20 6"/></svg></span></button>' +
       "</div>" +
     "</div>";
   }
@@ -1897,7 +1923,11 @@
     alvo.innerHTML = htmlAtrasadas + htmlHoje + htmlProximas;
     alvo.querySelectorAll(".botao-concluir-tarefa-dash").forEach(botao => {
       botao.addEventListener("click", async () => {
-        await salvarSeguro("calendario", sb.from("calendario").update({ status: "feito" }).eq("id", botao.dataset.id));
+        if (botao.dataset.origem === "producao") {
+          await salvarSeguro("tarefas_producao", sb.from("tarefas_producao").update({ coluna: "Concluído", concluido_em: new Date().toISOString() }).eq("id", botao.dataset.id));
+        } else {
+          await salvarSeguro("calendario", sb.from("calendario").update({ status: "feito" }).eq("id", botao.dataset.id));
+        }
         carregarDashboard();
       });
     });
@@ -2762,7 +2792,17 @@
     voltarParaListaProjetos();
     fecharGaveta();
   });
-  document.querySelector("[data-nav-producao-raiz]").addEventListener("click", voltarParaListaProjetos);
+  document.querySelector("[data-nav-producao-raiz]").addEventListener("click", () => {
+    const arvore = document.getElementById("nav-arvore-producao");
+    const jaEstavaNaAba = document.getElementById("aba-producao").classList.contains("ativa");
+    if (jaEstavaNaAba) {
+      arvore.classList.toggle("recolhida");
+      return;
+    }
+    arvore.classList.remove("recolhida");
+    abrirAba("producao");
+    voltarParaListaProjetos();
+  });
 
   // Carrega só a lista de projetos (leve) assim que a página abre, pra árvore
   // da barra lateral já aparecer mesmo antes de entrar na aba Produção.
@@ -3211,7 +3251,7 @@
     alvo.innerHTML =
       '<div class="anexo-producao-linha">' +
         '<span>📎 ' + escaparAtributo(anexoTarefaAtual.nome) + '</span>' +
-        '<button type="button" class="link-apagar" id="botao-remover-anexo-tarefa">Remover</button>' +
+        '<button type="button" class="link-apagar" id="botao-remover-anexo-tarefa" title="Remover anexo"><span class="icone"><svg viewBox="0 0 24 24"><path d="M4 7h16M9 7V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v3m3 0-1 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L6 7h12Z"/><path d="M10 11v6M14 11v6"/></svg></span></button>' +
       "</div>" + preview;
     document.getElementById("botao-remover-anexo-tarefa").addEventListener("click", () => {
       anexoTarefaAtual = null;
