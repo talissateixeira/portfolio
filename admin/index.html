@@ -262,11 +262,16 @@
   .bloco-portfolio { margin-bottom: 20px; }
   .painel-titulo-linha { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 14px; }
   .painel-titulo-linha-compacta { justify-content: flex-start; }
-  .filtros-tarefas-dash { display: flex; gap: 16px; }
-  .filtro-tarefa-dash { background: none; border: none; padding: 0; font-size: 0.82rem; font-weight: 600; color: var(--texto-suave); cursor: pointer; }
-  .filtro-tarefa-dash:hover { color: var(--texto); }
-  .filtro-tarefa-dash.ativo { color: var(--preto); text-decoration: underline; text-underline-offset: 3px; }
+  .filtros-tarefas-dash { display: flex; gap: 8px; flex-wrap: wrap; }
   .linha-dashboard-dupla { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .linha-proxima-tarefa-dash { display: flex; align-items: center; gap: 16px; padding: 14px 0; border-bottom: 1px solid var(--borda); cursor: pointer; }
+  .linha-proxima-tarefa-dash:last-child { border-bottom: none; }
+  .linha-proxima-tarefa-dash-data { width: 74px; flex-shrink: 0; }
+  .linha-proxima-tarefa-dash-dia { font-family: "SF Mono", Menlo, Consolas, monospace; font-weight: 700; font-size: 0.92rem; color: var(--preto); }
+  .linha-proxima-tarefa-dash-dias { font-family: "SF Mono", Menlo, Consolas, monospace; font-size: 0.7rem; font-weight: 600; color: var(--destaque-hoje); margin-top: 2px; white-space: nowrap; }
+  .linha-proxima-tarefa-dash-corpo { min-width: 0; }
+  .linha-proxima-tarefa-dash-titulo { font-weight: 700; font-size: 0.88rem; color: var(--preto); }
+  .linha-proxima-tarefa-dash-sub { font-size: 0.78rem; color: var(--texto-suave); margin-top: 2px; }
   .grafico-valor-mono { font-family: "SF Mono", Menlo, Consolas, monospace; }
   .grafico-barra-atual { background: var(--fundo-acento) !important; }
   .grafico-legenda-atual { font-size: 0.78rem; color: var(--texto-suave); margin: 14px 0 0; }
@@ -901,10 +906,10 @@
         <div class="painel-titulo-linha painel-titulo-linha-compacta">
           <div class="painel-titulo">Precisa de você</div>
           <div class="filtros-tarefas-dash">
-            <button type="button" class="filtro-tarefa-dash" data-filtro-tarefa-dash="atrasadas">Atrasado</button>
-            <button type="button" class="filtro-tarefa-dash" data-filtro-tarefa-dash="hoje">Hoje</button>
-            <button type="button" class="filtro-tarefa-dash" data-filtro-tarefa-dash="amanha">Amanhã</button>
-            <button type="button" class="filtro-tarefa-dash" data-filtro-tarefa-dash="proximas">Próximas</button>
+            <button type="button" class="pill-filtro" data-filtro-tarefa-dash="atrasadas">Atrasado</button>
+            <button type="button" class="pill-filtro" data-filtro-tarefa-dash="hoje">Hoje</button>
+            <button type="button" class="pill-filtro" data-filtro-tarefa-dash="amanha">Amanhã</button>
+            <button type="button" class="pill-filtro" data-filtro-tarefa-dash="proximas">Próximas</button>
           </div>
         </div>
         <div id="lista-tarefas-unificada-dash"></div>
@@ -920,9 +925,10 @@
         </div>
         <div class="painel-branco">
           <div class="painel-titulo-linha">
-            <div class="painel-titulo">Seu funil agora</div>
+            <div class="painel-titulo">Próximas tarefas</div>
+            <button type="button" class="botao botao-secundario" id="botao-ver-tudo-proximas-tarefas">Ver tudo</button>
           </div>
-          <div id="funil-crm-dash"></div>
+          <div id="lista-proximas-tarefas-dash"></div>
         </div>
       </div>
     </section>
@@ -1792,7 +1798,7 @@
     renderSaudacaoDashboard(tarefasHoje.length);
     renderCartoesResumoTopo(recebidoMes, aReceberTotal, meta, abertas.length, diasPrazoMaisProximo, leadsLista.length, leadsMes);
     renderGraficoFaturamento(campanhas);
-    renderFunilCrmDash(marcasTodas);
+    renderProximasTarefasDash(tarefasProducaoPendentes, mapaMarcaProjeto);
     renderTarefasUnificadasDash(tarefasAtrasadas, tarefasHoje, tarefasProximas);
   }
 
@@ -1890,6 +1896,47 @@
       "</div>";
     }).join("");
   }
+
+  // Lista compacta das próximas entregas de Produção (com prazo à frente de
+  // hoje), no painel ao lado do faturamento na Início.
+  function renderProximasTarefasDash(tarefas, mapaMarcaProjeto) {
+    const alvo = document.getElementById("lista-proximas-tarefas-dash");
+    const hoje = hojeISO();
+    const hojeData = new Date(hoje);
+    const proximas = tarefas
+      .filter(t => t.prazo && t.prazo > hoje)
+      .sort((a, b) => a.prazo < b.prazo ? -1 : 1)
+      .slice(0, 6);
+    if (proximas.length === 0) {
+      alvo.innerHTML = '<p class="texto-vazio">Nenhuma entrega com prazo à frente.</p>';
+      return;
+    }
+    alvo.innerHTML = proximas.map(t => {
+      const [, mes, dia] = t.prazo.split("-");
+      const dias = Math.round((new Date(t.prazo) - hojeData) / 86400000);
+      const marca = mapaMarcaProjeto[t.projeto_id] || "";
+      return '<div class="linha-proxima-tarefa-dash" data-id="' + t.id + '" data-projeto-id="' + (t.projeto_id || "") + '">' +
+        '<div class="linha-proxima-tarefa-dash-data">' +
+          '<div class="linha-proxima-tarefa-dash-dia">' + dia + "/" + mes + "</div>" +
+          '<div class="linha-proxima-tarefa-dash-dias">' + (dias === 1 ? "amanhã" : "em " + dias + " dias") + "</div>" +
+        "</div>" +
+        '<div class="linha-proxima-tarefa-dash-corpo">' +
+          '<div class="linha-proxima-tarefa-dash-titulo">' + escaparAtributo(t.titulo) + "</div>" +
+          '<div class="linha-proxima-tarefa-dash-sub">' + (marca ? escaparAtributo(marca) + " · " : "") + escaparAtributo(t.coluna) + "</div>" +
+        "</div>" +
+      "</div>";
+    }).join("");
+    alvo.querySelectorAll(".linha-proxima-tarefa-dash").forEach(linha => {
+      linha.addEventListener("click", () => abrirTarefaDoDashboard(linha.dataset.id, "producao", linha.dataset.projetoId));
+    });
+  }
+  document.getElementById("botao-ver-tudo-proximas-tarefas").addEventListener("click", async () => {
+    abasCarregadas.add("producao");
+    abrirAba("producao");
+    await carregarDadosProducao();
+    const botaoTodas = document.querySelector('[data-subaba-producao="todas"]');
+    if (botaoTodas) botaoTodas.click();
+  });
 
   const TIPO_CALENDARIO_LEGIVEL = { gravar: "gravação", editar: "edição", postar: "postagem" };
   let tarefasDashAtrasadas = [];
