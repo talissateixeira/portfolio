@@ -1741,7 +1741,7 @@
       consultarSeguro("calendario", sb.from("calendario").select("*").eq("status", "a_fazer").gt("data", hoje).order("data", { ascending: true }).limit(8)),
       carregarMetaFechamento(),
       consultarSeguro("marcas", sb.from("marcas").select("id,situacao,created_at")),
-      consultarSeguro("tarefas_producao", sb.from("tarefas_producao").select("id,titulo,prazo,coluna,projeto_id").not("prazo", "is", null).neq("coluna", "Concluído")),
+      consultarSeguro("tarefas_producao", sb.from("tarefas_producao").select("id,titulo,prazo,coluna,projeto_id,checklist").neq("coluna", "Concluído")),
       consultarSeguro("projetos_producao", sb.from("projetos_producao").select("id,marca"))
     ]);
     metaFechamentoMes = meta;
@@ -1749,12 +1749,27 @@
     const leadsLista = marcasTodas.filter(m => m.situacao === "lead");
 
     // Junta as tarefas do quadro de Produção (com prazo, ainda não concluídas)
-    // na mesma lista unificada de "Precisa de você" do calendário.
+    // e os itens do checklist delas que tiverem data marcada, na mesma lista
+    // unificada de "Precisa de você" do calendário.
     const mapaMarcaProjeto = {};
     projetosParaMarca.forEach(p => { mapaMarcaProjeto[p.id] = p.marca; });
-    const itensProducaoDash = tarefasProducaoPendentes.map(t => ({
-      id: t.id, data: t.prazo, marca: mapaMarcaProjeto[t.projeto_id] || "", tipo: t.coluna, titulo: t.titulo, origem: "producao", projeto_id: t.projeto_id
-    }));
+    const itensProducaoDash = [];
+    tarefasProducaoPendentes.forEach(t => {
+      const marca = mapaMarcaProjeto[t.projeto_id] || "";
+      if (t.prazo) {
+        itensProducaoDash.push({ id: t.id, data: t.prazo, marca: marca, tipo: t.coluna, titulo: t.titulo, origem: "producao", projeto_id: t.projeto_id });
+      }
+      if (Array.isArray(t.checklist)) {
+        t.checklist.forEach((item, indice) => {
+          if (item.data && !item.feito) {
+            itensProducaoDash.push({
+              id: t.id + "::check" + indice, data: item.data, marca: marca, tipo: t.titulo, titulo: item.texto,
+              origem: "producao", projeto_id: t.projeto_id, tarefaId: t.id, indiceChecklist: indice, checklistCompleto: t.checklist
+            });
+          }
+        });
+      }
+    });
     const tarefasHoje = tarefasHojeRaw.concat(itensProducaoDash.filter(i => i.data === hoje));
     const tarefasAtrasadas = tarefasAtrasadasRaw.concat(itensProducaoDash.filter(i => i.data < hoje)).sort((a, b) => a.data < b.data ? -1 : 1);
     const tarefasProximas = tarefasProximasRaw.concat(itensProducaoDash.filter(i => i.data > hoje)).sort((a, b) => a.data < b.data ? -1 : 1).slice(0, 8);
@@ -1884,13 +1899,15 @@
   function linhaTarefaUnificadaHtml(i, tagTexto, tagClasse) {
     const sub = (i.marca ? i.marca + " · " : "") + (TIPO_CALENDARIO_LEGIVEL[i.tipo] || i.tipo);
     const origem = i.origem || "calendario";
-    return '<div class="linha-tarefa-unificada" data-id="' + i.id + '" data-origem="' + origem + '" data-projeto-id="' + (i.projeto_id || "") + '">' +
+    const tarefaId = i.tarefaId || i.id;
+    const indiceChecklist = i.indiceChecklist != null ? i.indiceChecklist : "";
+    return '<div class="linha-tarefa-unificada" data-id="' + i.id + '" data-origem="' + origem + '" data-projeto-id="' + (i.projeto_id || "") + '" data-tarefa-id="' + tarefaId + '">' +
       '<div class="linha-tarefa-corpo">' +
         '<div class="linha-tarefa-titulo">' + i.titulo + "</div>" +
         '<div class="linha-tarefa-sub"><span>' + sub + '</span><span class="tag-prazo-mini ' + tagClasse + '">' + tagTexto + "</span></div>" +
       "</div>" +
       '<div class="linha-tarefa-acoes">' +
-        '<button type="button" class="botao-icone botao-concluir-tarefa-dash" data-id="' + i.id + '" data-origem="' + origem + '" title="Concluir"><span class="icone"><svg viewBox="0 0 24 24"><path d="M4 12l5 5L20 6"/></svg></span></button>' +
+        '<button type="button" class="botao-icone botao-concluir-tarefa-dash" data-id="' + i.id + '" data-origem="' + origem + '" data-tarefa-id="' + tarefaId + '" data-indice-checklist="' + indiceChecklist + '" title="Concluir"><span class="icone"><svg viewBox="0 0 24 24"><path d="M4 12l5 5L20 6"/></svg></span></button>' +
       "</div>" +
     "</div>";
   }
@@ -1934,10 +1951,21 @@
     }).join("");
 
     alvo.innerHTML = htmlAtrasadas + htmlHoje + htmlProximas;
+    function encontrarItemTarefaDash(id) {
+      return tarefasDashAtrasadas.find(i => i.id === id) || tarefasDashHoje.find(i => i.id === id) || tarefasDashProximas.find(i => i.id === id);
+    }
     alvo.querySelectorAll(".botao-concluir-tarefa-dash").forEach(botao => {
       botao.addEventListener("click", async (evento) => {
         evento.stopPropagation();
-        if (botao.dataset.origem === "producao") {
+        if (botao.dataset.origem === "producao" && botao.dataset.indiceChecklist !== "") {
+          // É a data de um item do checklist, não a da tarefa inteira: marca
+          // só aquele item como feito, sem mexer na coluna do card.
+          const item = encontrarItemTarefaDash(botao.dataset.id);
+          if (item) {
+            const novoChecklist = item.checklistCompleto.map((c, idx) => idx === item.indiceChecklist ? { ...c, feito: true } : c);
+            await salvarSeguro("tarefas_producao", sb.from("tarefas_producao").update({ checklist: novoChecklist }).eq("id", item.tarefaId));
+          }
+        } else if (botao.dataset.origem === "producao") {
           await salvarSeguro("tarefas_producao", sb.from("tarefas_producao").update({ coluna: "Concluído", concluido_em: new Date().toISOString() }).eq("id", botao.dataset.id));
         } else {
           await salvarSeguro("calendario", sb.from("calendario").update({ status: "feito" }).eq("id", botao.dataset.id));
@@ -1946,7 +1974,7 @@
       });
     });
     alvo.querySelectorAll(".linha-tarefa-unificada").forEach(linha => {
-      linha.addEventListener("click", () => abrirTarefaDoDashboard(linha.dataset.id, linha.dataset.origem, linha.dataset.projetoId));
+      linha.addEventListener("click", () => abrirTarefaDoDashboard(linha.dataset.tarefaId, linha.dataset.origem, linha.dataset.projetoId));
     });
   }
   document.querySelectorAll("[data-filtro-tarefa-dash]").forEach(botao => {
