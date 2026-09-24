@@ -2745,6 +2745,9 @@
   // ============================================================================
   let COLUNAS_PRODUCAO = ["To Do", "Briefing", "Roteiro", "Aprovação do roteiro", "Gravação", "Edição", "Revisão", "Envio pra marca", "Aprovação", "Concluído"];
   const FORMATOS_PRODUCAO = ["Reels", "TikTok", "Stories", "Foto", "Carrossel", "Outro"];
+  // Checklist padrão que toda tarefa nova já vem preenchida, com as etapas
+  // da produção como subtarefas dentro do próprio card.
+  const CHECKLIST_PADRAO_PRODUCAO = ["Briefing", "Roteiro", "Aprovar roteiro", "Gravar", "Editar", "Enviar pra marca", "Revisão"].map(texto => ({ texto: texto, feito: false }));
   let listaProjetosProducao = [];
   let listaTarefasProducao = [];
   let filtroProjetoStatus = "ativo";
@@ -3208,7 +3211,8 @@
           coluna: "Briefing",
           ordem: linhas.length,
           prazo: prazoFinal || null,
-          prioridade: "media"
+          prioridade: "media",
+          checklist: JSON.parse(JSON.stringify(CHECKLIST_PADRAO_PRODUCAO))
         });
       }
     });
@@ -3363,7 +3367,7 @@
     document.getElementById("card-link-brutos").value = tarefa ? (tarefa.link_arquivos_brutos || "") : "";
     document.getElementById("card-link-final").value = tarefa ? (tarefa.link_video_final || "") : "";
     document.getElementById("card-apagar").hidden = !tarefa;
-    checklistEditando = tarefa && Array.isArray(tarefa.checklist) ? JSON.parse(JSON.stringify(tarefa.checklist)) : [];
+    checklistEditando = tarefa && Array.isArray(tarefa.checklist) ? JSON.parse(JSON.stringify(tarefa.checklist)) : JSON.parse(JSON.stringify(CHECKLIST_PADRAO_PRODUCAO));
     comentariosEditando = tarefa && Array.isArray(tarefa.comentarios) ? JSON.parse(JSON.stringify(tarefa.comentarios)) : [];
     anexoTarefaAtual = tarefa && tarefa.anexo_url ? { url: tarefa.anexo_url, nome: tarefa.anexo_nome || "arquivo" } : null;
     renderChecklistModal();
