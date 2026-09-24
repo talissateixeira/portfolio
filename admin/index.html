@@ -1264,7 +1264,10 @@
       <div class="campo-form"><label>Descrição</label><textarea id="card-descricao"></textarea></div>
 
       <div class="campo-form">
-        <label>Checklist</label>
+        <div class="painel-titulo-linha" style="margin-bottom:4px;">
+          <label style="margin:0;">Checklist</label>
+          <button type="button" class="link-discreto" id="botao-checklist-padrao" style="margin-top:0;">usar etapas padrão</button>
+        </div>
         <div id="lista-checklist-card"></div>
         <div style="display:flex;gap:8px;margin-top:4px;">
           <input type="text" id="novo-item-checklist" class="campo-busca" placeholder="Novo item..." style="flex:1;">
@@ -3298,6 +3301,13 @@
     if (!texto) return;
     checklistEditando.push({ texto: texto, feito: false });
     campo.value = "";
+    renderChecklistModal();
+  });
+  document.getElementById("botao-checklist-padrao").addEventListener("click", () => {
+    CHECKLIST_PADRAO_PRODUCAO.forEach(item => {
+      const jaTem = checklistEditando.some(i => i.texto.toLowerCase() === item.texto.toLowerCase());
+      if (!jaTem) checklistEditando.push({ texto: item.texto, feito: false });
+    });
     renderChecklistModal();
   });
   function renderComentariosModal() {
