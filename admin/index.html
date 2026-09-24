@@ -903,6 +903,7 @@
           <div class="filtros-tarefas-dash">
             <button type="button" class="filtro-tarefa-dash" data-filtro-tarefa-dash="atrasadas">Atrasado</button>
             <button type="button" class="filtro-tarefa-dash" data-filtro-tarefa-dash="hoje">Hoje</button>
+            <button type="button" class="filtro-tarefa-dash" data-filtro-tarefa-dash="amanha">Amanhã</button>
             <button type="button" class="filtro-tarefa-dash" data-filtro-tarefa-dash="proximas">Próximas</button>
           </div>
         </div>
@@ -1927,17 +1928,21 @@
       return;
     }
 
+    const hojeData = new Date(hojeISO());
+    const soAmanha = i => Math.round((new Date(i.data) - hojeData) / 86400000) === 1;
+
     let atrasadas = tarefasDashAtrasadas, hoje = tarefasDashHoje, proximas = tarefasDashProximas;
     if (filtroCategoriaTarefasDash === "atrasadas") { hoje = []; proximas = []; }
     else if (filtroCategoriaTarefasDash === "hoje") { atrasadas = []; proximas = []; }
+    else if (filtroCategoriaTarefasDash === "amanha") { atrasadas = []; hoje = []; proximas = proximas.filter(soAmanha); }
     else if (filtroCategoriaTarefasDash === "proximas") { atrasadas = []; hoje = []; }
+    else { proximas = proximas.filter(soAmanha); }
 
     if (atrasadas.length + hoje.length + proximas.length === 0) {
       alvo.innerHTML = '<p class="texto-vazio">Nada nessa categoria por agora.</p>';
       return;
     }
 
-    const hojeData = new Date(hojeISO());
     const htmlAtrasadas = atrasadas.map(i => {
       const dias = Math.round((hojeData - new Date(i.data)) / 86400000);
       return linhaTarefaUnificadaHtml(i, "atrasado " + dias + (dias === 1 ? " dia" : " dias"), "atrasado");
