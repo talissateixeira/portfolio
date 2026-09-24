@@ -769,6 +769,12 @@
   .checklist-item-producao input[type="text"] { display: none; }
   .checklist-item-producao.marcado span { text-decoration: line-through; color: var(--texto-suave); }
   .checklist-item-producao span { flex-grow: 1; }
+  /* .campo-form input força width:100% em qualquer <input>, o que também
+     pegava o checkbox e a data daqui dentro e quebrava a linha toda (virava
+     uma caixa enorme empurrando o texto pro canto). Reseta os dois pro
+     tamanho natural deles. */
+  .checklist-item-producao input[type="checkbox"] { width: auto; flex: 0 0 auto; padding: 0; border: none; background: none; border-radius: 0; }
+  .checklist-item-producao input[type="date"] { width: 132px; flex: 0 0 auto; padding: 4px 6px; font-size: 0.76rem; }
 
   .comentario-producao { padding: 8px 0; border-top: 1px solid var(--borda); font-size: 0.84rem; }
   .comentario-producao:first-child { border-top: none; }
@@ -2750,7 +2756,7 @@
   const FORMATOS_PRODUCAO = ["Reels", "TikTok", "Stories", "Foto", "Carrossel", "Outro"];
   // Checklist padrão que toda tarefa nova já vem preenchida, com as etapas
   // da produção como subtarefas dentro do próprio card.
-  const CHECKLIST_PADRAO_PRODUCAO = ["Briefing", "Roteiro", "Aprovar roteiro", "Gravar", "Editar", "Enviar pra marca", "Revisão"].map(texto => ({ texto: texto, feito: false }));
+  const CHECKLIST_PADRAO_PRODUCAO = ["Briefing", "Roteiro", "Aprovar roteiro", "Gravar", "Editar", "Enviar pra marca", "Revisão"].map(texto => ({ texto: texto, feito: false, data: null }));
   let listaProjetosProducao = [];
   let listaTarefasProducao = [];
   let filtroProjetoStatus = "ativo";
@@ -3285,11 +3291,15 @@
       '<div class="checklist-item-producao' + (item.feito ? " marcado" : "") + '">' +
         '<input type="checkbox" data-indice-check="' + i + '"' + (item.feito ? " checked" : "") + '>' +
         '<span>' + escaparAtributo(item.texto) + "</span>" +
+        '<input type="date" data-indice-data="' + i + '" value="' + (item.data || "") + '" title="Data deste item">' +
         '<button type="button" class="botao-icone" data-indice-remover-check="' + i + '" title="Remover"><span class="icone"><svg viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></span></button>' +
       "</div>"
     ).join("");
     alvo.querySelectorAll("[data-indice-check]").forEach(chk => {
       chk.addEventListener("change", () => { checklistEditando[Number(chk.dataset.indiceCheck)].feito = chk.checked; renderChecklistModal(); });
+    });
+    alvo.querySelectorAll("[data-indice-data]").forEach(campoData => {
+      campoData.addEventListener("change", () => { checklistEditando[Number(campoData.dataset.indiceData)].data = campoData.value || null; });
     });
     alvo.querySelectorAll("[data-indice-remover-check]").forEach(botao => {
       botao.addEventListener("click", () => { checklistEditando.splice(Number(botao.dataset.indiceRemoverCheck), 1); renderChecklistModal(); });
@@ -3299,14 +3309,14 @@
     const campo = document.getElementById("novo-item-checklist");
     const texto = campo.value.trim();
     if (!texto) return;
-    checklistEditando.push({ texto: texto, feito: false });
+    checklistEditando.push({ texto: texto, feito: false, data: null });
     campo.value = "";
     renderChecklistModal();
   });
   document.getElementById("botao-checklist-padrao").addEventListener("click", () => {
     CHECKLIST_PADRAO_PRODUCAO.forEach(item => {
       const jaTem = checklistEditando.some(i => i.texto.toLowerCase() === item.texto.toLowerCase());
-      if (!jaTem) checklistEditando.push({ texto: item.texto, feito: false });
+      if (!jaTem) checklistEditando.push({ texto: item.texto, feito: false, data: null });
     });
     renderChecklistModal();
   });
