@@ -298,6 +298,8 @@
   .linha-tarefa-acoes { display: flex; gap: 6px; flex-shrink: 0; }
   .portfolio-subtitulo { color: var(--texto-suave); font-size: 0.88rem; margin: 4px 0 20px; }
   .painel-titulo { font-size: 0.85rem; font-weight: 700; margin-bottom: 14px; }
+  .painel-titulo-clicavel { background: none; border: none; padding: 0; margin-bottom: 0; font-family: var(--fonte); color: var(--preto); cursor: pointer; }
+  .painel-titulo-clicavel:hover { color: var(--acento-escuro); text-decoration: underline; }
   .texto-vazio { color: var(--texto-suave); font-size: 0.85rem; line-height: 1.6; padding: 10px 0; }
 
   /* Gráfico de barras simples, sem biblioteca */
@@ -904,12 +906,11 @@
 
       <div class="painel-branco bloco-portfolio">
         <div class="painel-titulo-linha painel-titulo-linha-compacta">
-          <div class="painel-titulo">Precisa de você</div>
+          <button type="button" class="painel-titulo painel-titulo-clicavel" id="botao-titulo-precisa-de-voce" title="Ver tudo (limpa os filtros)">Precisa de você</button>
           <div class="filtros-tarefas-dash">
             <button type="button" class="pill-filtro" data-filtro-tarefa-dash="atrasadas">Atrasado</button>
             <button type="button" class="pill-filtro" data-filtro-tarefa-dash="hoje">Hoje</button>
             <button type="button" class="pill-filtro" data-filtro-tarefa-dash="amanha">Amanhã</button>
-            <button type="button" class="pill-filtro" data-filtro-tarefa-dash="proximas">Próximas</button>
           </div>
         </div>
         <div id="lista-tarefas-unificada-dash"></div>
@@ -1982,7 +1983,6 @@
     if (filtroCategoriaTarefasDash === "atrasadas") { hoje = []; proximas = []; }
     else if (filtroCategoriaTarefasDash === "hoje") { atrasadas = []; proximas = []; }
     else if (filtroCategoriaTarefasDash === "amanha") { atrasadas = []; hoje = []; proximas = proximas.filter(soAmanha); }
-    else if (filtroCategoriaTarefasDash === "proximas") { atrasadas = []; hoje = []; }
     else { proximas = proximas.filter(soAmanha); }
 
     if (atrasadas.length + hoje.length + proximas.length === 0) {
@@ -2036,6 +2036,11 @@
       document.querySelectorAll("[data-filtro-tarefa-dash]").forEach(b => b.classList.toggle("ativo", b.dataset.filtroTarefaDash === filtroCategoriaTarefasDash));
       renderListaTarefasDash();
     });
+  });
+  document.getElementById("botao-titulo-precisa-de-voce").addEventListener("click", () => {
+    filtroCategoriaTarefasDash = "todas";
+    document.querySelectorAll("[data-filtro-tarefa-dash]").forEach(b => b.classList.remove("ativo"));
+    renderListaTarefasDash();
   });
 
   // Clicar numa linha de "Precisa de você" leva direto pro card (Produção)
