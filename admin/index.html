@@ -1899,36 +1899,53 @@
   }
 
   // Lista compacta das próximas entregas de Produção (com prazo à frente de
-  // hoje), no painel ao lado do faturamento na Início.
+  // hoje) no painel ao lado do faturamento na Início — inclui tanto o prazo
+  // do card quanto o de cada item do checklist dele que tiver data marcada.
   function renderProximasTarefasDash(tarefas, mapaMarcaProjeto) {
     const alvo = document.getElementById("lista-proximas-tarefas-dash");
     const hoje = hojeISO();
     const hojeData = new Date(hoje);
-    const proximas = tarefas
-      .filter(t => t.prazo && t.prazo > hoje)
-      .sort((a, b) => a.prazo < b.prazo ? -1 : 1)
-      .slice(0, 6);
+    const itens = [];
+    tarefas.forEach(t => {
+      const marca = mapaMarcaProjeto[t.projeto_id] || "";
+      if (t.prazo && t.prazo > hoje) {
+        itens.push({
+          id: t.id, tarefaId: t.id, projetoId: t.projeto_id, data: t.prazo,
+          titulo: t.titulo, sub: (marca ? marca + " · " : "") + t.coluna
+        });
+      }
+      if (Array.isArray(t.checklist)) {
+        t.checklist.forEach((item, indice) => {
+          if (item.data && item.data > hoje && !item.feito) {
+            itens.push({
+              id: t.id + "::check" + indice, tarefaId: t.id, projetoId: t.projeto_id, data: item.data,
+              titulo: item.texto, sub: (marca ? marca + " · " : "") + t.titulo
+            });
+          }
+        });
+      }
+    });
+    const proximas = itens.sort((a, b) => a.data < b.data ? -1 : 1).slice(0, 8);
     if (proximas.length === 0) {
       alvo.innerHTML = '<p class="texto-vazio">Nenhuma entrega com prazo à frente.</p>';
       return;
     }
-    alvo.innerHTML = proximas.map(t => {
-      const [, mes, dia] = t.prazo.split("-");
-      const dias = Math.round((new Date(t.prazo) - hojeData) / 86400000);
-      const marca = mapaMarcaProjeto[t.projeto_id] || "";
-      return '<div class="linha-proxima-tarefa-dash" data-id="' + t.id + '" data-projeto-id="' + (t.projeto_id || "") + '">' +
+    alvo.innerHTML = proximas.map(i => {
+      const [, mes, dia] = i.data.split("-");
+      const dias = Math.round((new Date(i.data) - hojeData) / 86400000);
+      return '<div class="linha-proxima-tarefa-dash" data-tarefa-id="' + i.tarefaId + '" data-projeto-id="' + (i.projetoId || "") + '">' +
         '<div class="linha-proxima-tarefa-dash-data">' +
           '<div class="linha-proxima-tarefa-dash-dia">' + dia + "/" + mes + "</div>" +
           '<div class="linha-proxima-tarefa-dash-dias">' + (dias === 1 ? "amanhã" : "em " + dias + " dias") + "</div>" +
         "</div>" +
         '<div class="linha-proxima-tarefa-dash-corpo">' +
-          '<div class="linha-proxima-tarefa-dash-titulo">' + escaparAtributo(t.titulo) + "</div>" +
-          '<div class="linha-proxima-tarefa-dash-sub">' + (marca ? escaparAtributo(marca) + " · " : "") + escaparAtributo(t.coluna) + "</div>" +
+          '<div class="linha-proxima-tarefa-dash-titulo">' + escaparAtributo(i.titulo) + "</div>" +
+          '<div class="linha-proxima-tarefa-dash-sub">' + escaparAtributo(i.sub) + "</div>" +
         "</div>" +
       "</div>";
     }).join("");
     alvo.querySelectorAll(".linha-proxima-tarefa-dash").forEach(linha => {
-      linha.addEventListener("click", () => abrirTarefaDoDashboard(linha.dataset.id, "producao", linha.dataset.projetoId));
+      linha.addEventListener("click", () => abrirTarefaDoDashboard(linha.dataset.tarefaId, "producao", linha.dataset.projetoId));
     });
   }
   document.getElementById("botao-ver-tudo-proximas-tarefas").addEventListener("click", async () => {
