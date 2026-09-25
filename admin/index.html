@@ -1084,6 +1084,7 @@
       <div class="subtabs">
         <button type="button" class="subtab-btn-producao ativo" data-subaba-producao="projetos">Projetos</button>
         <button type="button" class="subtab-btn-producao" data-subaba-producao="todas">Todas as tarefas</button>
+        <button type="button" class="subtab-btn-producao" data-subaba-producao="proximas">Próximas</button>
       </div>
 
       <!-- ---- Visão: lista de projetos ---- -->
@@ -1130,6 +1131,13 @@
           </div>
         </div>
         <div class="quadro-kanban" id="quadro-kanban-todas"></div>
+      </div>
+
+      <!-- ---- Visão: próximas tarefas em lista (prazo do card + checklist) ---- -->
+      <div class="subaba-producao" id="producao-view-proximas">
+        <div class="painel-branco">
+          <div id="lista-proximas-producao-completa"></div>
+        </div>
       </div>
     </section>
 
@@ -1898,62 +1906,68 @@
     }).join("");
   }
 
-  // Lista compacta das próximas entregas de Produção (com prazo à frente de
-  // hoje) no painel ao lado do faturamento na Início — inclui tanto o prazo
-  // do card quanto o de cada item do checklist dele que tiver data marcada.
-  function renderProximasTarefasDash(tarefas, mapaMarcaProjeto) {
-    const alvo = document.getElementById("lista-proximas-tarefas-dash");
+  // Junta, pra um conjunto de tarefas de Produção, tanto o prazo do card
+  // quanto o de cada item do checklist dele que tiver data marcada e ainda
+  // não estiver feito — usado no painel compacto da Início e na lista
+  // completa "Próximas" dentro de Produção.
+  function itensProximosProducao(tarefas, mapaMarcaProjeto) {
     const hoje = hojeISO();
-    const hojeData = new Date(hoje);
     const itens = [];
     tarefas.forEach(t => {
+      if (t.coluna === "Concluído") return;
       const marca = mapaMarcaProjeto[t.projeto_id] || "";
       if (t.prazo && t.prazo > hoje) {
         itens.push({
-          id: t.id, tarefaId: t.id, projetoId: t.projeto_id, data: t.prazo,
+          tarefaId: t.id, projetoId: t.projeto_id, data: t.prazo,
           titulo: t.titulo, sub: (marca ? marca + " · " : "") + t.coluna
         });
       }
       if (Array.isArray(t.checklist)) {
-        t.checklist.forEach((item, indice) => {
+        t.checklist.forEach(item => {
           if (item.data && item.data > hoje && !item.feito) {
             itens.push({
-              id: t.id + "::check" + indice, tarefaId: t.id, projetoId: t.projeto_id, data: item.data,
+              tarefaId: t.id, projetoId: t.projeto_id, data: item.data,
               titulo: item.texto, sub: (marca ? marca + " · " : "") + t.titulo
             });
           }
         });
       }
     });
-    const proximas = itens.sort((a, b) => a.data < b.data ? -1 : 1).slice(0, 8);
+    return itens.sort((a, b) => a.data < b.data ? -1 : 1);
+  }
+  function linhaProximaTarefaHtml(i, hojeData) {
+    const [, mes, dia] = i.data.split("-");
+    const dias = Math.round((new Date(i.data) - hojeData) / 86400000);
+    return '<div class="linha-proxima-tarefa-dash" data-tarefa-id="' + i.tarefaId + '" data-projeto-id="' + (i.projetoId || "") + '">' +
+      '<div class="linha-proxima-tarefa-dash-data">' +
+        '<div class="linha-proxima-tarefa-dash-dia">' + dia + "/" + mes + "</div>" +
+        '<div class="linha-proxima-tarefa-dash-dias">' + (dias === 1 ? "amanhã" : "em " + dias + " dias") + "</div>" +
+      "</div>" +
+      '<div class="linha-proxima-tarefa-dash-corpo">' +
+        '<div class="linha-proxima-tarefa-dash-titulo">' + escaparAtributo(i.titulo) + "</div>" +
+        '<div class="linha-proxima-tarefa-dash-sub">' + escaparAtributo(i.sub) + "</div>" +
+      "</div>" +
+    "</div>";
+  }
+
+  // Painel compacto (6 no máximo) do lado do faturamento na Início.
+  function renderProximasTarefasDash(tarefas, mapaMarcaProjeto) {
+    const alvo = document.getElementById("lista-proximas-tarefas-dash");
+    const hojeData = new Date(hojeISO());
+    const proximas = itensProximosProducao(tarefas, mapaMarcaProjeto).slice(0, 6);
     if (proximas.length === 0) {
       alvo.innerHTML = '<p class="texto-vazio">Nenhuma entrega com prazo à frente.</p>';
       return;
     }
-    alvo.innerHTML = proximas.map(i => {
-      const [, mes, dia] = i.data.split("-");
-      const dias = Math.round((new Date(i.data) - hojeData) / 86400000);
-      return '<div class="linha-proxima-tarefa-dash" data-tarefa-id="' + i.tarefaId + '" data-projeto-id="' + (i.projetoId || "") + '">' +
-        '<div class="linha-proxima-tarefa-dash-data">' +
-          '<div class="linha-proxima-tarefa-dash-dia">' + dia + "/" + mes + "</div>" +
-          '<div class="linha-proxima-tarefa-dash-dias">' + (dias === 1 ? "amanhã" : "em " + dias + " dias") + "</div>" +
-        "</div>" +
-        '<div class="linha-proxima-tarefa-dash-corpo">' +
-          '<div class="linha-proxima-tarefa-dash-titulo">' + escaparAtributo(i.titulo) + "</div>" +
-          '<div class="linha-proxima-tarefa-dash-sub">' + escaparAtributo(i.sub) + "</div>" +
-        "</div>" +
-      "</div>";
-    }).join("");
+    alvo.innerHTML = proximas.map(i => linhaProximaTarefaHtml(i, hojeData)).join("");
     alvo.querySelectorAll(".linha-proxima-tarefa-dash").forEach(linha => {
       linha.addEventListener("click", () => abrirTarefaDoDashboard(linha.dataset.tarefaId, "producao", linha.dataset.projetoId));
     });
   }
-  document.getElementById("botao-ver-tudo-proximas-tarefas").addEventListener("click", async () => {
-    abasCarregadas.add("producao");
-    abrirAba("producao");
-    await carregarDadosProducao();
-    const botaoTodas = document.querySelector('[data-subaba-producao="todas"]');
-    if (botaoTodas) botaoTodas.click();
+  // "Ver tudo" abre uma aba nova, direto na lista completa (sem limite) em
+  // Produção > Próximas.
+  document.getElementById("botao-ver-tudo-proximas-tarefas").addEventListener("click", () => {
+    window.open(window.location.pathname + "#producao-proximas", "_blank");
   });
 
   const TIPO_CALENDARIO_LEGIVEL = { gravar: "gravação", editar: "edição", postar: "postagem" };
@@ -2990,6 +3004,7 @@
     renderGradeProjetos();
     if (projetoAtualId) renderKanbanEm("quadro-kanban-projeto", listaTarefasProducao.filter(t => t.projeto_id === projetoAtualId), false);
     renderTarefasFiltradasTodas();
+    renderListaProximasProducaoCompleta();
   }
 
   // ---- Lista de projetos ----
@@ -3085,8 +3100,29 @@
       document.querySelectorAll(".subaba-producao").forEach(s => s.classList.remove("ativa"));
       document.getElementById("producao-view-" + botao.dataset.subabaProducao).classList.add("ativa");
       if (botao.dataset.subabaProducao === "todas") renderTarefasFiltradasTodas();
+      else if (botao.dataset.subabaProducao === "proximas") renderListaProximasProducaoCompleta();
     });
   });
+  function renderListaProximasProducaoCompleta() {
+    if (!document.getElementById("producao-view-proximas").classList.contains("ativa")) return;
+    const alvo = document.getElementById("lista-proximas-producao-completa");
+    const mapaMarcaProjeto = {};
+    listaProjetosProducao.forEach(p => { mapaMarcaProjeto[p.id] = p.marca; });
+    const hojeData = new Date(hojeISO());
+    const itens = itensProximosProducao(listaTarefasProducao, mapaMarcaProjeto);
+    if (itens.length === 0) {
+      alvo.innerHTML = '<p class="texto-vazio">Nenhuma entrega com prazo à frente.</p>';
+      return;
+    }
+    alvo.innerHTML = itens.map(i => linhaProximaTarefaHtml(i, hojeData)).join("");
+    alvo.querySelectorAll(".linha-proxima-tarefa-dash").forEach(linha => {
+      linha.addEventListener("click", () => {
+        abrirQuadroProjeto(linha.dataset.projetoId);
+        const tarefa = listaTarefasProducao.find(t => t.id === linha.dataset.tarefaId);
+        if (tarefa) abrirModalCard(tarefa);
+      });
+    });
+  }
 
   // ---- "Todas as tarefas" ----
   function popularFiltroProjetoTodas() {
@@ -4321,7 +4357,20 @@
   });
 
   // ---- Ponto de partida: abre a aba do hash da URL, ou Portfólio por padrão. ----
-  abrirAba((window.location.hash || "#dashboard").replace("#", ""));
+  // "#producao-proximas" é um link especial (usado pelo "Ver tudo" de
+  // Próximas tarefas, que abre numa aba nova): precisa esperar os dados de
+  // Produção carregarem antes de conseguir clicar na subaba certa.
+  const hashInicial = (window.location.hash || "#dashboard").replace("#", "");
+  if (hashInicial === "producao-proximas") {
+    abasCarregadas.add("producao");
+    abrirAba("producao");
+    carregarDadosProducao().then(() => {
+      const botaoProximas = document.querySelector('[data-subaba-producao="proximas"]');
+      if (botaoProximas) botaoProximas.click();
+    });
+  } else {
+    abrirAba(hashInicial);
+  }
 })();
 </script>
 </body>
