@@ -687,6 +687,32 @@
   .aviso-transcrever.erro { background: var(--fundo-erro); border-color: rgba(196,69,60,0.3); color: var(--erro); }
   .aviso-transcrever.sucesso { background: var(--fundo-sucesso); border-color: rgba(45,122,79,0.3); color: var(--sucesso); }
 
+  /* ---- Mensagens (modelos pra copiar e colar) ---- */
+  .aviso-mensagens {
+    display: flex; align-items: flex-start; gap: 10px;
+    background: var(--fundo-aviso);
+    border: 1px solid rgba(176, 137, 0, 0.3);
+    color: var(--texto);
+    padding: 12px 16px;
+    border-radius: 10px;
+    font-size: 0.82rem;
+    line-height: 1.5;
+    margin-bottom: 18px;
+  }
+  .aviso-mensagens .icone { width: 18px; height: 18px; flex-shrink: 0; margin-top: 1px; color: var(--aviso); }
+  .painel-meus-dados-resumo { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 0.82rem; color: var(--texto-suave); }
+  .painel-meus-dados-resumo strong { color: var(--texto); font-weight: 600; }
+  .grade-mensagens { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px; }
+  @media (max-width: 800px) { .grade-mensagens { grid-template-columns: 1fr; } }
+  .cartao-mensagem { background: var(--branco); border: 1px solid var(--borda); border-radius: var(--raio); padding: 16px 18px; }
+  .cartao-mensagem-topo { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 10px; }
+  .cartao-mensagem-acoes-topo { display: flex; align-items: center; gap: 6px; }
+  .tag-categoria-msg { display: inline-flex; padding: 3px 11px; border-radius: 100px; font-size: 0.7rem; font-weight: 700; background: var(--fundo-acento); color: var(--acento-escuro); }
+  .cartao-mensagem-titulo { font-weight: 700; font-size: 0.92rem; margin: 0 0 10px; padding-top: 8px; border-top: 1px solid var(--borda); }
+  .cartao-mensagem-corpo { font-size: 0.85rem; line-height: 1.7; white-space: pre-wrap; color: var(--texto); }
+  .colchete-destaque { background: var(--fundo-pill-amanha); color: var(--pill-amanha); padding: 1px 5px; border-radius: 5px; font-weight: 600; }
+  .botao-copiar-msg.copiado { background: var(--sucesso); border-color: var(--sucesso); color: #fff; }
+
   .transcricao-badge-quem { display: inline-flex; align-self: flex-start; padding: 2px 10px; border-radius: 100px; font-size: 0.68rem; font-weight: 700; }
   .transcricao-badge-minha { background: var(--fundo-acento); color: var(--acento); }
   .transcricao-badge-outra { background: var(--fundo-sucesso); color: var(--sucesso); }
@@ -870,6 +896,10 @@
       <button class="nav-item" data-aba="transcricoes" title="Transcrições">
         <span class="icone"><svg viewBox="0 0 24 24"><path d="M8 4h8l4 4v12a1 1 0 0 1-1 1H8a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1Z"/><path d="M16 4v4h4M9 13h6M9 16h6M9 10h2"/></svg></span>
         <span class="rotulo-nav">Transcrições</span>
+      </button>
+      <button class="nav-item" data-aba="mensagens" title="Mensagens">
+        <span class="icone"><svg viewBox="0 0 24 24"><path d="M4 4h16v13H8l-4 4Z"/></svg></span>
+        <span class="rotulo-nav">Mensagens</span>
       </button>
     </nav>
 
@@ -1206,6 +1236,55 @@
       </div>
       <div class="barra-acoes-esquerda" id="chips-tags-transcricoes" style="margin-bottom:14px;"></div>
       <div class="grade-transcricoes" id="grade-transcricoes"></div>
+    </section>
+
+    <!-- ===================== ABA MENSAGENS ===================== -->
+    <section class="aba" id="aba-mensagens">
+      <p class="portfolio-subtitulo">Texto pronto pra hora que dá branco.</p>
+
+      <div class="aviso-mensagens">
+        <span class="icone">⚡</span>
+        <div>
+          <strong>Os campos entre colchetes já vêm preenchidos com seus dados quando você copia.</strong>
+          Isso vale pra onde você usar <code>{{meu_nome}}</code>, <code>{{meu_instagram}}</code>, <code>{{meu_telefone}}</code> e <code>{{meu_link}}</code> — preenchidos sozinhos com o que estiver salvo em "Meus dados" logo abaixo. Já colchetes como [MARCA] ou [NOME] são pra você editar à mão em cada conversa.
+        </div>
+      </div>
+
+      <div class="painel-branco" id="painel-meus-dados-mensagens">
+        <div class="painel-titulo-linha">
+          <div class="painel-titulo">Meus dados</div>
+          <button type="button" class="botao botao-secundario" id="botao-editar-meus-dados">Editar</button>
+        </div>
+        <div class="painel-meus-dados-resumo" id="resumo-meus-dados"></div>
+        <form id="form-meus-dados" hidden>
+          <div class="linha-form-2">
+            <div class="campo-form"><label>Nome</label><input type="text" id="meudado-nome" placeholder="Talissa Müller"></div>
+            <div class="campo-form"><label>Instagram (@)</label><input type="text" id="meudado-instagram" placeholder="@talissamuller"></div>
+          </div>
+          <div class="linha-form-2">
+            <div class="campo-form"><label>Telefone</label><input type="text" id="meudado-telefone" placeholder="(11) 98765-4321"></div>
+            <div class="campo-form"><label>Link do portfólio</label><input type="text" id="meudado-link" placeholder="talissamuller.com"></div>
+          </div>
+          <div class="modal-acoes-direita" style="justify-content:flex-end;">
+            <button type="button" class="botao botao-secundario" id="botao-cancelar-meus-dados">Cancelar</button>
+            <button type="submit" class="botao botao-principal">Salvar</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="barra-acoes">
+        <div class="barra-acoes-esquerda" id="filtros-categoria-mensagens">
+          <button class="pill-filtro ativo" data-filtro-categoria-msg="todas">Todas</button>
+          <button class="pill-filtro" data-filtro-categoria-msg="Primeiro contato">Primeiro contato</button>
+          <button class="pill-filtro" data-filtro-categoria-msg="Follow up">Follow up</button>
+          <button class="pill-filtro" data-filtro-categoria-msg="Negociação">Negociação</button>
+          <button class="pill-filtro" data-filtro-categoria-msg="Fechamento">Fechamento</button>
+          <button class="pill-filtro" data-filtro-categoria-msg="Cobrança">Cobrança</button>
+          <button class="pill-filtro" data-filtro-categoria-msg="Pós-entrega">Pós-entrega</button>
+        </div>
+        <button type="button" class="botao botao-principal" id="botao-add-mensagem">+ Novo modelo</button>
+      </div>
+      <div class="grade-mensagens" id="grade-mensagens"></div>
     </section>
   </main>
 </div>
@@ -1567,6 +1646,41 @@
   </div>
 </div>
 
+<div class="modal-fundo" id="modal-mensagem" hidden>
+  <div class="modal-caixa" style="max-width:620px;">
+    <h3 class="modal-titulo" id="modal-mensagem-titulo">Novo modelo</h3>
+    <form id="form-mensagem">
+      <input type="hidden" id="msg-id">
+      <div class="linha-form-2">
+        <div class="campo-form"><label>Título</label><input type="text" id="msg-titulo" required placeholder="Ex: Cobrar retorno da proposta"></div>
+        <div class="campo-form">
+          <label>Categoria</label>
+          <select id="msg-categoria">
+            <option>Primeiro contato</option>
+            <option>Follow up</option>
+            <option>Negociação</option>
+            <option>Fechamento</option>
+            <option>Cobrança</option>
+            <option>Pós-entrega</option>
+          </select>
+        </div>
+      </div>
+      <div class="campo-form">
+        <label>Texto</label>
+        <textarea id="msg-corpo" rows="10" required placeholder="Oi, [NOME]! ..." style="min-height:180px;"></textarea>
+        <p class="texto-vazio" style="margin-top:4px;padding:0;">Use [MARCA], [NOME], [VALOR]... pra editar à mão em cada conversa. Use {{meu_nome}}, {{meu_instagram}}, {{meu_telefone}} e {{meu_link}} pra puxar seus dados sozinho.</p>
+      </div>
+      <div class="modal-acoes">
+        <button type="button" class="link-apagar" id="msg-apagar" hidden title="Apagar modelo"><span class="icone"><svg viewBox="0 0 24 24"><path d="M4 7h16M9 7V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v3m3 0-1 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L6 7h12Z"/><path d="M10 11v6M14 11v6"/></svg></span></button>
+        <div class="modal-acoes-direita">
+          <button type="button" class="botao botao-secundario" data-fechar-modal>Cancelar</button>
+          <button type="submit" class="botao botao-principal">Salvar</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script src="../js/banco.js"></script>
 <script src="../js/biblioteca.js"></script>
@@ -1621,8 +1735,8 @@
   }
 
   // ---- Navegação (abas + gaveta no celular) ----
-  const TITULOS_ABA = { dashboard: "👋 Início", portfolio: "Suas Métricas", marcas: "Marcas", calendario: "Calendário", campanhas: "Campanhas", producao: "Produção", checklist: "Checklist", transcricoes: "Transcrições" };
-  const CARREGADORES_ABA = { dashboard: carregarDashboard, portfolio: carregarPortfolio, marcas: carregarMarcas, calendario: carregarCalendario, campanhas: carregarCampanhas, producao: carregarProducao, checklist: carregarChecklist, transcricoes: carregarTranscricoes };
+  const TITULOS_ABA = { dashboard: "👋 Início", portfolio: "Suas Métricas", marcas: "Marcas", calendario: "Calendário", campanhas: "Campanhas", producao: "Produção", checklist: "Checklist", transcricoes: "Transcrições", mensagens: "Mensagens" };
+  const CARREGADORES_ABA = { dashboard: carregarDashboard, portfolio: carregarPortfolio, marcas: carregarMarcas, calendario: carregarCalendario, campanhas: carregarCampanhas, producao: carregarProducao, checklist: carregarChecklist, transcricoes: carregarTranscricoes, mensagens: carregarMensagens };
   const abasCarregadas = new Set();
 
   function abrirAba(nome) {
@@ -4354,6 +4468,175 @@
         if (capa) salvarSeguro("transcricoes", sb.from("transcricoes").update({ capa_url: capa }).eq("id", salvo.id)).then(carregarTranscricoes);
       });
     }
+  });
+
+  // ============================================================================
+  // ABA — MENSAGENS (modelos de texto pra copiar e colar pro cliente)
+  // ============================================================================
+  const CHAVES_MEUS_DADOS = { nome: "mensagens_meu_nome", instagram: "mensagens_meu_instagram", telefone: "mensagens_meu_telefone", link: "mensagens_meu_link" };
+  let listaMensagens = [];
+  let meusDados = { nome: "", instagram: "", telefone: "", link: "" };
+  let filtroCategoriaMsg = "todas";
+
+  async function carregarMensagens() {
+    const [mensagens, configs] = await Promise.all([
+      consultarSeguro("mensagens_modelos", sb.from("mensagens_modelos").select("*").order("categoria", { ascending: true }).order("ordem", { ascending: true })),
+      consultarSeguro("configuracoes", sb.from("configuracoes").select("chave,valor").in("chave", Object.values(CHAVES_MEUS_DADOS)))
+    ]);
+    listaMensagens = mensagens;
+    const mapaConfig = {};
+    configs.forEach(c => { mapaConfig[c.chave] = c.valor; });
+    meusDados = {
+      nome: mapaConfig[CHAVES_MEUS_DADOS.nome] || "",
+      instagram: mapaConfig[CHAVES_MEUS_DADOS.instagram] || "",
+      telefone: mapaConfig[CHAVES_MEUS_DADOS.telefone] || "",
+      link: mapaConfig[CHAVES_MEUS_DADOS.link] || ""
+    };
+    renderMeusDadosResumo();
+    renderMensagens();
+  }
+
+  function renderMeusDadosResumo() {
+    const alvo = document.getElementById("resumo-meus-dados");
+    const linhas = [
+      ["Nome", meusDados.nome], ["Instagram", meusDados.instagram],
+      ["Telefone", meusDados.telefone], ["Link", meusDados.link]
+    ];
+    alvo.innerHTML = linhas.map(([rotulo, valor]) =>
+      "<span>" + rotulo + ": <strong>" + (valor ? escaparAtributo(valor) : "não preenchido") + "</strong></span>"
+    ).join("");
+  }
+  const formMeusDados = document.getElementById("form-meus-dados");
+  document.getElementById("botao-editar-meus-dados").addEventListener("click", () => {
+    document.getElementById("meudado-nome").value = meusDados.nome;
+    document.getElementById("meudado-instagram").value = meusDados.instagram;
+    document.getElementById("meudado-telefone").value = meusDados.telefone;
+    document.getElementById("meudado-link").value = meusDados.link;
+    document.getElementById("resumo-meus-dados").hidden = true;
+    formMeusDados.hidden = false;
+  });
+  document.getElementById("botao-cancelar-meus-dados").addEventListener("click", () => {
+    formMeusDados.hidden = true;
+    document.getElementById("resumo-meus-dados").hidden = false;
+  });
+  formMeusDados.addEventListener("submit", async (evento) => {
+    evento.preventDefault();
+    const novosDados = {
+      nome: document.getElementById("meudado-nome").value.trim(),
+      instagram: document.getElementById("meudado-instagram").value.trim(),
+      telefone: document.getElementById("meudado-telefone").value.trim(),
+      link: document.getElementById("meudado-link").value.trim()
+    };
+    await Promise.all(Object.keys(CHAVES_MEUS_DADOS).map(campo =>
+      sb.from("configuracoes").upsert({ chave: CHAVES_MEUS_DADOS[campo], valor: novosDados[campo], updated_at: new Date().toISOString() })
+    ));
+    meusDados = novosDados;
+    formMeusDados.hidden = true;
+    document.getElementById("resumo-meus-dados").hidden = false;
+    renderMeusDadosResumo();
+    renderMensagens();
+  });
+
+  // Troca {{meu_nome}}/{{meu_instagram}}/{{meu_telefone}}/{{meu_link}} pelo
+  // que estiver salvo em "Meus dados" (ou por um colchete "[preencha...]"
+  // se ainda não foi preenchido, pra ficar visível que falta configurar).
+  function substituirMeusDados(texto) {
+    return texto
+      .replace(/\{\{meu_nome\}\}/g, meusDados.nome || "[seu nome]")
+      .replace(/\{\{meu_instagram\}\}/g, meusDados.instagram || "[seu @ do Instagram]")
+      .replace(/\{\{meu_telefone\}\}/g, meusDados.telefone || "[seu telefone]")
+      .replace(/\{\{meu_link\}\}/g, meusDados.link || "[link do seu portfólio]");
+  }
+  // Deixa qualquer [COLCHETE] destacado visualmente na tela (o texto copiado
+  // continua com o colchete normal, sem HTML).
+  function destacarColchetes(textoEscapado) {
+    return textoEscapado.replace(/\[([^\]<>]+)\]/g, '<span class="colchete-destaque">[$1]</span>');
+  }
+
+  function renderMensagens() {
+    const alvo = document.getElementById("grade-mensagens");
+    const filtradas = filtroCategoriaMsg === "todas" ? listaMensagens : listaMensagens.filter(m => m.categoria === filtroCategoriaMsg);
+    if (filtradas.length === 0) {
+      alvo.innerHTML = '<p class="texto-vazio">Nenhum modelo ' + (filtroCategoriaMsg === "todas" ? "ainda" : "nessa categoria ainda") + '. Clique em "+ Novo modelo" pra criar o primeiro.</p>';
+      return;
+    }
+    alvo.innerHTML = filtradas.map(m => {
+      const corpoFinal = substituirMeusDados(m.corpo);
+      return '<div class="cartao-mensagem" data-id="' + m.id + '">' +
+        '<div class="cartao-mensagem-topo">' +
+          '<span class="tag-categoria-msg">' + escaparAtributo(m.categoria) + '</span>' +
+          '<div class="cartao-mensagem-acoes-topo">' +
+            '<button type="button" class="botao-icone" data-editar-mensagem="' + m.id + '" title="Editar"><span class="icone"><svg viewBox="0 0 24 24"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></span></button>' +
+            '<button type="button" class="botao botao-secundario botao-copiar-msg" data-copiar-mensagem="' + m.id + '"><span class="icone"><svg viewBox="0 0 24 24"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1"/></svg></span> Copiar</button>' +
+          "</div>" +
+        "</div>" +
+        '<div class="cartao-mensagem-titulo">' + escaparAtributo(m.titulo) + "</div>" +
+        '<div class="cartao-mensagem-corpo">' + destacarColchetes(escaparAtributo(corpoFinal)) + "</div>" +
+      "</div>";
+    }).join("");
+    alvo.querySelectorAll("[data-editar-mensagem]").forEach(botao => {
+      botao.addEventListener("click", () => abrirModalMensagem(listaMensagens.find(m => m.id === botao.dataset.editarMensagem)));
+    });
+    alvo.querySelectorAll("[data-copiar-mensagem]").forEach(botao => {
+      botao.addEventListener("click", async () => {
+        const mensagem = listaMensagens.find(m => m.id === botao.dataset.copiarMensagem);
+        if (!mensagem) return;
+        try {
+          await navigator.clipboard.writeText(substituirMeusDados(mensagem.corpo));
+          const textoOriginal = botao.innerHTML;
+          botao.classList.add("copiado");
+          botao.innerHTML = '<span class="icone"><svg viewBox="0 0 24 24"><path d="M4 12l5 5L20 6"/></svg></span> Copiado!';
+          setTimeout(() => { botao.classList.remove("copiado"); botao.innerHTML = textoOriginal; }, 1600);
+        } catch (erro) {
+          alert("Não consegui copiar automaticamente. Selecione o texto e copie manualmente.");
+        }
+      });
+    });
+  }
+  document.querySelectorAll("[data-filtro-categoria-msg]").forEach(botao => {
+    botao.addEventListener("click", () => {
+      document.querySelectorAll("[data-filtro-categoria-msg]").forEach(b => b.classList.remove("ativo"));
+      botao.classList.add("ativo");
+      filtroCategoriaMsg = botao.dataset.filtroCategoriaMsg;
+      renderMensagens();
+    });
+  });
+
+  const modalMensagem = document.getElementById("modal-mensagem");
+  function abrirModalMensagem(mensagem) {
+    document.getElementById("form-mensagem").reset();
+    document.getElementById("modal-mensagem-titulo").textContent = mensagem ? "Editar modelo" : "Novo modelo";
+    document.getElementById("msg-id").value = mensagem ? mensagem.id : "";
+    document.getElementById("msg-titulo").value = mensagem ? mensagem.titulo : "";
+    document.getElementById("msg-categoria").value = mensagem ? mensagem.categoria : (filtroCategoriaMsg !== "todas" ? filtroCategoriaMsg : "Primeiro contato");
+    document.getElementById("msg-corpo").value = mensagem ? mensagem.corpo : "";
+    document.getElementById("msg-apagar").hidden = !mensagem;
+    modalMensagem.hidden = false;
+  }
+  document.getElementById("botao-add-mensagem").addEventListener("click", () => abrirModalMensagem(null));
+  document.getElementById("msg-apagar").addEventListener("click", async () => {
+    const id = document.getElementById("msg-id").value;
+    if (!id || !confirm("Apagar este modelo de mensagem?")) return;
+    await salvarSeguro("mensagens_modelos", sb.from("mensagens_modelos").delete().eq("id", id));
+    modalMensagem.hidden = true;
+    carregarMensagens();
+  });
+  document.getElementById("form-mensagem").addEventListener("submit", async (evento) => {
+    evento.preventDefault();
+    const id = document.getElementById("msg-id").value;
+    const registro = {
+      titulo: document.getElementById("msg-titulo").value.trim(),
+      categoria: document.getElementById("msg-categoria").value,
+      corpo: document.getElementById("msg-corpo").value.trim()
+    };
+    if (id) {
+      await salvarSeguro("mensagens_modelos", sb.from("mensagens_modelos").update(registro).eq("id", id));
+    } else {
+      registro.ordem = listaMensagens.filter(m => m.categoria === registro.categoria).length;
+      await salvarSeguro("mensagens_modelos", sb.from("mensagens_modelos").insert(registro));
+    }
+    modalMensagem.hidden = true;
+    carregarMensagens();
   });
 
   // ---- Ponto de partida: abre a aba do hash da URL, ou Portfólio por padrão. ----
