@@ -688,18 +688,6 @@
   .aviso-transcrever.sucesso { background: var(--fundo-sucesso); border-color: rgba(45,122,79,0.3); color: var(--sucesso); }
 
   /* ---- Mensagens (modelos pra copiar e colar) ---- */
-  .aviso-mensagens {
-    display: flex; align-items: flex-start; gap: 10px;
-    background: var(--fundo-aviso);
-    border: 1px solid rgba(176, 137, 0, 0.3);
-    color: var(--texto);
-    padding: 12px 16px;
-    border-radius: 10px;
-    font-size: 0.82rem;
-    line-height: 1.5;
-    margin-bottom: 18px;
-  }
-  .aviso-mensagens .icone { width: 18px; height: 18px; flex-shrink: 0; margin-top: 1px; color: var(--aviso); }
   .painel-meus-dados-resumo { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 0.82rem; color: var(--texto-suave); }
   .painel-meus-dados-resumo strong { color: var(--texto); font-weight: 600; }
   .grade-mensagens { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px; }
@@ -1241,14 +1229,6 @@
     <!-- ===================== ABA MENSAGENS ===================== -->
     <section class="aba" id="aba-mensagens">
       <p class="portfolio-subtitulo">Texto pronto pra hora que dá branco.</p>
-
-      <div class="aviso-mensagens">
-        <span class="icone">⚡</span>
-        <div>
-          <strong>Os campos entre colchetes já vêm preenchidos com seus dados quando você copia.</strong>
-          Isso vale pra onde você usar <code>{{meu_nome}}</code>, <code>{{meu_instagram}}</code>, <code>{{meu_telefone}}</code> e <code>{{meu_link}}</code> — preenchidos sozinhos com o que estiver salvo em "Meus dados" logo abaixo. Já colchetes como [MARCA] ou [NOME] são pra você editar à mão em cada conversa.
-        </div>
-      </div>
 
       <div class="painel-branco" id="painel-meus-dados-mensagens">
         <div class="painel-titulo-linha">
