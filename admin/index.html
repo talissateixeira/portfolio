@@ -502,6 +502,7 @@
   }
   .link-apagar:hover { background: rgba(196, 69, 60, 0.1); }
   .link-apagar .icone { width: 17px; height: 17px; }
+  .link-apagar[hidden] { display: none; }
   .modal-acoes-direita { display: flex; gap: 8px; margin-left: auto; }
 
   /* ===== CALENDÁRIO ===== */
@@ -850,14 +851,14 @@
         <span class="icone"><svg viewBox="0 0 24 24"><path d="M4 19V9M10 19V5M16 19v-7M22 19H2"/></svg></span>
         <span class="rotulo-nav">Portfólio</span>
       </button>
-      <button class="nav-item" data-aba="marcas" title="Marcas">
-        <span class="icone"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M2.5 20c0-3.6 2.9-6.2 6.5-6.2s6.5 2.6 6.5 6.2M16 8.3c1.6.3 2.8 1.6 2.8 3.2 0 1.5-1 2.7-2.4 3.1M17.5 14c2.6.5 4 2.4 4 5"/></svg></span>
-        <span class="rotulo-nav">Marcas</span>
-      </button>
     </nav>
 
     <nav class="nav-grupo">
       <div class="nav-grupo-titulo">Minha rotina</div>
+      <button class="nav-item" data-aba="marcas" title="Leads">
+        <span class="icone"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M2.5 20c0-3.6 2.9-6.2 6.5-6.2s6.5 2.6 6.5 6.2M16 8.3c1.6.3 2.8 1.6 2.8 3.2 0 1.5-1 2.7-2.4 3.1M17.5 14c2.6.5 4 2.4 4 5"/></svg></span>
+        <span class="rotulo-nav">Leads</span>
+      </button>
       <button class="nav-item" data-aba="calendario" title="Calendário">
         <span class="icone"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2.5"/><path d="M8 3v4M16 3v4M3 10h18"/></svg></span>
         <span class="rotulo-nav">Calendário</span>
@@ -1008,27 +1009,48 @@
       </div>
     </section>
 
-    <!-- ===================== ABA MARCAS ===================== -->
+    <!-- ===================== ABA LEADS (tabela "marcas") ===================== -->
     <section class="aba" id="aba-marcas">
+      <p class="portfolio-subtitulo">Do primeiro contato até o pagamento — sua operação comercial de UGC.</p>
+
+      <div class="cartoes-resumo-topo" id="cartoes-resumo-leads"></div>
+
+      <div class="linha-dashboard-dupla">
+        <div class="painel-branco">
+          <div class="painel-titulo">Funil comercial</div>
+          <div id="funil-leads"></div>
+        </div>
+        <div class="painel-branco">
+          <div class="painel-titulo-linha painel-titulo-linha-compacta">
+            <div class="painel-titulo">Follow-ups</div>
+            <div class="filtros-tarefas-dash">
+              <button type="button" class="pill-filtro" data-filtro-followup="atrasados">Atrasados</button>
+              <button type="button" class="pill-filtro" data-filtro-followup="hoje">Hoje</button>
+              <button type="button" class="pill-filtro" data-filtro-followup="proximos">Próximos 7 dias</button>
+            </div>
+          </div>
+          <div id="lista-followups-leads"></div>
+        </div>
+      </div>
+
       <div class="barra-acoes">
         <div class="barra-acoes-esquerda">
-          <input type="text" class="campo-busca" id="busca-marcas" placeholder="Buscar por nome, @ ou e-mail...">
-          <button class="pill-filtro ativo" data-situacao="todas">Todas</button>
-          <button class="pill-filtro" data-situacao="lead">Lead</button>
-          <button class="pill-filtro" data-situacao="conversando">Conversando</button>
-          <button class="pill-filtro" data-situacao="cliente">Cliente</button>
-          <button class="pill-filtro" data-situacao="parada">Parada</button>
+          <input type="text" class="campo-busca" id="busca-marcas" placeholder="Buscar por empresa, contato, @ ou e-mail...">
+          <select class="campo-busca" id="filtro-situacao-lead"><option value="todas">Qualquer status</option></select>
+          <select class="campo-busca" id="filtro-origem-lead"><option value="todas">Qualquer origem</option></select>
+          <select class="campo-busca" id="filtro-nicho-lead"><option value="todas">Qualquer nicho</option></select>
+          <button class="pill-filtro" data-filtro-prioridade-lead="alta">Prioridade alta</button>
         </div>
         <div class="barra-acoes-direita">
           <button class="botao botao-secundario" id="botao-exportar-marcas">Baixar CSV</button>
-          <button class="botao botao-principal" id="botao-add-marca">+ Adicionar</button>
+          <button class="botao botao-principal" id="botao-add-marca">+ Novo lead</button>
         </div>
       </div>
       <div class="painel-branco tabela-scroll">
         <table class="tabela">
           <thead>
             <tr>
-              <th>Marca</th><th>Instagram</th><th>E-mail</th><th>Telefone</th><th>Situação</th><th>Observação</th><th>Último contato</th><th></th>
+              <th>Empresa</th><th>Contato</th><th>Nicho</th><th>Origem</th><th>Status</th><th>Último contato</th><th>Próximo follow-up</th><th>Valor potencial</th><th></th>
             </tr>
           </thead>
           <tbody id="corpo-tabela-marcas"></tbody>
@@ -1432,36 +1454,102 @@
 </div>
 
 <div class="modal-fundo" id="modal-marca" hidden>
-  <div class="modal-caixa">
-    <h3 class="modal-titulo" id="modal-marca-titulo">Adicionar marca</h3>
+  <div class="modal-caixa" style="max-width:640px;">
+    <h3 class="modal-titulo" id="modal-marca-titulo">Adicionar lead</h3>
     <form id="form-marca">
       <input type="hidden" id="marca-id">
-      <div class="campo-form"><label>Marca</label><input type="text" id="marca-nome" required></div>
+      <div class="linha-form-2">
+        <div class="campo-form"><label>Empresa / marca</label><input type="text" id="marca-nome" required></div>
+        <div class="campo-form"><label>Site</label><input type="text" id="marca-site" placeholder="empresa.com"></div>
+      </div>
       <div class="linha-form-2">
         <div class="campo-form"><label>Instagram</label><input type="text" id="marca-instagram" placeholder="@marca"></div>
-        <div class="campo-form"><label>Telefone</label><input type="text" id="marca-telefone" placeholder="55999999999"></div>
+        <div class="campo-form">
+          <label>Nicho</label>
+          <select id="marca-nicho-select"></select>
+          <input type="text" id="marca-nicho-novo" placeholder="Nome do novo nicho" hidden>
+        </div>
       </div>
-      <div class="campo-form"><label>E-mail</label><input type="email" id="marca-email"></div>
       <div class="linha-form-2">
-        <div class="campo-form"><label>Situação</label>
-          <select id="marca-situacao">
-            <option value="lead">Lead</option>
-            <option value="conversando">Conversando</option>
-            <option value="cliente">Cliente</option>
-            <option value="parada">Parada</option>
+        <div class="campo-form"><label>Nome do contato</label><input type="text" id="marca-contato-nome"></div>
+        <div class="campo-form"><label>Cargo</label><input type="text" id="marca-cargo"></div>
+      </div>
+      <div class="linha-form-2">
+        <div class="campo-form"><label>E-mail</label><input type="email" id="marca-email"></div>
+        <div class="campo-form"><label>WhatsApp</label><input type="text" id="marca-telefone" placeholder="55999999999"></div>
+      </div>
+      <div class="linha-form-2">
+        <div class="campo-form"><label>Origem</label>
+          <select id="marca-origem">
+            <option>Instagram</option><option>E-mail</option><option>WhatsApp</option><option>Indicação</option>
+            <option>Plataforma UGC</option><option>Prospecção ativa</option><option>Evento</option><option>Outro</option>
           </select>
         </div>
-        <div class="campo-form"><label>Último contato</label><input type="date" id="marca-ultimo-contato"></div>
+        <div class="campo-form"><label>Status</label><select id="marca-situacao"></select></div>
       </div>
+      <div class="linha-form-2">
+        <div class="campo-form"><label>Prioridade</label>
+          <select id="marca-prioridade">
+            <option value="baixa">Baixa</option><option value="media" selected>Média</option><option value="alta">Alta</option>
+          </select>
+        </div>
+        <div class="campo-form"><label>Valor potencial (R$)</label><input type="number" id="marca-valor-potencial" min="0" step="0.01"></div>
+      </div>
+      <div class="linha-form-2">
+        <div class="campo-form"><label>Último contato</label><input type="date" id="marca-ultimo-contato"></div>
+        <div class="campo-form"><label>Próximo follow-up</label><input type="date" id="marca-proximo-contato"></div>
+      </div>
+      <div class="campo-form"><label>Tags (separadas por vírgula)</label><input type="text" id="marca-tags" placeholder="skincare, recorrente, pet"></div>
       <div class="campo-form"><label>Observação</label><textarea id="marca-obs"></textarea></div>
       <div class="modal-acoes">
-        <button type="button" class="link-apagar" id="marca-apagar" hidden title="Apagar marca"><span class="icone"><svg viewBox="0 0 24 24"><path d="M4 7h16M9 7V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v3m3 0-1 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L6 7h12Z"/><path d="M10 11v6M14 11v6"/></svg></span></button>
+        <button type="button" class="link-apagar" id="marca-apagar" hidden title="Apagar lead"><span class="icone"><svg viewBox="0 0 24 24"><path d="M4 7h16M9 7V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v3m3 0-1 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L6 7h12Z"/><path d="M10 11v6M14 11v6"/></svg></span></button>
         <div class="modal-acoes-direita">
           <button type="button" class="botao botao-secundario" data-fechar-modal>Cancelar</button>
           <button type="submit" class="botao botao-principal">Salvar</button>
         </div>
       </div>
     </form>
+  </div>
+</div>
+
+<div class="modal-fundo" id="modal-lead-detalhe" hidden>
+  <div class="modal-caixa" style="max-width:680px;">
+    <div class="painel-titulo-linha">
+      <h3 class="modal-titulo" id="lead-detalhe-titulo" style="margin-bottom:0;"></h3>
+      <button type="button" class="botao botao-secundario" id="botao-editar-lead-detalhe">Editar</button>
+    </div>
+    <div id="lead-detalhe-info" class="painel-meus-dados-resumo" style="margin-bottom:18px;"></div>
+
+    <div class="painel-titulo-linha painel-titulo-linha-compacta" style="margin-top:6px;">
+      <div class="painel-titulo">Propostas ligadas</div>
+      <button type="button" class="botao botao-secundario" id="botao-nova-proposta-lead">+ Nova proposta</button>
+    </div>
+    <div id="lead-detalhe-propostas" style="margin-bottom:18px;"></div>
+
+    <div class="painel-titulo-linha painel-titulo-linha-compacta">
+      <div class="painel-titulo">Timeline</div>
+    </div>
+    <div style="display:flex;gap:8px;margin-bottom:12px;">
+      <select id="atividade-tipo" style="max-width:170px;">
+        <option value="observação">Observação</option>
+        <option value="ligação">Ligação</option>
+        <option value="whatsapp">WhatsApp</option>
+        <option value="e-mail">E-mail</option>
+        <option value="instagram">Instagram</option>
+        <option value="reunião">Reunião</option>
+        <option value="proposta enviada">Proposta enviada</option>
+        <option value="follow-up">Follow-up</option>
+      </select>
+      <input type="text" id="atividade-descricao" class="campo-busca" placeholder="O que aconteceu?" style="flex:1;">
+      <button type="button" class="botao botao-principal" id="botao-add-atividade">+ Adicionar</button>
+    </div>
+    <div id="lead-detalhe-timeline"></div>
+
+    <div class="modal-acoes">
+      <div class="modal-acoes-direita">
+        <button type="button" class="botao botao-secundario" data-fechar-modal>Fechar</button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -1507,6 +1595,7 @@
     <h3 class="modal-titulo" id="modal-campanha-titulo">Adicionar campanha</h3>
     <form id="form-campanha">
       <input type="hidden" id="camp-id">
+      <input type="hidden" id="camp-marca-id">
       <div class="linha-form-2">
         <div class="campo-form"><label>Campanha</label><input type="text" id="camp-campanha" required></div>
         <div class="campo-form"><label>Cliente</label><input type="text" id="camp-cliente" required></div>
@@ -1719,7 +1808,7 @@
   }
 
   // ---- Navegação (abas + gaveta no celular) ----
-  const TITULOS_ABA = { dashboard: "👋 Início", portfolio: "Suas Métricas", marcas: "Marcas", calendario: "Calendário", campanhas: "Campanhas", producao: "Produção", checklist: "Checklist", transcricoes: "Transcrições", mensagens: "Mensagens" };
+  const TITULOS_ABA = { dashboard: "👋 Início", portfolio: "Suas Métricas", marcas: "Leads", calendario: "Calendário", campanhas: "Campanhas", producao: "Produção", checklist: "Checklist", transcricoes: "Transcrições", mensagens: "Mensagens" };
   const CARREGADORES_ABA = { dashboard: carregarDashboard, portfolio: carregarPortfolio, marcas: carregarMarcas, calendario: carregarCalendario, campanhas: carregarCampanhas, producao: carregarProducao, checklist: carregarChecklist, transcricoes: carregarTranscricoes, mensagens: carregarMensagens };
   const abasCarregadas = new Set();
 
@@ -1860,7 +1949,9 @@
     ]);
     metaFechamentoMes = meta;
     const marcasTodas = leads;
-    const leadsLista = marcasTodas.filter(m => m.situacao === "lead");
+    // "Ativos" pro card do topo: qualquer lead que ainda não fechou nem foi
+    // perdido (o pipeline mudou de 4 pra 8 estágios, ver aba Leads).
+    const leadsLista = marcasTodas.filter(m => m.situacao !== "Fechado" && m.situacao !== "Perdido");
 
     // Junta as tarefas do quadro de Produção (com prazo, ainda não concluídas)
     // e os itens do checklist delas que tiverem data marcada, na mesma lista
@@ -1986,23 +2077,6 @@
     '<p class="grafico-legenda-atual">O mês atual aparece mais claro porque ainda está correndo.</p>';
   }
 
-  function renderFunilCrmDash(marcas) {
-    const ETAPAS_CRM = [
-      { chave: "lead", rotulo: "Lead" },
-      { chave: "conversando", rotulo: "Conversando" },
-      { chave: "cliente", rotulo: "Cliente" },
-      { chave: "parada", rotulo: "Parada" }
-    ];
-    const contagens = ETAPAS_CRM.map(e => ({ ...e, qtd: marcas.filter(m => m.situacao === e.chave).length }));
-    const max = Math.max(...contagens.map(e => e.qtd), 1);
-    document.getElementById("funil-crm-dash").innerHTML = contagens.map(e => {
-      const pct = Math.round((e.qtd / max) * 100);
-      return '<div class="funil-linha-crm">' +
-        '<div class="funil-linha-crm-topo"><span class="funil-linha-crm-nome">' + e.rotulo + '</span><span class="funil-linha-crm-qtd">' + e.qtd + "</span></div>" +
-        '<div class="barra-progresso-fundo"><div class="barra-progresso" style="width:' + pct + '%;"></div></div>' +
-      "</div>";
-    }).join("");
-  }
 
   // Junta, pra um conjunto de tarefas de Produção, tanto o prazo do card
   // quanto o de cada item do checklist dele que tiver data marcada e ainda
@@ -2440,77 +2514,243 @@
   });
 
   // ============================================================================
-  // ABA 2 — MARCAS
+  // ABA 2 — LEADS (tabela "marcas": pipeline comercial de UGC creator)
   // ============================================================================
+  const ESTAGIOS_LEAD = ["Novo lead", "Contato realizado", "Interessado", "Proposta enviada", "Em negociação", "Fechado", "Perdido", "Sem resposta"];
+  const CORES_ESTAGIO_LEAD = {
+    "Novo lead": "cinza", "Contato realizado": "cinza", "Interessado": "aviso",
+    "Proposta enviada": "aviso", "Em negociação": "aviso",
+    "Fechado": "sucesso", "Perdido": "erro", "Sem resposta": "erro"
+  };
+  const ORIGENS_LEAD = ["Instagram", "E-mail", "WhatsApp", "Indicação", "Plataforma UGC", "Prospecção ativa", "Evento", "Outro"];
+  const TIPOS_ATIVIDADE_LEGIVEL = { "observação": "📝", "ligação": "📞", "whatsapp": "💬", "e-mail": "✉️", "instagram": "📷", "reunião": "🤝", "proposta enviada": "📄", "follow-up": "⏰" };
+  document.getElementById("marca-situacao").innerHTML = ESTAGIOS_LEAD.map(e => "<option>" + e + "</option>").join("");
+
   let listaMarcas = [];
-  let filtroSituacaoAtual = "todas";
+  let listaAtividadesLead = [];
+  let listaCampanhasDoLead = [];
+  let leadDetalheAtualId = null;
+  let filtroSituacaoLead = "todas";
+  let filtroOrigemLead = "todas";
+  let filtroNichoLead = "todas";
+  let filtroPrioridadeLead = null;
+  let filtroFollowupLead = null;
 
   async function carregarMarcas() {
     listaMarcas = await consultarSeguro("marcas", sb.from("marcas").select("*").order("created_at", { ascending: false }));
+    popularFiltrosLead();
+    renderCartoesLeadsResumo();
+    renderFunilLeads();
+    renderFollowupsLeads();
     renderTabelaMarcas();
   }
-  function renderTabelaMarcas() {
+  function popularFiltrosLead() {
+    const selectSituacao = document.getElementById("filtro-situacao-lead");
+    const valorSituacao = selectSituacao.value;
+    selectSituacao.innerHTML = '<option value="todas">Qualquer status</option>' + ESTAGIOS_LEAD.map(e => "<option>" + e + "</option>").join("");
+    selectSituacao.value = ESTAGIOS_LEAD.includes(valorSituacao) ? valorSituacao : "todas";
+
+    const selectOrigem = document.getElementById("filtro-origem-lead");
+    const valorOrigem = selectOrigem.value;
+    selectOrigem.innerHTML = '<option value="todas">Qualquer origem</option>' + ORIGENS_LEAD.map(o => "<option>" + o + "</option>").join("");
+    selectOrigem.value = ORIGENS_LEAD.includes(valorOrigem) ? valorOrigem : "todas";
+
+    const nichos = [...new Set(listaMarcas.map(m => m.nicho).filter(Boolean))].sort((a, b) => a.localeCompare(b, "pt-BR"));
+    const selectNicho = document.getElementById("filtro-nicho-lead");
+    const valorNicho = selectNicho.value;
+    selectNicho.innerHTML = '<option value="todas">Qualquer nicho</option>' + nichos.map(n => "<option>" + n + "</option>").join("");
+    selectNicho.value = nichos.includes(valorNicho) ? valorNicho : "todas";
+  }
+  function leadsFiltrados() {
     const termo = document.getElementById("busca-marcas").value.trim().toLowerCase();
-    const filtradas = listaMarcas.filter(m => {
-      if (filtroSituacaoAtual !== "todas" && m.situacao !== filtroSituacaoAtual) return false;
+    return listaMarcas.filter(m => {
+      if (filtroSituacaoLead !== "todas" && m.situacao !== filtroSituacaoLead) return false;
+      if (filtroOrigemLead !== "todas" && m.origem !== filtroOrigemLead) return false;
+      if (filtroNichoLead !== "todas" && m.nicho !== filtroNichoLead) return false;
+      if (filtroPrioridadeLead && m.prioridade !== filtroPrioridadeLead) return false;
       if (!termo) return true;
-      return (m.marca || "").toLowerCase().includes(termo) || (m.instagram || "").toLowerCase().includes(termo) || (m.email || "").toLowerCase().includes(termo);
+      return (m.marca || "").toLowerCase().includes(termo) || (m.contato_nome || "").toLowerCase().includes(termo) ||
+        (m.instagram || "").toLowerCase().includes(termo) || (m.email || "").toLowerCase().includes(termo);
     });
+  }
+
+  function cartaoResumoHtml(rotulo, valor) {
+    return '<div class="cartao-resumo"><div class="cartao-resumo-rotulo">' + rotulo + '</div><div class="cartao-resumo-valor">' + valor + "</div></div>";
+  }
+  function renderCartoesLeadsResumo() {
+    const abertos = listaMarcas.filter(m => m.situacao !== "Fechado" && m.situacao !== "Perdido");
+    const valorPotencialAberto = abertos.reduce((soma, m) => soma + Number(m.valor_potencial || 0), 0);
+    document.getElementById("cartoes-resumo-leads").innerHTML =
+      cartaoResumoHtml("Total de leads", listaMarcas.length) +
+      cartaoResumoHtml("Novos", listaMarcas.filter(m => m.situacao === "Novo lead").length) +
+      cartaoResumoHtml("Em negociação", listaMarcas.filter(m => m.situacao === "Em negociação").length) +
+      cartaoResumoHtml("Fechados", listaMarcas.filter(m => m.situacao === "Fechado").length) +
+      cartaoResumoHtml("Valor potencial em aberto", formatarMoeda(valorPotencialAberto));
+  }
+  function renderFunilLeads() {
+    const contagens = ESTAGIOS_LEAD.map(e => ({ nome: e, qtd: listaMarcas.filter(m => m.situacao === e).length }));
+    const max = Math.max(...contagens.map(e => e.qtd), 1);
+    document.getElementById("funil-leads").innerHTML = contagens.map(e => {
+      const pct = Math.round((e.qtd / max) * 100);
+      return '<div class="funil-linha-crm">' +
+        '<div class="funil-linha-crm-topo"><span class="funil-linha-crm-nome">' + e.nome + '</span><span class="funil-linha-crm-qtd">' + e.qtd + "</span></div>" +
+        '<div class="barra-progresso-fundo"><div class="barra-progresso" style="width:' + pct + '%;"></div></div>' +
+      "</div>";
+    }).join("");
+  }
+
+  // Follow-ups (proximo_contato) reaproveitando o mesmo componente de linha
+  // (e a mesma lógica atrasado/hoje/próximos) já usado em "Precisa de você".
+  function renderFollowupsLeads() {
+    const hoje = hojeISO();
+    const hojeData = new Date(hoje);
+    const comFollowup = listaMarcas.filter(m => m.proximo_contato);
+    let atrasados = comFollowup.filter(m => m.proximo_contato < hoje).sort((a, b) => a.proximo_contato < b.proximo_contato ? -1 : 1);
+    let hojeArr = comFollowup.filter(m => m.proximo_contato === hoje);
+    let proximos = comFollowup.filter(m => m.proximo_contato > hoje && Math.round((new Date(m.proximo_contato) - hojeData) / 86400000) <= 7)
+      .sort((a, b) => a.proximo_contato < b.proximo_contato ? -1 : 1);
+    if (filtroFollowupLead === "atrasados") { hojeArr = []; proximos = []; }
+    else if (filtroFollowupLead === "hoje") { atrasados = []; proximos = []; }
+    else if (filtroFollowupLead === "proximos") { atrasados = []; hojeArr = []; }
+
+    const alvo = document.getElementById("lista-followups-leads");
+    const total = atrasados.length + hojeArr.length + proximos.length;
+    if (total === 0) { alvo.innerHTML = '<p class="texto-vazio">Nada agendado por agora.</p>'; return; }
+    const linha = (m, tagTexto, tagClasse) =>
+      '<div class="linha-tarefa-unificada" data-id="' + m.id + '">' +
+        '<div class="linha-tarefa-corpo">' +
+          '<div class="linha-tarefa-titulo">' + escaparAtributo(m.marca) + "</div>" +
+          '<div class="linha-tarefa-sub"><span>' + escaparAtributo(m.contato_nome || m.situacao) + '</span><span class="tag-prazo-mini ' + tagClasse + '">' + tagTexto + "</span></div>" +
+        "</div>" +
+      "</div>";
+    const htmlAtrasados = atrasados.map(m => {
+      const dias = Math.round((hojeData - new Date(m.proximo_contato)) / 86400000);
+      return linha(m, "atrasado " + dias + (dias === 1 ? " dia" : " dias"), "atrasado");
+    }).join("");
+    const htmlHoje = hojeArr.map(m => linha(m, "hoje", "normal")).join("");
+    const htmlProximos = proximos.map(m => {
+      const dias = Math.round((new Date(m.proximo_contato) - hojeData) / 86400000);
+      return linha(m, dias === 1 ? "amanhã" : "em " + dias + " dias", dias === 1 ? "amanha" : "normal");
+    }).join("");
+    alvo.innerHTML = htmlAtrasados + htmlHoje + htmlProximos;
+    alvo.querySelectorAll(".linha-tarefa-unificada").forEach(linhaEl => {
+      linhaEl.addEventListener("click", () => abrirDetalheLead(listaMarcas.find(m => m.id === linhaEl.dataset.id)));
+    });
+  }
+  document.querySelectorAll("[data-filtro-followup]").forEach(botao => {
+    botao.addEventListener("click", () => {
+      const valor = botao.dataset.filtroFollowup;
+      filtroFollowupLead = filtroFollowupLead === valor ? null : valor;
+      document.querySelectorAll("[data-filtro-followup]").forEach(b => b.classList.toggle("ativo", b.dataset.filtroFollowup === filtroFollowupLead));
+      renderFollowupsLeads();
+    });
+  });
+
+  function renderTabelaMarcas() {
+    const filtradas = leadsFiltrados();
     const corpo = document.getElementById("corpo-tabela-marcas");
     if (filtradas.length === 0) {
-      corpo.innerHTML = '<tr><td colspan="8" class="texto-vazio">Nenhuma marca encontrada.</td></tr>';
+      corpo.innerHTML = '<tr><td colspan="9" class="texto-vazio">Nenhum lead encontrado.</td></tr>';
       return;
     }
-    const CORES_SITUACAO = { lead: "fundo-cinza", conversando: "fundo-aviso", cliente: "fundo-sucesso", parada: "fundo-erro" };
-    const TEXTO_COR_SITUACAO = { lead: "cinza", conversando: "aviso", cliente: "sucesso", parada: "erro" };
-    const NOMES_SITUACAO = { lead: "Lead", conversando: "Conversando", cliente: "Cliente", parada: "Parada" };
     corpo.innerHTML = filtradas.map(m => {
-      const wa = m.telefone ? '<a class="botao-icone" title="WhatsApp" target="_blank" rel="noopener" href="https://wa.me/' + m.telefone.replace(/\D/g, "") + '" onclick="event.stopPropagation()"><span class="icone"><svg viewBox="0 0 24 24"><path d="M21 11.5a8.5 8.5 0 0 1-12.4 7.6L3 20l1-5.4A8.5 8.5 0 1 1 21 11.5Z"/><path d="M8.5 9.5c.3 3 2.7 5.4 5.7 5.7"/></svg></span></a>' : "";
-      const ig = m.instagram ? '<a target="_blank" rel="noopener" href="https://instagram.com/' + m.instagram.replace("@", "") + '" onclick="event.stopPropagation()">' + m.instagram + "</a>" : "—";
+      const cor = CORES_ESTAGIO_LEAD[m.situacao] || "cinza";
       return '<tr class="linha-clicavel" data-id="' + m.id + '">' +
-        "<td>" + m.marca + "</td>" +
-        "<td>" + ig + "</td>" +
-        "<td>" + (m.email || "—") + "</td>" +
-        "<td>" + (m.telefone || "—") + "</td>" +
-        '<td><span class="pill fundo-' + TEXTO_COR_SITUACAO[m.situacao] + '" style="background:var(--' + CORES_SITUACAO[m.situacao] + ');color:var(--' + TEXTO_COR_SITUACAO[m.situacao] + ')">' + (NOMES_SITUACAO[m.situacao] || m.situacao) + "</span></td>" +
-        '<td style="max-width:160px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + (m.obs || "—") + "</td>" +
+        "<td>" + escaparAtributo(m.marca) + "</td>" +
+        "<td>" + (m.contato_nome ? escaparAtributo(m.contato_nome) : "—") + "</td>" +
+        "<td>" + (m.nicho ? escaparAtributo(m.nicho) : "—") + "</td>" +
+        "<td>" + (m.origem || "—") + "</td>" +
+        '<td><select class="select-status-lead" data-id="' + m.id + '" style="font-size:0.76rem;padding:4px 8px;border-radius:100px;background:var(--fundo-' + cor + ');color:var(--' + cor + ');border:none;">' +
+          ESTAGIOS_LEAD.map(e => "<option" + (e === m.situacao ? " selected" : "") + ">" + e + "</option>").join("") +
+        "</select></td>" +
         "<td>" + (m.ultimo_contato ? formatarData(m.ultimo_contato) : "—") + "</td>" +
-        "<td>" + wa + "</td>" +
+        "<td>" + (m.proximo_contato ? formatarData(m.proximo_contato) : "—") + "</td>" +
+        "<td>" + (m.valor_potencial ? formatarMoeda(m.valor_potencial) : "—") + "</td>" +
+        '<td><button type="button" class="botao-icone" data-editar-lead="' + m.id + '" title="Editar"><span class="icone"><svg viewBox="0 0 24 24"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></span></button></td>' +
       "</tr>";
     }).join("");
     corpo.querySelectorAll("tr[data-id]").forEach(linha => {
-      linha.addEventListener("click", () => abrirModalMarca(listaMarcas.find(m => m.id === linha.dataset.id)));
+      linha.addEventListener("click", (evento) => {
+        if (evento.target.closest("select") || evento.target.closest("[data-editar-lead]")) return;
+        abrirDetalheLead(listaMarcas.find(m => m.id === linha.dataset.id));
+      });
+    });
+    corpo.querySelectorAll("[data-editar-lead]").forEach(botao => {
+      botao.addEventListener("click", (evento) => {
+        evento.stopPropagation();
+        abrirModalMarca(listaMarcas.find(m => m.id === botao.dataset.editarLead));
+      });
+    });
+    corpo.querySelectorAll(".select-status-lead").forEach(select => {
+      select.addEventListener("click", (evento) => evento.stopPropagation());
+      select.addEventListener("change", async () => {
+        await salvarSeguro("marcas", sb.from("marcas").update({ situacao: select.value }).eq("id", select.dataset.id));
+        carregarMarcas();
+      });
     });
   }
   document.getElementById("busca-marcas").addEventListener("input", renderTabelaMarcas);
-  document.querySelectorAll('[data-situacao]').forEach(pill => {
-    pill.addEventListener("click", () => {
-      document.querySelectorAll('[data-situacao]').forEach(p => p.classList.remove("ativo"));
-      pill.classList.add("ativo");
-      filtroSituacaoAtual = pill.dataset.situacao;
-      renderTabelaMarcas();
-    });
+  document.getElementById("filtro-situacao-lead").addEventListener("change", (evento) => { filtroSituacaoLead = evento.target.value; renderTabelaMarcas(); });
+  document.getElementById("filtro-origem-lead").addEventListener("change", (evento) => { filtroOrigemLead = evento.target.value; renderTabelaMarcas(); });
+  document.getElementById("filtro-nicho-lead").addEventListener("change", (evento) => { filtroNichoLead = evento.target.value; renderTabelaMarcas(); });
+  document.querySelector("[data-filtro-prioridade-lead]").addEventListener("click", (evento) => {
+    const botao = evento.currentTarget;
+    const ativo = botao.classList.toggle("ativo");
+    filtroPrioridadeLead = ativo ? botao.dataset.filtroPrioridadeLead : null;
+    renderTabelaMarcas();
   });
+
+  // Nichos de lead: mesmo padrão "escolha ou crie" já usado pros nichos de
+  // vídeo/transcrição, só que a lista vem dos leads em vez desses dois.
+  function todosNichosLead() {
+    return [...new Set(listaMarcas.map(m => m.nicho).filter(Boolean))].sort((a, b) => a.localeCompare(b, "pt-BR"));
+  }
+  function preencherSeletorNichoLead(selectEl, campoNovoEl, nichoAtual) {
+    const opcoes = todosNichosLead();
+    selectEl.innerHTML = opcoes.map(n => '<option value="' + n + '">' + n + "</option>").join("") +
+      '<option value="' + VALOR_NICHO_NOVO + '">+ Criar novo nicho...</option>';
+    if (nichoAtual && opcoes.includes(nichoAtual)) {
+      selectEl.value = nichoAtual; campoNovoEl.hidden = true; campoNovoEl.value = "";
+    } else if (nichoAtual) {
+      selectEl.value = VALOR_NICHO_NOVO; campoNovoEl.hidden = false; campoNovoEl.value = nichoAtual;
+    } else {
+      selectEl.value = opcoes.length ? opcoes[0] : VALOR_NICHO_NOVO;
+      campoNovoEl.hidden = selectEl.value !== VALOR_NICHO_NOVO;
+    }
+  }
+  const selectNichoLead = document.getElementById("marca-nicho-select");
+  const campoNichoLeadNovo = document.getElementById("marca-nicho-novo");
+  configurarSeletorNicho(selectNichoLead, campoNichoLeadNovo);
 
   const modalMarca = document.getElementById("modal-marca");
   document.getElementById("botao-add-marca").addEventListener("click", () => abrirModalMarca(null));
   function abrirModalMarca(marca) {
     document.getElementById("form-marca").reset();
-    document.getElementById("modal-marca-titulo").textContent = marca ? "Editar marca" : "Adicionar marca";
+    document.getElementById("modal-marca-titulo").textContent = marca ? "Editar lead" : "Adicionar lead";
     document.getElementById("marca-id").value = marca ? marca.id : "";
     document.getElementById("marca-nome").value = marca ? marca.marca : "";
+    document.getElementById("marca-site").value = marca ? (marca.site || "") : "";
     document.getElementById("marca-instagram").value = marca ? (marca.instagram || "") : "";
-    document.getElementById("marca-telefone").value = marca ? (marca.telefone || "") : "";
+    preencherSeletorNichoLead(selectNichoLead, campoNichoLeadNovo, marca ? marca.nicho : "");
+    document.getElementById("marca-contato-nome").value = marca ? (marca.contato_nome || "") : "";
+    document.getElementById("marca-cargo").value = marca ? (marca.cargo || "") : "";
     document.getElementById("marca-email").value = marca ? (marca.email || "") : "";
-    document.getElementById("marca-situacao").value = marca ? marca.situacao : "lead";
+    document.getElementById("marca-telefone").value = marca ? (marca.telefone || "") : "";
+    document.getElementById("marca-origem").value = marca && marca.origem ? marca.origem : "Instagram";
+    document.getElementById("marca-situacao").value = marca ? marca.situacao : "Novo lead";
+    document.getElementById("marca-prioridade").value = marca ? marca.prioridade : "media";
+    document.getElementById("marca-valor-potencial").value = marca ? (marca.valor_potencial || "") : "";
     document.getElementById("marca-ultimo-contato").value = marca ? (marca.ultimo_contato || "") : "";
+    document.getElementById("marca-proximo-contato").value = marca ? (marca.proximo_contato || "") : "";
+    document.getElementById("marca-tags").value = marca && Array.isArray(marca.tags) ? marca.tags.join(", ") : "";
     document.getElementById("marca-obs").value = marca ? (marca.obs || "") : "";
     document.getElementById("marca-apagar").hidden = !marca;
+    modalLeadDetalhe.hidden = true;
     modalMarca.hidden = false;
   }
   document.getElementById("marca-apagar").addEventListener("click", async () => {
     const id = document.getElementById("marca-id").value;
-    if (!id || !confirm("Apagar esta marca da sua base?")) return;
+    if (!id || !confirm("Apagar este lead da sua base? As atividades e o vínculo com propostas dele também somem.")) return;
     await salvarSeguro("marcas", sb.from("marcas").delete().eq("id", id));
     modalMarca.hidden = true;
     carregarMarcas();
@@ -2518,19 +2758,108 @@
   document.getElementById("form-marca").addEventListener("submit", async (evento) => {
     evento.preventDefault();
     const id = document.getElementById("marca-id").value;
+    const tagsTexto = document.getElementById("marca-tags").value.trim();
     const registro = {
       marca: document.getElementById("marca-nome").value.trim(),
+      site: document.getElementById("marca-site").value.trim() || null,
       instagram: document.getElementById("marca-instagram").value.trim() || null,
+      nicho: valorNichoSelecionado(selectNichoLead, campoNichoLeadNovo) || null,
+      contato_nome: document.getElementById("marca-contato-nome").value.trim() || null,
+      cargo: document.getElementById("marca-cargo").value.trim() || null,
       telefone: document.getElementById("marca-telefone").value.trim() || null,
       email: document.getElementById("marca-email").value.trim() || null,
+      origem: document.getElementById("marca-origem").value,
       situacao: document.getElementById("marca-situacao").value,
+      prioridade: document.getElementById("marca-prioridade").value,
+      valor_potencial: document.getElementById("marca-valor-potencial").value ? Number(document.getElementById("marca-valor-potencial").value) : null,
       ultimo_contato: document.getElementById("marca-ultimo-contato").value || null,
+      proximo_contato: document.getElementById("marca-proximo-contato").value || null,
+      tags: tagsTexto ? tagsTexto.split(",").map(t => t.trim()).filter(Boolean) : [],
       obs: document.getElementById("marca-obs").value.trim() || null
     };
     if (id) await salvarSeguro("marcas", sb.from("marcas").update(registro).eq("id", id));
     else await salvarSeguro("marcas", sb.from("marcas").insert(registro));
     modalMarca.hidden = true;
     carregarMarcas();
+  });
+
+  // ---- Detalhe do lead: info + timeline de atividades + propostas ligadas ----
+  const modalLeadDetalhe = document.getElementById("modal-lead-detalhe");
+  async function abrirDetalheLead(lead) {
+    if (!lead) return;
+    leadDetalheAtualId = lead.id;
+    document.getElementById("lead-detalhe-titulo").textContent = lead.marca;
+    const cor = CORES_ESTAGIO_LEAD[lead.situacao] || "cinza";
+    const linhasInfo = [
+      ["Status", '<span class="pill" style="background:var(--fundo-' + cor + ');color:var(--' + cor + ')">' + escaparAtributo(lead.situacao) + "</span>"],
+      ["Contato", lead.contato_nome ? escaparAtributo(lead.contato_nome) + (lead.cargo ? " · " + escaparAtributo(lead.cargo) : "") : "—"],
+      ["E-mail", lead.email ? escaparAtributo(lead.email) : "—"],
+      ["WhatsApp", lead.telefone ? escaparAtributo(lead.telefone) : "—"],
+      ["Instagram", lead.instagram ? escaparAtributo(lead.instagram) : "—"],
+      ["Site", lead.site ? escaparAtributo(lead.site) : "—"],
+      ["Nicho", lead.nicho ? escaparAtributo(lead.nicho) : "—"],
+      ["Origem", lead.origem ? escaparAtributo(lead.origem) : "—"],
+      ["Prioridade", lead.prioridade === "alta" ? "Alta" : lead.prioridade === "baixa" ? "Baixa" : "Média"],
+      ["Valor potencial", lead.valor_potencial ? formatarMoeda(lead.valor_potencial) : "—"],
+      ["Próximo follow-up", lead.proximo_contato ? formatarData(lead.proximo_contato) : "—"]
+    ];
+    document.getElementById("lead-detalhe-info").innerHTML =
+      linhasInfo.map(([rotulo, valor]) => "<span>" + rotulo + ": <strong>" + valor + "</strong></span>").join("") +
+      (lead.obs ? '<span style="width:100%;">Obs: <strong>' + escaparAtributo(lead.obs) + "</strong></span>" : "");
+
+    document.getElementById("atividade-descricao").value = "";
+    const [atividades, campanhasDoLead] = await Promise.all([
+      consultarSeguro("atividades", sb.from("atividades").select("*").eq("marca_id", lead.id).order("data", { ascending: false })),
+      consultarSeguro("campanhas", sb.from("campanhas").select("*").eq("marca_id", lead.id).order("created_at", { ascending: false }))
+    ]);
+    listaAtividadesLead = atividades;
+    listaCampanhasDoLead = campanhasDoLead;
+    renderTimelineLead();
+    renderPropostasDoLead();
+    modalLeadDetalhe.hidden = false;
+  }
+  document.getElementById("botao-editar-lead-detalhe").addEventListener("click", () => {
+    abrirModalMarca(listaMarcas.find(m => m.id === leadDetalheAtualId));
+  });
+  document.getElementById("botao-nova-proposta-lead").addEventListener("click", () => {
+    const lead = listaMarcas.find(m => m.id === leadDetalheAtualId);
+    modalLeadDetalhe.hidden = true;
+    abrirModalCampanha(null, lead);
+  });
+  function renderPropostasDoLead() {
+    const alvo = document.getElementById("lead-detalhe-propostas");
+    if (listaCampanhasDoLead.length === 0) { alvo.innerHTML = '<p class="texto-vazio">Nenhuma proposta ligada ainda.</p>'; return; }
+    alvo.innerHTML = listaCampanhasDoLead.map(c =>
+      '<div class="comentario-producao"><strong>' + escaparAtributo(c.campanha) + "</strong> — " + formatarMoeda(c.valor) + " · " + escaparAtributo(c.status) +
+      (c.prazo ? " · prazo " + formatarData(c.prazo) : "") + "</div>"
+    ).join("");
+  }
+  function renderTimelineLead() {
+    const alvo = document.getElementById("lead-detalhe-timeline");
+    if (listaAtividadesLead.length === 0) { alvo.innerHTML = '<p class="texto-vazio">Nenhuma atividade registrada ainda.</p>'; return; }
+    alvo.innerHTML = listaAtividadesLead.map(a =>
+      '<div class="comentario-producao"><strong>' + formatarDataHora(a.data) + "</strong> — " + (TIPOS_ATIVIDADE_LEGIVEL[a.tipo] || "") + " " + escaparAtributo(a.tipo) +
+      (a.descricao ? ": " + escaparAtributo(a.descricao) : "") +
+      ' <button type="button" class="botao-icone" data-apagar-atividade="' + a.id + '" title="Apagar" style="float:right;"><span class="icone"><svg viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></span></button></div>'
+    ).join("");
+    alvo.querySelectorAll("[data-apagar-atividade]").forEach(botao => {
+      botao.addEventListener("click", async () => {
+        await salvarSeguro("atividades", sb.from("atividades").delete().eq("id", botao.dataset.apagarAtividade));
+        listaAtividadesLead = listaAtividadesLead.filter(a => a.id !== botao.dataset.apagarAtividade);
+        renderTimelineLead();
+      });
+    });
+  }
+  document.getElementById("botao-add-atividade").addEventListener("click", async () => {
+    if (!leadDetalheAtualId) return;
+    const descricao = document.getElementById("atividade-descricao").value.trim();
+    const tipo = document.getElementById("atividade-tipo").value;
+    const nova = await salvarSeguro("atividades", sb.from("atividades").insert({ marca_id: leadDetalheAtualId, tipo, descricao: descricao || null }).select().single());
+    if (nova) {
+      listaAtividadesLead.unshift(nova);
+      document.getElementById("atividade-descricao").value = "";
+      renderTimelineLead();
+    }
   });
 
   function baixarCsv(nomeArquivo, colunas, linhas) {
@@ -2544,13 +2873,8 @@
     link.click();
   }
   document.getElementById("botao-exportar-marcas").addEventListener("click", () => {
-    const termo = document.getElementById("busca-marcas").value.trim().toLowerCase();
-    const linhas = listaMarcas.filter(m => {
-      if (filtroSituacaoAtual !== "todas" && m.situacao !== filtroSituacaoAtual) return false;
-      if (!termo) return true;
-      return (m.marca || "").toLowerCase().includes(termo) || (m.instagram || "").toLowerCase().includes(termo) || (m.email || "").toLowerCase().includes(termo);
-    }).map(m => [m.marca, m.instagram, m.email, m.telefone, m.situacao, m.obs, m.ultimo_contato]);
-    baixarCsv("marcas.csv", ["Marca", "Instagram", "E-mail", "Telefone", "Situação", "Observação", "Último contato"], linhas);
+    const linhas = leadsFiltrados().map(m => [m.marca, m.contato_nome, m.nicho, m.origem, m.situacao, m.instagram, m.email, m.telefone, m.valor_potencial, m.proximo_contato, m.ultimo_contato, m.obs]);
+    baixarCsv("leads.csv", ["Empresa", "Contato", "Nicho", "Origem", "Status", "Instagram", "E-mail", "Telefone", "Valor potencial", "Próximo follow-up", "Último contato", "Observação"], linhas);
   });
 
   // ============================================================================
@@ -2884,12 +3208,13 @@
 
   const modalCampanha = document.getElementById("modal-campanha");
   document.getElementById("botao-add-campanha").addEventListener("click", () => abrirModalCampanha(null));
-  function abrirModalCampanha(campanha) {
+  function abrirModalCampanha(campanha, leadParaNova) {
     document.getElementById("form-campanha").reset();
     document.getElementById("modal-campanha-titulo").textContent = campanha ? "Editar campanha" : "Adicionar campanha";
     document.getElementById("camp-id").value = campanha ? campanha.id : "";
+    document.getElementById("camp-marca-id").value = campanha ? (campanha.marca_id || "") : (leadParaNova ? leadParaNova.id : "");
     document.getElementById("camp-campanha").value = campanha ? campanha.campanha : "";
-    document.getElementById("camp-cliente").value = campanha ? campanha.cliente : "";
+    document.getElementById("camp-cliente").value = campanha ? campanha.cliente : (leadParaNova ? leadParaNova.marca : "");
     document.getElementById("camp-tipo").value = campanha ? campanha.tipo : "Conteúdo";
     document.getElementById("camp-status").value = campanha ? campanha.status : "Briefing";
     document.getElementById("camp-qtd").value = campanha ? campanha.qtd : 1;
@@ -2936,6 +3261,7 @@
     const registro = {
       campanha: document.getElementById("camp-campanha").value.trim(),
       cliente: document.getElementById("camp-cliente").value.trim(),
+      marca_id: document.getElementById("camp-marca-id").value || null,
       tipo: document.getElementById("camp-tipo").value,
       status: document.getElementById("camp-status").value,
       qtd: id ? Number(document.getElementById("camp-qtd").value) : Math.max(1, qtdCalculada),
