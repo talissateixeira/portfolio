@@ -382,6 +382,9 @@
 
   .barra-acoes { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
   .barra-acoes-esquerda { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  /* Barra de ações em duas linhas: filtros em cima, botão principal embaixo. */
+  .barra-acoes-empilhada { display: flex; flex-direction: column; gap: 12px; margin-bottom: 16px; }
+  .barra-acoes-linha-botao { display: flex; justify-content: flex-end; }
   .barra-acoes-direita { display: flex; align-items: center; gap: 8px; }
 
   .campo-busca {
@@ -1189,13 +1192,15 @@
 
       <!-- ---- Visão: lista de projetos ---- -->
       <div class="subaba-producao ativa" id="producao-view-projetos">
-        <div class="barra-acoes">
+        <div class="barra-acoes-empilhada">
           <div class="barra-acoes-esquerda">
             <button class="pill-filtro ativo" data-filtro-projeto="ativo">Ativos</button>
             <button class="pill-filtro" data-filtro-projeto="concluido">Concluídos</button>
             <button class="pill-filtro" data-filtro-projeto="arquivado">Arquivados</button>
           </div>
-          <button type="button" class="botao botao-principal" id="botao-add-projeto">+ Novo projeto</button>
+          <div class="barra-acoes-linha-botao">
+            <button type="button" class="botao botao-principal" id="botao-add-projeto">+ Novo projeto</button>
+          </div>
         </div>
         <div class="painel-branco">
           <div class="grade-projetos-producao" id="grade-projetos-producao"></div>
