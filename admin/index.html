@@ -557,8 +557,16 @@
 
   /* ===== CHECKLIST ===== */
   .subtabs { display: flex; gap: 6px; margin-bottom: 18px; flex-wrap: wrap; }
-  .subtab-btn, .subtab-btn-producao { padding: 7px 14px; border-radius: 100px; border: 1px solid var(--borda); background: var(--branco); font-size: 0.8rem; font-weight: 600; color: var(--texto-suave); cursor: pointer; }
-  .subtab-btn.ativo, .subtab-btn-producao.ativo { background: var(--fundo-acento); border-color: var(--acento); color: var(--acento); }
+  .subtab-btn, .subtab-btn-producao, .subtab-btn-conteudo { padding: 7px 14px; border-radius: 100px; border: 1px solid var(--borda); background: var(--branco); font-size: 0.8rem; font-weight: 600; color: var(--texto-suave); cursor: pointer; }
+  .subtab-btn.ativo, .subtab-btn-producao.ativo, .subtab-btn-conteudo.ativo { background: var(--fundo-acento); border-color: var(--acento); color: var(--acento); }
+  .subaba-conteudo { display: none; }
+  .subaba-conteudo.ativa { display: block; }
+  /* Etiqueta de pilar no card de conteúdo — uma cor por pilar. */
+  .pill-pilar { font-size: 0.64rem; font-weight: 700; padding: 2px 8px; border-radius: 100px; align-self: flex-start; background: rgba(38,34,32,0.08); color: var(--texto-suave); }
+  .pill-pilar[data-pilar="Autoridade/Cases"] { background: rgba(201, 162, 39, 0.16); color: #96751a; }
+  .pill-pilar[data-pilar="Dicas/Educativo"] { background: rgba(63, 133, 87, 0.16); color: #2f6642; }
+  .pill-pilar[data-pilar="Bastidores UGC"] { background: rgba(193, 97, 58, 0.16); color: #a04a29; }
+  .pill-pilar[data-pilar="Pessoal/Lifestyle"] { background: rgba(138, 133, 120, 0.18); color: #6b6659; }
   .subaba { display: none; }
   .subaba.ativa { display: block; }
 
@@ -867,6 +875,10 @@
         <span class="icone"><svg viewBox="0 0 24 24"><rect x="3" y="7.5" width="18" height="12.5" rx="2.2"/><path d="M8 7.5V6a2.5 2.5 0 0 1 2.5-2.5h3A2.5 2.5 0 0 1 16 6v1.5M3 13h18"/></svg></span>
         <span class="rotulo-nav">Campanhas</span>
       </button>
+      <button class="nav-item" data-aba="conteudo" title="Conteúdo">
+        <span class="icone"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1.2"/></svg></span>
+        <span class="rotulo-nav">Conteúdo</span>
+      </button>
       <button class="nav-item" data-aba="producao" data-nav-producao-raiz title="Produção">
         <span class="icone"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="5" height="16" rx="1.3"/><rect x="9.5" y="4" width="5" height="10" rx="1.3"/><rect x="16" y="4" width="5" height="13" rx="1.3"/></svg></span>
         <span class="rotulo-nav">Produção</span>
@@ -1120,6 +1132,46 @@
           </thead>
           <tbody id="corpo-tabela-campanhas"></tbody>
         </table>
+      </div>
+    </section>
+
+    <!-- ===================== ABA CONTEÚDO (meu Instagram) ===================== -->
+    <section class="aba" id="aba-conteudo">
+      <p class="portfolio-subtitulo">O planejamento dos SEUS posts — da ideia até no ar. (Entregas de marca ficam na aba Produção.)</p>
+
+      <div class="stats-faixa" id="stats-conteudo"></div>
+
+      <div class="subtabs">
+        <button type="button" class="subtab-btn-conteudo ativo" data-subaba-conteudo="quadro">Quadro</button>
+        <button type="button" class="subtab-btn-conteudo" data-subaba-conteudo="calendario">Calendário</button>
+      </div>
+
+      <!-- ---- Visão: quadro Kanban dos posts ---- -->
+      <div class="subaba-conteudo ativa" id="conteudo-view-quadro">
+        <div class="barra-acoes">
+          <div class="barra-acoes-esquerda">
+            <button class="pill-filtro ativo" data-filtro-pilar="todos">Todos os pilares</button>
+            <button class="pill-filtro" data-filtro-pilar="Autoridade/Cases">Autoridade/Cases</button>
+            <button class="pill-filtro" data-filtro-pilar="Dicas/Educativo">Dicas/Educativo</button>
+            <button class="pill-filtro" data-filtro-pilar="Bastidores UGC">Bastidores UGC</button>
+            <button class="pill-filtro" data-filtro-pilar="Pessoal/Lifestyle">Pessoal/Lifestyle</button>
+          </div>
+          <button type="button" class="botao botao-principal" id="botao-add-conteudo">+ Nova ideia</button>
+        </div>
+        <div class="quadro-kanban" id="quadro-kanban-conteudo"></div>
+      </div>
+
+      <!-- ---- Visão: calendário dos posts (usa a data de postagem) ---- -->
+      <div class="subaba-conteudo" id="conteudo-view-calendario">
+        <div class="calendario-topo">
+          <div class="calendario-nav">
+            <button class="botao-icone" id="conteudo-mes-anterior"><span class="icone"><svg viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></span></button>
+            <span class="calendario-mes-nome" id="conteudo-mes-nome"></span>
+            <button class="botao-icone" id="conteudo-mes-seguinte"><span class="icone"><svg viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></span></button>
+            <button class="botao botao-secundario" id="conteudo-este-mes">Este mês</button>
+          </div>
+        </div>
+        <div class="grade-calendario" id="grade-calendario-conteudo"></div>
       </div>
     </section>
 
@@ -1413,6 +1465,67 @@
         </div>
       </div>
     </form>
+  </div>
+</div>
+
+<div class="modal-fundo" id="modal-conteudo" hidden>
+  <div class="modal-caixa" style="max-width:640px;">
+    <h3 class="modal-titulo" id="modal-conteudo-titulo">Nova ideia</h3>
+    <form id="form-conteudo">
+      <input type="hidden" id="cont-id">
+      <div class="campo-form"><label>Título / ideia do post</label><input type="text" id="cont-titulo" placeholder="Ex: 3 erros que toda creator iniciante comete" required></div>
+      <div class="linha-form-2">
+        <div class="campo-form">
+          <label>Pilar</label>
+          <select id="cont-pilar">
+            <option>Autoridade/Cases</option>
+            <option>Dicas/Educativo</option>
+            <option>Bastidores UGC</option>
+            <option>Pessoal/Lifestyle</option>
+            <option>Sem pilar</option>
+          </select>
+        </div>
+        <div class="campo-form">
+          <label>Formato</label>
+          <select id="cont-formato">
+            <option>Reels</option><option>Carrossel</option><option>Stories</option><option>Foto</option><option>TikTok</option><option>Outro</option>
+          </select>
+        </div>
+      </div>
+      <div class="linha-form-2">
+        <div class="campo-form">
+          <label>Etapa</label>
+          <select id="cont-etapa"></select>
+        </div>
+        <div class="campo-form"><label>Data de postagem</label><input type="date" id="cont-data"></div>
+      </div>
+      <div class="campo-form"><label>Gancho (a primeira frase)</label><textarea id="cont-gancho" placeholder="O que prende a atenção nos 3 primeiros segundos..."></textarea></div>
+      <div class="campo-form"><label>Roteiro</label><textarea id="cont-roteiro" placeholder="O que você fala / mostra no vídeo..."></textarea></div>
+      <div class="campo-form"><label>Legenda</label><textarea id="cont-legenda" placeholder="A legenda pronta pra colar no Instagram..."></textarea></div>
+      <div class="campo-form"><label>Referência (link que te inspirou)</label><input type="url" id="cont-referencia" placeholder="https://..."></div>
+      <div class="campo-form"><label>Observações</label><textarea id="cont-observacoes"></textarea></div>
+
+      <div class="modal-acoes">
+        <button type="button" class="link-apagar" id="cont-apagar" hidden title="Excluir post"><span class="icone"><svg viewBox="0 0 24 24"><path d="M4 7h16M9 7V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v3m3 0-1 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L6 7h12Z"/><path d="M10 11v6M14 11v6"/></svg></span></button>
+        <div class="modal-acoes-direita">
+          <button type="button" class="botao botao-secundario" data-fechar-modal>Cancelar</button>
+          <button type="submit" class="botao botao-principal">Salvar</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div class="modal-fundo" id="modal-dia-conteudo" hidden>
+  <div class="modal-caixa">
+    <h3 class="modal-titulo" id="modal-dia-conteudo-titulo">Dia</h3>
+    <div id="modal-dia-conteudo-lista"></div>
+    <div class="modal-acoes">
+      <div class="modal-acoes-direita">
+        <button type="button" class="botao botao-secundario" data-fechar-modal>Fechar</button>
+        <button type="button" class="botao botao-principal" id="modal-dia-conteudo-add">+ Novo post neste dia</button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -1808,8 +1921,8 @@
   }
 
   // ---- Navegação (abas + gaveta no celular) ----
-  const TITULOS_ABA = { dashboard: "👋 Início", portfolio: "Suas Métricas", marcas: "Leads", calendario: "Calendário", campanhas: "Campanhas", producao: "Produção", checklist: "Checklist", transcricoes: "Transcrições", mensagens: "Mensagens" };
-  const CARREGADORES_ABA = { dashboard: carregarDashboard, portfolio: carregarPortfolio, marcas: carregarMarcas, calendario: carregarCalendario, campanhas: carregarCampanhas, producao: carregarProducao, checklist: carregarChecklist, transcricoes: carregarTranscricoes, mensagens: carregarMensagens };
+  const TITULOS_ABA = { dashboard: "👋 Início", portfolio: "Suas Métricas", marcas: "Leads", calendario: "Calendário", campanhas: "Campanhas", conteudo: "Meu conteúdo no Instagram", producao: "Produção", checklist: "Checklist", transcricoes: "Transcrições", mensagens: "Mensagens" };
+  const CARREGADORES_ABA = { dashboard: carregarDashboard, portfolio: carregarPortfolio, marcas: carregarMarcas, calendario: carregarCalendario, campanhas: carregarCampanhas, conteudo: carregarConteudo, producao: carregarProducao, checklist: carregarChecklist, transcricoes: carregarTranscricoes, mensagens: carregarMensagens };
   const abasCarregadas = new Set();
 
   function abrirAba(nome) {
@@ -4947,6 +5060,357 @@
     }
     modalMensagem.hidden = true;
     carregarMensagens();
+  });
+
+  // ==========================================================================
+  // ABA CONTEÚDO — planejamento dos posts do próprio Instagram da Talissa.
+  // Quadro Kanban (Ideia → Postado) + Calendário, na tabela conteudo_instagram.
+  // ==========================================================================
+  const COLUNAS_CONTEUDO = ["Ideia", "Roteiro", "Gravado", "Editado", "Postado"];
+  let listaConteudo = [];
+  let filtroPilarConteudo = "todos";
+  let mesConteudo = new Date().getMonth();
+  let anoConteudo = new Date().getFullYear();
+  let dragConteudo = null;
+
+  async function carregarConteudo() {
+    // Preenche o select de etapa do modal uma vez só.
+    const selEtapa = document.getElementById("cont-etapa");
+    if (selEtapa && !selEtapa.options.length) {
+      selEtapa.innerHTML = COLUNAS_CONTEUDO.map(c => "<option>" + c + "</option>").join("");
+    }
+    listaConteudo = await consultarSeguro("conteudo_instagram", sb.from("conteudo_instagram").select("*"));
+    renderStatsConteudo();
+    renderKanbanConteudo();
+    renderCalendarioConteudo();
+  }
+
+  function renderStatsConteudo() {
+    const emAndamento = listaConteudo.filter(p => p.etapa !== "Postado").length;
+    const prontos = listaConteudo.filter(p => p.etapa === "Editado").length;
+    const mesAtualIso = new Date().getFullYear() + "-" + String(new Date().getMonth() + 1).padStart(2, "0");
+    const postadosMes = listaConteudo.filter(p => p.etapa === "Postado" && (p.data_postagem || "").startsWith(mesAtualIso)).length;
+    const semData = listaConteudo.filter(p => p.etapa !== "Postado" && !p.data_postagem).length;
+    document.getElementById("stats-conteudo").innerHTML = [
+      { rotulo: "Na esteira", valor: emAndamento, extra: "ideias até o post" },
+      { rotulo: "Prontos pra postar", valor: prontos },
+      { rotulo: "Postados este mês", valor: postadosMes },
+      { rotulo: "Sem data marcada", valor: semData }
+    ].map((s, i) => '<div class="stat-item' + (i === 2 ? " stat-item-cor-3" : "") + '"><div class="stat-rotulo">' + s.rotulo + '</div><div class="stat-valor">' + s.valor + (s.extra ? "<small>" + s.extra + "</small>" : "") + "</div></div>").join("");
+  }
+
+  function conteudoFiltrado() {
+    return filtroPilarConteudo === "todos" ? listaConteudo : listaConteudo.filter(p => p.pilar === filtroPilarConteudo);
+  }
+
+  function cardConteudoHtml(p) {
+    let dataHtml = "";
+    if (p.data_postagem) {
+      const dias = Math.round((new Date(p.data_postagem) - new Date(hojeISO())) / 86400000);
+      const classe = p.etapa === "Postado" ? "" : (dias < 0 ? "atrasado" : (dias <= 2 ? "proximo" : ""));
+      dataHtml = '<span class="card-kanban-prazo ' + classe + '">' + (p.etapa === "Postado" ? "📤 " : "🗓 ") + formatarData(p.data_postagem) + "</span>";
+    }
+    const pilarHtml = p.pilar && p.pilar !== "Sem pilar"
+      ? '<span class="pill-pilar" data-pilar="' + escaparAtributo(p.pilar) + '">' + escaparAtributo(p.pilar) + "</span>"
+      : "";
+    return '<div class="card-kanban" data-id="' + p.id + '">' +
+      '<span class="card-kanban-titulo">' + escaparAtributo(p.titulo) + "</span>" +
+      pilarHtml +
+      '<span class="pill-formato">' + escaparAtributo(p.formato) + "</span>" +
+      '<div class="card-kanban-rodape">' +
+        '<span></span>' + dataHtml +
+      "</div>" +
+    "</div>";
+  }
+
+  function renderKanbanConteudo() {
+    const alvo = document.getElementById("quadro-kanban-conteudo");
+    const posts = conteudoFiltrado();
+    alvo.innerHTML = COLUNAS_CONTEUDO.map((coluna, i) => {
+      const itens = posts.filter(p => p.etapa === coluna).sort((a, b) => (a.ordem || 0) - (b.ordem || 0));
+      const cor = PALETA_CORES_COLUNA[i % PALETA_CORES_COLUNA.length];
+      const corpo = itens.length === 0
+        ? '<p class="texto-vazio" style="padding:4px 2px;">Nada aqui ainda.</p>'
+        : itens.map(cardConteudoHtml).join("");
+      return '<div class="coluna-kanban" data-coluna="' + escaparAtributo(coluna) + '">' +
+        '<div class="coluna-kanban-topo" style="color:' + cor + ';">' +
+          '<span class="coluna-kanban-ponto"></span>' +
+          '<span class="coluna-kanban-nome" style="color:var(--preto);">' + coluna + "</span>" +
+          '<span class="coluna-kanban-contagem">' + itens.length + "</span>" +
+          '<button type="button" class="coluna-kanban-add-topo" data-conteudo-coluna-add="' + escaparAtributo(coluna) + '" title="Nova ideia aqui">+</button>' +
+        "</div>" +
+        '<div class="coluna-kanban-corpo">' + corpo + "</div>" +
+      "</div>";
+    }).join("");
+    alvo.querySelectorAll(".card-kanban").forEach(cardEl => {
+      const post = listaConteudo.find(p => p.id === cardEl.dataset.id);
+      if (post) wireCardDragConteudo(cardEl, post);
+    });
+    alvo.querySelectorAll("[data-conteudo-coluna-add]").forEach(botao => {
+      botao.addEventListener("click", () => abrirModalConteudo(null, null, botao.dataset.conteudoColunaAdd));
+    });
+  }
+
+  // ---- Arrastar e soltar os cards de conteúdo (mesmo esquema da Produção) ----
+  function colunaConteudoSobPonteiro(x, y) {
+    const els = document.elementsFromPoint(x, y);
+    return els.find(el => el.classList && el.classList.contains("coluna-kanban")) || null;
+  }
+  function wireCardDragConteudo(cardEl, post) {
+    cardEl.addEventListener("pointerdown", (evento) => {
+      if (evento.button !== 0 && evento.pointerType === "mouse") return;
+      evento.preventDefault();
+      const rect = cardEl.getBoundingClientRect();
+      dragConteudo = {
+        postId: post.id, origemEl: cardEl, pointerId: evento.pointerId,
+        startX: evento.clientX, startY: evento.clientY,
+        offsetX: evento.clientX - rect.left, offsetY: evento.clientY - rect.top,
+        largura: rect.width, moveu: false, fantasma: null
+      };
+      cardEl.setPointerCapture(evento.pointerId);
+      cardEl.addEventListener("pointermove", onCardConteudoMove);
+      cardEl.addEventListener("pointerup", onCardConteudoUp);
+      cardEl.addEventListener("pointercancel", onCardConteudoUp);
+    });
+  }
+  function onCardConteudoMove(evento) {
+    if (!dragConteudo || evento.pointerId !== dragConteudo.pointerId) return;
+    const dx = evento.clientX - dragConteudo.startX;
+    const dy = evento.clientY - dragConteudo.startY;
+    if (!dragConteudo.moveu && Math.hypot(dx, dy) > 6) {
+      dragConteudo.moveu = true;
+      dragConteudo.origemEl.classList.add("arrastando");
+      const fantasma = dragConteudo.origemEl.cloneNode(true);
+      fantasma.classList.add("card-kanban-fantasma");
+      fantasma.classList.remove("arrastando");
+      fantasma.style.width = dragConteudo.largura + "px";
+      document.body.appendChild(fantasma);
+      dragConteudo.fantasma = fantasma;
+    }
+    if (dragConteudo.moveu && dragConteudo.fantasma) {
+      dragConteudo.fantasma.style.left = (evento.clientX - dragConteudo.offsetX) + "px";
+      dragConteudo.fantasma.style.top = (evento.clientY - dragConteudo.offsetY) + "px";
+      document.querySelectorAll("#quadro-kanban-conteudo .coluna-kanban").forEach(c => c.classList.remove("arrasto-sobre"));
+      const colunaAlvo = colunaConteudoSobPonteiro(evento.clientX, evento.clientY);
+      if (colunaAlvo) colunaAlvo.classList.add("arrasto-sobre");
+    }
+  }
+  async function onCardConteudoUp(evento) {
+    if (!dragConteudo || evento.pointerId !== dragConteudo.pointerId) return;
+    const { origemEl, postId, moveu, fantasma } = dragConteudo;
+    origemEl.removeEventListener("pointermove", onCardConteudoMove);
+    origemEl.removeEventListener("pointerup", onCardConteudoUp);
+    origemEl.removeEventListener("pointercancel", onCardConteudoUp);
+    try { origemEl.releasePointerCapture(evento.pointerId); } catch (erro) { /* já liberado */ }
+    origemEl.classList.remove("arrastando");
+    document.querySelectorAll("#quadro-kanban-conteudo .coluna-kanban").forEach(c => c.classList.remove("arrasto-sobre"));
+    if (fantasma) fantasma.remove();
+
+    if (!moveu) {
+      dragConteudo = null;
+      abrirModalConteudo(listaConteudo.find(p => p.id === postId));
+      return;
+    }
+    const colunaAlvoEl = colunaConteudoSobPonteiro(evento.clientX, evento.clientY);
+    dragConteudo = null;
+    if (!colunaAlvoEl) return;
+    const novaEtapa = colunaAlvoEl.dataset.coluna;
+    const post = listaConteudo.find(p => p.id === postId);
+    if (!post) return;
+
+    const corpo = colunaAlvoEl.querySelector(".coluna-kanban-corpo");
+    const cardsIrmaos = [...corpo.querySelectorAll(".card-kanban")].filter(c => c.dataset.id !== postId);
+    let indiceInsercao = cardsIrmaos.length;
+    for (let i = 0; i < cardsIrmaos.length; i++) {
+      const rect = cardsIrmaos[i].getBoundingClientRect();
+      if (evento.clientY < rect.top + rect.height / 2) { indiceInsercao = i; break; }
+    }
+
+    const mudouEtapa = post.etapa !== novaEtapa;
+    const idsNaEtapa = cardsIrmaos.map(c => c.dataset.id);
+    idsNaEtapa.splice(indiceInsercao, 0, postId);
+
+    const registro = { etapa: novaEtapa, updated_at: new Date().toISOString() };
+    if (mudouEtapa && novaEtapa === "Postado") {
+      registro.postado_em = new Date().toISOString();
+      // Se ainda não tinha data marcada, assume hoje pra já aparecer no calendário.
+      if (!post.data_postagem) { registro.data_postagem = hojeISO(); post.data_postagem = hojeISO(); }
+    } else if (mudouEtapa && post.etapa === "Postado" && novaEtapa !== "Postado") {
+      registro.postado_em = null;
+    }
+
+    post.etapa = novaEtapa;
+    if (registro.postado_em !== undefined) post.postado_em = registro.postado_em;
+    idsNaEtapa.forEach((id, ordem) => {
+      const p = listaConteudo.find(x => x.id === id);
+      if (p) p.ordem = ordem;
+    });
+    renderKanbanConteudo();
+    renderStatsConteudo();
+    renderCalendarioConteudo();
+
+    await salvarSeguro("conteudo_instagram", sb.from("conteudo_instagram").update(registro).eq("id", postId));
+    await Promise.all(idsNaEtapa.map((id, ordem) =>
+      salvarSeguro("conteudo_instagram", sb.from("conteudo_instagram").update({ ordem: ordem }).eq("id", id))
+    ));
+  }
+
+  // ---- Calendário dos posts (usa data_postagem) ----
+  function renderCalendarioConteudo() {
+    document.getElementById("conteudo-mes-nome").textContent = NOMES_MES[mesConteudo] + " de " + anoConteudo;
+    const grade = document.getElementById("grade-calendario-conteudo");
+    const NOMES_DIA = ["Seg", "Ter", "Qua", "Qui", "Sex", "Sáb", "Dom"];
+    let html = NOMES_DIA.map(n => '<div class="dia-semana-nome">' + n + "</div>").join("");
+
+    const primeiroDiaMes = new Date(anoConteudo, mesConteudo, 1);
+    const deslocamento = (primeiroDiaMes.getDay() + 6) % 7;
+    const diasNoMes = new Date(anoConteudo, mesConteudo + 1, 0).getDate();
+    const diasMesAnterior = new Date(anoConteudo, mesConteudo, 0).getDate();
+
+    const celulas = [];
+    for (let i = deslocamento - 1; i >= 0; i--) celulas.push({ dia: diasMesAnterior - i, foraMes: true, mesOffset: -1 });
+    for (let d = 1; d <= diasNoMes; d++) celulas.push({ dia: d, foraMes: false, mesOffset: 0 });
+    while (celulas.length % 7 !== 0) celulas.push({ dia: celulas.length - (deslocamento + diasNoMes) + 1, foraMes: true, mesOffset: 1 });
+
+    const hoje = hojeISO();
+    html += celulas.map(c => {
+      const dataReal = new Date(anoConteudo, mesConteudo + c.mesOffset, c.dia);
+      const dataIso = isoData(dataReal);
+      const itensDoDia = listaConteudo.filter(p => p.data_postagem === dataIso && (filtroPilarConteudo === "todos" || p.pilar === filtroPilarConteudo));
+      const mostrar = itensDoDia.slice(0, 3);
+      const corpoItens = mostrar.map(p => '<div class="dia-item' + (p.etapa === "Postado" ? " feito" : "") + '">' + (p.etapa === "Postado" ? "📤 " : "") + escaparAtributo(p.titulo) + "</div>").join("");
+      const escondidos = itensDoDia.length - mostrar.length;
+      return '<div class="dia-cel' + (c.foraMes ? " fora-mes" : "") + (dataIso === hoje ? " hoje" : "") + '" data-data="' + dataIso + '">' +
+        '<div class="dia-numero">' + c.dia + "</div>" + corpoItens +
+        (escondidos > 0 ? '<div class="dia-mais">+' + escondidos + " mais</div>" : "") +
+        '<button type="button" class="dia-add-btn" data-data="' + dataIso + '">+</button>' +
+      "</div>";
+    }).join("");
+    grade.innerHTML = html;
+
+    grade.querySelectorAll(".dia-add-btn").forEach(botao => {
+      botao.addEventListener("click", (evento) => { evento.stopPropagation(); abrirModalConteudo(null, botao.dataset.data); });
+    });
+    grade.querySelectorAll(".dia-cel").forEach(celula => {
+      celula.addEventListener("click", () => abrirModalDiaConteudo(celula.dataset.data));
+    });
+  }
+
+  function abrirModalDiaConteudo(dataIso) {
+    const itensDoDia = listaConteudo.filter(p => p.data_postagem === dataIso);
+    document.getElementById("modal-dia-conteudo-titulo").textContent = formatarData(dataIso);
+    const lista = document.getElementById("modal-dia-conteudo-lista");
+    if (itensDoDia.length === 0) {
+      lista.innerHTML = '<p class="texto-vazio">Nenhum post marcado pra este dia ainda.</p>';
+    } else {
+      lista.innerHTML = itensDoDia.map(p =>
+        '<div class="item-atrasado" data-id="' + p.id + '" style="cursor:pointer;"><span>' + (p.etapa === "Postado" ? "📤" : "🗓") + " " + escaparAtributo(p.titulo) + " · " + escaparAtributo(p.formato) + '</span><span>' + escaparAtributo(p.etapa) + "</span></div>"
+      ).join("");
+      lista.querySelectorAll("[data-id]").forEach(linha => {
+        linha.addEventListener("click", () => {
+          document.getElementById("modal-dia-conteudo").hidden = true;
+          abrirModalConteudo(listaConteudo.find(p => p.id === linha.dataset.id));
+        });
+      });
+    }
+    document.getElementById("modal-dia-conteudo-add").onclick = () => {
+      document.getElementById("modal-dia-conteudo").hidden = true;
+      abrirModalConteudo(null, dataIso);
+    };
+    document.getElementById("modal-dia-conteudo").hidden = false;
+  }
+
+  // ---- Modal: criar/editar um post ----
+  const modalConteudo = document.getElementById("modal-conteudo");
+  function abrirModalConteudo(post, dataPreenchida, etapaPreenchida) {
+    document.getElementById("form-conteudo").reset();
+    document.getElementById("modal-conteudo-titulo").textContent = post ? "Editar post" : "Nova ideia";
+    document.getElementById("cont-id").value = post ? post.id : "";
+    document.getElementById("cont-titulo").value = post ? post.titulo : "";
+    document.getElementById("cont-pilar").value = post ? (post.pilar || "Sem pilar") : "Autoridade/Cases";
+    document.getElementById("cont-formato").value = post ? (post.formato || "Reels") : "Reels";
+    document.getElementById("cont-etapa").value = post ? post.etapa : (etapaPreenchida || "Ideia");
+    document.getElementById("cont-data").value = post ? (post.data_postagem || "") : (dataPreenchida || "");
+    document.getElementById("cont-gancho").value = post ? (post.gancho || "") : "";
+    document.getElementById("cont-roteiro").value = post ? (post.roteiro || "") : "";
+    document.getElementById("cont-legenda").value = post ? (post.legenda || "") : "";
+    document.getElementById("cont-referencia").value = post ? (post.referencia || "") : "";
+    document.getElementById("cont-observacoes").value = post ? (post.observacoes || "") : "";
+    const botaoApagar = document.getElementById("cont-apagar");
+    botaoApagar.hidden = !post;
+    botaoApagar.onclick = post ? () => apagarConteudo(post.id) : null;
+    modalConteudo.hidden = false;
+  }
+
+  async function apagarConteudo(id) {
+    if (!confirm("Excluir este post do planejamento? Isso não dá pra desfazer.")) return;
+    await salvarSeguro("conteudo_instagram", sb.from("conteudo_instagram").delete().eq("id", id));
+    modalConteudo.hidden = true;
+    carregarConteudo();
+  }
+
+  document.getElementById("form-conteudo").addEventListener("submit", async (evento) => {
+    evento.preventDefault();
+    const id = document.getElementById("cont-id").value;
+    const etapa = document.getElementById("cont-etapa").value;
+    const registro = {
+      titulo: document.getElementById("cont-titulo").value.trim(),
+      pilar: document.getElementById("cont-pilar").value,
+      formato: document.getElementById("cont-formato").value,
+      etapa: etapa,
+      data_postagem: document.getElementById("cont-data").value || null,
+      gancho: document.getElementById("cont-gancho").value.trim() || null,
+      roteiro: document.getElementById("cont-roteiro").value.trim() || null,
+      legenda: document.getElementById("cont-legenda").value.trim() || null,
+      referencia: document.getElementById("cont-referencia").value.trim() || null,
+      observacoes: document.getElementById("cont-observacoes").value.trim() || null,
+      updated_at: new Date().toISOString()
+    };
+    if (!registro.titulo) return;
+    if (id) {
+      const anterior = listaConteudo.find(p => p.id === id);
+      if (etapa === "Postado" && anterior && anterior.etapa !== "Postado") registro.postado_em = new Date().toISOString();
+      else if (etapa !== "Postado" && anterior && anterior.etapa === "Postado") registro.postado_em = null;
+      await salvarSeguro("conteudo_instagram", sb.from("conteudo_instagram").update(registro).eq("id", id));
+    } else {
+      registro.ordem = listaConteudo.filter(p => p.etapa === etapa).length;
+      if (etapa === "Postado") registro.postado_em = new Date().toISOString();
+      await salvarSeguro("conteudo_instagram", sb.from("conteudo_instagram").insert(registro));
+    }
+    modalConteudo.hidden = true;
+    carregarConteudo();
+  });
+
+  // ---- Botões estáticos da aba Conteúdo (ligados uma vez só) ----
+  document.getElementById("botao-add-conteudo").addEventListener("click", () => abrirModalConteudo(null));
+  document.querySelectorAll(".subtab-btn-conteudo").forEach(botao => {
+    botao.addEventListener("click", () => {
+      document.querySelectorAll(".subtab-btn-conteudo").forEach(b => b.classList.remove("ativo"));
+      botao.classList.add("ativo");
+      const alvo = botao.dataset.subabaConteudo;
+      document.querySelectorAll(".subaba-conteudo").forEach(s => s.classList.toggle("ativa", s.id === "conteudo-view-" + alvo));
+    });
+  });
+  document.querySelectorAll("[data-filtro-pilar]").forEach(botao => {
+    botao.addEventListener("click", () => {
+      document.querySelectorAll("[data-filtro-pilar]").forEach(b => b.classList.remove("ativo"));
+      botao.classList.add("ativo");
+      filtroPilarConteudo = botao.dataset.filtroPilar;
+      renderKanbanConteudo();
+      renderCalendarioConteudo();
+    });
+  });
+  document.getElementById("conteudo-mes-anterior").addEventListener("click", () => {
+    mesConteudo--; if (mesConteudo < 0) { mesConteudo = 11; anoConteudo--; }
+    renderCalendarioConteudo();
+  });
+  document.getElementById("conteudo-mes-seguinte").addEventListener("click", () => {
+    mesConteudo++; if (mesConteudo > 11) { mesConteudo = 0; anoConteudo++; }
+    renderCalendarioConteudo();
+  });
+  document.getElementById("conteudo-este-mes").addEventListener("click", () => {
+    mesConteudo = new Date().getMonth(); anoConteudo = new Date().getFullYear();
+    renderCalendarioConteudo();
   });
 
   // ---- Ponto de partida: abre a aba do hash da URL, ou Portfólio por padrão. ----
