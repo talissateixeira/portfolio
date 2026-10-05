@@ -397,8 +397,24 @@
     border: 1px solid var(--borda);
     background: var(--branco);
     font-size: 0.83rem;
+    color: var(--preto);
+    font-family: var(--fonte);
     min-width: 200px;
   }
+  /* Selects da barra de filtros: tira o visual nativo do macOS e põe a mesma
+     setinha discreta dos outros campos, no estilo "pílula" clarinho. */
+  select.campo-busca {
+    appearance: none;
+    -webkit-appearance: none;
+    padding-right: 36px;
+    cursor: pointer;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2379736A' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    background-size: 15px;
+  }
+  select.campo-busca:hover { border-color: var(--texto-suave); }
+  select.campo-busca:focus-visible { outline: none; border-color: var(--acento); box-shadow: 0 0 0 3px var(--fundo-acento); }
 
   .pill-filtro {
     padding: 6px 14px;
