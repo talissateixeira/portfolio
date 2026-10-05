@@ -415,6 +415,23 @@
   }
   select.campo-busca:hover { border-color: var(--texto-suave); }
   select.campo-busca:focus-visible { outline: none; border-color: var(--acento); box-shadow: 0 0 0 3px var(--fundo-acento); }
+  /* Selects de status dentro da tabela de leads: pílula colorida limpa, sem o
+     visual nativo do macOS, com setinha discreta. A cor vem inline por status. */
+  .select-status-lead {
+    appearance: none;
+    -webkit-appearance: none;
+    cursor: pointer;
+    border: none;
+    border-radius: 100px;
+    font-family: var(--fonte);
+    font-size: 0.76rem;
+    font-weight: 600;
+    padding: 4px 26px 4px 11px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='rgba(38,34,32,0.5)' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 9px center;
+    background-size: 12px;
+  }
 
   .pill-filtro {
     padding: 6px 14px;
@@ -2880,7 +2897,7 @@
         "<td>" + (m.contato_nome ? escaparAtributo(m.contato_nome) : "—") + "</td>" +
         "<td>" + (m.nicho ? escaparAtributo(m.nicho) : "—") + "</td>" +
         "<td>" + (m.origem || "—") + "</td>" +
-        '<td><select class="select-status-lead" data-id="' + m.id + '" style="font-size:0.76rem;padding:4px 8px;border-radius:100px;background:var(--fundo-' + cor + ');color:var(--' + cor + ');border:none;">' +
+        '<td><select class="select-status-lead" data-id="' + m.id + '" style="background-color:var(--fundo-' + cor + ');color:var(--' + cor + ');">' +
           ESTAGIOS_LEAD.map(e => "<option" + (e === m.situacao ? " selected" : "") + ">" + e + "</option>").join("") +
         "</select></td>" +
         "<td>" + (m.ultimo_contato ? formatarData(m.ultimo_contato) : "—") + "</td>" +
