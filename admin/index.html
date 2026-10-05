@@ -3903,7 +3903,11 @@
           formato: formato,
           coluna: "Briefing",
           ordem: linhas.length,
-          prazo: prazoFinal || null,
+          // Nasce SEM prazo: antes copiava o prazo da campanha em toda tarefa,
+          // então os N reels caíam todos no mesmo dia e entupiam a Início.
+          // Agora cada tarefa é agendada manualmente (o prazo da campanha segue
+          // guardado em projetos_producao.prazo_final, pra referência).
+          prazo: null,
           prioridade: "media",
           checklist: JSON.parse(JSON.stringify(CHECKLIST_PADRAO_PRODUCAO))
         });
