@@ -2078,6 +2078,7 @@
     ]);
     metaFechamentoMes = meta;
     const marcasTodas = leads;
+    atualizarBadgeLeads(contarLeadsNovos(marcasTodas));
     // "Ativos" pro card do topo: qualquer lead que ainda não fechou nem foi
     // perdido (o pipeline mudou de 4 pra 8 estágios, ver aba Leads).
     const leadsLista = marcasTodas.filter(m => m.situacao !== "Fechado" && m.situacao !== "Perdido");
@@ -2665,21 +2666,39 @@
   let filtroPrioridadeLead = null;
   let filtroFollowupLead = null;
 
-  // Bolinha de "novos" na aba Leads: conta os contatos que vieram do formulário
-  // do site e ainda não foram triados. O site grava sempre situacao === "lead"
-  // (minúsculo), diferente dos estágios do funil ("Novo lead", etc.), então
-  // esse filtro pega exatamente os que ela ainda não abriu/moveu. Some sozinha
-  // assim que o lead ganha um estágio (todo salvar/mover chama carregarMarcas).
+  // Bolinha de "novos" na aba Leads: avisa quando chegam contatos novos do
+  // formulário do site (que vêm sempre com situacao === "lead", minúsculo,
+  // distinto dos estágios do funil). Funciona como aviso de novidade: guarda no
+  // navegador a data da última vez que a Talissa abriu a aba Leads, e conta só
+  // os leads que chegaram DEPOIS disso. Abrir a aba zera a bolinha.
+  const CHAVE_LEADS_VISTOS = "leads_vistos_ate";
+  function leadsVistosAte() {
+    try { return localStorage.getItem(CHAVE_LEADS_VISTOS) || ""; } catch (e) { return ""; }
+  }
   function atualizarBadgeLeads(qtd) {
     const badge = document.getElementById("badge-leads");
     if (!badge) return;
     badge.textContent = qtd > 99 ? "99+" : String(qtd);
     badge.hidden = qtd <= 0;
   }
+  function contarLeadsNovos(lista) {
+    const vistos = leadsVistosAte();
+    const limite = vistos ? Date.parse(vistos) : 0;
+    return (lista || []).filter(m => {
+      if (m.situacao !== "lead") return false;
+      if (!limite) return true;
+      const t = Date.parse(m.created_at || "");
+      return isNaN(t) ? true : t > limite;
+    }).length;
+  }
+  function marcarLeadsComoVistos() {
+    try { localStorage.setItem(CHAVE_LEADS_VISTOS, new Date().toISOString()); } catch (e) {}
+    atualizarBadgeLeads(0);
+  }
 
   async function carregarMarcas() {
     listaMarcas = await consultarSeguro("marcas", sb.from("marcas").select("*").order("created_at", { ascending: false }));
-    atualizarBadgeLeads(listaMarcas.filter(m => m.situacao === "lead").length);
+    marcarLeadsComoVistos();
     popularFiltrosLead();
     renderCartoesLeadsResumo();
     renderFunilLeads();
@@ -3582,8 +3601,8 @@
 
   // Já mostra a bolinha de leads novos na abertura, sem esperar abrir a aba.
   (async function carregarBadgeLeadsCedo() {
-    const novos = await consultarSeguro("marcas", sb.from("marcas").select("id").eq("situacao", "lead"));
-    atualizarBadgeLeads(novos.length);
+    const novos = await consultarSeguro("marcas", sb.from("marcas").select("id,created_at").eq("situacao", "lead"));
+    atualizarBadgeLeads(contarLeadsNovos(novos));
   })();
   function rerenderizarProducao() {
     renderGradeProjetos();
