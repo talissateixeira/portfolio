@@ -449,6 +449,8 @@
   .celula-video-textos span { font-size: 0.74rem; color: var(--texto-suave); }
   .alca-arrastar { cursor: grab; color: var(--texto-suave); }
   tr.arrastando { opacity: 0.4; }
+  .cartao-projeto-producao.arrastando { opacity: 0.4; }
+  .alca-projeto { flex: 0 0 auto; font-size: 0.85rem; letter-spacing: -2px; line-height: 1; }
 
   .tabela-scroll { overflow-x: auto; }
 
@@ -3472,7 +3474,7 @@
       consultarSeguro("projetos_producao", sb.from("projetos_producao").select("*").order("created_at", { ascending: false })),
       consultarSeguro("tarefas_producao", sb.from("tarefas_producao").select("*"))
     ]);
-    listaProjetosProducao = projetos;
+    listaProjetosProducao = ordenarProjetos(projetos);
     listaTarefasProducao = tarefas;
     popularFiltroProjetoTodas();
     renderSidebarProjetos();
@@ -3483,6 +3485,19 @@
   // dentro de cada grupo (fixados / não fixados) mantém a ordem original.
   function comFixadosPrimeiro(lista) {
     return lista.slice().sort((a, b) => (b.fixado ? 1 : 0) - (a.fixado ? 1 : 0));
+  }
+
+  // Ordena pela ordem manual definida arrastando (campo `ordem`). Projetos que
+  // ainda não têm ordem vão pro fim, desempatando por mais recente. Os fixados
+  // continuam subindo pro topo via comFixadosPrimeiro (que é estável e mantém
+  // esta ordem dentro de cada grupo).
+  function ordenarProjetos(lista) {
+    return (lista || []).slice().sort((a, b) => {
+      const oa = a.ordem == null ? Infinity : a.ordem;
+      const ob = b.ordem == null ? Infinity : b.ordem;
+      if (oa !== ob) return oa - ob;
+      return (b.created_at || "").localeCompare(a.created_at || "");
+    });
   }
 
   // ---- Árvore "Produção > Projetos > cada projeto" na barra lateral ----
@@ -3542,7 +3557,7 @@
   // da barra lateral já aparecer mesmo antes de entrar na aba Produção.
   (async function carregarProjetosSidebarCedo() {
     if (listaProjetosProducao.length === 0) {
-      listaProjetosProducao = await consultarSeguro("projetos_producao", sb.from("projetos_producao").select("*").order("created_at", { ascending: false }));
+      listaProjetosProducao = ordenarProjetos(await consultarSeguro("projetos_producao", sb.from("projetos_producao").select("*").order("created_at", { ascending: false })));
       renderSidebarProjetos();
     }
   })();
@@ -3570,7 +3585,8 @@
     }
     alvo.innerHTML = filtrados.map(p => {
       const prog = progressoProjeto(p.id);
-      return '<div class="cartao-projeto-producao' + (p.fixado ? " fixado" : "") + '" data-id="' + p.id + '">' +
+      return '<div class="cartao-projeto-producao' + (p.fixado ? " fixado" : "") + '" draggable="true" data-id="' + p.id + '">' +
+        '<span class="alca-arrastar alca-projeto" title="Arraste pra ordenar por prioridade">⠿⠿</span>' +
         '<div class="cartao-projeto-producao-topo">' +
           '<span class="selo-status-projeto status-' + p.status + '">' + ROTULO_STATUS_PROJETO[p.status] + "</span>" +
         "</div>" +
@@ -3590,7 +3606,7 @@
     }).join("");
     alvo.querySelectorAll(".cartao-projeto-producao").forEach(cartao => {
       cartao.addEventListener("click", (evento) => {
-        if (evento.target.closest("[data-editar-projeto]") || evento.target.closest("[data-fixar-projeto]")) return;
+        if (evento.target.closest("[data-editar-projeto]") || evento.target.closest("[data-fixar-projeto]") || evento.target.closest(".alca-arrastar")) return;
         abrirQuadroProjeto(cartao.dataset.id);
       });
     });
@@ -3609,6 +3625,35 @@
         if (projeto) projeto.fixado = novoFixado;
         renderGradeProjetos();
         renderSidebarProjetos();
+      });
+    });
+
+    // Arrastar os cards pra ordenar por prioridade (persiste em `ordem`).
+    // Mesmo esquema da tabela de vídeos. A barra lateral acompanha a ordem.
+    let projArrastadoId = null;
+    alvo.querySelectorAll(".cartao-projeto-producao[draggable]").forEach(cartao => {
+      cartao.addEventListener("dragstart", () => { projArrastadoId = cartao.dataset.id; cartao.classList.add("arrastando"); });
+      cartao.addEventListener("dragend", () => cartao.classList.remove("arrastando"));
+      cartao.addEventListener("dragover", (evento) => evento.preventDefault());
+      cartao.addEventListener("drop", async (evento) => {
+        evento.preventDefault();
+        const destinoId = cartao.dataset.id;
+        if (!projArrastadoId || projArrastadoId === destinoId) return;
+        const iDe = filtrados.findIndex(p => p.id === projArrastadoId);
+        const iPara = filtrados.findIndex(p => p.id === destinoId);
+        if (iDe < 0 || iPara < 0) return;
+        const [movido] = filtrados.splice(iDe, 1);
+        filtrados.splice(iPara, 0, movido);
+        // Renumera a ordem na memória, reordena a lista e re-renderiza na hora
+        // (otimista); depois persiste cada projeto no banco.
+        filtrados.forEach((p, i) => {
+          const ref = listaProjetosProducao.find(x => x.id === p.id);
+          if (ref) ref.ordem = i;
+        });
+        listaProjetosProducao = ordenarProjetos(listaProjetosProducao);
+        renderGradeProjetos();
+        renderSidebarProjetos();
+        await Promise.all(filtrados.map((p, i) => salvarSeguro("projetos_producao", sb.from("projetos_producao").update({ ordem: i }).eq("id", p.id))));
       });
     });
   }
