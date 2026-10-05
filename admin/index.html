@@ -814,6 +814,11 @@
      tamanho natural deles. */
   .checklist-item-producao input[type="checkbox"] { width: auto; flex: 0 0 auto; padding: 0; border: none; background: none; border-radius: 0; }
   .checklist-item-producao input[type="date"] { width: 132px; flex: 0 0 auto; padding: 4px 6px; font-size: 0.76rem; }
+  /* Campo de data vazio: esconde a data de hoje "fantasma" que o Safari mostra
+     num <input type="date"> sem valor (deixa o campo claramente em branco).
+     Cor transparente no input inteiro cobre todas as sub-partes (dia/mês/ano);
+     ao escolher uma data a classe sai e a data aparece normal. */
+  input[type="date"].data-vazia { color: transparent; }
 
   .comentario-producao { padding: 8px 0; border-top: 1px solid var(--borda); font-size: 0.84rem; }
   .comentario-producao:first-child { border-top: none; }
@@ -1968,6 +1973,22 @@
   document.querySelectorAll(".nav-item").forEach(botao => {
     if (botao.hasAttribute("data-nav-producao-raiz")) return;
     botao.addEventListener("click", () => abrirAba(botao.dataset.aba));
+  });
+
+  // Campos de data vazios: alguns navegadores (Safari) mostram a data de hoje
+  // "fantasma" num <input type="date"> sem valor, o que parece preenchido sem
+  // estar. Marcamos .data-vazia nos vazios (o CSS esconde esse fantasma) e
+  // mantemos atualizado conforme a pessoa escolhe/apaga a data.
+  function marcarDatasVaziasEm(container) {
+    (container || document).querySelectorAll('input[type="date"]').forEach(inp => {
+      inp.classList.toggle("data-vazia", !inp.value);
+    });
+  }
+  document.addEventListener("input", (evento) => {
+    const alvo = evento.target;
+    if (alvo && alvo.matches && alvo.matches('input[type="date"]')) {
+      alvo.classList.toggle("data-vazia", !alvo.value);
+    }
   });
 
   const sidebar = document.getElementById("sidebar");
@@ -4084,6 +4105,7 @@
     alvo.querySelectorAll("[data-indice-remover-check]").forEach(botao => {
       botao.addEventListener("click", () => { checklistEditando.splice(Number(botao.dataset.indiceRemoverCheck), 1); renderChecklistModal(); });
     });
+    marcarDatasVaziasEm(alvo);
   }
   document.getElementById("botao-add-item-checklist").addEventListener("click", () => {
     const campo = document.getElementById("novo-item-checklist");
@@ -4176,6 +4198,7 @@
     document.getElementById("card-datas-info").textContent = tarefa
       ? "Criada em " + formatarDataHora(tarefa.created_at) + (tarefa.concluido_em ? " · Concluída em " + formatarDataHora(tarefa.concluido_em) : "")
       : "";
+    marcarDatasVaziasEm(document.getElementById("form-card-producao"));
     modalCard.hidden = false;
   }
   document.getElementById("card-apagar").addEventListener("click", async () => {
