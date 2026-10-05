@@ -411,6 +411,7 @@
     cursor: pointer;
   }
   .pill-filtro.ativo { background: var(--preto); border-color: var(--preto); color: #fff; }
+  .segmento-view { display: inline-flex; gap: 6px; }
 
   /* ===== TABELAS ===== */
   table.tabela { width: 100%; border-collapse: collapse; font-size: 0.84rem; }
@@ -1073,11 +1074,15 @@
           <button class="pill-filtro" data-filtro-prioridade-lead="alta">Prioridade alta</button>
         </div>
         <div class="barra-acoes-direita">
+          <div class="segmento-view" role="group" aria-label="Visualização dos leads">
+            <button type="button" class="pill-filtro ativo" data-lead-view="tabela">Tabela</button>
+            <button type="button" class="pill-filtro" data-lead-view="quadro">Quadro</button>
+          </div>
           <button class="botao botao-secundario" id="botao-exportar-marcas">Baixar CSV</button>
           <button class="botao botao-principal" id="botao-add-marca">+ Novo lead</button>
         </div>
       </div>
-      <div class="painel-branco tabela-scroll">
+      <div class="painel-branco tabela-scroll" id="leads-view-tabela">
         <table class="tabela">
           <thead>
             <tr>
@@ -1086,6 +1091,9 @@
           </thead>
           <tbody id="corpo-tabela-marcas"></tbody>
         </table>
+      </div>
+      <div id="leads-view-quadro" hidden>
+        <div class="quadro-kanban" id="quadro-leads"></div>
       </div>
     </section>
 
@@ -2728,7 +2736,7 @@
     renderCartoesLeadsResumo();
     renderFunilLeads();
     renderFollowupsLeads();
-    renderTabelaMarcas();
+    renderLeadsAtual();
   }
   function popularFiltrosLead() {
     const selectSituacao = document.getElementById("filtro-situacao-lead");
@@ -2875,16 +2883,162 @@
       });
     });
   }
-  document.getElementById("busca-marcas").addEventListener("input", renderTabelaMarcas);
-  document.getElementById("filtro-situacao-lead").addEventListener("change", (evento) => { filtroSituacaoLead = evento.target.value; renderTabelaMarcas(); });
-  document.getElementById("filtro-origem-lead").addEventListener("change", (evento) => { filtroOrigemLead = evento.target.value; renderTabelaMarcas(); });
-  document.getElementById("filtro-nicho-lead").addEventListener("change", (evento) => { filtroNichoLead = evento.target.value; renderTabelaMarcas(); });
+  document.getElementById("busca-marcas").addEventListener("input", renderLeadsAtual);
+  document.getElementById("filtro-situacao-lead").addEventListener("change", (evento) => { filtroSituacaoLead = evento.target.value; renderLeadsAtual(); });
+  document.getElementById("filtro-origem-lead").addEventListener("change", (evento) => { filtroOrigemLead = evento.target.value; renderLeadsAtual(); });
+  document.getElementById("filtro-nicho-lead").addEventListener("change", (evento) => { filtroNichoLead = evento.target.value; renderLeadsAtual(); });
   document.querySelector("[data-filtro-prioridade-lead]").addEventListener("click", (evento) => {
     const botao = evento.currentTarget;
     const ativo = botao.classList.toggle("ativo");
     filtroPrioridadeLead = ativo ? botao.dataset.filtroPrioridadeLead : null;
-    renderTabelaMarcas();
+    renderLeadsAtual();
   });
+
+  // ---- Visão Tabela / Quadro dos leads ----
+  let leadViewMode = "tabela";
+  function renderLeadsAtual() {
+    if (leadViewMode === "quadro") renderQuadroLeads();
+    else renderTabelaMarcas();
+  }
+  function setLeadView(modo) {
+    leadViewMode = modo === "quadro" ? "quadro" : "tabela";
+    document.getElementById("leads-view-tabela").hidden = leadViewMode !== "tabela";
+    document.getElementById("leads-view-quadro").hidden = leadViewMode !== "quadro";
+    // No quadro, as colunas já SÃO os status, então o filtro de status não faz
+    // sentido — esconde pra não confundir.
+    document.getElementById("filtro-situacao-lead").style.display = leadViewMode === "quadro" ? "none" : "";
+    document.querySelectorAll("[data-lead-view]").forEach(b => b.classList.toggle("ativo", b.dataset.leadView === leadViewMode));
+    renderLeadsAtual();
+  }
+  document.querySelectorAll("[data-lead-view]").forEach(botao => {
+    botao.addEventListener("click", () => setLeadView(botao.dataset.leadView));
+  });
+
+  // ---- Quadro (Kanban) de leads por etapa do funil ----
+  // Reaproveita as classes de Kanban (coluna-kanban, card-kanban, fantasma) e a
+  // mesma mecânica de arrastar por ponteiro da Produção. Arrastar um lead pra
+  // outra coluna muda o status (situacao). Clicar (sem arrastar) abre o detalhe.
+  let dragLead = null;
+  function colunaDoLead(situacao) {
+    return ESTAGIOS_LEAD.includes(situacao) ? situacao : "Novo lead";
+  }
+  function leadsDoQuadro() {
+    // Mesmos filtros da tabela, menos o de status (as colunas já são o status).
+    const termo = document.getElementById("busca-marcas").value.trim().toLowerCase();
+    return listaMarcas.filter(m => {
+      if (filtroOrigemLead !== "todas" && m.origem !== filtroOrigemLead) return false;
+      if (filtroNichoLead !== "todas" && m.nicho !== filtroNichoLead) return false;
+      if (filtroPrioridadeLead && m.prioridade !== filtroPrioridadeLead) return false;
+      if (!termo) return true;
+      return (m.marca || "").toLowerCase().includes(termo) || (m.contato_nome || "").toLowerCase().includes(termo) ||
+        (m.instagram || "").toLowerCase().includes(termo) || (m.email || "").toLowerCase().includes(termo);
+    });
+  }
+  function cardLeadHtml(m) {
+    const hoje = hojeISO();
+    let prazoHtml = "";
+    if (m.proximo_contato) {
+      const classe = m.proximo_contato < hoje ? "atrasado" : (m.proximo_contato === hoje ? "proximo" : "");
+      prazoHtml = '<span class="card-kanban-prazo ' + classe + '">⏰ ' + formatarData(m.proximo_contato) + "</span>";
+    }
+    const prioridade = m.prioridade === "alta" ? '<span class="ponto-prioridade ponto-prioridade-alta" title="Prioridade alta"></span> ' : "";
+    const esquerda = m.valor_potencial ? formatarMoeda(m.valor_potencial) : (m.contato_nome ? escaparAtributo(m.contato_nome) : "");
+    return '<div class="card-kanban" data-id="' + m.id + '">' +
+      (m.nicho ? '<div class="card-kanban-marca">' + escaparAtributo(m.nicho) + "</div>" : "") +
+      '<div class="card-kanban-titulo">' + escaparAtributo(m.marca) + "</div>" +
+      '<div class="card-kanban-rodape"><span>' + prioridade + esquerda + "</span>" + prazoHtml + "</div>" +
+    "</div>";
+  }
+  function renderQuadroLeads() {
+    const alvo = document.getElementById("quadro-leads");
+    if (!alvo) return;
+    const leads = leadsDoQuadro();
+    alvo.innerHTML = ESTAGIOS_LEAD.map(estagio => {
+      const itens = leads.filter(m => colunaDoLead(m.situacao) === estagio);
+      const cor = CORES_ESTAGIO_LEAD[estagio] || "cinza";
+      const corpo = itens.length === 0
+        ? '<p class="texto-vazio" style="padding:4px 2px;">—</p>'
+        : itens.map(cardLeadHtml).join("");
+      return '<div class="coluna-kanban" data-estagio="' + escaparAtributo(estagio) + '">' +
+        '<div class="coluna-kanban-topo" style="color:var(--' + cor + ');">' +
+          '<span class="coluna-kanban-ponto"></span>' +
+          '<span class="coluna-kanban-nome" style="color:var(--preto);">' + estagio + "</span>" +
+          '<span class="coluna-kanban-contagem">' + itens.length + "</span>" +
+        "</div>" +
+        '<div class="coluna-kanban-corpo">' + corpo + "</div>" +
+      "</div>";
+    }).join("");
+    alvo.querySelectorAll(".card-kanban").forEach(cardEl => {
+      const lead = listaMarcas.find(m => m.id === cardEl.dataset.id);
+      if (lead) wireLeadDrag(cardEl, lead);
+    });
+  }
+  function wireLeadDrag(cardEl, lead) {
+    cardEl.addEventListener("pointerdown", (evento) => {
+      if (evento.button !== 0 && evento.pointerType === "mouse") return;
+      evento.preventDefault();
+      const rect = cardEl.getBoundingClientRect();
+      dragLead = {
+        leadId: lead.id, origemEl: cardEl, pointerId: evento.pointerId,
+        startX: evento.clientX, startY: evento.clientY,
+        offsetX: evento.clientX - rect.left, offsetY: evento.clientY - rect.top,
+        largura: rect.width, moveu: false, fantasma: null
+      };
+      cardEl.setPointerCapture(evento.pointerId);
+      cardEl.addEventListener("pointermove", onLeadPointerMove);
+      cardEl.addEventListener("pointerup", onLeadPointerUp);
+      cardEl.addEventListener("pointercancel", onLeadPointerUp);
+    });
+  }
+  function onLeadPointerMove(evento) {
+    if (!dragLead || evento.pointerId !== dragLead.pointerId) return;
+    const dx = evento.clientX - dragLead.startX, dy = evento.clientY - dragLead.startY;
+    if (!dragLead.moveu && Math.hypot(dx, dy) > 6) {
+      dragLead.moveu = true;
+      dragLead.origemEl.classList.add("arrastando");
+      const fantasma = dragLead.origemEl.cloneNode(true);
+      fantasma.classList.add("card-kanban-fantasma");
+      fantasma.classList.remove("arrastando");
+      fantasma.style.width = dragLead.largura + "px";
+      document.body.appendChild(fantasma);
+      dragLead.fantasma = fantasma;
+    }
+    if (dragLead.moveu && dragLead.fantasma) {
+      dragLead.fantasma.style.left = (evento.clientX - dragLead.offsetX) + "px";
+      dragLead.fantasma.style.top = (evento.clientY - dragLead.offsetY) + "px";
+      document.querySelectorAll(".coluna-kanban").forEach(c => c.classList.remove("arrasto-sobre"));
+      const col = colunaSobPonteiro(evento.clientX, evento.clientY);
+      if (col) col.classList.add("arrasto-sobre");
+    }
+  }
+  async function onLeadPointerUp(evento) {
+    if (!dragLead || evento.pointerId !== dragLead.pointerId) return;
+    const { origemEl, leadId, moveu, fantasma } = dragLead;
+    origemEl.removeEventListener("pointermove", onLeadPointerMove);
+    origemEl.removeEventListener("pointerup", onLeadPointerUp);
+    origemEl.removeEventListener("pointercancel", onLeadPointerUp);
+    try { origemEl.releasePointerCapture(evento.pointerId); } catch (e) { /* já liberado */ }
+    origemEl.classList.remove("arrastando");
+    document.querySelectorAll(".coluna-kanban").forEach(c => c.classList.remove("arrasto-sobre"));
+    if (fantasma) fantasma.remove();
+    if (!moveu) {
+      dragLead = null;
+      abrirDetalheLead(listaMarcas.find(m => m.id === leadId));
+      return;
+    }
+    const colEl = colunaSobPonteiro(evento.clientX, evento.clientY);
+    dragLead = null;
+    if (!colEl) return;
+    const novoEstagio = colEl.dataset.estagio;
+    const lead = listaMarcas.find(m => m.id === leadId);
+    if (!lead || colunaDoLead(lead.situacao) === novoEstagio) return;
+    lead.situacao = novoEstagio;
+    renderQuadroLeads();
+    renderCartoesLeadsResumo();
+    renderFunilLeads();
+    atualizarBadgeLeads(contarLeadsNovos(listaMarcas));
+    await salvarSeguro("marcas", sb.from("marcas").update({ situacao: novoEstagio }).eq("id", leadId));
+  }
 
   // Nichos de lead: mesmo padrão "escolha ou crie" já usado pros nichos de
   // vídeo/transcrição, só que a lista vem dos leads em vez desses dois.
