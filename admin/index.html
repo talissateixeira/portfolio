@@ -106,6 +106,10 @@
   }
   .nav-item:hover { background: var(--sidebar-hover); color: var(--sidebar-texto); }
   .nav-item.ativo { background: var(--sidebar-ativo-fundo); color: var(--sidebar-texto); font-weight: 700; }
+  .nav-badge { margin-left: auto; min-width: 20px; height: 20px; padding: 0 6px; border-radius: 100px; background: var(--pill-atrasado); color: #fff; font-size: 0.68rem; font-weight: 800; line-height: 1; display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto; }
+  .nav-badge[hidden] { display: none; }
+  .layout.sidebar-colapsada .nav-item { position: relative; }
+  .layout.sidebar-colapsada .nav-badge { position: absolute; top: 3px; right: 3px; margin: 0; min-width: 15px; height: 15px; padding: 0 3px; font-size: 0.58rem; }
 
   .nav-arvore-filhos { display: flex; flex-direction: column; margin-left: 17px; padding-left: 10px; border-left: 1px solid var(--sidebar-borda); margin-bottom: 2px; }
   .nav-subitem {
@@ -871,6 +875,7 @@
       <button class="nav-item" data-aba="marcas" title="Leads">
         <span class="icone"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M2.5 20c0-3.6 2.9-6.2 6.5-6.2s6.5 2.6 6.5 6.2M16 8.3c1.6.3 2.8 1.6 2.8 3.2 0 1.5-1 2.7-2.4 3.1M17.5 14c2.6.5 4 2.4 4 5"/></svg></span>
         <span class="rotulo-nav">Leads</span>
+        <span class="nav-badge" id="badge-leads" title="Contatos novos do site, ainda não triados" hidden>0</span>
       </button>
       <button class="nav-item" data-aba="calendario" title="Calendário">
         <span class="icone"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2.5"/><path d="M8 3v4M16 3v4M3 10h18"/></svg></span>
@@ -2660,8 +2665,21 @@
   let filtroPrioridadeLead = null;
   let filtroFollowupLead = null;
 
+  // Bolinha de "novos" na aba Leads: conta os contatos que vieram do formulário
+  // do site e ainda não foram triados. O site grava sempre situacao === "lead"
+  // (minúsculo), diferente dos estágios do funil ("Novo lead", etc.), então
+  // esse filtro pega exatamente os que ela ainda não abriu/moveu. Some sozinha
+  // assim que o lead ganha um estágio (todo salvar/mover chama carregarMarcas).
+  function atualizarBadgeLeads(qtd) {
+    const badge = document.getElementById("badge-leads");
+    if (!badge) return;
+    badge.textContent = qtd > 99 ? "99+" : String(qtd);
+    badge.hidden = qtd <= 0;
+  }
+
   async function carregarMarcas() {
     listaMarcas = await consultarSeguro("marcas", sb.from("marcas").select("*").order("created_at", { ascending: false }));
+    atualizarBadgeLeads(listaMarcas.filter(m => m.situacao === "lead").length);
     popularFiltrosLead();
     renderCartoesLeadsResumo();
     renderFunilLeads();
@@ -3560,6 +3578,12 @@
       listaProjetosProducao = ordenarProjetos(await consultarSeguro("projetos_producao", sb.from("projetos_producao").select("*").order("created_at", { ascending: false })));
       renderSidebarProjetos();
     }
+  })();
+
+  // Já mostra a bolinha de leads novos na abertura, sem esperar abrir a aba.
+  (async function carregarBadgeLeadsCedo() {
+    const novos = await consultarSeguro("marcas", sb.from("marcas").select("id").eq("situacao", "lead"));
+    atualizarBadgeLeads(novos.length);
   })();
   function rerenderizarProducao() {
     renderGradeProjetos();
