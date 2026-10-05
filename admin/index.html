@@ -1960,6 +1960,10 @@
       abasCarregadas.add(nome);
       CARREGADORES_ABA[nome]();
     }
+    // A aba Leads é carregada só uma vez (abasCarregadas), então o zerar da
+    // bolinha não pode depender do carregarMarcas: toda vez que a aba abre,
+    // marca os leads como vistos aqui.
+    if (nome === "marcas") marcarLeadsComoVistos();
   }
   document.querySelectorAll(".nav-item").forEach(botao => {
     if (botao.hasAttribute("data-nav-producao-raiz")) return;
