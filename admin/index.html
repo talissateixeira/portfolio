@@ -302,6 +302,28 @@
   .painel-titulo-clicavel:hover { color: var(--acento-escuro); text-decoration: underline; }
   .texto-vazio { color: var(--texto-suave); font-size: 0.85rem; line-height: 1.6; padding: 10px 0; }
 
+  /* Blocos agrupados de "Precisa de você": Atrasado / Hoje / Esta semana */
+  .grupo-tarefas-dash { margin-bottom: 16px; }
+  .grupo-tarefas-dash:last-child { margin-bottom: 0; }
+  .grupo-tarefas-dash-cabecalho { display: flex; align-items: center; gap: 9px; padding: 6px 0; }
+  .grupo-tarefas-dash-ponto { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; background: var(--texto-suave); }
+  .grupo-tarefas-dash-rotulo { font-size: 0.78rem; font-weight: 800; letter-spacing: 0.03em; text-transform: uppercase; color: var(--texto-suave); }
+  .grupo-tarefas-dash-contador { font-size: 0.72rem; font-weight: 800; min-width: 20px; text-align: center; padding: 1px 7px; border-radius: 100px; background: var(--borda); color: var(--preto); }
+  .texto-vazio-hoje { padding: 4px 0 2px; }
+  /* Atrasado — terracota, chamando atenção no topo */
+  .grupo-tarefas-dash.atrasado .grupo-tarefas-dash-ponto { background: var(--pill-atrasado); }
+  .grupo-tarefas-dash.atrasado .grupo-tarefas-dash-rotulo { color: var(--pill-atrasado); }
+  .grupo-tarefas-dash.atrasado .grupo-tarefas-dash-contador { background: var(--fundo-pill-atrasado); color: var(--pill-atrasado); }
+  /* Hoje — o herói: caixa verde destacada */
+  .grupo-tarefas-dash.hoje { background: var(--fundo-pill-hoje); border-radius: 14px; padding: 6px 16px 10px; }
+  .grupo-tarefas-dash.hoje .grupo-tarefas-dash-ponto { background: var(--pill-hoje); }
+  .grupo-tarefas-dash.hoje .grupo-tarefas-dash-rotulo { color: var(--pill-hoje); font-size: 0.9rem; }
+  .grupo-tarefas-dash.hoje .grupo-tarefas-dash-contador { background: var(--pill-hoje); color: #fff; }
+  .grupo-tarefas-dash.hoje .linha-tarefa-unificada { border-bottom-color: rgba(63, 133, 87, 0.22); }
+  .grupo-tarefas-dash.hoje .texto-vazio-hoje { color: var(--pill-hoje); font-weight: 600; }
+  /* Esta semana — discreto, embaixo */
+  .grupo-tarefas-dash.semana .grupo-tarefas-dash-ponto { background: var(--pill-amanha); }
+
   /* Gráfico de barras simples, sem biblioteca */
   .grafico-barras { display: flex; align-items: flex-end; gap: 6px; height: 175px; }
   .grafico-coluna { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; gap: 6px; }
@@ -952,7 +974,7 @@
           <div class="filtros-tarefas-dash">
             <button type="button" class="pill-filtro" data-filtro-tarefa-dash="atrasadas">Atrasado</button>
             <button type="button" class="pill-filtro" data-filtro-tarefa-dash="hoje">Hoje</button>
-            <button type="button" class="pill-filtro" data-filtro-tarefa-dash="amanha">Amanhã</button>
+            <button type="button" class="pill-filtro" data-filtro-tarefa-dash="semana">Esta semana</button>
           </div>
         </div>
         <div id="lista-tarefas-unificada-dash"></div>
@@ -2302,32 +2324,56 @@
     }
 
     const hojeData = new Date(hojeISO());
-    const soAmanha = i => Math.round((new Date(i.data) - hojeData) / 86400000) === 1;
+    const dentroSemana = i => Math.round((new Date(i.data) - hojeData) / 86400000) <= 7;
 
-    let atrasadas = tarefasDashAtrasadas, hoje = tarefasDashHoje, proximas = tarefasDashProximas;
-    if (filtroCategoriaTarefasDash === "atrasadas") { hoje = []; proximas = []; }
-    else if (filtroCategoriaTarefasDash === "hoje") { atrasadas = []; proximas = []; }
-    else if (filtroCategoriaTarefasDash === "amanha") { atrasadas = []; hoje = []; proximas = proximas.filter(soAmanha); }
-    else { proximas = proximas.filter(soAmanha); }
+    // "Esta semana" = próximas entregas até 7 dias à frente. O que passa disso
+    // some do dashboard (continua visível na aba Produção).
+    let atrasadas = tarefasDashAtrasadas, hoje = tarefasDashHoje, proximas = tarefasDashProximas.filter(dentroSemana);
+    const filtro = filtroCategoriaTarefasDash;
+    if (filtro === "atrasadas") { hoje = []; proximas = []; }
+    else if (filtro === "hoje") { atrasadas = []; proximas = []; }
+    else if (filtro === "semana") { atrasadas = []; hoje = []; }
 
-    if (atrasadas.length + hoje.length + proximas.length === 0) {
+    const grupo = (classe, rotulo, corpo, qtd) =>
+      '<div class="grupo-tarefas-dash ' + classe + '">' +
+        '<div class="grupo-tarefas-dash-cabecalho">' +
+          '<span class="grupo-tarefas-dash-ponto"></span>' +
+          '<span class="grupo-tarefas-dash-rotulo">' + rotulo + '</span>' +
+          (qtd != null ? '<span class="grupo-tarefas-dash-contador">' + qtd + '</span>' : '') +
+        '</div>' + corpo + '</div>';
+
+    let html = "";
+    if (atrasadas.length) {
+      const corpo = atrasadas.map(i => {
+        const dias = Math.round((hojeData - new Date(i.data)) / 86400000);
+        return linhaTarefaUnificadaHtml(i, "atrasado " + dias + (dias === 1 ? " dia" : " dias"), "atrasado");
+      }).join("");
+      html += grupo("atrasado", "Atrasado", corpo, atrasadas.length);
+    }
+    // O bloco "Hoje" sempre aparece em "todas"/"hoje", mesmo vazio, pra você
+    // ter certeza de que não há nada pra hoje (em vez de só não ver nada).
+    const mostrarHoje = (filtro === "todas" || filtro === "hoje");
+    if (hoje.length) {
+      const corpo = hoje.map(i => linhaTarefaUnificadaHtml(i, "hoje", "normal")).join("");
+      html += grupo("hoje", "Hoje", corpo, hoje.length);
+    } else if (mostrarHoje) {
+      html += grupo("hoje", "Hoje", '<p class="texto-vazio texto-vazio-hoje">Nada pra fazer hoje — respira! ✨</p>', null);
+    }
+    if (proximas.length) {
+      const corpo = proximas.map(i => {
+        const dias = Math.round((new Date(i.data) - hojeData) / 86400000);
+        const ehAmanha = dias === 1;
+        const rotulo = ehAmanha ? "amanhã" : "em " + dias + " dias";
+        return linhaTarefaUnificadaHtml(i, rotulo, ehAmanha ? "amanha" : "normal");
+      }).join("");
+      html += grupo("semana", "Esta semana", corpo, proximas.length);
+    }
+
+    if (!html) {
       alvo.innerHTML = '<p class="texto-vazio">Nada nessa categoria por agora.</p>';
       return;
     }
-
-    const htmlAtrasadas = atrasadas.map(i => {
-      const dias = Math.round((hojeData - new Date(i.data)) / 86400000);
-      return linhaTarefaUnificadaHtml(i, "atrasado " + dias + (dias === 1 ? " dia" : " dias"), "atrasado");
-    }).join("");
-    const htmlHoje = hoje.map(i => linhaTarefaUnificadaHtml(i, "hoje", "normal")).join("");
-    const htmlProximas = proximas.map(i => {
-      const dias = Math.round((new Date(i.data) - hojeData) / 86400000);
-      const ehAmanha = dias === 1;
-      const rotulo = ehAmanha ? "amanhã" : "em " + dias + " dias";
-      return linhaTarefaUnificadaHtml(i, rotulo, ehAmanha ? "amanha" : "normal");
-    }).join("");
-
-    alvo.innerHTML = htmlAtrasadas + htmlHoje + htmlProximas;
+    alvo.innerHTML = html;
     function encontrarItemTarefaDash(id) {
       return tarefasDashAtrasadas.find(i => i.id === id) || tarefasDashHoje.find(i => i.id === id) || tarefasDashProximas.find(i => i.id === id);
     }
