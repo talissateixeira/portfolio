@@ -1078,6 +1078,8 @@
             <button type="button" class="pill-filtro ativo" data-lead-view="tabela">Tabela</button>
             <button type="button" class="pill-filtro" data-lead-view="quadro">Quadro</button>
           </div>
+          <button class="botao botao-secundario" id="botao-importar-marcas">Importar CSV</button>
+          <input type="file" id="arquivo-csv-marcas" accept=".csv,text/csv" hidden>
           <button class="botao botao-secundario" id="botao-exportar-marcas">Baixar CSV</button>
           <button class="botao botao-principal" id="botao-add-marca">+ Novo lead</button>
         </div>
@@ -1606,6 +1608,9 @@
       </div>
       <div class="linha-form-2">
         <div class="campo-form"><label>Instagram</label><input type="text" id="marca-instagram" placeholder="@marca"></div>
+        <div class="campo-form"><label>Seguidores</label><input type="text" id="marca-seguidores" placeholder="ex: 25 mil, 1.2M"></div>
+      </div>
+      <div class="linha-form-2">
         <div class="campo-form">
           <label>Nicho</label>
           <select id="marca-nicho-select"></select>
@@ -3071,6 +3076,7 @@
     document.getElementById("marca-nome").value = marca ? marca.marca : "";
     document.getElementById("marca-site").value = marca ? (marca.site || "") : "";
     document.getElementById("marca-instagram").value = marca ? (marca.instagram || "") : "";
+    document.getElementById("marca-seguidores").value = marca ? (marca.seguidores || "") : "";
     preencherSeletorNichoLead(selectNichoLead, campoNichoLeadNovo, marca ? marca.nicho : "");
     document.getElementById("marca-contato-nome").value = marca ? (marca.contato_nome || "") : "";
     document.getElementById("marca-cargo").value = marca ? (marca.cargo || "") : "";
@@ -3103,6 +3109,7 @@
       marca: document.getElementById("marca-nome").value.trim(),
       site: document.getElementById("marca-site").value.trim() || null,
       instagram: document.getElementById("marca-instagram").value.trim() || null,
+      seguidores: document.getElementById("marca-seguidores").value.trim() || null,
       nicho: valorNichoSelecionado(selectNichoLead, campoNichoLeadNovo) || null,
       contato_nome: document.getElementById("marca-contato-nome").value.trim() || null,
       cargo: document.getElementById("marca-cargo").value.trim() || null,
@@ -3136,6 +3143,7 @@
       ["E-mail", lead.email ? escaparAtributo(lead.email) : "—"],
       ["WhatsApp", lead.telefone ? escaparAtributo(lead.telefone) : "—"],
       ["Instagram", lead.instagram ? escaparAtributo(lead.instagram) : "—"],
+      ["Seguidores", lead.seguidores ? escaparAtributo(lead.seguidores) : "—"],
       ["Site", lead.site ? escaparAtributo(lead.site) : "—"],
       ["Nicho", lead.nicho ? escaparAtributo(lead.nicho) : "—"],
       ["Origem", lead.origem ? escaparAtributo(lead.origem) : "—"],
@@ -3213,8 +3221,82 @@
     link.click();
   }
   document.getElementById("botao-exportar-marcas").addEventListener("click", () => {
-    const linhas = leadsFiltrados().map(m => [m.marca, m.contato_nome, m.nicho, m.origem, m.situacao, m.instagram, m.email, m.telefone, m.valor_potencial, m.proximo_contato, m.ultimo_contato, m.obs]);
-    baixarCsv("leads.csv", ["Empresa", "Contato", "Nicho", "Origem", "Status", "Instagram", "E-mail", "Telefone", "Valor potencial", "Próximo follow-up", "Último contato", "Observação"], linhas);
+    const linhas = leadsFiltrados().map(m => [m.marca, m.contato_nome, m.nicho, m.origem, m.situacao, m.instagram, m.seguidores, m.email, m.telefone, m.valor_potencial, m.proximo_contato, m.ultimo_contato, m.obs]);
+    baixarCsv("leads.csv", ["Empresa", "Contato", "Nicho", "Origem", "Status", "Instagram", "Seguidores", "E-mail", "Telefone", "Valor potencial", "Próximo follow-up", "Último contato", "Observação"], linhas);
+  });
+
+  // ---- Importar marcas/leads de uma planilha CSV ----
+  // Aceita separador vírgula OU ponto-e-vírgula (Excel BR), com cabeçalho no
+  // topo. As colunas são mapeadas pelo NOME do cabeçalho (sem ligar pra
+  // maiúsculas/acentos), então a ordem não importa — só precisa ter "Nome".
+  const MAPA_COLUNAS_CSV = {
+    "nome": "marca", "empresa": "marca", "marca": "marca",
+    "site": "site", "website": "site",
+    "instagram": "instagram", "insta": "instagram", "arroba": "instagram",
+    "seguidores": "seguidores", "followers": "seguidores",
+    "email": "email", "e-mail": "email", "e mail": "email",
+    "whatsapp": "telefone", "telefone": "telefone", "tel": "telefone", "celular": "telefone", "fone": "telefone", "zap": "telefone",
+    "contato": "contato_nome", "pessoa de contato": "contato_nome", "nome do contato": "contato_nome", "pessoa": "contato_nome",
+    "nicho": "nicho",
+    "origem": "origem", "onde encontrei": "origem", "onde eu encontrei": "origem",
+    "status": "situacao", "situacao": "situacao",
+    "observacao": "obs", "observacoes": "obs", "obs": "obs", "nota": "obs", "notas": "obs"
+  };
+  function normalizarCabecalhoCSV(s) {
+    return (s || "").trim().toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
+  }
+  function detectarSeparadorCSV(linha) {
+    return (linha.match(/;/g) || []).length > (linha.match(/,/g) || []).length ? ";" : ",";
+  }
+  function parseCSV(texto, sep) {
+    const linhas = [];
+    let campo = "", linha = [], dentroAspas = false;
+    for (let i = 0; i < texto.length; i++) {
+      const c = texto[i];
+      if (dentroAspas) {
+        if (c === '"') { if (texto[i + 1] === '"') { campo += '"'; i++; } else dentroAspas = false; }
+        else campo += c;
+      } else if (c === '"') { dentroAspas = true; }
+      else if (c === sep) { linha.push(campo); campo = ""; }
+      else if (c === "\n") { linha.push(campo); linhas.push(linha); linha = []; campo = ""; }
+      else if (c !== "\r") { campo += c; }
+    }
+    if (campo.length > 0 || linha.length > 0) { linha.push(campo); linhas.push(linha); }
+    return linhas;
+  }
+  async function importarCSVMarcas(arquivo) {
+    let texto = await arquivo.text();
+    texto = texto.replace(/^﻿/, "");
+    const sep = detectarSeparadorCSV((texto.split(/\r?\n/)[0]) || "");
+    const linhas = parseCSV(texto, sep).filter(l => l.some(c => (c || "").trim() !== ""));
+    if (linhas.length < 2) { alert("A planilha parece vazia ou só tem o cabeçalho."); return; }
+    const indices = linhas[0].map(h => MAPA_COLUNAS_CSV[normalizarCabecalhoCSV(h)] || null);
+    if (!indices.includes("marca")) {
+      alert('Não encontrei a coluna do nome. A planilha precisa ter, no topo, uma coluna chamada "Nome" (ou "Empresa"/"Marca").');
+      return;
+    }
+    const registros = [];
+    for (let i = 1; i < linhas.length; i++) {
+      const reg = { situacao: "Novo lead", origem: "Prospecção ativa" };
+      indices.forEach((campo, col) => {
+        if (!campo) return;
+        const valor = (linhas[i][col] || "").trim();
+        if (valor) reg[campo] = valor;
+      });
+      if (reg.marca) registros.push(reg);
+    }
+    if (registros.length === 0) { alert("Não achei nenhuma linha com o nome da marca preenchido."); return; }
+    if (!confirm("Importar " + registros.length + (registros.length === 1 ? " marca" : " marcas") + " da planilha pra sua base de Leads?")) return;
+    const { error } = await sb.from("marcas").insert(registros);
+    if (error) { alert("Deu um problema na importação: " + error.message); return; }
+    alert("Prontinho! " + registros.length + (registros.length === 1 ? " marca importada" : " marcas importadas") + ". 🎉");
+    carregarMarcas();
+  }
+  document.getElementById("botao-importar-marcas").addEventListener("click", () => document.getElementById("arquivo-csv-marcas").click());
+  document.getElementById("arquivo-csv-marcas").addEventListener("change", (evento) => {
+    const arquivo = evento.target.files[0];
+    evento.target.value = "";
+    if (arquivo) importarCSVMarcas(arquivo);
   });
 
   // ============================================================================
