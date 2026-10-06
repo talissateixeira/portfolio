@@ -3165,8 +3165,16 @@
       tags: tagsTexto ? tagsTexto.split(",").map(t => t.trim()).filter(Boolean) : [],
       obs: document.getElementById("marca-obs").value.trim() || null
     };
-    if (id) await salvarSeguro("marcas", sb.from("marcas").update(registro).eq("id", id));
-    else await salvarSeguro("marcas", sb.from("marcas").insert(registro));
+    const exec = (reg) => id ? sb.from("marcas").update(reg).eq("id", id) : sb.from("marcas").insert(reg);
+    let { error } = await exec(registro);
+    if (error && /seguidores/i.test(error.message || "")) {
+      // A coluna "seguidores" ainda não existe no banco: salva sem ela pra não
+      // travar o cadastro inteiro (nicho etc.) e avisa pra rodar o SQL uma vez.
+      const semSeguidores = Object.assign({}, registro); delete semSeguidores.seguidores;
+      ({ error } = await exec(semSeguidores));
+      if (!error) alert('Salvei! Só um aviso: o campo "Seguidores" ainda não foi ativado no banco. Pra ativar, rode uma vez no Supabase (SQL Editor):\n\nalter table marcas add column if not exists seguidores text;');
+    }
+    if (error) { alert("Não consegui salvar em marcas: " + error.message); return; }
     modalMarca.hidden = true;
     carregarMarcas();
   });
@@ -3339,7 +3347,11 @@
     }
     if (registros.length === 0) { alert("Não achei nenhuma linha com o nome da marca preenchido."); return; }
     if (!confirm("Importar " + registros.length + (registros.length === 1 ? " marca" : " marcas") + " da planilha pra sua base de Leads?")) return;
-    const { error } = await sb.from("marcas").insert(registros);
+    let { error } = await sb.from("marcas").insert(registros);
+    if (error && /seguidores/i.test(error.message || "")) {
+      const semSeguidores = registros.map(r => { const c = Object.assign({}, r); delete c.seguidores; return c; });
+      ({ error } = await sb.from("marcas").insert(semSeguidores));
+    }
     if (error) { alert("Deu um problema na importação: " + error.message); return; }
     alert("Prontinho! " + registros.length + (registros.length === 1 ? " marca importada" : " marcas importadas") + ". 🎉");
     carregarMarcas();
