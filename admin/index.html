@@ -746,6 +746,9 @@
   /* ---- Mensagens (modelos pra copiar e colar) ---- */
   .painel-meus-dados-resumo { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 0.82rem; color: var(--texto-suave); }
   .painel-meus-dados-resumo strong { color: var(--texto); font-weight: 600; }
+  .painel-meus-dados-resumo span { min-width: 0; overflow-wrap: anywhere; }
+  .lead-link { color: var(--acento-escuro); text-decoration: underline; text-underline-offset: 2px; font-weight: 600; }
+  .lead-link:hover { color: var(--acento); }
   .grade-mensagens { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px; }
   @media (max-width: 800px) { .grade-mensagens { grid-template-columns: 1fr; } }
   .cartao-mensagem { background: var(--branco); border: 1px solid var(--borda); border-radius: var(--raio); padding: 16px 18px; }
@@ -1715,7 +1718,7 @@
       <div class="painel-titulo">Timeline</div>
     </div>
     <div style="display:flex;gap:8px;margin-bottom:12px;">
-      <select id="atividade-tipo" style="max-width:170px;">
+      <select id="atividade-tipo" class="campo-busca" style="min-width:150px;">
         <option value="observação">Observação</option>
         <option value="ligação">Ligação</option>
         <option value="whatsapp">WhatsApp</option>
@@ -3170,6 +3173,17 @@
 
   // ---- Detalhe do lead: info + timeline de atividades + propostas ligadas ----
   const modalLeadDetalhe = document.getElementById("modal-lead-detalhe");
+  // Mostra o site como link curto (só o domínio), pra URLs enormes com rastreio
+  // (utm_...) não estourarem o layout do card. O link abre a URL completa.
+  function siteLinkHtml(site) {
+    let href = (site || "").trim();
+    if (!href) return "—";
+    if (!/^https?:\/\//i.test(href)) href = "https://" + href;
+    let display = href.replace(/^https?:\/\//i, "").replace(/^www\./i, "");
+    const barra = display.indexOf("/");
+    if (barra > -1) display = display.slice(0, barra);
+    return '<a href="' + escaparAtributo(href) + '" target="_blank" rel="noopener" class="lead-link">' + escaparAtributo(display) + "</a>";
+  }
   async function abrirDetalheLead(lead) {
     if (!lead) return;
     leadDetalheAtualId = lead.id;
@@ -3182,7 +3196,7 @@
       ["WhatsApp", lead.telefone ? escaparAtributo(lead.telefone) : "—"],
       ["Instagram", lead.instagram ? escaparAtributo(lead.instagram) : "—"],
       ["Seguidores", lead.seguidores ? escaparAtributo(lead.seguidores) : "—"],
-      ["Site", lead.site ? escaparAtributo(lead.site) : "—"],
+      ["Site", lead.site ? siteLinkHtml(lead.site) : "—"],
       ["Nicho", lead.nicho ? escaparAtributo(lead.nicho) : "—"],
       ["Origem", lead.origem ? escaparAtributo(lead.origem) : "—"],
       ["Prioridade", lead.prioridade === "alta" ? "Alta" : lead.prioridade === "baixa" ? "Baixa" : "Média"],
