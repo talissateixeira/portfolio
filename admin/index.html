@@ -817,6 +817,30 @@
 
   .quadro-producao-titulo { font-size: 1.05rem; }
   .quadro-kanban { display: flex; gap: 14px; overflow-x: auto; padding-bottom: 14px; align-items: flex-start; -webkit-user-select: none; user-select: none; }
+
+  /* Visão em lista das tarefas de um projeto (alternativa ao Kanban) */
+  .lista-tarefas-producao { background: var(--branco); border: 1px solid var(--borda); border-radius: 12px; padding: 6px 18px 10px; }
+  .lista-tarefas-grupo { padding: 10px 0; }
+  .lista-tarefas-grupo + .lista-tarefas-grupo { border-top: 1px solid var(--borda); }
+  .lista-tarefas-grupo-topo { display: flex; align-items: center; gap: 8px; padding: 6px 2px 4px; }
+  .lista-tarefas-grupo-ponto { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+  .lista-tarefas-grupo-nome { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: var(--preto); }
+  .lista-tarefas-grupo-contagem { font-size: 0.74rem; color: var(--texto-suave); }
+  .lista-tarefas-grupo-add { margin-left: auto; border: none; background: none; color: var(--texto-suave); font-size: 1.1rem; line-height: 1; cursor: pointer; padding: 0 6px; }
+  .lista-tarefas-grupo-add:hover { color: var(--acento); }
+  .linha-tarefa-producao { display: flex; align-items: center; gap: 12px; padding: 11px 4px; border-top: 1px solid var(--borda); cursor: pointer; }
+  .lista-tarefas-grupo-topo + .linha-tarefa-producao { border-top: none; }
+  .linha-tarefa-producao:hover { background: rgba(89,25,2,0.03); }
+  .linha-tarefa-producao .ponto-prioridade { width: 9px; height: 9px; }
+  .linha-tarefa-producao-corpo { flex: 1 1 auto; min-width: 0; }
+  .linha-tarefa-producao-titulo { font-weight: 600; font-size: 0.88rem; color: var(--preto); }
+  .linha-tarefa-producao-sub { display: flex; align-items: center; gap: 8px; margin-top: 4px; }
+  .linha-tarefa-producao-prazo { font-size: 0.78rem; color: var(--texto-suave); flex-shrink: 0; white-space: nowrap; }
+  .linha-tarefa-producao-prazo.atrasado { color: var(--erro); font-weight: 700; }
+  .linha-tarefa-producao-prazo.proximo { color: var(--aviso); font-weight: 700; }
+  .producao-quadro-switch { display: inline-flex; background: rgba(38, 34, 32, 0.06); border-radius: 100px; padding: 3px; gap: 2px; }
+  /* O atributo hidden precisa vencer o display:flex do quadro (regra de autor) */
+  #quadro-kanban-projeto[hidden], #lista-tarefas-projeto[hidden] { display: none; }
   .coluna-kanban { background: rgba(38, 34, 32, 0.045); border-radius: var(--raio); min-width: 260px; max-width: 260px; flex-shrink: 0; display: flex; flex-direction: column; max-height: calc(100vh - 280px); min-height: 160px; transition: background 0.15s ease; }
   .coluna-kanban.arrasto-sobre { background: var(--fundo-acento); }
   .coluna-kanban-topo { display: flex; align-items: center; gap: 8px; padding: 12px 12px 8px; }
@@ -1278,12 +1302,17 @@
             <h2 class="quadro-producao-titulo" id="quadro-producao-titulo"></h2>
           </div>
           <div class="barra-acoes-direita">
+            <div class="producao-quadro-switch" role="group" aria-label="Visualização das tarefas">
+              <button type="button" class="seg-btn ativo" data-producao-view="quadro">▦ Quadro</button>
+              <button type="button" class="seg-btn" data-producao-view="lista">☰ Lista</button>
+            </div>
             <button type="button" class="botao botao-secundario" id="botao-editar-projeto-atual">Editar projeto</button>
             <button type="button" class="botao botao-secundario" id="botao-add-coluna-producao">+ Nova coluna</button>
             <button type="button" class="botao botao-principal" id="botao-add-card-topo">+ Nova tarefa</button>
           </div>
         </div>
         <div class="quadro-kanban" id="quadro-kanban-projeto"></div>
+        <div class="lista-tarefas-producao" id="lista-tarefas-projeto" hidden></div>
       </div>
 
       <!-- ---- Visão: todas as tarefas ---- -->
@@ -3787,6 +3816,7 @@
   let listaTarefasProducao = [];
   let filtroProjetoStatus = "ativo";
   let projetoAtualId = null;
+  let producaoProjetoView = "quadro";
   let filtroPrioridadeTodas = "todas";
   let filtroTodasProjetoIdAtual = "";
   let filtroTodasSoAtrasadas = false;
@@ -3931,7 +3961,7 @@
   })();
   function rerenderizarProducao() {
     renderGradeProjetos();
-    if (projetoAtualId) renderKanbanEm("quadro-kanban-projeto", listaTarefasProducao.filter(t => t.projeto_id === projetoAtualId), false);
+    if (projetoAtualId) renderProjetoAtual();
     renderTarefasFiltradasTodas();
     renderListaProximasProducaoCompleta();
   }
@@ -4042,7 +4072,7 @@
     document.querySelectorAll(".subaba-producao").forEach(s => s.classList.remove("ativa"));
     document.getElementById("producao-view-quadro").classList.add("ativa");
     document.querySelectorAll(".subtab-btn-producao").forEach(b => b.classList.remove("ativo"));
-    renderKanbanEm("quadro-kanban-projeto", listaTarefasProducao.filter(t => t.projeto_id === projetoId), false);
+    renderProjetoAtual();
     atualizarSidebarProducaoAtiva();
   }
   document.getElementById("botao-voltar-projetos").addEventListener("click", voltarParaListaProjetos);
@@ -4176,10 +4206,81 @@
   }
   function rerenderizarQuadroAtivo() {
     if (projetoAtualId && document.getElementById("producao-view-quadro").classList.contains("ativa")) {
-      renderKanbanEm("quadro-kanban-projeto", listaTarefasProducao.filter(t => t.projeto_id === projetoAtualId), false);
+      renderProjetoAtual();
     }
     renderTarefasFiltradasTodas();
     renderGradeProjetos();
+  }
+
+  // ---- Visão do projeto: alterna entre Quadro (Kanban) e Lista ----
+  // Decide qual visão desenhar pro projeto aberto e esconde a outra. O Kanban
+  // continua sendo a fonte do arrastar-e-soltar; a Lista é só leitura + abrir.
+  function renderProjetoAtual() {
+    if (!projetoAtualId) return;
+    const tarefas = listaTarefasProducao.filter(t => t.projeto_id === projetoAtualId);
+    const emLista = producaoProjetoView === "lista";
+    document.getElementById("quadro-kanban-projeto").hidden = emLista;
+    document.getElementById("lista-tarefas-projeto").hidden = !emLista;
+    if (emLista) renderListaTarefasProjeto(tarefas);
+    else renderKanbanEm("quadro-kanban-projeto", tarefas, false);
+  }
+  function setProducaoView(modo) {
+    producaoProjetoView = modo === "lista" ? "lista" : "quadro";
+    document.querySelectorAll("[data-producao-view]").forEach(b => b.classList.toggle("ativo", b.dataset.producaoView === producaoProjetoView));
+    renderProjetoAtual();
+  }
+  document.querySelectorAll("[data-producao-view]").forEach(botao => {
+    botao.addEventListener("click", () => setProducaoView(botao.dataset.producaoView));
+  });
+  // Mostra as tarefas de um projeto como lista agrupada por etapa (coluna), na
+  // mesma ordem do fluxo do Kanban. Clicar numa linha abre o modal da tarefa.
+  function renderListaTarefasProjeto(tarefas) {
+    const alvo = document.getElementById("lista-tarefas-projeto");
+    if (tarefas.length === 0) {
+      alvo.innerHTML = '<p class="texto-vazio" style="padding:14px 2px;">Nenhuma tarefa nesse projeto ainda.</p>';
+      return;
+    }
+    alvo.innerHTML = COLUNAS_PRODUCAO.map((coluna, i) => {
+      const itens = tarefasOrdenadasPorColuna(tarefas, coluna);
+      if (itens.length === 0) return "";
+      const cor = PALETA_CORES_COLUNA[i % PALETA_CORES_COLUNA.length];
+      const linhas = itens.map(t => {
+        let prazoHtml = "";
+        if (t.prazo) {
+          const dias = diasAtePrazo(t.prazo);
+          const classe = dias < 0 ? "atrasado" : (dias <= 2 ? "proximo" : "");
+          prazoHtml = '<span class="linha-tarefa-producao-prazo ' + classe + '">' + formatarData(t.prazo) + "</span>";
+        }
+        return '<div class="linha-tarefa-producao" data-id="' + t.id + '">' +
+          '<span class="ponto-prioridade ponto-prioridade-' + t.prioridade + '" title="Prioridade ' + t.prioridade + '"></span>' +
+          '<div class="linha-tarefa-producao-corpo">' +
+            '<div class="linha-tarefa-producao-titulo">' + escaparAtributo(t.titulo) + "</div>" +
+            '<div class="linha-tarefa-producao-sub"><span class="pill-formato">' + escaparAtributo(t.formato) + "</span></div>" +
+          "</div>" +
+          prazoHtml +
+        "</div>";
+      }).join("");
+      return '<div class="lista-tarefas-grupo">' +
+        '<div class="lista-tarefas-grupo-topo">' +
+          '<span class="lista-tarefas-grupo-ponto" style="background:' + cor + ';"></span>' +
+          '<span class="lista-tarefas-grupo-nome">' + escaparAtributo(coluna) + "</span>" +
+          '<span class="lista-tarefas-grupo-contagem">' + itens.length + "</span>" +
+          '<button type="button" class="lista-tarefas-grupo-add" data-lista-add="' + escaparAtributo(coluna) + '" title="Nova tarefa nesta etapa">+</button>' +
+        "</div>" +
+        linhas +
+      "</div>";
+    }).join("");
+    alvo.querySelectorAll(".linha-tarefa-producao").forEach(linha => {
+      linha.addEventListener("click", () => {
+        const tarefa = listaTarefasProducao.find(t => t.id === linha.dataset.id);
+        if (tarefa) abrirModalCard(tarefa);
+      });
+    });
+    alvo.querySelectorAll("[data-lista-add]").forEach(botao => {
+      botao.addEventListener("click", () => {
+        if (projetoAtualId) abrirModalCard(null, projetoAtualId, botao.dataset.listaAdd);
+      });
+    });
   }
 
   // ---- Arrastar e soltar (mouse e toque, via Pointer Events) ----
