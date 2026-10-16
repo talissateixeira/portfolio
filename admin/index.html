@@ -3281,13 +3281,27 @@
     }
     // Pra coluna "Contato": mostra o nome da pessoa se houver; senão, o melhor
     // jeito de falar com a marca (e-mail > WhatsApp > @ do Instagram).
+    // Ignora valores "placeholder" (ex.: "não encontrado", "n/a", "-") que a
+    // planilha às vezes traz no lugar de um dado de verdade.
+    function valorUtilLead(v) {
+      if (!v) return "";
+      const t = String(v).trim();
+      const norm = t.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
+      const lixo = ["nao encontrado", "nao achei", "nao tem", "n/a", "na", "nd", "-", "--", "---", "sem", "nenhum", "nenhuma", "x", "?", "sem contato", "sem email", "sem e-mail", "sem instagram", "sem site"];
+      if (lixo.includes(norm)) return "";
+      return t;
+    }
     function contatoResumoLead(m) {
-      if (m.contato_nome) return escaparAtributo(m.contato_nome);
-      if (m.email) return escaparAtributo(m.email);
-      if (m.telefone) return escaparAtributo(m.telefone.replace(/^\s*whatsapp:\s*/i, "").replace(/\s*\(wa\.me[^)]*\)\s*/i, "").trim());
-      if (m.instagram) {
-        const mt = m.instagram.match(/instagram\.com\/([^\/?#]+)/i);
-        return escaparAtributo(mt ? "@" + mt[1] : m.instagram.trim());
+      const nome = valorUtilLead(m.contato_nome);
+      if (nome) return escaparAtributo(nome);
+      const email = valorUtilLead(m.email);
+      if (email) return escaparAtributo(email);
+      const tel = valorUtilLead(m.telefone);
+      if (tel) return escaparAtributo(tel.replace(/^\s*whatsapp:\s*/i, "").replace(/\s*\(wa\.me[^)]*\)\s*/i, "").trim());
+      const insta = valorUtilLead(m.instagram);
+      if (insta) {
+        const mt = insta.match(/instagram\.com\/([^\/?#]+)/i);
+        return escaparAtributo(mt ? "@" + mt[1] : insta);
       }
       return "—";
     }
