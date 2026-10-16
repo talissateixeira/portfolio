@@ -848,6 +848,7 @@
   .lead-info-val strong { font-weight: 600; }
   .lead-info-dica { font-size: 0.74rem; color: var(--texto-suave); margin: 0 0 16px; }
   .lead-link { color: var(--acento-escuro); text-decoration: underline; text-underline-offset: 2px; font-weight: 600; }
+  .lead-obs-celula { display: inline-block; max-width: 220px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; vertical-align: middle; color: var(--texto-suave); }
   .lead-link:hover { color: var(--acento); }
   .grade-mensagens { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px; }
   @media (max-width: 800px) { .grade-mensagens { grid-template-columns: 1fr; } }
@@ -1272,7 +1273,7 @@
         <table class="tabela">
           <thead>
             <tr>
-              <th>Empresa</th><th>Contato</th><th>Nicho</th><th>Origem</th><th>Status</th><th>Último contato</th><th>Próximo follow-up</th><th>Valor potencial</th><th></th>
+              <th>Marca</th><th>Nicho</th><th>Instagram</th><th>E-mail</th><th>Telefone</th><th>Situação</th><th>Observação</th><th>Último contato</th><th>Próximo follow-up</th><th>Valor potencial</th><th></th>
             </tr>
           </thead>
           <tbody id="corpo-tabela-marcas"></tbody>
@@ -3276,11 +3277,9 @@
     const filtradas = leadsFiltrados();
     const corpo = document.getElementById("corpo-tabela-marcas");
     if (filtradas.length === 0) {
-      corpo.innerHTML = '<tr><td colspan="9" class="texto-vazio">Nenhum lead encontrado.</td></tr>';
+      corpo.innerHTML = '<tr><td colspan="11" class="texto-vazio">Nenhum lead encontrado.</td></tr>';
       return;
     }
-    // Pra coluna "Contato": mostra o nome da pessoa se houver; senão, o melhor
-    // jeito de falar com a marca (e-mail > WhatsApp > @ do Instagram).
     // Ignora valores "placeholder" (ex.: "não encontrado", "n/a", "-") que a
     // planilha às vezes traz no lugar de um dado de verdade.
     function valorUtilLead(v) {
@@ -3291,30 +3290,41 @@
       if (lixo.includes(norm)) return "";
       return t;
     }
-    function contatoResumoLead(m) {
-      const nome = valorUtilLead(m.contato_nome);
-      if (nome) return escaparAtributo(nome);
-      const email = valorUtilLead(m.email);
-      if (email) return escaparAtributo(email);
-      const tel = valorUtilLead(m.telefone);
-      if (tel) return escaparAtributo(tel.replace(/^\s*whatsapp:\s*/i, "").replace(/\s*\(wa\.me[^)]*\)\s*/i, "").trim());
+    function instaCelulaLead(m) {
       const insta = valorUtilLead(m.instagram);
-      if (insta) {
-        const mt = insta.match(/instagram\.com\/([^\/?#]+)/i);
-        return escaparAtributo(mt ? "@" + mt[1] : insta);
-      }
-      return "—";
+      if (!insta) return "—";
+      const mt = insta.match(/instagram\.com\/([^\/?#]+)/i);
+      const user = (mt ? mt[1] : insta.replace(/^@/, "")).replace(/\/$/, "");
+      if (!user) return "—";
+      return '<a href="https://instagram.com/' + escaparAtributo(user) + '" target="_blank" rel="noopener" class="lead-link">@' + escaparAtributo(user) + "</a>";
+    }
+    function emailCelulaLead(m) {
+      const email = valorUtilLead(m.email);
+      if (!email) return "—";
+      return '<a href="mailto:' + escaparAtributo(email) + '" class="lead-link">' + escaparAtributo(email) + "</a>";
+    }
+    function telefoneCelulaLead(m) {
+      const tel = valorUtilLead(m.telefone);
+      if (!tel) return "—";
+      return escaparAtributo(tel.replace(/^\s*whatsapp:\s*/i, "").replace(/\s*\(wa\.me[^)]*\)\s*/i, "").trim());
+    }
+    function obsCelulaLead(m) {
+      const obs = (m.obs || "").trim();
+      if (!obs) return "—";
+      return '<span class="lead-obs-celula" title="' + escaparAtributo(obs) + '">' + escaparAtributo(obs) + "</span>";
     }
     corpo.innerHTML = filtradas.map(m => {
       const cor = CORES_ESTAGIO_LEAD[m.situacao] || "cinza";
       return '<tr class="linha-clicavel" data-id="' + m.id + '">' +
         "<td>" + escaparAtributo(m.marca) + "</td>" +
-        "<td>" + contatoResumoLead(m) + "</td>" +
         "<td>" + (m.nicho ? escaparAtributo(m.nicho) : "—") + "</td>" +
-        "<td>" + (m.origem || "—") + "</td>" +
+        "<td>" + instaCelulaLead(m) + "</td>" +
+        "<td>" + emailCelulaLead(m) + "</td>" +
+        "<td>" + telefoneCelulaLead(m) + "</td>" +
         '<td><select class="select-status-lead" data-id="' + m.id + '" style="background-color:var(--fundo-' + cor + ');color:var(--' + cor + ');">' +
           ESTAGIOS_LEAD.map(e => "<option" + (e === m.situacao ? " selected" : "") + ">" + e + "</option>").join("") +
         "</select></td>" +
+        "<td>" + obsCelulaLead(m) + "</td>" +
         "<td>" + (m.ultimo_contato ? formatarData(m.ultimo_contato) : "—") + "</td>" +
         "<td>" + (m.proximo_contato ? formatarData(m.proximo_contato) : "—") + "</td>" +
         "<td>" + (m.valor_potencial ? formatarMoeda(m.valor_potencial) : "—") + "</td>" +
@@ -3323,7 +3333,7 @@
     }).join("");
     corpo.querySelectorAll("tr[data-id]").forEach(linha => {
       linha.addEventListener("click", (evento) => {
-        if (evento.target.closest("select") || evento.target.closest("[data-editar-lead]")) return;
+        if (evento.target.closest("select") || evento.target.closest("[data-editar-lead]") || evento.target.closest("a")) return;
         abrirDetalheLead(listaMarcas.find(m => m.id === linha.dataset.id));
       });
     });
