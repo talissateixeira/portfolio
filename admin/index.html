@@ -2396,11 +2396,9 @@
       return;
     }
     if (Notification.permission === "granted") {
-      blocoPush.classList.add("ativado");
-      statusPush.textContent = "Ativadas ✓ Você recebe as tarefas do dia toda manhã.";
-      botaoPush.textContent = "Enviar um teste";
-      botaoPush.dataset.modo = "teste";
-      botaoPush.hidden = false;
+      // Já ativado: o card some. Ele só reaparece se um dia precisar reativar
+      // (celular novo, app reinstalado, permissão revogada).
+      blocoPush.hidden = true;
     } else if (Notification.permission === "denied") {
       statusPush.textContent = "As notificações estão bloqueadas. Libere nos Ajustes do iPhone: Notificações → Painel.";
     } else {
