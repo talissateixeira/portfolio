@@ -3667,6 +3667,8 @@
   // maiúsculas/acentos), então a ordem não importa — só precisa ter "Nome".
   const MAPA_COLUNAS_CSV = {
     "nome": "marca", "empresa": "marca", "marca": "marca",
+    "cliente": "marca", "lead": "marca", "nome da empresa": "marca", "nome empresa": "marca",
+    "razao social": "marca", "empresa/marca": "marca", "marca/empresa": "marca", "nome da marca": "marca",
     "site": "site", "website": "site",
     "instagram": "instagram", "insta": "instagram", "arroba": "instagram",
     "seguidores": "seguidores", "followers": "seguidores",
@@ -3748,13 +3750,22 @@
       .map(l => (l || []).map(c => (c == null ? "" : String(c))))
       .filter(l => l.some(c => c.trim() !== ""));
     if (linhas.length < 2) { alert("A planilha parece vazia ou só tem o cabeçalho."); return; }
-    const indices = linhas[0].map(h => MAPA_COLUNAS_CSV[normalizarCabecalhoCSV(h)] || null);
-    if (!indices.includes("marca")) {
-      alert('Não encontrei a coluna do nome. A planilha precisa ter, no topo, uma coluna chamada "Nome" (ou "Empresa"/"Marca").');
+    // Acha a linha de cabeçalho: a primeira (nas 15 primeiras) que tenha uma
+    // coluna de nome reconhecida. Assim funciona mesmo com um título ou linhas
+    // em branco acima do cabeçalho de verdade.
+    let linhaCabecalho = -1, indices = null;
+    const limiteBusca = Math.min(linhas.length, 15);
+    for (let i = 0; i < limiteBusca; i++) {
+      const mapeadas = linhas[i].map(h => MAPA_COLUNAS_CSV[normalizarCabecalhoCSV(h)] || null);
+      if (mapeadas.includes("marca")) { linhaCabecalho = i; indices = mapeadas; break; }
+    }
+    if (linhaCabecalho === -1) {
+      const colunasLidas = linhas[0].map(c => c.trim()).filter(Boolean).join(" | ") || "(nenhuma)";
+      alert('Não encontrei a coluna do nome.\n\nA planilha precisa ter, no cabeçalho, uma coluna chamada "Nome" (ou "Empresa", "Marca" ou "Cliente").\n\nAs colunas que eu li na 1ª linha foram:\n' + colunasLidas);
       return;
     }
     const registros = [];
-    for (let i = 1; i < linhas.length; i++) {
+    for (let i = linhaCabecalho + 1; i < linhas.length; i++) {
       const reg = { situacao: "Novo lead", origem: "Prospecção ativa" };
       indices.forEach((campo, col) => {
         if (!campo) return;
