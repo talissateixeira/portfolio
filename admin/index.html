@@ -3279,11 +3279,23 @@
       corpo.innerHTML = '<tr><td colspan="9" class="texto-vazio">Nenhum lead encontrado.</td></tr>';
       return;
     }
+    // Pra coluna "Contato": mostra o nome da pessoa se houver; senão, o melhor
+    // jeito de falar com a marca (e-mail > WhatsApp > @ do Instagram).
+    function contatoResumoLead(m) {
+      if (m.contato_nome) return escaparAtributo(m.contato_nome);
+      if (m.email) return escaparAtributo(m.email);
+      if (m.telefone) return escaparAtributo(m.telefone.replace(/^\s*whatsapp:\s*/i, "").replace(/\s*\(wa\.me[^)]*\)\s*/i, "").trim());
+      if (m.instagram) {
+        const mt = m.instagram.match(/instagram\.com\/([^\/?#]+)/i);
+        return escaparAtributo(mt ? "@" + mt[1] : m.instagram.trim());
+      }
+      return "—";
+    }
     corpo.innerHTML = filtradas.map(m => {
       const cor = CORES_ESTAGIO_LEAD[m.situacao] || "cinza";
       return '<tr class="linha-clicavel" data-id="' + m.id + '">' +
         "<td>" + escaparAtributo(m.marca) + "</td>" +
-        "<td>" + (m.contato_nome ? escaparAtributo(m.contato_nome) : "—") + "</td>" +
+        "<td>" + contatoResumoLead(m) + "</td>" +
         "<td>" + (m.nicho ? escaparAtributo(m.nicho) : "—") + "</td>" +
         "<td>" + (m.origem || "—") + "</td>" +
         '<td><select class="select-status-lead" data-id="' + m.id + '" style="background-color:var(--fundo-' + cor + ');color:var(--' + cor + ');">' +
