@@ -6294,6 +6294,7 @@
     if (modo === "eu") return [{ marca: "Você (teste)", email: MEU_EMAIL }];
     let base = [];
     if (modo === "selecionadas") base = listaMarcas.filter(m => m.selecionada);
+    else if (modo === "favoritas") base = listaMarcas.filter(m => m.favorita);
     else if (modo === "com_email") base = listaMarcas.slice();
     else if (modo.indexOf("situacao:") === 0) { const s = modo.slice(9); base = listaMarcas.filter(m => m.situacao === s); }
     const vistos = new Set(), out = [];
@@ -6308,8 +6309,10 @@
   function popularDestinos() {
     const sel = document.getElementById("prosp-destino");
     const selN = listaMarcas.filter(m => m.selecionada && temEmailLead(m)).length;
+    const favN = listaMarcas.filter(m => m.favorita && temEmailLead(m)).length;
     const comN = listaMarcas.filter(temEmailLead).length;
     let html = '<option value="selecionadas">Só as marcas selecionadas (' + selN + ')</option>';
+    html += '<option value="favoritas">⭐ Só as marcas favoritadas (' + favN + ')</option>';
     html += '<option value="com_email">Todas as marcas com e-mail (' + comN + ')</option>';
     const situs = [...new Set(listaMarcas.map(m => m.situacao).filter(Boolean))];
     situs.forEach(s => {
@@ -6327,6 +6330,7 @@
     if (modo === "eu") { alvo.textContent = "Vai só pra você (teste)."; return; }
     let base = [];
     if (modo === "selecionadas") base = listaMarcas.filter(m => m.selecionada);
+    else if (modo === "favoritas") base = listaMarcas.filter(m => m.favorita);
     else if (modo === "com_email") base = listaMarcas.slice();
     else if (modo.indexOf("situacao:") === 0) base = listaMarcas.filter(m => m.situacao === modo.slice(9));
     const comEmail = destinatariosProsp().length;
