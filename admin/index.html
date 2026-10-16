@@ -849,6 +849,14 @@
   .lead-info-dica { font-size: 0.74rem; color: var(--texto-suave); margin: 0 0 16px; }
   .lead-link { color: var(--acento-escuro); text-decoration: underline; text-underline-offset: 2px; font-weight: 600; }
   .lead-obs-celula { display: inline-block; max-width: 220px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; vertical-align: middle; color: var(--texto-suave); }
+  /* Seleção de marcas (pra disparo de e-mail) */
+  .selecao-barra { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; padding: 10px 14px; margin-bottom: 12px; background: var(--fundo-acento); border: 1px solid rgba(116, 144, 123, 0.3); border-radius: var(--raio); font-size: 0.82rem; }
+  .selecao-texto { color: var(--texto); }
+  .selecao-texto strong { color: var(--acento-escuro); }
+  .link-acao { background: none; border: none; cursor: pointer; color: var(--acento-escuro); font-weight: 600; font-size: 0.82rem; text-decoration: underline; text-underline-offset: 2px; padding: 0; font-family: var(--fonte); }
+  .link-acao:hover { color: var(--preto); }
+  .check-selecao-lead { width: 16px; height: 16px; cursor: pointer; accent-color: var(--acento); }
+  .check-selecao-lead:disabled { cursor: not-allowed; opacity: 0.4; }
   .lead-link:hover { color: var(--acento); }
   .grade-mensagens { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px; }
   @media (max-width: 800px) { .grade-mensagens { grid-template-columns: 1fr; } }
@@ -1270,11 +1278,16 @@
           <button class="botao botao-principal" id="botao-add-marca">+ Novo lead</button>
         </div>
       </div>
+      <div class="selecao-barra" id="selecao-barra-leads">
+        <span class="selecao-texto"><strong id="selecao-contagem-leads">0</strong> marcas selecionadas</span>
+        <button type="button" class="link-acao" id="selecionar-todas-filtro">Selecionar todas do filtro</button>
+        <button type="button" class="link-acao" id="limpar-selecao-leads">Limpar seleção</button>
+      </div>
       <div class="painel-branco tabela-scroll" id="leads-view-tabela">
         <table class="tabela">
           <thead>
             <tr>
-              <th></th><th>Marca</th><th>Nicho</th><th>Instagram</th><th>E-mail</th><th>Telefone</th><th>Situação</th><th>Observação</th><th>Último contato</th><th>Próximo follow-up</th><th>Valor potencial</th><th></th>
+              <th></th><th></th><th>Marca</th><th>Nicho</th><th>Instagram</th><th>E-mail</th><th>Telefone</th><th>Situação</th><th>Observação</th><th>Último contato</th><th>Próximo follow-up</th><th>Valor potencial</th><th></th>
             </tr>
           </thead>
           <tbody id="corpo-tabela-marcas"></tbody>
@@ -3289,8 +3302,9 @@
     // Favoritas sempre no topo (sort estável mantém a ordem dentro de cada grupo).
     filtradas.sort((a, b) => (b.favorita ? 1 : 0) - (a.favorita ? 1 : 0));
     const corpo = document.getElementById("corpo-tabela-marcas");
+    atualizarContagemSelecao();
     if (filtradas.length === 0) {
-      corpo.innerHTML = '<tr><td colspan="12" class="texto-vazio">Nenhum lead encontrado.</td></tr>';
+      corpo.innerHTML = '<tr><td colspan="13" class="texto-vazio">Nenhum lead encontrado.</td></tr>';
       return;
     }
     // Ignora valores "placeholder" (ex.: "não encontrado", "n/a", "-") que a
@@ -3328,7 +3342,9 @@
     }
     corpo.innerHTML = filtradas.map(m => {
       const cor = CORES_ESTAGIO_LEAD[m.situacao] || "cinza";
+      const temEmail = temEmailLead(m);
       return '<tr class="linha-clicavel' + (m.favorita ? " favorita" : "") + '" data-id="' + m.id + '">' +
+        '<td><input type="checkbox" class="check-selecao-lead" data-sel-lead="' + m.id + '"' + (m.selecionada ? " checked" : "") + (temEmail ? "" : ' disabled title="Sem e-mail"') + "></td>" +
         '<td><button type="button" class="estrela-btn' + (m.favorita ? " marcada" : "") + '" data-fav-lead="' + m.id + '" data-favorita="' + !!m.favorita + '" title="Fixar no topo">★</button></td>' +
         "<td>" + escaparAtributo(m.marca) + "</td>" +
         "<td>" + (m.nicho ? escaparAtributo(m.nicho) : "—") + "</td>" +
@@ -3347,8 +3363,18 @@
     }).join("");
     corpo.querySelectorAll("tr[data-id]").forEach(linha => {
       linha.addEventListener("click", (evento) => {
-        if (evento.target.closest("select") || evento.target.closest("[data-editar-lead]") || evento.target.closest("a") || evento.target.closest(".estrela-btn")) return;
+        if (evento.target.closest("select") || evento.target.closest("[data-editar-lead]") || evento.target.closest("a") || evento.target.closest(".estrela-btn") || evento.target.closest(".check-selecao-lead")) return;
         abrirDetalheLead(listaMarcas.find(m => m.id === linha.dataset.id));
+      });
+    });
+    corpo.querySelectorAll("[data-sel-lead]").forEach(chk => {
+      chk.addEventListener("click", (evento) => evento.stopPropagation());
+      chk.addEventListener("change", async () => {
+        const novoValor = chk.checked;
+        await salvarSeguro("marcas", sb.from("marcas").update({ selecionada: novoValor }).eq("id", chk.dataset.selLead));
+        const lead = listaMarcas.find(m => m.id === chk.dataset.selLead);
+        if (lead) lead.selecionada = novoValor;
+        atualizarContagemSelecao();
       });
     });
     corpo.querySelectorAll("[data-fav-lead]").forEach(botao => {
@@ -3390,9 +3416,37 @@
     renderLeadsAtual();
   });
 
+  // ---- Seleção de marcas (pra disparo de e-mail na aba Prospecção) ----
+  function atualizarContagemSelecao() {
+    const el = document.getElementById("selecao-contagem-leads");
+    if (el) el.textContent = listaMarcas.filter(m => m.selecionada).length;
+  }
+  const botaoSelTodas = document.getElementById("selecionar-todas-filtro");
+  if (botaoSelTodas) {
+    botaoSelTodas.addEventListener("click", async () => {
+      const comEmail = leadsFiltrados().filter(temEmailLead);
+      if (comEmail.length === 0) { alert("Nenhuma marca com e-mail no filtro atual."); return; }
+      await salvarSeguro("marcas", sb.from("marcas").update({ selecionada: true }).in("id", comEmail.map(m => m.id)));
+      comEmail.forEach(m => m.selecionada = true);
+      renderLeadsAtual();
+    });
+  }
+  const botaoLimparSel = document.getElementById("limpar-selecao-leads");
+  if (botaoLimparSel) {
+    botaoLimparSel.addEventListener("click", async () => {
+      const selecionadas = listaMarcas.filter(m => m.selecionada);
+      if (selecionadas.length === 0) { alert("Nenhuma marca selecionada."); return; }
+      if (!confirm("Limpar a seleção de " + selecionadas.length + " marca(s)?")) return;
+      await salvarSeguro("marcas", sb.from("marcas").update({ selecionada: false }).in("id", selecionadas.map(m => m.id)));
+      selecionadas.forEach(m => m.selecionada = false);
+      renderLeadsAtual();
+    });
+  }
+
   // ---- Visão Tabela / Quadro dos leads ----
   let leadViewMode = "tabela";
   function renderLeadsAtual() {
+    atualizarContagemSelecao();
     if (leadViewMode === "quadro") renderQuadroLeads();
     else renderTabelaMarcas();
   }
