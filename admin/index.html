@@ -846,6 +846,7 @@
   .lead-info-rot { font-size: 0.66rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: var(--texto-suave); }
   .lead-info-val { font-size: 0.88rem; color: var(--texto); overflow-wrap: anywhere; }
   .lead-info-val strong { font-weight: 600; }
+  .lead-info-dica { font-size: 0.74rem; color: var(--texto-suave); margin: 0 0 16px; }
   .lead-link { color: var(--acento-escuro); text-decoration: underline; text-underline-offset: 2px; font-weight: 600; }
   .lead-link:hover { color: var(--acento); }
   .grade-mensagens { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px; }
@@ -1906,9 +1907,10 @@
   <div class="modal-caixa" style="max-width:680px;">
     <div class="painel-titulo-linha">
       <h3 class="modal-titulo" id="lead-detalhe-titulo" style="margin-bottom:0;"></h3>
-      <button type="button" class="botao botao-secundario" id="botao-editar-lead-detalhe">Editar</button>
+      <button type="button" class="botao botao-principal" id="botao-editar-lead-detalhe"><span class="icone" style="width:14px;height:14px;"><svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></span> Editar</button>
     </div>
-    <div id="lead-detalhe-info" class="lead-info-grid" style="margin-bottom:20px;"></div>
+    <div id="lead-detalhe-info" class="lead-info-grid" style="margin-bottom:8px;"></div>
+    <p class="lead-info-dica">Pra preencher ou mudar qualquer campo, toque em <strong>Editar</strong> ali em cima. ✏️</p>
 
     <div class="painel-titulo-linha painel-titulo-linha-compacta" style="margin-top:6px;">
       <div class="painel-titulo">Propostas ligadas</div>
