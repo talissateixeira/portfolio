@@ -3695,6 +3695,31 @@
   function normalizarCabecalhoCSV(s) {
     return (s || "").trim().toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
   }
+  // Quando o nome da coluna não bate exato no mapa, tenta adivinhar pelo
+  // conteúdo do título (ex.: "E-mail do responsável/marketing" -> email,
+  // "Seguidores (Instagram)" -> seguidores, "Link do produto" -> site).
+  // A ORDEM importa: checa e-mail antes de contato, seguidores antes de
+  // instagram, etc.
+  function adivinharColunaCabecalho(h) {
+    if (/e-?mail/.test(h)) return "email";
+    if (/seguidor|follower/.test(h)) return "seguidores";
+    if (/instagram|insta\b/.test(h) || h.includes("@")) return "instagram";
+    if (/whats|zap|telefone|celular|\btel\b|\bfone\b/.test(h)) return "telefone";
+    if (/site|website|loja|link|produto|url/.test(h)) return "site";
+    if (/nicho|segmento|categoria/.test(h)) return "nicho";
+    if (/origem|onde/.test(h)) return "origem";
+    if (/status|situacao|etapa|estagio/.test(h)) return "situacao";
+    if (/contato|responsav|pessoa/.test(h)) return "contato_nome";
+    if (/observ|\bobs\b|nota|coment/.test(h)) return "obs";
+    if (/empresa|marca|cliente|razao|^nome/.test(h)) return "marca";
+    return null;
+  }
+  // Mapeia um título de coluna pro campo do banco: tenta o nome exato e,
+  // se não achar, usa o palpite inteligente.
+  function mapearCabecalho(bruto) {
+    const h = normalizarCabecalhoCSV(bruto);
+    return MAPA_COLUNAS_CSV[h] || adivinharColunaCabecalho(h);
+  }
   function detectarSeparadorCSV(linha) {
     return (linha.match(/;/g) || []).length > (linha.match(/,/g) || []).length ? ";" : ",";
   }
@@ -3768,7 +3793,7 @@
     let linhaCabecalho = -1, indices = null;
     const limiteBusca = Math.min(linhas.length, 15);
     for (let i = 0; i < limiteBusca; i++) {
-      const mapeadas = linhas[i].map(h => MAPA_COLUNAS_CSV[normalizarCabecalhoCSV(h)] || null);
+      const mapeadas = linhas[i].map(mapearCabecalho);
       if (mapeadas.includes("marca")) { linhaCabecalho = i; indices = mapeadas; break; }
     }
     if (linhaCabecalho === -1) {
@@ -3776,25 +3801,58 @@
       alert('Não encontrei a coluna do nome.\n\nA planilha precisa ter, no cabeçalho, uma coluna chamada "Nome" (ou "Empresa", "Marca" ou "Cliente").\n\nAs colunas que eu li na 1ª linha foram:\n' + colunasLidas);
       return;
     }
+    // Monta um registro por linha com SÓ os campos preenchidos da planilha.
     const registros = [];
     for (let i = linhaCabecalho + 1; i < linhas.length; i++) {
-      const reg = { situacao: "Novo lead", origem: "Prospecção ativa" };
+      const campos = {};
       indices.forEach((campo, col) => {
         if (!campo) return;
         const valor = (linhas[i][col] || "").trim();
-        if (valor) reg[campo] = valor;
+        if (valor) campos[campo] = valor;
       });
-      if (reg.marca) registros.push(reg);
+      if (campos.marca) registros.push(campos);
     }
     if (registros.length === 0) { alert("Não achei nenhuma linha com o nome da marca preenchido."); return; }
-    if (!confirm("Importar " + registros.length + (registros.length === 1 ? " marca" : " marcas") + " da planilha pra sua base de Leads?")) return;
-    let { error } = await sb.from("marcas").insert(registros);
-    if (error && /seguidores/i.test(error.message || "")) {
-      const semSeguidores = registros.map(r => { const c = Object.assign({}, r); delete c.seguidores; return c; });
-      ({ error } = await sb.from("marcas").insert(semSeguidores));
+
+    // Separa quem já existe (pelo nome da empresa) pra ATUALIZAR, de quem é
+    // novo pra INSERIR — assim reimportar não cria duplicados, só completa.
+    const nomeNorm = s => (s || "").trim().toLowerCase();
+    const jaExistem = new Map();
+    (listaMarcas || []).forEach(m => jaExistem.set(nomeNorm(m.marca), m));
+    const novos = [], atualizacoes = [];
+    registros.forEach(r => {
+      const existente = jaExistem.get(nomeNorm(r.marca));
+      if (existente) {
+        const campos = Object.assign({}, r);
+        delete campos.marca; // o nome já está certo, não precisa reescrever
+        if (Object.keys(campos).length) atualizacoes.push({ id: existente.id, campos });
+      } else {
+        // Só os novos ganham os valores padrão de status/origem.
+        novos.push(Object.assign({ situacao: "Novo lead", origem: "Prospecção ativa" }, r));
+      }
+    });
+
+    const partes = [];
+    if (novos.length) partes.push(novos.length + (novos.length === 1 ? " novo lead" : " novos leads"));
+    if (atualizacoes.length) partes.push(atualizacoes.length + (atualizacoes.length === 1 ? " já existente (vou completar)" : " já existentes (vou completar)"));
+    if (!confirm("Importar da planilha:\n• " + partes.join("\n• ") + "\n\nContinuar?")) return;
+
+    // Tenta de novo sem "seguidores" caso essa coluna ainda não exista no banco.
+    const semSeg = obj => { const c = Object.assign({}, obj); delete c.seguidores; return c; };
+    let erroMsg = null;
+    if (novos.length) {
+      let { error } = await sb.from("marcas").insert(novos);
+      if (error && /seguidores/i.test(error.message || "")) ({ error } = await sb.from("marcas").insert(novos.map(semSeg)));
+      if (error) erroMsg = error.message;
     }
-    if (error) { alert("Deu um problema na importação: " + error.message); return; }
-    alert("Prontinho! " + registros.length + (registros.length === 1 ? " marca importada" : " marcas importadas") + ". 🎉");
+    for (const a of atualizacoes) {
+      if (erroMsg) break;
+      let { error } = await sb.from("marcas").update(a.campos).eq("id", a.id);
+      if (error && /seguidores/i.test(error.message || "")) ({ error } = await sb.from("marcas").update(semSeg(a.campos)).eq("id", a.id));
+      if (error) erroMsg = error.message;
+    }
+    if (erroMsg) { alert("Deu um problema na importação: " + erroMsg); return; }
+    alert("Prontinho! " + (partes.join(" e ")) + ". 🎉");
     carregarMarcas();
   }
   document.getElementById("botao-importar-marcas").addEventListener("click", () => document.getElementById("arquivo-csv-marcas").click());
