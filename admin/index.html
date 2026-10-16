@@ -1261,6 +1261,7 @@
           <select class="campo-busca" id="filtro-origem-lead"><option value="todas">Qualquer origem</option></select>
           <select class="campo-busca" id="filtro-nicho-lead"><option value="todas">Qualquer nicho</option></select>
           <button class="pill-filtro" data-filtro-prioridade-lead="alta">Prioridade alta</button>
+          <button class="pill-filtro" data-filtro-com-email>Com e-mail</button>
         </div>
         <div class="barra-acoes-direita">
           <button class="botao botao-secundario" id="botao-importar-marcas">Importar planilha</button>
@@ -3130,6 +3131,15 @@
   let filtroOrigemLead = "todas";
   let filtroNichoLead = "todas";
   let filtroPrioridadeLead = null;
+  let filtroComEmail = false;
+  // Considera que a marca "tem e-mail" se o campo tem um @ de verdade
+  // (ignora placeholders como "não encontrado", "sem e-mail" etc.).
+  function temEmailLead(m) {
+    const e = (m.email || "").trim();
+    if (!e || !e.includes("@")) return false;
+    const norm = e.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
+    return !["nao encontrado", "nao achei", "nao tem", "sem", "sem email", "sem e-mail", "nenhum"].includes(norm);
+  }
   let filtroFollowupLead = null;
 
   // Bolinha de "novos" na aba Leads: avisa quando chegam contatos novos do
@@ -3195,6 +3205,7 @@
       if (filtroOrigemLead !== "todas" && m.origem !== filtroOrigemLead) return false;
       if (filtroNichoLead !== "todas" && m.nicho !== filtroNichoLead) return false;
       if (filtroPrioridadeLead && m.prioridade !== filtroPrioridadeLead) return false;
+      if (filtroComEmail && !temEmailLead(m)) return false;
       if (!termo) return true;
       return (m.marca || "").toLowerCase().includes(termo) || (m.contato_nome || "").toLowerCase().includes(termo) ||
         (m.instagram || "").toLowerCase().includes(termo) || (m.email || "").toLowerCase().includes(termo);
@@ -3361,6 +3372,10 @@
     filtroPrioridadeLead = ativo ? botao.dataset.filtroPrioridadeLead : null;
     renderLeadsAtual();
   });
+  document.querySelector("[data-filtro-com-email]").addEventListener("click", (evento) => {
+    filtroComEmail = evento.currentTarget.classList.toggle("ativo");
+    renderLeadsAtual();
+  });
 
   // ---- Visão Tabela / Quadro dos leads ----
   let leadViewMode = "tabela";
@@ -3397,6 +3412,7 @@
       if (filtroOrigemLead !== "todas" && m.origem !== filtroOrigemLead) return false;
       if (filtroNichoLead !== "todas" && m.nicho !== filtroNichoLead) return false;
       if (filtroPrioridadeLead && m.prioridade !== filtroPrioridadeLead) return false;
+      if (filtroComEmail && !temEmailLead(m)) return false;
       if (!termo) return true;
       return (m.marca || "").toLowerCase().includes(termo) || (m.contato_nome || "").toLowerCase().includes(termo) ||
         (m.instagram || "").toLowerCase().includes(termo) || (m.email || "").toLowerCase().includes(termo);
