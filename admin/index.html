@@ -857,6 +857,69 @@
   .link-acao:hover { color: var(--preto); }
   .check-selecao-lead { width: 16px; height: 16px; cursor: pointer; accent-color: var(--acento); }
   .check-selecao-lead:disabled { cursor: not-allowed; opacity: 0.4; }
+
+  /* ===== ABA PROSPECÇÃO ===== */
+  .prosp-capa { display: flex; justify-content: space-between; align-items: center; gap: 20px; flex-wrap: wrap; padding: 26px 28px; border-radius: var(--raio-grande); background: linear-gradient(135deg, #7d9a84, #46594c); color: #fff; }
+  .prosp-capa-esq { display: flex; align-items: center; gap: 16px; }
+  .prosp-capa-icone { display: inline-flex; align-items: center; justify-content: center; width: 52px; height: 52px; border-radius: 16px; background: rgba(255,255,255,0.16); flex-shrink: 0; }
+  .prosp-capa-icone svg { width: 26px; height: 26px; stroke: #fff; fill: none; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+  .prosp-capa-titulo { font-size: 1.6rem; margin: 0; color: #fff; }
+  .prosp-capa-sub { margin: 4px 0 0; font-size: 0.86rem; color: rgba(255,255,255,0.82); max-width: 440px; }
+  .prosp-capa-dir { text-align: right; }
+  .prosp-capa-numero { font-size: 2.4rem; font-weight: 700; line-height: 1; }
+  .prosp-capa-numero-legenda { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color: rgba(255,255,255,0.8); margin-top: 4px; }
+  .prosp-capa-tags { display: flex; flex-wrap: wrap; gap: 8px; margin: 14px 0 22px; }
+  .prosp-tag { font-size: 0.74rem; font-weight: 600; padding: 6px 12px; border-radius: 999px; background: var(--fundo-acento); color: var(--acento-escuro); }
+  .prosp-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 14px; margin-bottom: 22px; }
+  .prosp-card { background: var(--branco); border: 1px solid var(--borda); border-left: 4px solid var(--acento); border-radius: var(--raio); padding: 14px 16px; }
+  .prosp-card-numero { font-size: 1.7rem; font-weight: 700; line-height: 1; }
+  .prosp-card-nome { font-size: 0.78rem; color: var(--texto-suave); margin-top: 6px; }
+  .prosp-card-ctx { font-size: 0.7rem; color: var(--texto-suave); margin-top: 2px; opacity: 0.85; }
+  .prosp-aviso { background: var(--fundo-aviso); color: var(--aviso); border: 1px solid rgba(176,137,0,0.3); border-radius: var(--raio); padding: 12px 14px; font-size: 0.82rem; margin-bottom: 18px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+  .prosp-aviso[hidden] { display: none; }
+  .prosp-main { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; align-items: start; }
+  .prosp-form { padding: 22px; }
+  .prosp-origem-nota { font-size: 0.8rem; color: var(--acento-escuro); background: var(--fundo-acento); border-radius: 10px; padding: 9px 12px; margin: 0 0 16px; }
+  .prosp-contagem { font-size: 0.8rem; color: var(--acento-escuro); font-weight: 600; margin: -6px 0 14px; }
+  .prosp-check-linha { display: flex; align-items: center; gap: 8px; font-size: 0.82rem; color: var(--texto); margin-bottom: 4px; cursor: pointer; }
+  .prosp-check-linha input { accent-color: var(--acento); width: 16px; height: 16px; }
+  .prosp-subtitulo { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--texto-suave); margin: 20px 0 8px; }
+  .prosp-modo-toggle, .prosp-metodo-toggle { display: inline-flex; gap: 4px; background: var(--creme); border: 1px solid var(--borda); border-radius: 999px; padding: 3px; margin-bottom: 8px; }
+  .prosp-modo-btn, .prosp-metodo-btn { border: none; background: none; cursor: pointer; font-family: var(--fonte); font-size: 0.8rem; font-weight: 600; color: var(--texto-suave); padding: 6px 14px; border-radius: 999px; }
+  .prosp-modo-btn.ativo, .prosp-metodo-btn.ativo { background: var(--acento); color: #fff; }
+  .prosp-metodo-nota { font-size: 0.76rem; color: var(--texto-suave); margin: 2px 0 0; }
+  .prosp-codigo { font-family: "SF Mono", Menlo, Consolas, monospace; font-size: 0.78rem; }
+  .prosp-aviso-sair { font-size: 0.76rem; color: var(--aviso); font-weight: 600; margin: 6px 0 0; }
+  .prosp-acoes { display: flex; gap: 10px; margin-top: 18px; flex-wrap: wrap; }
+  .prosp-progresso { margin-top: 16px; }
+  .prosp-progresso[hidden] { display: none; }
+  .prosp-progresso-barra { height: 10px; background: var(--creme); border-radius: 999px; overflow: hidden; border: 1px solid var(--borda); }
+  .prosp-progresso-fill { height: 100%; width: 0; background: var(--acento); transition: width 0.3s ease; }
+  .prosp-progresso-texto { font-size: 0.8rem; color: var(--texto-suave); margin: 8px 0 0; }
+  .prosp-resultado { margin-top: 16px; padding: 14px; border-radius: var(--raio); font-size: 0.84rem; background: var(--fundo-sucesso); border: 1px solid rgba(116,144,123,0.35); }
+  .prosp-resultado[hidden] { display: none; }
+  .prosp-previa-col { position: sticky; top: 20px; }
+  .prosp-palco { position: relative; background: var(--creme-destaque); border-radius: var(--raio-grande); padding: 30px 22px; }
+  .prosp-fullscreen-btn { position: absolute; top: 12px; right: 12px; background: rgba(255,255,255,0.92); border: 1px solid var(--borda); border-radius: 999px; font-size: 0.74rem; font-weight: 600; padding: 6px 12px; cursor: pointer; color: var(--texto); font-family: var(--fonte); }
+  .prosp-email-janela { background: #fff; border-radius: 14px; box-shadow: 0 14px 40px rgba(38,34,32,0.18); overflow: hidden; }
+  .prosp-email-header { display: flex; gap: 12px; align-items: center; padding: 16px 18px; border-bottom: 1px solid #eee; }
+  .prosp-email-avatar { width: 40px; height: 40px; border-radius: 50%; background: var(--acento); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1.1rem; flex-shrink: 0; }
+  .prosp-email-assunto { font-weight: 700; font-size: 1rem; color: #1a1a1a; }
+  .prosp-email-de { font-size: 0.78rem; color: #777; margin-top: 2px; }
+  .prosp-email-de strong { color: #333; }
+  .prosp-para { color: #aaa; }
+  .prosp-email-corpo { padding: 20px 18px; max-height: 520px; overflow-y: auto; }
+  .prosp-previa-dica { font-size: 0.76rem; color: var(--texto-suave); text-align: center; margin: 12px 0 0; }
+  .prosp-fs-topo { display: flex; justify-content: space-between; align-items: center; padding: 14px 18px; background: var(--creme); border-bottom: 1px solid var(--borda); font-weight: 700; font-size: 0.9rem; }
+  .prosp-fila-item { border: 1px solid var(--borda); border-radius: var(--raio); padding: 14px; margin-bottom: 12px; }
+  .prosp-fila-item.feita { opacity: 0.5; }
+  .prosp-fila-marca { font-weight: 700; }
+  .prosp-fila-email { font-size: 0.8rem; color: var(--texto-suave); }
+  .prosp-fila-acoes { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+  @media (max-width: 860px) {
+    .prosp-main { grid-template-columns: 1fr; }
+    .prosp-previa-col { position: static; }
+  }
   .lead-link:hover { color: var(--acento); }
   .grade-mensagens { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px; }
   @media (max-width: 800px) { .grade-mensagens { grid-template-columns: 1fr; } }
@@ -1055,6 +1118,10 @@
         <span class="icone"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M2.5 20c0-3.6 2.9-6.2 6.5-6.2s6.5 2.6 6.5 6.2M16 8.3c1.6.3 2.8 1.6 2.8 3.2 0 1.5-1 2.7-2.4 3.1M17.5 14c2.6.5 4 2.4 4 5"/></svg></span>
         <span class="rotulo-nav">Leads</span>
         <span class="nav-badge" id="badge-leads" title="Contatos novos do site, ainda não triados" hidden>0</span>
+      </button>
+      <button class="nav-item" data-aba="prospeccao" title="Prospecção">
+        <span class="icone"><svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="m3.5 7 8.5 6 8.5-6"/></svg></span>
+        <span class="rotulo-nav">Prospecção</span>
       </button>
       <button class="nav-item" data-aba="calendario" title="Calendário">
         <span class="icone"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2.5"/><path d="M8 3v4M16 3v4M3 10h18"/></svg></span>
@@ -1312,6 +1379,128 @@
             </div>
           </div>
           <div id="lista-followups-leads"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===================== ABA PROSPECÇÃO ===================== -->
+    <section class="aba" id="aba-prospeccao">
+      <!-- 1) CAPA -->
+      <div class="prosp-capa">
+        <div class="prosp-capa-esq">
+          <span class="prosp-capa-icone"><svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="m3.5 7 8.5 6 8.5-6"/></svg></span>
+          <div>
+            <h2 class="prosp-capa-titulo">Prospecção</h2>
+            <p class="prosp-capa-sub">Mande seu e-mail de apresentação pra várias marcas de uma vez, chamando cada uma pelo nome.</p>
+          </div>
+        </div>
+        <div class="prosp-capa-dir">
+          <div class="prosp-capa-numero" id="prosp-total-enviados">—</div>
+          <div class="prosp-capa-numero-legenda">enviados até agora</div>
+        </div>
+      </div>
+      <div class="prosp-capa-tags">
+        <span class="prosp-tag">Teste antes, sempre</span>
+        <span class="prosp-tag">A chave vive no Supabase</span>
+        <span class="prosp-tag">Quem responde SAIR sai da lista</span>
+      </div>
+
+      <!-- 2) CARTÕES -->
+      <div class="prosp-cards" id="prosp-cards"></div>
+      <div class="prosp-aviso" id="prosp-aviso-tabelas" hidden></div>
+
+      <!-- 3) FORM + PRÉVIA -->
+      <div class="prosp-main">
+        <div class="prosp-form painel-branco">
+          <p class="prosp-origem-nota">Os e-mails vêm da sua aba <strong>Marcas</strong>.</p>
+
+          <div class="campo-form">
+            <label>Mandar para</label>
+            <select id="prosp-destino" class="campo-busca"></select>
+          </div>
+          <p class="prosp-contagem" id="prosp-contagem">—</p>
+
+          <label class="prosp-check-linha"><input type="checkbox" id="prosp-pular-recebidos" checked> Pular quem já recebeu este mesmo assunto</label>
+
+          <div class="prosp-subtitulo">Como enviar</div>
+          <div class="prosp-metodo-toggle">
+            <button type="button" class="prosp-metodo-btn ativo" data-prosp-metodo="resend">Automático (Resend)</button>
+            <button type="button" class="prosp-metodo-btn" data-prosp-metodo="rascunho">Rascunho (Gmail)</button>
+          </div>
+          <p class="prosp-metodo-nota" id="prosp-metodo-nota"></p>
+
+          <div class="prosp-subtitulo">Escrever o e-mail</div>
+          <div class="prosp-modo-toggle">
+            <button type="button" class="prosp-modo-btn ativo" data-prosp-modo="texto">Texto fácil</button>
+            <button type="button" class="prosp-modo-btn" data-prosp-modo="html">HTML</button>
+          </div>
+
+          <div class="campo-form">
+            <label>Assunto</label>
+            <input type="text" id="prosp-assunto" class="campo-busca" placeholder="Ex: Parceria de conteúdo com a {{marca}}">
+          </div>
+
+          <div id="prosp-modo-texto">
+            <div class="campo-form">
+              <label>Seu e-mail (use {{nome}} e {{marca}} onde quiser o nome da marca)</label>
+              <textarea id="prosp-corpo-texto" rows="9" placeholder="Oi {{nome}}, tudo bem?&#10;&#10;Eu sou a Talissa, criadora de conteúdo UGC..."></textarea>
+            </div>
+          </div>
+
+          <div id="prosp-modo-html" hidden>
+            <div class="campo-form">
+              <label>HTML do e-mail ({{nome}} e {{marca}} funcionam aqui também)</label>
+              <textarea id="prosp-corpo-html" rows="12" class="prosp-codigo" placeholder="&lt;div&gt;...&lt;/div&gt;"></textarea>
+            </div>
+            <button type="button" class="botao botao-secundario" id="prosp-modelo-pronto">Começar do modelo pronto</button>
+            <p class="prosp-aviso-sair" id="prosp-aviso-sair-html" hidden>Atenção: seu HTML não tem o rodapé do SAIR. É recomendado manter.</p>
+          </div>
+
+          <div class="linha-form-2">
+            <div class="campo-form"><label>Botão (opcional): texto</label><input type="text" id="prosp-botao-texto" class="campo-busca" placeholder="Ex: Ver meu portfólio"></div>
+            <div class="campo-form"><label>Botão: link</label><input type="text" id="prosp-botao-link" class="campo-busca" placeholder="https://talissamuller.com"></div>
+          </div>
+
+          <div class="prosp-acoes">
+            <button type="button" class="botao botao-secundario" id="prosp-enviar-teste">Enviar teste pra mim</button>
+            <button type="button" class="botao botao-principal" id="prosp-disparar">Disparar</button>
+          </div>
+          <div class="prosp-progresso" id="prosp-progresso" hidden>
+            <div class="prosp-progresso-barra"><div class="prosp-progresso-fill" id="prosp-progresso-fill"></div></div>
+            <p class="prosp-progresso-texto" id="prosp-progresso-texto"></p>
+          </div>
+          <div class="prosp-resultado" id="prosp-resultado" hidden></div>
+        </div>
+
+        <div class="prosp-previa-col">
+          <div class="prosp-palco">
+            <button type="button" class="prosp-fullscreen-btn" id="prosp-ver-fullscreen">Ver em tela cheia</button>
+            <div class="prosp-email-janela">
+              <div class="prosp-email-header">
+                <div class="prosp-email-avatar" id="prosp-previa-avatar">T</div>
+                <div class="prosp-email-meta">
+                  <div class="prosp-email-assunto" id="prosp-previa-assunto">(assunto do e-mail)</div>
+                  <div class="prosp-email-de"><strong id="prosp-previa-nome">Talissa Müller</strong> <span id="prosp-previa-email">mullertalissa@gmail.com</span> <span class="prosp-para">para você</span></div>
+                </div>
+              </div>
+              <div class="prosp-email-corpo" id="prosp-previa-corpo"></div>
+            </div>
+          </div>
+          <p class="prosp-previa-dica">Mande o teste pra você mesma e abra no celular antes de disparar.</p>
+        </div>
+      </div>
+
+      <!-- HISTÓRICO -->
+      <div class="painel-branco" style="margin-top:24px;">
+        <div class="painel-titulo-linha painel-titulo-linha-compacta">
+          <div class="painel-titulo">Histórico de envios</div>
+          <input type="text" id="prosp-busca-historico" class="campo-busca" placeholder="Buscar por e-mail..." style="max-width:240px;">
+        </div>
+        <div class="tabela-scroll">
+          <table class="tabela">
+            <thead><tr><th>E-mail</th><th>Assunto</th><th>Quando</th><th>Status</th></tr></thead>
+            <tbody id="prosp-historico-corpo"></tbody>
+          </table>
         </div>
       </div>
     </section>
@@ -1601,6 +1790,36 @@
 </div>
 
 <!-- ===================== MODAIS ===================== -->
+<!-- ===================== MODAL PRÉVIA EM TELA CHEIA ===================== -->
+<div class="modal-fundo" id="modal-prosp-fullscreen" hidden>
+  <div class="modal-caixa" style="max-width:600px;padding:0;overflow:hidden;">
+    <div class="prosp-fs-topo">
+      <span>Prévia do e-mail</span>
+      <button type="button" class="botao botao-secundario" data-fechar-modal>Fechar</button>
+    </div>
+    <div class="prosp-email-janela" style="box-shadow:none;border-radius:0;">
+      <div class="prosp-email-header">
+        <div class="prosp-email-avatar" id="prosp-fs-avatar">T</div>
+        <div class="prosp-email-meta">
+          <div class="prosp-email-assunto" id="prosp-fs-assunto"></div>
+          <div class="prosp-email-de"><strong id="prosp-fs-nome"></strong> <span id="prosp-fs-email"></span> <span class="prosp-para">para você</span></div>
+        </div>
+      </div>
+      <div class="prosp-email-corpo" id="prosp-fs-corpo"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== MODAL FILA DO MODO RASCUNHO ===================== -->
+<div class="modal-fundo" id="modal-prosp-fila" hidden>
+  <div class="modal-caixa" style="max-width:620px;">
+    <h3 class="modal-titulo" id="prosp-fila-titulo">Fila de envio manual</h3>
+    <p style="font-size:0.8rem;color:var(--texto-suave);margin:-8px 0 16px;">Copie o texto ou abra o Gmail já preenchido. Ao marcar como enviada, a marca sai da fila.</p>
+    <div id="prosp-fila-conteudo"></div>
+    <div class="modal-acoes"><div class="modal-acoes-direita"><button type="button" class="botao botao-secundario" data-fechar-modal>Fechar</button></div></div>
+  </div>
+</div>
+
 <!-- ===================== MODAL PERSONALIZAR FAVORITOS ===================== -->
 <div class="modal-fundo" id="modal-fav-config" hidden>
   <div class="modal-caixa" style="max-width:520px;">
@@ -2215,8 +2434,8 @@
   }
 
   // ---- Navegação (abas + gaveta no celular) ----
-  const TITULOS_ABA = { dashboard: "👋 Início", portfolio: "Suas Métricas", marcas: "Leads", calendario: "Calendário", campanhas: "Campanhas", conteudo: "Meu conteúdo no Instagram", producao: "Produção", checklist: "Checklist", transcricoes: "Transcrições", mensagens: "Mensagens" };
-  const CARREGADORES_ABA = { dashboard: carregarDashboard, portfolio: carregarPortfolio, marcas: carregarMarcas, calendario: carregarCalendario, campanhas: carregarCampanhas, conteudo: carregarConteudo, producao: carregarProducao, checklist: carregarChecklist, transcricoes: carregarTranscricoes, mensagens: carregarMensagens };
+  const TITULOS_ABA = { dashboard: "👋 Início", portfolio: "Suas Métricas", marcas: "Leads", prospeccao: "Prospecção", calendario: "Calendário", campanhas: "Campanhas", conteudo: "Meu conteúdo no Instagram", producao: "Produção", checklist: "Checklist", transcricoes: "Transcrições", mensagens: "Mensagens" };
+  const CARREGADORES_ABA = { dashboard: carregarDashboard, portfolio: carregarPortfolio, marcas: carregarMarcas, prospeccao: carregarProspeccao, calendario: carregarCalendario, campanhas: carregarCampanhas, conteudo: carregarConteudo, producao: carregarProducao, checklist: carregarChecklist, transcricoes: carregarTranscricoes, mensagens: carregarMensagens };
   const abasCarregadas = new Set();
 
   function abrirAba(nome) {
@@ -6010,6 +6229,359 @@
       });
     }
   });
+
+  // ============================================================================
+  // ABA — PROSPECÇÃO (disparo de e-mail pras marcas)
+  // ============================================================================
+  const MEU_EMAIL = "mullertalissa@gmail.com";
+  let listaEnvios = [], listaOptout = [];
+  let modoEscrita = "texto";   // "texto" ou "html"
+  let metodoEnvio = "resend";  // "resend" ou "rascunho"
+
+  const RODAPE_SAIR = '<div style="margin-top:28px;padding-top:16px;border-top:1px solid #eeeeee;font-size:12px;color:#999999;line-height:1.5;">Se não quiser mais receber estes e-mails, é só responder esta mensagem com a palavra SAIR.</div>';
+
+  function escaparHtmlEmail(s) {
+    return (s || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  }
+  function autolink(s) {
+    return s.replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" style="color:#5C7564;">$1</a>');
+  }
+  function primeiroNome(nomeMarca) {
+    return (nomeMarca || "").trim().split(/\s+/)[0] || "";
+  }
+  function aplicarVariaveisTexto(txt, marca) {
+    return (txt || "").replace(/\{\{nome\}\}/g, primeiroNome(marca.marca || "")).replace(/\{\{marca\}\}/g, marca.marca || "");
+  }
+  function aplicarVariaveis(html, marca) {
+    return (html || "").replace(/\{\{nome\}\}/g, escaparHtmlEmail(primeiroNome(marca.marca || ""))).replace(/\{\{marca\}\}/g, escaparHtmlEmail(marca.marca || ""));
+  }
+  // Monta o HTML limpo do modo "texto fácil".
+  function montarEmailTexto(corpoTexto, botaoTexto, botaoLink) {
+    const corpo = autolink(escaparHtmlEmail(corpoTexto)).replace(/\n/g, "<br>");
+    let botao = "";
+    if (botaoTexto && botaoLink) {
+      botao = '<div style="margin:26px 0;"><a href="' + escaparHtmlEmail(botaoLink) + '" style="display:inline-block;background:#74907B;color:#ffffff;text-decoration:none;padding:12px 24px;border-radius:10px;font-weight:600;">' + escaparHtmlEmail(botaoTexto) + '</a></div>';
+    }
+    return '<div style="max-width:560px;margin:0 auto;font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.6;color:#3A342E;background:#ffffff;padding:8px 4px;">' + corpo + botao + RODAPE_SAIR + '</div>';
+  }
+  function getHtmlBase() {
+    if (modoEscrita === "html") return document.getElementById("prosp-corpo-html").value;
+    return montarEmailTexto(document.getElementById("prosp-corpo-texto").value, document.getElementById("prosp-botao-texto").value.trim(), document.getElementById("prosp-botao-link").value.trim());
+  }
+  function corpoProspPreenchido() {
+    return (modoEscrita === "html" ? document.getElementById("prosp-corpo-html").value : document.getElementById("prosp-corpo-texto").value).trim().length > 0;
+  }
+  // Texto puro do e-mail de uma marca (pro modo rascunho: copiar / abrir Gmail).
+  function textoEmailParaMarca(marca) {
+    if (modoEscrita === "texto") {
+      let t = document.getElementById("prosp-corpo-texto").value;
+      const bt = document.getElementById("prosp-botao-texto").value.trim(), bl = document.getElementById("prosp-botao-link").value.trim();
+      if (bt && bl) t += "\n\n" + bt + ": " + bl;
+      t += "\n\nSe não quiser mais receber, responda com SAIR.";
+      return aplicarVariaveisTexto(t, marca);
+    }
+    const tmp = document.createElement("div");
+    tmp.innerHTML = aplicarVariaveis(getHtmlBase(), marca);
+    return tmp.textContent || "";
+  }
+  function gmailUrl(email, assunto, corpoTexto) {
+    return "https://mail.google.com/mail/?view=cm&fs=1&to=" + encodeURIComponent(email) + "&su=" + encodeURIComponent(assunto) + "&body=" + encodeURIComponent(corpoTexto);
+  }
+
+  // Lista de destinatários conforme a opção escolhida (já sem e-mail repetido).
+  function destinatariosProsp() {
+    const modo = document.getElementById("prosp-destino").value;
+    if (modo === "eu") return [{ marca: "Você (teste)", email: MEU_EMAIL }];
+    let base = [];
+    if (modo === "selecionadas") base = listaMarcas.filter(m => m.selecionada);
+    else if (modo === "com_email") base = listaMarcas.slice();
+    else if (modo.indexOf("situacao:") === 0) { const s = modo.slice(9); base = listaMarcas.filter(m => m.situacao === s); }
+    const vistos = new Set(), out = [];
+    base.forEach(m => {
+      if (!temEmailLead(m)) return;
+      const e = m.email.trim().toLowerCase();
+      if (vistos.has(e)) return;
+      vistos.add(e); out.push(m);
+    });
+    return out;
+  }
+  function popularDestinos() {
+    const sel = document.getElementById("prosp-destino");
+    const selN = listaMarcas.filter(m => m.selecionada && temEmailLead(m)).length;
+    const comN = listaMarcas.filter(temEmailLead).length;
+    let html = '<option value="selecionadas">Só as marcas selecionadas (' + selN + ')</option>';
+    html += '<option value="com_email">Todas as marcas com e-mail (' + comN + ')</option>';
+    const situs = [...new Set(listaMarcas.map(m => m.situacao).filter(Boolean))];
+    situs.forEach(s => {
+      const n = listaMarcas.filter(m => m.situacao === s && temEmailLead(m)).length;
+      html += '<option value="situacao:' + escaparAtributo(s) + '">Só: ' + escaparAtributo(s) + ' (' + n + ')</option>';
+    });
+    html += '<option value="eu">Só pra mim (teste)</option>';
+    const anterior = sel.value;
+    sel.innerHTML = html;
+    if (anterior) sel.value = anterior;
+  }
+  function updateContagemDestino() {
+    const modo = document.getElementById("prosp-destino").value;
+    const alvo = document.getElementById("prosp-contagem");
+    if (modo === "eu") { alvo.textContent = "Vai só pra você (teste)."; return; }
+    let base = [];
+    if (modo === "selecionadas") base = listaMarcas.filter(m => m.selecionada);
+    else if (modo === "com_email") base = listaMarcas.slice();
+    else if (modo.indexOf("situacao:") === 0) base = listaMarcas.filter(m => m.situacao === modo.slice(9));
+    const comEmail = destinatariosProsp().length;
+    const semEmail = base.length - base.filter(temEmailLead).length;
+    alvo.textContent = comEmail + " marca(s) vão receber" + (semEmail > 0 ? " · " + semEmail + " sem e-mail ficaram de fora" : "");
+  }
+  function updatePreview() {
+    const exemplo = { marca: "Marca Exemplo" };
+    const assunto = document.getElementById("prosp-assunto").value.trim();
+    document.getElementById("prosp-previa-assunto").textContent = aplicarVariaveisTexto(assunto, exemplo) || "(assunto do e-mail)";
+    document.getElementById("prosp-previa-corpo").innerHTML = aplicarVariaveis(getHtmlBase(), exemplo);
+    if (modoEscrita === "html") {
+      document.getElementById("prosp-aviso-sair-html").hidden = /sair/i.test(document.getElementById("prosp-corpo-html").value);
+    }
+  }
+  function cardProsp(num, nome, cor, ctx) {
+    return '<div class="prosp-card" style="border-left-color:' + cor + '"><div class="prosp-card-numero" style="color:' + cor + '">' + num + '</div><div class="prosp-card-nome">' + nome + '</div>' + (ctx ? '<div class="prosp-card-ctx">' + ctx + '</div>' : '') + '</div>';
+  }
+  function renderHistoricoProsp() {
+    const termo = (document.getElementById("prosp-busca-historico").value || "").trim().toLowerCase();
+    const corpo = document.getElementById("prosp-historico-corpo");
+    const linhas = listaEnvios.filter(e => !termo || (e.email || "").toLowerCase().includes(termo));
+    if (linhas.length === 0) { corpo.innerHTML = '<tr><td colspan="4" class="texto-vazio">Nenhum envio ainda.</td></tr>'; return; }
+    corpo.innerHTML = linhas.slice(0, 300).map(e => {
+      const ok = e.status === "ok";
+      const quando = e.data ? new Date(e.data).toLocaleString("pt-BR") : "";
+      const status = ok
+        ? '<span class="pill" style="background:var(--fundo-sucesso);color:var(--sucesso)">ok</span>'
+        : '<span class="pill" style="background:var(--fundo-erro);color:var(--erro)" title="' + escaparAtributo(e.erro || "") + '">erro</span>';
+      return '<tr><td>' + escaparAtributo(e.email || "") + '</td><td>' + escaparAtributo(e.assunto || "") + '</td><td>' + escaparAtributo(quando) + '</td><td>' + status + '</td></tr>';
+    }).join("");
+  }
+
+  async function carregarProspeccao() {
+    if (!Array.isArray(listaMarcas) || listaMarcas.length === 0) { await carregarMarcas(); }
+    const enviosRes = await sb.from("email_envios").select("email,assunto,status,erro,data").order("data", { ascending: false });
+    const optoutRes = await sb.from("email_optout").select("email");
+    const faltando = [];
+    if (enviosRes.error) faltando.push("email_envios");
+    if (optoutRes.error) faltando.push("email_optout");
+    listaEnvios = enviosRes.data || [];
+    listaOptout = (optoutRes.data || []).map(o => (o.email || "").toLowerCase());
+
+    const enviosExiste = !enviosRes.error, optoutExiste = !optoutRes.error;
+    const comEmail = listaMarcas.filter(temEmailLead);
+    const enviosOk = listaEnvios.filter(e => e.status === "ok").length;
+    document.getElementById("prosp-total-enviados").textContent = (enviosExiste && enviosOk > 0) ? enviosOk : "—";
+
+    const jaReceberam = listaMarcas.filter(m => m.enviado_em).length;
+    const aEnviar = comEmail.filter(m => !m.enviado_em).length;
+    const falhas = enviosExiste ? listaEnvios.filter(e => e.status === "erro").length : "—";
+    const descad = optoutExiste ? listaOptout.length : "—";
+    document.getElementById("prosp-cards").innerHTML =
+      cardProsp(comEmail.length, "Marcas com e-mail", "#74907B") +
+      cardProsp(aEnviar, "A enviar", "#B08900", "ainda não receberam") +
+      cardProsp(jaReceberam, "Já receberam", "#3F8557") +
+      cardProsp(falhas, "Falhas", "#C4453C") +
+      cardProsp(descad, "Descadastrados", "#5B7C99");
+
+    const avisoEl = document.getElementById("prosp-aviso-tabelas");
+    if (comEmail.length === 0) {
+      avisoEl.hidden = false;
+      avisoEl.innerHTML = 'Sua base ainda está sem e-mail. <button type="button" class="botao botao-secundario" id="prosp-ir-marcas">Ir pra Marcas</button> pra cadastrar ou importar a planilha primeiro.';
+      const b = document.getElementById("prosp-ir-marcas"); if (b) b.addEventListener("click", () => abrirAba("marcas"));
+    } else if (faltando.length) {
+      avisoEl.hidden = false;
+      avisoEl.innerHTML = 'Faltam tabelas no banco (' + faltando.join(", ") + '). Rode o <strong>disparo.sql</strong> no Supabase. O resto da aba continua funcionando.';
+    } else {
+      avisoEl.hidden = true;
+    }
+
+    popularDestinos();
+    updateContagemDestino();
+    updatePreview();
+    renderHistoricoProsp();
+  }
+
+  // Chama a Edge Function do Supabase que manda pelo Resend.
+  async function chamarEnviarEmails(destinatarios, assunto, html) {
+    const { data: sess } = await sb.auth.getSession();
+    const token = sess && sess.session ? sess.session.access_token : "";
+    const resp = await fetch(SUPABASE_URL + "/functions/v1/enviar-emails", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token },
+      body: JSON.stringify({ destinatarios: destinatarios, assunto: assunto, html: html })
+    });
+    if (!resp.ok) {
+      let msg = "";
+      try { msg = (await resp.json()).erro || ""; } catch (e) { /* sem corpo */ }
+      throw new Error(msg || ("status " + resp.status));
+    }
+    return await resp.json();
+  }
+
+  // Modo rascunho (plano B, sem Resend): abre a fila manual.
+  function abrirFilaRascunho(destinatarios, assunto) {
+    const cont = document.getElementById("prosp-fila-conteudo");
+    document.getElementById("prosp-fila-titulo").textContent = "Fila de envio manual (" + destinatarios.length + ")";
+    cont.innerHTML = destinatarios.map((m, i) => {
+      const assuntoR = aplicarVariaveisTexto(assunto, m);
+      return '<div class="prosp-fila-item" data-fila-i="' + i + '">' +
+        '<div class="prosp-fila-marca">' + escaparAtributo(m.marca || "") + '</div>' +
+        '<div class="prosp-fila-email">' + escaparAtributo(m.email) + ' · ' + escaparAtributo(assuntoR) + '</div>' +
+        '<div class="prosp-fila-acoes">' +
+          '<button type="button" class="botao botao-secundario" data-fila-copiar="' + i + '">Copiar texto</button>' +
+          '<button type="button" class="botao botao-secundario" data-fila-gmail="' + i + '">Abrir no Gmail</button>' +
+          '<button type="button" class="botao botao-principal" data-fila-feita="' + i + '">Marcar como enviada</button>' +
+        '</div></div>';
+    }).join("");
+    cont.querySelectorAll("[data-fila-copiar]").forEach(b => b.addEventListener("click", () => {
+      const m = destinatarios[+b.dataset.filaCopiar];
+      navigator.clipboard.writeText(textoEmailParaMarca(m)).then(() => { b.textContent = "Copiado!"; setTimeout(() => b.textContent = "Copiar texto", 1200); });
+    }));
+    cont.querySelectorAll("[data-fila-gmail]").forEach(b => b.addEventListener("click", () => {
+      const m = destinatarios[+b.dataset.filaGmail];
+      window.open(gmailUrl(m.email, aplicarVariaveisTexto(assunto, m), textoEmailParaMarca(m)), "_blank");
+    }));
+    cont.querySelectorAll("[data-fila-feita]").forEach(b => b.addEventListener("click", async () => {
+      const m = destinatarios[+b.dataset.filaFeita];
+      await salvarSeguro("email_envios", sb.from("email_envios").insert({ email: m.email, assunto: assunto, status: "ok" }));
+      if (m.id) { await salvarSeguro("marcas", sb.from("marcas").update({ enviado_em: hojeISO() }).eq("id", m.id)); m.enviado_em = hojeISO(); }
+      const item = b.closest(".prosp-fila-item");
+      item.classList.add("feita");
+      item.querySelector(".prosp-fila-acoes").innerHTML = '<span style="color:var(--sucesso);font-weight:600;">Enviada ✓</span>';
+    }));
+    document.getElementById("modal-prosp-fila").hidden = false;
+  }
+
+  async function enviarTesteProsp() {
+    if (!corpoProspPreenchido()) { alert("Escreva o corpo do e-mail antes de mandar o teste."); return; }
+    const assunto = document.getElementById("prosp-assunto").value.trim() || "(teste) sem assunto";
+    const html = getHtmlBase();
+    if (metodoEnvio === "rascunho") { abrirFilaRascunho([{ marca: "Marca Exemplo", email: MEU_EMAIL }], assunto); return; }
+    let r;
+    try { r = await chamarEnviarEmails([{ email: MEU_EMAIL, nome: "Talissa", marca: "Marca Exemplo" }], assunto, html); }
+    catch (e) { alert("Não consegui enviar o teste: " + e.message + "\n\nSe o Resend ainda não foi configurado, use o modo Rascunho (Gmail)."); return; }
+    if (r.erro) { alert("Não consegui enviar o teste: " + r.erro); return; }
+    alert("Teste enviado pra " + MEU_EMAIL + "! Abra seu e-mail (de preferência no celular) e confira se ficou do jeito que você quer.");
+    carregarProspeccao();
+  }
+
+  async function dispararProsp() {
+    if (!corpoProspPreenchido()) { alert("Escreva o corpo do e-mail."); return; }
+    const assunto = document.getElementById("prosp-assunto").value.trim();
+    if (!assunto) { alert("Escreva um assunto."); return; }
+    const html = getHtmlBase();
+    if (modoEscrita === "html" && !/sair/i.test(document.getElementById("prosp-corpo-html").value)) {
+      if (!confirm("Seu HTML não tem o rodapé do SAIR (descadastro). Quer disparar mesmo assim?")) return;
+    }
+    const modo = document.getElementById("prosp-destino").value;
+    let destinatarios = destinatariosProsp();
+    if (modo === "selecionadas" && destinatarios.length === 0) {
+      if (confirm("Você não tem nenhuma marca selecionada. Quer ir pra aba Marcas selecionar?")) abrirAba("marcas");
+      return;
+    }
+    destinatarios = destinatarios.filter(m => !listaOptout.includes((m.email || "").toLowerCase()));
+    if (document.getElementById("prosp-pular-recebidos").checked) {
+      const jaReceberam = new Set(listaEnvios.filter(e => e.status === "ok" && (e.assunto || "") === assunto).map(e => (e.email || "").toLowerCase()));
+      destinatarios = destinatarios.filter(m => !jaReceberam.has((m.email || "").toLowerCase()));
+    }
+    if (destinatarios.length === 0) { alert("Não sobrou ninguém pra enviar (todos já receberam este assunto ou estão no descadastro)."); return; }
+
+    if (metodoEnvio === "rascunho") { abrirFilaRascunho(destinatarios, assunto); return; }
+
+    const nomeLista = document.getElementById("prosp-destino").selectedOptions[0].textContent;
+    if (!confirm("Vai para " + destinatarios.length + " marcas, da lista \"" + nomeLista + "\", e não dá pra desfazer.\n\nContinuar?")) return;
+
+    const progresso = document.getElementById("prosp-progresso");
+    const fill = document.getElementById("prosp-progresso-fill");
+    const txt = document.getElementById("prosp-progresso-texto");
+    const resultado = document.getElementById("prosp-resultado");
+    progresso.hidden = false; resultado.hidden = true; fill.style.width = "0%";
+    document.getElementById("prosp-disparar").disabled = true;
+
+    let enviados = 0, falhas = 0, pulados = 0, cotaAcabou = false, erroFatal = "";
+    const lotes = [];
+    for (let i = 0; i < destinatarios.length; i += 100) lotes.push(destinatarios.slice(i, i + 100));
+    for (let li = 0; li < lotes.length; li++) {
+      const payload = lotes[li].map(m => ({ email: m.email, nome: primeiroNome(m.marca), marca: m.marca || "" }));
+      let r;
+      try { r = await chamarEnviarEmails(payload, assunto, html); }
+      catch (e) { erroFatal = e.message; break; }
+      if (r.erro) { erroFatal = r.erro; break; }
+      enviados += r.enviados || 0; falhas += r.falhas || 0; pulados += r.pulados || 0;
+      const feitos = Math.min((li + 1) * 100, destinatarios.length);
+      fill.style.width = Math.round(feitos / destinatarios.length * 100) + "%";
+      txt.textContent = feitos + " de " + destinatarios.length + " processados...";
+      if (r.cotaAcabou) { cotaAcabou = true; break; }
+    }
+
+    const idsEnviados = destinatarios.filter(m => m.id).map(m => m.id);
+    if (idsEnviados.length) {
+      await salvarSeguro("marcas", sb.from("marcas").update({ enviado_em: hojeISO() }).in("id", idsEnviados));
+      destinatarios.forEach(m => { if (m.id) m.enviado_em = hojeISO(); });
+    }
+
+    resultado.hidden = false;
+    if (cotaAcabou) {
+      resultado.innerHTML = '<strong>A cota diária do Resend acabou.</strong> Foram ' + enviados + ' enviados. Volte amanhã, cole o mesmo assunto e o mesmo texto, deixe marcada a caixinha "pular quem já recebeu este assunto", e dispare de novo: ele manda só pros que faltaram.';
+    } else if (erroFatal) {
+      resultado.innerHTML = '<strong>Deu um problema:</strong> ' + escaparAtributo(erroFatal) + '. Enviados até aqui: ' + enviados + '.';
+    } else {
+      resultado.textContent = "Pronto! Enviados: " + enviados + " · Falhas: " + falhas + " · Pulados: " + pulados + ".";
+    }
+    document.getElementById("prosp-disparar").disabled = false;
+    await carregarProspeccao();
+
+    if (modo === "selecionadas" && !erroFatal) {
+      if (confirm("Disparo concluído. Quer limpar a seleção das marcas? (às vezes você manda a mesma lista de novo, então só limpo se quiser)")) {
+        const sel = listaMarcas.filter(m => m.selecionada);
+        if (sel.length) {
+          await salvarSeguro("marcas", sb.from("marcas").update({ selecionada: false }).in("id", sel.map(m => m.id)));
+          sel.forEach(m => m.selecionada = false);
+          atualizarContagemSelecao();
+        }
+      }
+    }
+  }
+
+  // ---- Fios da aba Prospecção (uma vez só) ----
+  document.getElementById("prosp-destino").addEventListener("change", updateContagemDestino);
+  ["prosp-assunto", "prosp-corpo-texto", "prosp-corpo-html", "prosp-botao-texto", "prosp-botao-link"].forEach(id => {
+    const el = document.getElementById(id); if (el) el.addEventListener("input", updatePreview);
+  });
+  document.querySelectorAll("[data-prosp-modo]").forEach(b => b.addEventListener("click", () => {
+    modoEscrita = b.dataset.prospModo;
+    document.querySelectorAll("[data-prosp-modo]").forEach(x => x.classList.toggle("ativo", x === b));
+    document.getElementById("prosp-modo-texto").hidden = modoEscrita !== "texto";
+    document.getElementById("prosp-modo-html").hidden = modoEscrita !== "html";
+    updatePreview();
+  }));
+  document.querySelectorAll("[data-prosp-metodo]").forEach(b => b.addEventListener("click", () => {
+    metodoEnvio = b.dataset.prospMetodo;
+    document.querySelectorAll("[data-prosp-metodo]").forEach(x => x.classList.toggle("ativo", x === b));
+    document.getElementById("prosp-metodo-nota").textContent = metodoEnvio === "resend"
+      ? "Envio automático pelo Resend (precisa estar configurado)."
+      : "Monta o e-mail e abre o Gmail pra você enviar na mão, um por um. Funciona sem Resend.";
+  }));
+  document.getElementById("prosp-modelo-pronto").addEventListener("click", () => {
+    const corpo = document.getElementById("prosp-corpo-texto").value || "Oi {{nome}}, tudo bem?\n\nEscreva aqui o seu e-mail.";
+    document.getElementById("prosp-corpo-html").value = montarEmailTexto(corpo, document.getElementById("prosp-botao-texto").value.trim(), document.getElementById("prosp-botao-link").value.trim());
+    updatePreview();
+  });
+  document.getElementById("prosp-ver-fullscreen").addEventListener("click", () => {
+    const exemplo = { marca: "Marca Exemplo" };
+    document.getElementById("prosp-fs-assunto").textContent = aplicarVariaveisTexto(document.getElementById("prosp-assunto").value.trim(), exemplo) || "(assunto)";
+    document.getElementById("prosp-fs-nome").textContent = "Talissa Müller";
+    document.getElementById("prosp-fs-email").textContent = MEU_EMAIL;
+    document.getElementById("prosp-fs-corpo").innerHTML = aplicarVariaveis(getHtmlBase(), exemplo);
+    document.getElementById("modal-prosp-fullscreen").hidden = false;
+  });
+  document.getElementById("prosp-busca-historico").addEventListener("input", renderHistoricoProsp);
+  document.getElementById("prosp-enviar-teste").addEventListener("click", enviarTesteProsp);
+  document.getElementById("prosp-disparar").addEventListener("click", dispararProsp);
+  document.getElementById("prosp-metodo-nota").textContent = "Envio automático pelo Resend (precisa estar configurado).";
 
   // ============================================================================
   // ABA — MENSAGENS (modelos de texto pra copiar e colar pro cliente)
