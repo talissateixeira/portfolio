@@ -5,6 +5,14 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="noindex, nofollow">
 <title>Painel | Talissa Müller</title>
+<!-- PWA / notificações push no celular -->
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#262626">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Painel">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" href="icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -605,6 +613,33 @@
   }
   .fav-toast.visivel { opacity: 1; transform: translateX(-50%) translateY(0); }
 
+  /* ===== Card de ativar notificações (push) ===== */
+  .bloco-push {
+    display: flex; align-items: center; gap: 14px;
+    padding: 14px 16px; margin: 0 0 20px;
+    background: var(--fundo-acento);
+    border: 1px solid rgba(116, 144, 123, 0.3);
+    border-radius: var(--raio);
+  }
+  .bloco-push[hidden] { display: none; }
+  .bloco-push.ativado { background: var(--fundo-sucesso); border-color: rgba(116, 144, 123, 0.35); }
+  .bloco-push-icone {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 38px; height: 38px; flex-shrink: 0;
+    border-radius: 50%;
+    background: var(--branco);
+    color: var(--acento-escuro);
+  }
+  .bloco-push-icone .icone { width: 19px; height: 19px; }
+  .bloco-push-texto { flex: 1; min-width: 0; }
+  .bloco-push-texto strong { font-size: 0.86rem; display: block; color: var(--preto); }
+  .bloco-push-texto p { font-size: 0.78rem; color: var(--texto-suave); margin: 2px 0 0; line-height: 1.35; }
+  .bloco-push #btn-ativar-push { flex-shrink: 0; white-space: nowrap; }
+  @media (max-width: 560px) {
+    .bloco-push { flex-wrap: wrap; }
+    .bloco-push #btn-ativar-push { width: 100%; justify-content: center; }
+  }
+
   /* ===== CALENDÁRIO ===== */
   .calendario-topo { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; flex-wrap: wrap; gap: 10px; }
   .calendario-nav { display: flex; align-items: center; gap: 10px; }
@@ -1099,6 +1134,15 @@
             <span class="icone"><svg viewBox="0 0 24 24"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg></span>
           </button>
         </div>
+      </div>
+
+      <div class="bloco-push" id="bloco-push" hidden>
+        <span class="bloco-push-icone"><span class="icone"><svg viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></span></span>
+        <div class="bloco-push-texto">
+          <strong>Notificações das tarefas do dia</strong>
+          <p id="status-push">Carregando…</p>
+        </div>
+        <button type="button" class="botao botao-principal" id="btn-ativar-push" hidden>Ativar notificações</button>
       </div>
 
       <div class="cartoes-resumo-topo" id="cartoes-resumo-topo"></div>
@@ -2311,6 +2355,102 @@
   }
 
   carregarFavoritos();
+
+  // ---- Notificações push (PWA) ----
+  // Chave PÚBLICA VAPID (pode ficar no site; a privada fica só no Supabase).
+  const VAPID_PUBLICA = "BBoRD8_Vd5fS2uNR9tAIfAylSC9srpVGPPhit5nPjLwv0pipQW2X-OTGoMY270Zx0S_TKbEaloSpbG6qVcVYlK8";
+
+  function base64ParaUint8(base64) {
+    const preenchimento = "=".repeat((4 - (base64.length % 4)) % 4);
+    const b64 = (base64 + preenchimento).replace(/-/g, "+").replace(/_/g, "/");
+    const bruto = atob(b64);
+    const arr = new Uint8Array(bruto.length);
+    for (let i = 0; i < bruto.length; i++) arr[i] = bruto.charCodeAt(i);
+    return arr;
+  }
+
+  const pushSuportado = "serviceWorker" in navigator && "PushManager" in window && "Notification" in window;
+  const ehIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+  const blocoPush = document.getElementById("bloco-push");
+  const statusPush = document.getElementById("status-push");
+  const botaoPush = document.getElementById("btn-ativar-push");
+  let registroSW = null;
+
+  async function registrarSW() {
+    if (!("serviceWorker" in navigator)) return null;
+    try { registroSW = await navigator.serviceWorker.register("sw.js"); return registroSW; }
+    catch (erro) { return null; }
+  }
+
+  function atualizarUIPush() {
+    if (!blocoPush) return;
+    blocoPush.hidden = false;
+    blocoPush.classList.remove("ativado");
+    botaoPush.hidden = true;
+    botaoPush.disabled = false;
+
+    if (!pushSuportado) {
+      statusPush.textContent = ehIOS
+        ? "No iPhone: toque em Compartilhar → “Adicionar à Tela de Início”, abra o painel pelo ícone e volte aqui pra ativar."
+        : "Este navegador não suporta notificações push.";
+      return;
+    }
+    if (Notification.permission === "granted") {
+      blocoPush.classList.add("ativado");
+      statusPush.textContent = "Ativadas ✓ Você recebe as tarefas do dia toda manhã.";
+      botaoPush.textContent = "Enviar um teste";
+      botaoPush.dataset.modo = "teste";
+      botaoPush.hidden = false;
+    } else if (Notification.permission === "denied") {
+      statusPush.textContent = "As notificações estão bloqueadas. Libere nos Ajustes do iPhone: Notificações → Painel.";
+    } else {
+      statusPush.textContent = "Receba as tarefas do dia como notificação aqui no celular.";
+      botaoPush.textContent = "Ativar notificações";
+      botaoPush.dataset.modo = "ativar";
+      botaoPush.hidden = false;
+    }
+  }
+
+  async function ativarPush() {
+    const permissao = await Notification.requestPermission();
+    if (permissao !== "granted") { atualizarUIPush(); return; }
+    if (!registroSW) await registrarSW();
+    const assinatura = await registroSW.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey: base64ParaUint8(VAPID_PUBLICA)
+    });
+    const j = assinatura.toJSON();
+    await salvarSeguro("push_subscriptions", sb.from("push_subscriptions").upsert({
+      endpoint: j.endpoint,
+      p256dh: j.keys.p256dh,
+      auth: j.keys.auth,
+      user_agent: navigator.userAgent,
+      updated_at: new Date().toISOString()
+    }, { onConflict: "endpoint" }));
+    atualizarUIPush();
+    mostrarToastFav("Notificações ativadas! ✓");
+  }
+
+  if (botaoPush) {
+    botaoPush.addEventListener("click", async () => {
+      if (botaoPush.dataset.modo === "teste") {
+        if (!registroSW) await registrarSW();
+        if (registroSW) {
+          registroSW.showNotification("Tudo certo! ✓", {
+            body: "É assim que as tarefas do dia vão chegar.",
+            icon: "icon-192.png", badge: "icon-192.png"
+          });
+        }
+        return;
+      }
+      botaoPush.disabled = true;
+      try { await ativarPush(); }
+      catch (erro) { mostrarToastFav("Não consegui ativar: " + erro.message); atualizarUIPush(); }
+    });
+  }
+
+  if (pushSuportado) registrarSW();
+  atualizarUIPush();
 
   function formatarMoeda(valor) {
     return (valor || 0).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });

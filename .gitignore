@@ -1,1 +1,5 @@
 .DS_Store
+
+# Segredos locais — NUNCA versionar (repo é público)
+*.local.txt
+NOTIFICACOES-SEGREDOS.local.txt
