@@ -838,6 +838,14 @@
   .painel-meus-dados-resumo { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 0.82rem; color: var(--texto-suave); }
   .painel-meus-dados-resumo strong { color: var(--texto); font-weight: 600; }
   .painel-meus-dados-resumo span { min-width: 0; overflow-wrap: anywhere; }
+
+  /* Card de detalhe do lead: campos em grade (rótulo em cima, valor embaixo) */
+  .lead-info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 14px 20px; }
+  .lead-info-item { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+  .lead-info-item.largo { grid-column: 1 / -1; }
+  .lead-info-rot { font-size: 0.66rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: var(--texto-suave); }
+  .lead-info-val { font-size: 0.88rem; color: var(--texto); overflow-wrap: anywhere; }
+  .lead-info-val strong { font-weight: 600; }
   .lead-link { color: var(--acento-escuro); text-decoration: underline; text-underline-offset: 2px; font-weight: 600; }
   .lead-link:hover { color: var(--acento); }
   .grade-mensagens { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px; }
@@ -1900,7 +1908,7 @@
       <h3 class="modal-titulo" id="lead-detalhe-titulo" style="margin-bottom:0;"></h3>
       <button type="button" class="botao botao-secundario" id="botao-editar-lead-detalhe">Editar</button>
     </div>
-    <div id="lead-detalhe-info" class="painel-meus-dados-resumo" style="margin-bottom:18px;"></div>
+    <div id="lead-detalhe-info" class="lead-info-grid" style="margin-bottom:20px;"></div>
 
     <div class="painel-titulo-linha painel-titulo-linha-compacta" style="margin-top:6px;">
       <div class="painel-titulo">Propostas ligadas</div>
@@ -3588,8 +3596,10 @@
       ["Próximo follow-up", lead.proximo_contato ? formatarData(lead.proximo_contato) : "—"]
     ];
     document.getElementById("lead-detalhe-info").innerHTML =
-      linhasInfo.map(([rotulo, valor]) => "<span>" + rotulo + ": <strong>" + valor + "</strong></span>").join("") +
-      (lead.obs ? '<span style="width:100%;">Obs: <strong>' + escaparAtributo(lead.obs) + "</strong></span>" : "");
+      linhasInfo.map(([rotulo, valor]) =>
+        '<div class="lead-info-item"><span class="lead-info-rot">' + rotulo + '</span><span class="lead-info-val">' + valor + "</span></div>"
+      ).join("") +
+      (lead.obs ? '<div class="lead-info-item largo"><span class="lead-info-rot">Obs</span><span class="lead-info-val">' + escaparAtributo(lead.obs) + "</span></div>" : "");
 
     document.getElementById("atividade-descricao").value = "";
     const [atividades, campanhasDoLead] = await Promise.all([
