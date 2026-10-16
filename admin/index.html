@@ -1274,7 +1274,7 @@
         <table class="tabela">
           <thead>
             <tr>
-              <th>Marca</th><th>Nicho</th><th>Instagram</th><th>E-mail</th><th>Telefone</th><th>Situação</th><th>Observação</th><th>Último contato</th><th>Próximo follow-up</th><th>Valor potencial</th><th></th>
+              <th></th><th>Marca</th><th>Nicho</th><th>Instagram</th><th>E-mail</th><th>Telefone</th><th>Situação</th><th>Observação</th><th>Último contato</th><th>Próximo follow-up</th><th>Valor potencial</th><th></th>
             </tr>
           </thead>
           <tbody id="corpo-tabela-marcas"></tbody>
@@ -3286,9 +3286,11 @@
 
   function renderTabelaMarcas() {
     const filtradas = leadsFiltrados();
+    // Favoritas sempre no topo (sort estável mantém a ordem dentro de cada grupo).
+    filtradas.sort((a, b) => (b.favorita ? 1 : 0) - (a.favorita ? 1 : 0));
     const corpo = document.getElementById("corpo-tabela-marcas");
     if (filtradas.length === 0) {
-      corpo.innerHTML = '<tr><td colspan="11" class="texto-vazio">Nenhum lead encontrado.</td></tr>';
+      corpo.innerHTML = '<tr><td colspan="12" class="texto-vazio">Nenhum lead encontrado.</td></tr>';
       return;
     }
     // Ignora valores "placeholder" (ex.: "não encontrado", "n/a", "-") que a
@@ -3326,7 +3328,8 @@
     }
     corpo.innerHTML = filtradas.map(m => {
       const cor = CORES_ESTAGIO_LEAD[m.situacao] || "cinza";
-      return '<tr class="linha-clicavel" data-id="' + m.id + '">' +
+      return '<tr class="linha-clicavel' + (m.favorita ? " favorita" : "") + '" data-id="' + m.id + '">' +
+        '<td><button type="button" class="estrela-btn' + (m.favorita ? " marcada" : "") + '" data-fav-lead="' + m.id + '" data-favorita="' + !!m.favorita + '" title="Fixar no topo">★</button></td>' +
         "<td>" + escaparAtributo(m.marca) + "</td>" +
         "<td>" + (m.nicho ? escaparAtributo(m.nicho) : "—") + "</td>" +
         "<td>" + instaCelulaLead(m) + "</td>" +
@@ -3344,8 +3347,18 @@
     }).join("");
     corpo.querySelectorAll("tr[data-id]").forEach(linha => {
       linha.addEventListener("click", (evento) => {
-        if (evento.target.closest("select") || evento.target.closest("[data-editar-lead]") || evento.target.closest("a")) return;
+        if (evento.target.closest("select") || evento.target.closest("[data-editar-lead]") || evento.target.closest("a") || evento.target.closest(".estrela-btn")) return;
         abrirDetalheLead(listaMarcas.find(m => m.id === linha.dataset.id));
+      });
+    });
+    corpo.querySelectorAll("[data-fav-lead]").forEach(botao => {
+      botao.addEventListener("click", async (evento) => {
+        evento.stopPropagation();
+        const novoValor = botao.dataset.favorita !== "true";
+        await salvarSeguro("marcas", sb.from("marcas").update({ favorita: novoValor }).eq("id", botao.dataset.favLead));
+        const lead = listaMarcas.find(m => m.id === botao.dataset.favLead);
+        if (lead) lead.favorita = novoValor;
+        renderLeadsAtual();
       });
     });
     corpo.querySelectorAll("[data-editar-lead]").forEach(botao => {
