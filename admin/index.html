@@ -1435,6 +1435,14 @@
             <button type="button" class="prosp-modo-btn" data-prosp-modo="html">HTML</button>
           </div>
 
+          <div id="prosp-estilo-bloco" style="margin:4px 0 2px;">
+            <label style="display:block;margin-bottom:4px;">Estilo do e-mail</label>
+            <div class="prosp-modo-toggle">
+              <button type="button" class="prosp-modo-btn ativo" data-prosp-estilo="pessoal">Pessoal (parece Gmail)</button>
+              <button type="button" class="prosp-modo-btn" data-prosp-estilo="visual">Com botão/visual</button>
+            </div>
+          </div>
+
           <div class="campo-form">
             <label>Assunto</label>
             <input type="text" id="prosp-assunto" class="campo-busca" placeholder="Ex: Parceria de conteúdo com a {{marca}}">
@@ -1457,9 +1465,10 @@
           </div>
 
           <div class="linha-form-2">
-            <div class="campo-form"><label>Botão (opcional): texto</label><input type="text" id="prosp-botao-texto" class="campo-busca" placeholder="Ex: Ver meu portfólio"></div>
-            <div class="campo-form"><label>Botão: link</label><input type="text" id="prosp-botao-link" class="campo-busca" placeholder="https://talissamuller.com"></div>
+            <div class="campo-form"><label>Botão/link (opcional): texto</label><input type="text" id="prosp-botao-texto" class="campo-busca" placeholder="Ex: Ver meu portfólio"></div>
+            <div class="campo-form"><label>Botão/link: endereço</label><input type="text" id="prosp-botao-link" class="campo-busca" placeholder="https://talissamuller.com"></div>
           </div>
+          <div class="campo-form"><label>Foto na assinatura (link, opcional)</label><input type="text" id="prosp-foto-link" class="campo-busca" placeholder="https://talissamuller.com/foto-email.jpg"></div>
 
           <div class="prosp-acoes">
             <button type="button" class="botao botao-secundario" id="prosp-enviar-teste">Enviar teste pra mim</button>
@@ -6237,6 +6246,7 @@
   let listaEnvios = [], listaOptout = [];
   let modoEscrita = "texto";   // "texto" ou "html"
   let metodoEnvio = "resend";  // "resend" ou "rascunho"
+  let estiloEmail = "pessoal"; // "pessoal" (parece Gmail) ou "visual" (card + botão)
 
   const RODAPE_SAIR = '<div style="margin-top:28px;padding-top:16px;border-top:1px solid #eeeeee;font-size:12px;color:#999999;line-height:1.5;">Se não quiser mais receber estes e-mails, é só responder esta mensagem com a palavra SAIR.</div>';
 
@@ -6255,18 +6265,37 @@
   function aplicarVariaveis(html, marca) {
     return (html || "").replace(/\{\{nome\}\}/g, escaparHtmlEmail(primeiroNome(marca.marca || ""))).replace(/\{\{marca\}\}/g, escaparHtmlEmail(marca.marca || ""));
   }
-  // Monta o HTML limpo do modo "texto fácil".
-  function montarEmailTexto(corpoTexto, botaoTexto, botaoLink) {
+  // Foto redonda de assinatura (quando há um link de foto).
+  function assinaturaFotoHtml(fotoLink) {
+    const foto = (fotoLink || "").trim();
+    if (!foto) return "";
+    return '<div style="margin-top:22px;"><img src="' + escaparHtmlEmail(foto) + '" width="54" height="54" alt="" style="width:54px;height:54px;border-radius:50%;object-fit:cover;display:block;"></div>';
+  }
+  // Monta o HTML do modo "texto fácil", no estilo escolhido.
+  function montarEmailTexto(corpoTexto, botaoTexto, botaoLink, fotoLink) {
     const corpo = autolink(escaparHtmlEmail(corpoTexto)).replace(/\n/g, "<br>");
+    const assinatura = assinaturaFotoHtml(fotoLink);
+
+    if (estiloEmail === "pessoal") {
+      // Parece um e-mail escrito na mão no Gmail: sem quadro, sem botão colorido.
+      let link = "";
+      if (botaoTexto && botaoLink) {
+        link = '<div style="margin:14px 0;"><a href="' + escaparHtmlEmail(botaoLink) + '" style="color:#1155cc;">' + escaparHtmlEmail(botaoTexto) + '</a></div>';
+      }
+      const rodape = '<div style="margin-top:22px;font-size:12px;color:#999999;">Se não quiser mais receber, é só responder com SAIR.</div>';
+      return '<div style="font-family:-apple-system,\'Segoe UI\',Roboto,Arial,sans-serif;font-size:14px;line-height:1.6;color:#222222;">' + corpo + link + assinatura + rodape + '</div>';
+    }
+
+    // Estilo "visual": quadro centralizado com o botão colorido.
     let botao = "";
     if (botaoTexto && botaoLink) {
       botao = '<div style="margin:26px 0;"><a href="' + escaparHtmlEmail(botaoLink) + '" style="display:inline-block;background:#74907B;color:#ffffff;text-decoration:none;padding:12px 24px;border-radius:10px;font-weight:600;">' + escaparHtmlEmail(botaoTexto) + '</a></div>';
     }
-    return '<div style="max-width:560px;margin:0 auto;font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.6;color:#3A342E;background:#ffffff;padding:8px 4px;">' + corpo + botao + RODAPE_SAIR + '</div>';
+    return '<div style="max-width:560px;margin:0 auto;font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.6;color:#3A342E;background:#ffffff;padding:8px 4px;">' + corpo + botao + assinatura + RODAPE_SAIR + '</div>';
   }
   function getHtmlBase() {
     if (modoEscrita === "html") return document.getElementById("prosp-corpo-html").value;
-    return montarEmailTexto(document.getElementById("prosp-corpo-texto").value, document.getElementById("prosp-botao-texto").value.trim(), document.getElementById("prosp-botao-link").value.trim());
+    return montarEmailTexto(document.getElementById("prosp-corpo-texto").value, document.getElementById("prosp-botao-texto").value.trim(), document.getElementById("prosp-botao-link").value.trim(), document.getElementById("prosp-foto-link").value.trim());
   }
   function corpoProspPreenchido() {
     return (modoEscrita === "html" ? document.getElementById("prosp-corpo-html").value : document.getElementById("prosp-corpo-texto").value).trim().length > 0;
@@ -6552,7 +6581,7 @@
 
   // ---- Fios da aba Prospecção (uma vez só) ----
   document.getElementById("prosp-destino").addEventListener("change", updateContagemDestino);
-  ["prosp-assunto", "prosp-corpo-texto", "prosp-corpo-html", "prosp-botao-texto", "prosp-botao-link"].forEach(id => {
+  ["prosp-assunto", "prosp-corpo-texto", "prosp-corpo-html", "prosp-botao-texto", "prosp-botao-link", "prosp-foto-link"].forEach(id => {
     const el = document.getElementById(id); if (el) el.addEventListener("input", updatePreview);
   });
   document.querySelectorAll("[data-prosp-modo]").forEach(b => b.addEventListener("click", () => {
@@ -6560,6 +6589,12 @@
     document.querySelectorAll("[data-prosp-modo]").forEach(x => x.classList.toggle("ativo", x === b));
     document.getElementById("prosp-modo-texto").hidden = modoEscrita !== "texto";
     document.getElementById("prosp-modo-html").hidden = modoEscrita !== "html";
+    document.getElementById("prosp-estilo-bloco").hidden = modoEscrita !== "texto";
+    updatePreview();
+  }));
+  document.querySelectorAll("[data-prosp-estilo]").forEach(b => b.addEventListener("click", () => {
+    estiloEmail = b.dataset.prospEstilo;
+    document.querySelectorAll("[data-prosp-estilo]").forEach(x => x.classList.toggle("ativo", x === b));
     updatePreview();
   }));
   document.querySelectorAll("[data-prosp-metodo]").forEach(b => b.addEventListener("click", () => {
@@ -6571,7 +6606,7 @@
   }));
   document.getElementById("prosp-modelo-pronto").addEventListener("click", () => {
     const corpo = document.getElementById("prosp-corpo-texto").value || "Oi {{nome}}, tudo bem?\n\nEscreva aqui o seu e-mail.";
-    document.getElementById("prosp-corpo-html").value = montarEmailTexto(corpo, document.getElementById("prosp-botao-texto").value.trim(), document.getElementById("prosp-botao-link").value.trim());
+    document.getElementById("prosp-corpo-html").value = montarEmailTexto(corpo, document.getElementById("prosp-botao-texto").value.trim(), document.getElementById("prosp-botao-link").value.trim(), document.getElementById("prosp-foto-link").value.trim());
     updatePreview();
   });
   document.getElementById("prosp-ver-fullscreen").addEventListener("click", () => {
