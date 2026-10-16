@@ -849,7 +849,6 @@
   .lead-info-dica { font-size: 0.74rem; color: var(--texto-suave); margin: 0 0 16px; }
   .lead-link { color: var(--acento-escuro); text-decoration: underline; text-underline-offset: 2px; font-weight: 600; }
   .lead-obs-celula { display: inline-block; max-width: 220px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; vertical-align: middle; color: var(--texto-suave); }
-  .lead-tel-celula { white-space: nowrap; }
   .lead-link:hover { color: var(--acento); }
   .grade-mensagens { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px; }
   @media (max-width: 800px) { .grade-mensagens { grid-template-columns: 1fr; } }
@@ -3318,8 +3317,7 @@
     function telefoneCelulaLead(m) {
       const tel = valorUtilLead(m.telefone);
       if (!tel) return "—";
-      const limpo = tel.replace(/^\s*whatsapp:\s*/i, "").replace(/\s*\(wa\.me[^)]*\)\s*/i, "").trim();
-      return '<span class="lead-tel-celula">' + escaparAtributo(limpo) + "</span>";
+      return escaparAtributo(tel.replace(/^\s*whatsapp:\s*/i, "").replace(/\s*\(wa\.me[^)]*\)\s*/i, "").trim());
     }
     function obsCelulaLead(m) {
       const obs = (m.obs || "").trim();
