@@ -6254,7 +6254,16 @@
     return (s || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
   }
   function autolink(s) {
-    return s.replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" style="color:#5C7564;">$1</a>');
+    // 1) links http(s) viram clicáveis
+    s = s.replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" style="color:#5C7564;">$1</a>');
+    // 2) @usuario (do Instagram) vira link. Só quando vem depois de espaço,
+    //    início de linha ou "(", pra NÃO pegar o @ de um e-mail.
+    s = s.replace(/(^|[\s(>])@([A-Za-z0-9_.]{1,30})/g, function (m, pre, user) {
+      const limpo = user.replace(/\.+$/, "");          // tira ponto final (fim de frase)
+      const resto = user.slice(limpo.length);           // o que sobrou vira texto normal
+      return pre + '<a href="https://instagram.com/' + limpo + '" style="color:#5C7564;">@' + limpo + "</a>" + resto;
+    });
+    return s;
   }
   function primeiroNome(nomeMarca) {
     return (nomeMarca || "").trim().split(/\s+/)[0] || "";
