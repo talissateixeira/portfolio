@@ -1253,8 +1253,8 @@
           <button class="pill-filtro" data-filtro-prioridade-lead="alta">Prioridade alta</button>
         </div>
         <div class="barra-acoes-direita">
-          <button class="botao botao-secundario" id="botao-importar-marcas">Importar CSV</button>
-          <input type="file" id="arquivo-csv-marcas" accept=".csv,text/csv" hidden>
+          <button class="botao botao-secundario" id="botao-importar-marcas">Importar planilha</button>
+          <input type="file" id="arquivo-csv-marcas" accept=".csv,text/csv,.xlsx,.xls,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel" hidden>
           <button class="botao botao-secundario" id="botao-exportar-marcas">Baixar CSV</button>
           <button class="botao botao-principal" id="botao-add-marca">+ Novo lead</button>
         </div>
@@ -3700,11 +3700,53 @@
     if (campo.length > 0 || linha.length > 0) { linha.push(campo); linhas.push(linha); }
     return linhas;
   }
-  async function importarCSVMarcas(arquivo) {
-    let texto = await arquivo.text();
-    texto = texto.replace(/^﻿/, "");
-    const sep = detectarSeparadorCSV((texto.split(/\r?\n/)[0]) || "");
-    const linhas = parseCSV(texto, sep).filter(l => l.some(c => (c || "").trim() !== ""));
+  // Carrega a biblioteca de leitura de Excel (SheetJS) só quando for preciso,
+  // uma única vez — assim o painel não fica pesado à toa.
+  let sheetjsPromessa = null;
+  function carregarSheetJS() {
+    if (window.XLSX) return Promise.resolve();
+    if (sheetjsPromessa) return sheetjsPromessa;
+    sheetjsPromessa = new Promise((resolve, reject) => {
+      const script = document.createElement("script");
+      script.src = "https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js";
+      script.onload = () => resolve();
+      script.onerror = () => { sheetjsPromessa = null; reject(new Error("não consegui carregar a biblioteca de Excel")); };
+      document.head.appendChild(script);
+    });
+    return sheetjsPromessa;
+  }
+
+  // Ponto de entrada da importação: decide se o arquivo é Excel ou CSV e, nos
+  // dois casos, transforma numa lista de linhas (array de arrays) pro mesmo
+  // processamento.
+  async function importarArquivoMarcas(arquivo) {
+    const nome = (arquivo.name || "").toLowerCase();
+    const ehExcel = nome.endsWith(".xlsx") || nome.endsWith(".xls") || /spreadsheet|ms-excel/.test(arquivo.type || "");
+    let linhas;
+    if (ehExcel) {
+      try {
+        await carregarSheetJS();
+        const buffer = await arquivo.arrayBuffer();
+        const planilha = XLSX.read(buffer, { type: "array" });
+        const aba = planilha.Sheets[planilha.SheetNames[0]];
+        linhas = XLSX.utils.sheet_to_json(aba, { header: 1, raw: false, defval: "" });
+      } catch (erro) {
+        alert("Não consegui ler o Excel: " + erro.message + ".\nSe preferir, salve como CSV e tente de novo.");
+        return;
+      }
+    } else {
+      let texto = await arquivo.text();
+      texto = texto.replace(/^﻿/, "");
+      const sep = detectarSeparadorCSV((texto.split(/\r?\n/)[0]) || "");
+      linhas = parseCSV(texto, sep);
+    }
+    await importarMarcasDeLinhas(linhas);
+  }
+
+  async function importarMarcasDeLinhas(linhasBrutas) {
+    const linhas = (linhasBrutas || [])
+      .map(l => (l || []).map(c => (c == null ? "" : String(c))))
+      .filter(l => l.some(c => c.trim() !== ""));
     if (linhas.length < 2) { alert("A planilha parece vazia ou só tem o cabeçalho."); return; }
     const indices = linhas[0].map(h => MAPA_COLUNAS_CSV[normalizarCabecalhoCSV(h)] || null);
     if (!indices.includes("marca")) {
@@ -3736,7 +3778,7 @@
   document.getElementById("arquivo-csv-marcas").addEventListener("change", (evento) => {
     const arquivo = evento.target.files[0];
     evento.target.value = "";
-    if (arquivo) importarCSVMarcas(arquivo);
+    if (arquivo) importarArquivoMarcas(arquivo);
   });
 
   // ============================================================================
