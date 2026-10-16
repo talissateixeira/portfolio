@@ -561,7 +561,10 @@
   .modal-acoes-direita { display: flex; gap: 8px; margin-left: auto; }
 
   /* ===== Favoritos rápidos (dashboard) ===== */
-  .fav-rapidos { display: flex; align-items: center; gap: 10px; margin: 2px 0 20px; position: relative; flex-wrap: wrap; }
+  .dashboard-cabecalho { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 22px; }
+  .dashboard-cabecalho .dashboard-saudacao-titulo { margin: 0; }
+  /* row-reverse: a estrela fica na ponta direita e a barrinha abre pra ESQUERDA, sem vazar a borda. */
+  .fav-rapidos { display: flex; align-items: center; gap: 10px; margin: 0; position: relative; flex-direction: row-reverse; flex-shrink: 0; }
   .fav-estrela {
     display: inline-flex; align-items: center; justify-content: center;
     width: 40px; height: 40px; flex-shrink: 0;
@@ -1107,10 +1110,10 @@
     <!-- ===================== ABA DASHBOARD ===================== -->
     <section class="aba" id="aba-dashboard">
       <p class="dashboard-saudacao-label" id="dashboard-saudacao-label">Boa tarde</p>
-      <h2 class="dashboard-saudacao-titulo" id="dashboard-saudacao-titulo">Carregando...</h2>
-
-      <div class="fav-rapidos" id="fav-rapidos">
-        <button type="button" class="fav-estrela" id="fav-estrela" title="Meus favoritos" aria-expanded="false" aria-controls="fav-barra">
+      <div class="dashboard-cabecalho">
+        <h2 class="dashboard-saudacao-titulo" id="dashboard-saudacao-titulo">Carregando...</h2>
+        <div class="fav-rapidos" id="fav-rapidos">
+          <button type="button" class="fav-estrela" id="fav-estrela" title="Meus favoritos" aria-expanded="false" aria-controls="fav-barra">
           <span class="icone"><svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg></span>
         </button>
         <div class="fav-barra" id="fav-barra" hidden>
@@ -1134,6 +1137,7 @@
             <span class="icone"><svg viewBox="0 0 24 24"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg></span>
           </button>
         </div>
+      </div>
       </div>
 
       <div class="bloco-push" id="bloco-push" hidden>
