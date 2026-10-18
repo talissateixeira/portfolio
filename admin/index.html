@@ -1350,6 +1350,7 @@
         <span class="selecao-texto"><strong id="selecao-contagem-leads">0</strong> marcas selecionadas</span>
         <button type="button" class="link-acao" id="selecionar-todas-filtro">Selecionar todas do filtro</button>
         <button type="button" class="link-acao" id="limpar-selecao-leads">Limpar seleção</button>
+        <button type="button" class="link-acao" id="favoritar-todas">★ Favoritar todas do filtro</button>
         <button type="button" class="link-acao" id="desfavoritar-todas">☆ Desfavoritar todas</button>
         <select class="campo-busca" id="bulk-situacao-leads" style="max-width:220px;"><option value="">Mudar situação para…</option></select>
       </div>
@@ -3679,6 +3680,20 @@
       renderLeadsAtual();
     });
   }
+  // ---- Favoritar todas as marcas do filtro atual de uma vez ----
+  const botaoFavTodas = document.getElementById("favoritar-todas");
+  if (botaoFavTodas) {
+    botaoFavTodas.addEventListener("click", async () => {
+      const alvo = leadsFiltrados().filter(m => !m.favorita);
+      if (alvo.length === 0) { alert("Todas as marcas do filtro atual já estão favoritadas (ou o filtro está vazio)."); return; }
+      if (!confirm("Favoritar " + alvo.length + " marca(s) do filtro atual?")) return;
+      await salvarSeguro("marcas", sb.from("marcas").update({ favorita: true }).in("id", alvo.map(m => m.id)));
+      alvo.forEach(m => m.favorita = true);
+      renderLeadsAtual();
+      mostrarToastFav(alvo.length + " marca(s) favoritada(s)");
+    });
+  }
+
   // ---- Tirar a estrela de todas de uma vez ----
   const botaoDesfavTodas = document.getElementById("desfavoritar-todas");
   if (botaoDesfavTodas) {
