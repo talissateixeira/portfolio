@@ -1350,6 +1350,7 @@
         <span class="selecao-texto"><strong id="selecao-contagem-leads">0</strong> marcas selecionadas</span>
         <button type="button" class="link-acao" id="selecionar-todas-filtro">Selecionar todas do filtro</button>
         <button type="button" class="link-acao" id="limpar-selecao-leads">Limpar seleção</button>
+        <button type="button" class="link-acao" id="desfavoritar-todas">☆ Desfavoritar todas</button>
         <select class="campo-busca" id="bulk-situacao-leads" style="max-width:220px;"><option value="">Mudar situação para…</option></select>
       </div>
       <div class="painel-branco tabela-scroll" id="leads-view-tabela">
@@ -3678,6 +3679,20 @@
       renderLeadsAtual();
     });
   }
+  // ---- Tirar a estrela de todas de uma vez ----
+  const botaoDesfavTodas = document.getElementById("desfavoritar-todas");
+  if (botaoDesfavTodas) {
+    botaoDesfavTodas.addEventListener("click", async () => {
+      const favoritadas = listaMarcas.filter(m => m.favorita);
+      if (favoritadas.length === 0) { alert("Nenhuma marca favoritada."); return; }
+      if (!confirm("Tirar a estrela de " + favoritadas.length + " marca(s) favoritada(s)?")) return;
+      await salvarSeguro("marcas", sb.from("marcas").update({ favorita: false }).in("id", favoritadas.map(m => m.id)));
+      favoritadas.forEach(m => m.favorita = false);
+      renderLeadsAtual();
+      mostrarToastFav("Estrela removida de " + favoritadas.length + " marca(s)");
+    });
+  }
+
   // ---- Mudar a situação de várias marcas selecionadas de uma vez ----
   const bulkSituacao = document.getElementById("bulk-situacao-leads");
   if (bulkSituacao) {
