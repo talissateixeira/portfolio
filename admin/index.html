@@ -1337,6 +1337,7 @@
           <select class="campo-busca" id="filtro-nicho-lead"><option value="todas">Qualquer nicho</option></select>
           <button class="pill-filtro" data-filtro-prioridade-lead="alta">Prioridade alta</button>
           <button class="pill-filtro" data-filtro-com-email>Com e-mail</button>
+          <button class="pill-filtro" data-filtro-favoritas>⭐ Favoritas</button>
         </div>
         <div class="barra-acoes-direita">
           <button class="botao botao-secundario" id="botao-importar-marcas">Importar planilha</button>
@@ -1349,6 +1350,7 @@
         <span class="selecao-texto"><strong id="selecao-contagem-leads">0</strong> marcas selecionadas</span>
         <button type="button" class="link-acao" id="selecionar-todas-filtro">Selecionar todas do filtro</button>
         <button type="button" class="link-acao" id="limpar-selecao-leads">Limpar seleção</button>
+        <select class="campo-busca" id="bulk-situacao-leads" style="max-width:220px;"><option value="">Mudar situação para…</option></select>
       </div>
       <div class="painel-branco tabela-scroll" id="leads-view-tabela">
         <table class="tabela">
@@ -3373,6 +3375,7 @@
   let filtroNichoLead = "todas";
   let filtroPrioridadeLead = null;
   let filtroComEmail = false;
+  let filtroFavoritas = false;
   // Considera que a marca "tem e-mail" se o campo tem um @ de verdade
   // (ignora placeholders como "não encontrado", "sem e-mail" etc.).
   function temEmailLead(m) {
@@ -3447,6 +3450,7 @@
       if (filtroNichoLead !== "todas" && m.nicho !== filtroNichoLead) return false;
       if (filtroPrioridadeLead && m.prioridade !== filtroPrioridadeLead) return false;
       if (filtroComEmail && !temEmailLead(m)) return false;
+      if (filtroFavoritas && !m.favorita) return false;
       if (!termo) return true;
       return (m.marca || "").toLowerCase().includes(termo) || (m.contato_nome || "").toLowerCase().includes(termo) ||
         (m.instagram || "").toLowerCase().includes(termo) || (m.email || "").toLowerCase().includes(termo);
@@ -3643,6 +3647,10 @@
     filtroComEmail = evento.currentTarget.classList.toggle("ativo");
     renderLeadsAtual();
   });
+  document.querySelector("[data-filtro-favoritas]").addEventListener("click", (evento) => {
+    filtroFavoritas = evento.currentTarget.classList.toggle("ativo");
+    renderLeadsAtual();
+  });
 
   // ---- Seleção de marcas (pra disparo de e-mail na aba Prospecção) ----
   function atualizarContagemSelecao() {
@@ -3668,6 +3676,24 @@
       await salvarSeguro("marcas", sb.from("marcas").update({ selecionada: false }).in("id", selecionadas.map(m => m.id)));
       selecionadas.forEach(m => m.selecionada = false);
       renderLeadsAtual();
+    });
+  }
+  // ---- Mudar a situação de várias marcas selecionadas de uma vez ----
+  const bulkSituacao = document.getElementById("bulk-situacao-leads");
+  if (bulkSituacao) {
+    bulkSituacao.innerHTML = '<option value="">Mudar situação para…</option>' +
+      ESTAGIOS_LEAD.map(s => "<option>" + s + "</option>").join("");
+    bulkSituacao.addEventListener("change", async () => {
+      const novaSituacao = bulkSituacao.value;
+      if (!novaSituacao) return;
+      const selecionadas = listaMarcas.filter(m => m.selecionada);
+      if (selecionadas.length === 0) { alert("Selecione as marcas primeiro (marque as caixinhas ou use \"Selecionar todas do filtro\")."); bulkSituacao.value = ""; return; }
+      if (!confirm("Mudar a situação de " + selecionadas.length + " marca(s) para \"" + novaSituacao + "\"?")) { bulkSituacao.value = ""; return; }
+      await salvarSeguro("marcas", sb.from("marcas").update({ situacao: novaSituacao }).in("id", selecionadas.map(m => m.id)));
+      selecionadas.forEach(m => m.situacao = novaSituacao);
+      bulkSituacao.value = "";
+      renderLeadsAtual();
+      mostrarToastFav ? mostrarToastFav(selecionadas.length + " marca(s) agora em \"" + novaSituacao + "\"") : null;
     });
   }
 
@@ -3708,6 +3734,7 @@
       if (filtroNichoLead !== "todas" && m.nicho !== filtroNichoLead) return false;
       if (filtroPrioridadeLead && m.prioridade !== filtroPrioridadeLead) return false;
       if (filtroComEmail && !temEmailLead(m)) return false;
+      if (filtroFavoritas && !m.favorita) return false;
       if (!termo) return true;
       return (m.marca || "").toLowerCase().includes(termo) || (m.contato_nome || "").toLowerCase().includes(termo) ||
         (m.instagram || "").toLowerCase().includes(termo) || (m.email || "").toLowerCase().includes(termo);
