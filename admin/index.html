@@ -6581,6 +6581,11 @@
     }
     destinatarios = destinatarios.filter(m => !listaOptout.includes((m.email || "").toLowerCase()));
     if (document.getElementById("prosp-pular-recebidos").checked) {
+      // Reconfere o registro de envios na hora, pra nunca usar dado velho.
+      try {
+        const frescos = await sb.from("email_envios").select("email,assunto,status").eq("status", "ok");
+        if (!frescos.error && Array.isArray(frescos.data)) listaEnvios = frescos.data;
+      } catch (e) { /* se falhar, usa o que já tinha carregado */ }
       const jaReceberam = new Set(listaEnvios.filter(e => e.status === "ok" && (e.assunto || "") === assunto).map(e => (e.email || "").toLowerCase()));
       destinatarios = destinatarios.filter(m => !jaReceberam.has((m.email || "").toLowerCase()));
     }
