@@ -3749,7 +3749,7 @@
       const cor = CORES_ESTAGIO_LEAD[m.situacao] || "cinza";
       const temEmail = temEmailLead(m);
       return '<tr class="linha-clicavel' + (m.favorita ? " favorita" : "") + '" data-id="' + m.id + '">' +
-        '<td><input type="checkbox" class="check-selecao-lead" data-sel-lead="' + m.id + '"' + (m.selecionada ? " checked" : "") + (temEmail ? "" : ' disabled title="Sem e-mail"') + "></td>" +
+        '<td><input type="checkbox" class="check-selecao-lead" data-sel-lead="' + m.id + '"' + (m.selecionada ? " checked" : "") + "></td>" +
         '<td><button type="button" class="estrela-btn' + (m.favorita ? " marcada" : "") + '" data-fav-lead="' + m.id + '" data-favorita="' + !!m.favorita + '" title="Fixar no topo">★</button></td>' +
         "<td>" + escaparAtributo(m.marca) + "</td>" +
         "<td>" + (m.nicho ? escaparAtributo(m.nicho) : "—") + "</td>" +
@@ -3833,10 +3833,10 @@
   const botaoSelTodas = document.getElementById("selecionar-todas-filtro");
   if (botaoSelTodas) {
     botaoSelTodas.addEventListener("click", async () => {
-      const comEmail = leadsFiltrados().filter(temEmailLead);
-      if (comEmail.length === 0) { alert("Nenhuma marca com e-mail no filtro atual."); return; }
-      await salvarSeguro("marcas", sb.from("marcas").update({ selecionada: true }).in("id", comEmail.map(m => m.id)));
-      comEmail.forEach(m => m.selecionada = true);
+      const alvo = leadsFiltrados();
+      if (alvo.length === 0) { alert("Nenhuma marca no filtro atual."); return; }
+      await salvarSeguro("marcas", sb.from("marcas").update({ selecionada: true }).in("id", alvo.map(m => m.id)));
+      alvo.forEach(m => m.selecionada = true);
       renderLeadsAtual();
     });
   }
