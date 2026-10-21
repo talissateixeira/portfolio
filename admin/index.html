@@ -1392,6 +1392,7 @@
         <button type="button" class="link-acao" id="favoritar-todas">★ Favoritar todas do filtro</button>
         <button type="button" class="link-acao" id="desfavoritar-todas">☆ Desfavoritar todas</button>
         <select class="campo-busca" id="bulk-situacao-leads" style="max-width:220px;"><option value="">Mudar situação para…</option></select>
+        <button type="button" class="link-acao" id="apagar-selecionadas-leads" style="color:var(--erro);">🗑 Apagar selecionadas</button>
       </div>
       <div class="painel-branco tabela-scroll" id="leads-view-tabela">
         <table class="tabela">
@@ -3851,6 +3852,19 @@
       renderLeadsAtual();
     });
   }
+  // ---- Apagar as marcas selecionadas de uma vez ----
+  const botaoApagarSel = document.getElementById("apagar-selecionadas-leads");
+  if (botaoApagarSel) {
+    botaoApagarSel.addEventListener("click", async () => {
+      const selecionadas = listaMarcas.filter(m => m.selecionada);
+      if (selecionadas.length === 0) { alert("Selecione as marcas primeiro (marque as caixinhas ou use \"Selecionar todas do filtro\")."); return; }
+      if (!confirm("Apagar DE VEZ " + selecionadas.length + " lead(s) da sua base?\n\nAs atividades e os vínculos com propostas deles também somem. Isso não dá pra desfazer.")) return;
+      await salvarSeguro("marcas", sb.from("marcas").delete().in("id", selecionadas.map(m => m.id)));
+      await carregarMarcas();
+      mostrarToastFav(selecionadas.length + " lead(s) apagado(s)");
+    });
+  }
+
   // ---- Favoritar todas as marcas do filtro atual de uma vez ----
   const botaoFavTodas = document.getElementById("favoritar-todas");
   if (botaoFavTodas) {
