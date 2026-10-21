@@ -7642,7 +7642,9 @@
 
     let roteiroId = id;
     if (id) {
-      const ok = await salvarSeguro("roteiros", sb.from("roteiros").update(dados).eq("id", id));
+      // .select() faz o update DEVOLVER a linha — sem isso o Supabase retorna
+      // null mesmo quando dá certo, e o salvamento parava achando que falhou.
+      const ok = await salvarSeguro("roteiros", sb.from("roteiros").update(dados).eq("id", id).select());
       if (ok === null) return;
     } else {
       const novo = await salvarSeguro("roteiros", sb.from("roteiros").insert(dados).select());
