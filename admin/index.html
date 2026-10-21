@@ -1378,6 +1378,7 @@
         <div class="barra-acoes-direita">
           <button class="botao botao-secundario" id="botao-importar-marcas">Importar planilha</button>
           <input type="file" id="arquivo-csv-marcas" accept=".csv,text/csv,.xlsx,.xls,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel" hidden>
+          <button class="botao botao-secundario" id="botao-corrigir-nomes-leads" title="Corrige nomes que vieram errados da importação, pelo @ do Instagram">🔧 Corrigir nomes</button>
           <button class="botao botao-secundario" id="botao-exportar-marcas">Baixar CSV</button>
           <button class="botao botao-principal" id="botao-add-marca">+ Novo lead</button>
         </div>
@@ -1859,6 +1860,21 @@
 </div>
 
 <!-- ===================== MODAIS ===================== -->
+<!-- ===================== MODAL CORRIGIR NOMES DOS LEADS ===================== -->
+<div class="modal-fundo" id="modal-corrigir-nomes" hidden>
+  <div class="modal-caixa" style="max-width:640px;">
+    <h3 class="modal-titulo">Corrigir nomes importados</h3>
+    <p id="corrigir-resumo" style="font-size:0.85rem;color:var(--texto-suave);margin:-6px 0 14px;line-height:1.5;"></p>
+    <div id="corrigir-lista" style="max-height:48vh;overflow:auto;border:1px solid var(--borda);border-radius:var(--raio);padding:8px 14px;"></div>
+    <div class="modal-acoes">
+      <div class="modal-acoes-direita">
+        <button type="button" class="botao botao-secundario" data-fechar-modal>Cancelar</button>
+        <button type="button" class="botao botao-principal" id="btn-aplicar-correcao-nomes">Aplicar correção</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- ===================== MODAL ROTEIRO ===================== -->
 <div class="modal-fundo" id="modal-roteiro" hidden>
   <div class="modal-caixa" style="max-width:820px;">
@@ -4417,6 +4433,88 @@
     const arquivo = evento.target.files[0];
     evento.target.value = "";
     if (arquivo) importarArquivoMarcas(arquivo);
+  });
+
+  // ---- Corrigir nomes de leads importados errado (pelo @ do Instagram) ----
+  // Pega o @ de um link/handle do Instagram ("instagram.com/xpto/" -> "xpto").
+  function handleInstagramLead(valor) {
+    const v = (valor || "").trim();
+    const m = v.match(/instagram\.com\/([^/?#]+)/i);
+    let h = m ? m[1] : (v.startsWith("@") ? v.slice(1) : "");
+    return h.replace(/\/+$/, "").trim().toLowerCase();
+  }
+  // Um nome é "suspeito" quando é vazio ou parece a resposta da coluna errada da
+  // planilha ("Não identificado...", "Sim, tem destaque...", "Notas:", etc.).
+  function nomeLeadSuspeito(nome) {
+    const n = (nome || "").trim().toLowerCase();
+    if (!n) return true;
+    const marcadores = ["nao identificado", "não identificado", "nao encontrado", "não encontrado",
+      "sim,", "sim ", "provavel", "provável", "possivel", "possível", "nao (", "não (",
+      "destaque", "creator", "collab", "reels", "reel de", "afiliad", "criadora", "notas:"];
+    const nn = n.normalize("NFD").replace(/[̀-ͯ]/g, "");
+    return marcadores.some(mk => {
+      const mkn = mk.normalize("NFD").replace(/[̀-ͯ]/g, "");
+      return nn.startsWith(mkn) || nn.includes(mkn);
+    });
+  }
+  function abrirCorrigirNomesLeads() {
+    const renomear = [], apagar = [];
+    (listaMarcas || []).forEach(m => {
+      if (!nomeLeadSuspeito(m.marca)) return;      // deixa em paz os nomes normais
+      const h = handleInstagramLead(m.instagram);
+      if (h) renomear.push({ id: m.id, de: m.marca || "(vazio)", para: h });
+      else apagar.push({ id: m.id, de: m.marca || "(vazio)" });
+    });
+    if (!renomear.length && !apagar.length) {
+      alert("Não encontrei nomes suspeitos pra corrigir — seus leads estão de boa! 🎉");
+      return;
+    }
+    document.getElementById("corrigir-resumo").textContent =
+      renomear.length + " nome(s) pra corrigir pelo @ do Instagram" +
+      (apagar.length ? " · " + apagar.length + " linha(s) de lixo pra apagar" : "") +
+      ". Seus leads com nome normal nem aparecem aqui. Desmarque o que não quiser mexer.";
+    let html = "";
+    if (renomear.length) {
+      html += '<p style="font-weight:600;margin:4px 0 6px;">Corrigir nome → @ do Instagram</p>';
+      html += renomear.map(c =>
+        '<label style="display:flex;gap:8px;align-items:flex-start;padding:6px 0;border-bottom:1px solid var(--borda);font-size:0.84rem;">' +
+        '<input type="checkbox" class="chk-renomear" data-id="' + escaparAtributo(c.id) + '" data-para="' + escaparAtributo(c.para) + '" checked style="margin-top:3px;">' +
+        '<span><span style="color:var(--erro)">' + escaparHtmlEmail(c.de.slice(0, 48)) + '</span> → <strong style="color:var(--sucesso)">@' + escaparHtmlEmail(c.para) + '</strong></span></label>'
+      ).join("");
+    }
+    if (apagar.length) {
+      html += '<p style="font-weight:600;margin:14px 0 6px;">Apagar (lixo da planilha, sem Instagram)</p>';
+      html += apagar.map(c =>
+        '<label style="display:flex;gap:8px;align-items:flex-start;padding:6px 0;border-bottom:1px solid var(--borda);font-size:0.84rem;">' +
+        '<input type="checkbox" class="chk-apagar-lead" data-id="' + escaparAtributo(c.id) + '" checked style="margin-top:3px;">' +
+        '<span style="color:var(--texto-suave)">' + escaparHtmlEmail(c.de.slice(0, 60)) + '</span></label>'
+      ).join("");
+    }
+    document.getElementById("corrigir-lista").innerHTML = html;
+    document.getElementById("modal-corrigir-nomes").hidden = false;
+  }
+  document.getElementById("botao-corrigir-nomes-leads").addEventListener("click", abrirCorrigirNomesLeads);
+  document.getElementById("btn-aplicar-correcao-nomes").addEventListener("click", async () => {
+    const renomear = Array.from(document.querySelectorAll(".chk-renomear:checked")).map(c => ({ id: c.dataset.id, para: c.dataset.para }));
+    const apagar = Array.from(document.querySelectorAll(".chk-apagar-lead:checked")).map(c => c.dataset.id);
+    if (!renomear.length && !apagar.length) { alert("Nada marcado pra aplicar."); return; }
+    if (!confirm("Corrigir " + renomear.length + " nome(s) e apagar " + apagar.length + " linha(s)?\n\nSeus outros leads não são afetados.")) return;
+    const botao = document.getElementById("btn-aplicar-correcao-nomes");
+    botao.disabled = true; botao.textContent = "Aplicando…";
+    let erro = null;
+    for (const r of renomear) {
+      const { error } = await sb.from("marcas").update({ marca: r.para }).eq("id", r.id);
+      if (error) { erro = error.message; break; }
+    }
+    if (!erro && apagar.length) {
+      const { error } = await sb.from("marcas").delete().in("id", apagar);
+      if (error) erro = error.message;
+    }
+    botao.disabled = false; botao.textContent = "Aplicar correção";
+    if (erro) { alert("Deu um problema ao aplicar: " + erro); return; }
+    document.getElementById("modal-corrigir-nomes").hidden = true;
+    await carregarMarcas();
+    alert("Prontinho! Nomes corrigidos. 🎉");
   });
 
   // ============================================================================
