@@ -195,10 +195,17 @@
 <!-- Enquanto carrega -->
 <div class="carregando" id="carregando">Carregando roteiro…</div>
 
-<!-- Link inválido / não encontrado -->
+<!-- Link inválido / não encontrado (link errado ou apagado) -->
 <div class="estado" id="erro" hidden>
   <h1>Roteiro não encontrado</h1>
   <p>Esse link pode ter expirado ou estar incompleto. É só responder a mensagem que te mandou ele.</p>
+</div>
+
+<!-- Falha momentânea de conexão (o roteiro existe, só não carregou agora) -->
+<div class="estado" id="erro-conexao" hidden>
+  <h1>Ops, deu um soluço</h1>
+  <p>Não consegui carregar agora. Verifique sua internet e tente de novo.</p>
+  <button class="btn-enviar" id="btn-recarregar" type="button" style="margin-top:18px;">Recarregar</button>
 </div>
 
 <!-- Conteúdo -->
@@ -267,26 +274,36 @@
   const token = params.get("token");
 
   const $ = (sel) => document.querySelector(sel);
-  function mostrarErro() {
+  // tipo: "notfound" (link errado/apagado) ou "conexao" (soluço, roteiro existe)
+  function mostrarErro(tipo) {
     $("#carregando").hidden = true;
     $("#conteudo").hidden = true;
-    $("#erro").hidden = false;
+    if (tipo === "conexao") $("#erro-conexao").hidden = false;
+    else $("#erro").hidden = false;
   }
   function escapar(t) {
     const d = document.createElement("div"); d.textContent = t == null ? "" : String(t); return d.innerHTML;
   }
-  if (!id || !token) { mostrarErro(); return; }
+  const btnRecarregar = document.getElementById("btn-recarregar");
+  if (btnRecarregar) btnRecarregar.addEventListener("click", () => location.reload());
+  if (!id || !token) { mostrarErro("notfound"); return; }
 
   (async function carregar() {
-    let dados;
-    try {
-      const { data, error } = await sb.rpc("ver_roteiro", { p_id: id, p_token: token });
-      if (error) throw error;
-      dados = data;
-    } catch (e) {
-      mostrarErro(); return;
+    // Tenta algumas vezes antes de desistir — um soluço de conexão não deve
+    // mostrar "roteiro não encontrado" pra marca.
+    let dados = null, ultimoErro = null;
+    for (let tentativa = 1; tentativa <= 3; tentativa++) {
+      try {
+        const { data, error } = await sb.rpc("ver_roteiro", { p_id: id, p_token: token });
+        if (error) throw error;
+        dados = data; ultimoErro = null; break;
+      } catch (e) {
+        ultimoErro = e;
+        if (tentativa < 3) await new Promise(r => setTimeout(r, 700 * tentativa));
+      }
     }
-    if (!dados || !dados.roteiro) { mostrarErro(); return; }
+    if (ultimoErro) { mostrarErro("conexao"); return; }       // falhou a conexão
+    if (!dados || !dados.roteiro) { mostrarErro("notfound"); return; } // link inválido
 
     const r = dados.roteiro;
     const cenas = dados.cenas || [];
