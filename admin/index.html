@@ -7398,6 +7398,7 @@
   }
 
   function renderListaRoteiros() {
+   try {
     const termo = document.getElementById("busca-roteiros").value.trim().toLowerCase();
     const linhas = listaRoteiros.filter(r => {
       if (filtroRoteiroAtual !== "todos" && r.status !== filtroRoteiroAtual) return false;
@@ -7441,6 +7442,10 @@
       const r = listaRoteiros.find(x => x.id === b.dataset.id);
       window.open(linkRoteiro(r), "_blank");
     }));
+   } catch (e) {
+    const cont = document.getElementById("lista-roteiros");
+    if (cont) cont.innerHTML = '<p class="texto-vazio" style="color:var(--erro)">Erro ao mostrar os roteiros: ' + (e && e.message ? e.message : e) + '</p>';
+   }
   }
 
   // ---- Linhas de cena e moodboard (dentro do modal) ----
