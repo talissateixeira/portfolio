@@ -7627,6 +7627,7 @@
   // ---- Salvar ----
   document.getElementById("form-roteiro").addEventListener("submit", async (ev) => {
     ev.preventDefault();
+   try {
     const id = document.getElementById("rot-id").value;
     const dados = {
       titulo: document.getElementById("rot-titulo").value.trim(),
@@ -7663,6 +7664,9 @@
 
     modalRoteiro.hidden = true;
     await carregarRoteiros();
+   } catch (e) {
+    alert("Erro ao salvar o roteiro: " + (e && e.message ? e.message : e));
+   }
   });
 
   // ---- Apagar ----
