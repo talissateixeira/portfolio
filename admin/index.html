@@ -1110,6 +1110,7 @@
   .rot-remover { position: absolute; top: 8px; right: 8px; border: none; background: transparent; color: var(--erro); cursor: pointer; font-size: 1.15rem; line-height: 1; padding: 2px 6px; }
   .rot-mood-linha { display: flex; gap: 8px; margin-bottom: 8px; align-items: center; }
   .rot-mood-linha input { flex: 1; }
+  .rot-mood-thumb { width: 40px; height: 52px; object-fit: cover; border-radius: 6px; border: 1px solid var(--borda); background: var(--creme); flex: none; }
   .rot-coment-item { border: 1px solid var(--borda); border-radius: var(--raio); padding: 10px 12px; margin-bottom: 8px; background: var(--creme); }
   .rot-coment-item .meta { font-size: 0.75rem; color: var(--texto-suave); margin-bottom: 3px; }
   .badge-novo-roteiro { background: var(--erro); color: #fff; border-radius: 999px; font-size: 0.66rem; padding: 1px 7px; vertical-align: middle; }
@@ -1911,9 +1912,14 @@
       </div>
 
       <div class="campo-form">
-        <label>Moodboard (cole o link de cada imagem)</label>
+        <label>Moodboard (referências visuais)</label>
         <div id="rot-moodboard"></div>
-        <button type="button" class="botao botao-secundario" id="btn-add-mood" style="margin-top:4px;">+ imagem</button>
+        <div style="display:flex;gap:8px;margin-top:6px;flex-wrap:wrap;align-items:center;">
+          <button type="button" class="botao botao-principal" id="btn-upload-mood">📎 Enviar do PC</button>
+          <button type="button" class="botao botao-secundario" id="btn-add-mood">+ colar link</button>
+          <span class="rot-ia-status" id="rot-mood-status"></span>
+        </div>
+        <input type="file" id="input-mood-file" accept="image/*" multiple hidden>
       </div>
 
       <div class="linha-form-2">
@@ -7483,8 +7489,10 @@
     '</div>';
   }
   function htmlLinhaMood(url) {
+    const u = url || "";
     return '<div class="rot-mood-linha">' +
-      '<input type="text" class="mood-url" placeholder="https://..." value="' + escaparAttr(url) + '">' +
+      '<img class="rot-mood-thumb" alt="" src="' + escaparAttr(u) + '"' + (u ? "" : " hidden") + '>' +
+      '<input type="text" class="mood-url" placeholder="https://... ou use o botão Enviar do PC" value="' + escaparAttr(u) + '">' +
       '<button type="button" class="botao botao-secundario rot-remover-mood">Remover</button>' +
     '</div>';
   }
@@ -7503,6 +7511,43 @@
   });
   document.getElementById("rot-moodboard").addEventListener("click", (e) => {
     if (e.target.classList.contains("rot-remover-mood")) e.target.closest(".rot-mood-linha").remove();
+  });
+  // Atualiza a miniatura ao vivo quando o link muda (ou é colado).
+  document.getElementById("rot-moodboard").addEventListener("input", (e) => {
+    if (!e.target.classList.contains("mood-url")) return;
+    const thumb = e.target.closest(".rot-mood-linha").querySelector(".rot-mood-thumb");
+    if (thumb) { thumb.src = e.target.value; thumb.hidden = !e.target.value; }
+  });
+
+  // Upload de imagem do PC pro moodboard (reaproveita o bucket producao-arquivos).
+  async function uploadImagemMoodboard(arquivo) {
+    const nome = "roteiros/" + Date.now() + "-" + Math.random().toString(36).slice(2, 7) + "-" +
+      (arquivo.name || "img").replace(/[^a-zA-Z0-9.\-_]/g, "_");
+    const { error } = await sb.storage.from("producao-arquivos").upload(nome, arquivo, { upsert: true });
+    if (error) return null;
+    const { data } = sb.storage.from("producao-arquivos").getPublicUrl(nome);
+    return data.publicUrl;
+  }
+  document.getElementById("btn-upload-mood").addEventListener("click", () => document.getElementById("input-mood-file").click());
+  document.getElementById("input-mood-file").addEventListener("change", async (e) => {
+    const arquivos = Array.from(e.target.files || []);
+    e.target.value = "";
+    if (!arquivos.length) return;
+    const status = document.getElementById("rot-mood-status");
+    const btn = document.getElementById("btn-upload-mood");
+    btn.disabled = true;
+    let ok = 0;
+    for (let i = 0; i < arquivos.length; i++) {
+      status.className = "rot-ia-status";
+      status.textContent = "Enviando " + (i + 1) + " de " + arquivos.length + "…";
+      const url = await uploadImagemMoodboard(arquivos[i]);
+      if (url) { addMood(url); ok++; }
+    }
+    status.className = ok ? "rot-ia-status ok" : "rot-ia-status erro";
+    status.textContent = ok
+      ? (ok + " imagem" + (ok > 1 ? "s" : "") + " adicionada" + (ok > 1 ? "s" : "") + "! ✨")
+      : "Não consegui enviar. Tenta de novo?";
+    btn.disabled = false;
   });
 
   function lerCenasDoForm() {
