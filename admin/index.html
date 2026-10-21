@@ -1845,7 +1845,7 @@
         <button type="button" class="botao botao-principal" id="botao-add-roteiro">+ Novo roteiro</button>
       </div>
 
-      <div id="lista-roteiros" class="grade-roteiros"></div>
+      <div id="lista-roteiros-aba" class="grade-roteiros"></div>
     </section>
   </main>
 </div>
@@ -7405,7 +7405,7 @@
       if (!termo) return true;
       return (r.titulo || "").toLowerCase().includes(termo) || (r.marca || "").toLowerCase().includes(termo);
     });
-    const cont = document.getElementById("lista-roteiros");
+    const cont = document.getElementById("lista-roteiros-aba");
     if (linhas.length === 0) {
       cont.innerHTML = '<p class="texto-vazio">Nenhum roteiro ainda. Clique em "+ Novo roteiro" pra começar.</p>';
       return;
@@ -7443,7 +7443,7 @@
       window.open(linkRoteiro(r), "_blank");
     }));
    } catch (e) {
-    const cont = document.getElementById("lista-roteiros");
+    const cont = document.getElementById("lista-roteiros-aba");
     if (cont) cont.innerHTML = '<p class="texto-vazio" style="color:var(--erro)">Erro ao mostrar os roteiros: ' + (e && e.message ? e.message : e) + '</p>';
    }
   }
