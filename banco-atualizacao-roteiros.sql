@@ -69,6 +69,38 @@ create table if not exists roteiro_comentarios (
 );
 create index if not exists idx_roteiro_coment_roteiro on roteiro_comentarios(roteiro_id, criado_em);
 
+-- ---------------------------------------------------------------------------
+-- Rede de segurança: se alguma dessas tabelas já existia de antes (sem todas
+-- as colunas), o "create table if not exists" acima não teria adicionado as
+-- novas. Estes ALTERs garantem que toda coluna exista, sem apagar dados.
+-- ---------------------------------------------------------------------------
+alter table roteiros add column if not exists token text not null default replace(gen_random_uuid()::text, '-', '');
+alter table roteiros add column if not exists titulo text;
+alter table roteiros add column if not exists subtitulo text;
+alter table roteiros add column if not exists marca text;
+alter table roteiros add column if not exists formato text;
+alter table roteiros add column if not exists objetivo text;
+alter table roteiros add column if not exists pontos_importantes text;
+alter table roteiros add column if not exists sugestao_legenda text;
+alter table roteiros add column if not exists status text not null default 'rascunho';
+alter table roteiros add column if not exists criado_em timestamptz not null default now();
+alter table roteiros add column if not exists atualizado_em timestamptz not null default now();
+
+alter table roteiro_cenas add column if not exists ordem int not null default 0;
+alter table roteiro_cenas add column if not exists tag text;
+alter table roteiro_cenas add column if not exists tempo text;
+alter table roteiro_cenas add column if not exists narracao text;
+alter table roteiro_cenas add column if not exists cena text;
+alter table roteiro_cenas add column if not exists criado_em timestamptz not null default now();
+
+alter table roteiro_moodboard add column if not exists url text;
+alter table roteiro_moodboard add column if not exists ordem int not null default 0;
+
+alter table roteiro_comentarios add column if not exists nome text;
+alter table roteiro_comentarios add column if not exists texto text;
+alter table roteiro_comentarios add column if not exists visto boolean not null default false;
+alter table roteiro_comentarios add column if not exists criado_em timestamptz not null default now();
+
 -- Mantém atualizado_em em dia quando você edita o roteiro.
 create or replace function roteiros_touch() returns trigger
 language plpgsql as $$
