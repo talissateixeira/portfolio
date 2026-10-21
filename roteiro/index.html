@@ -111,6 +111,11 @@
   }
   .campo-val { margin: 0 0 18px; white-space: pre-wrap; }
   .campo-val:last-child { margin-bottom: 0; }
+  /* Respiro entre as seções do bloco Roteiro (Objetivo, Pontos...) */
+  #bloco-roteiro > div { margin-top: 28px; }
+  #bloco-roteiro > div:first-of-type { margin-top: 0; }
+  /* Respiro entre Narração e Cena dentro dos cards */
+  .cena .campo-rot + .campo-val + .campo-rot { margin-top: 18px; }
 
   .legenda-box {
     background: var(--creme); border: 1px dashed var(--borda);
