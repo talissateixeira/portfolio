@@ -1098,6 +1098,13 @@
   .rot-ia-box > label { display: block; font-weight: 600; margin-bottom: 6px; }
   .rot-ia-status { font-size: 0.82rem; color: var(--texto-suave); margin-left: 10px; }
   .rot-ia-status.erro { color: var(--erro); }
+  .rot-ia-status.ok { color: var(--sucesso); }
+  .rot-colar-box { background: var(--fundo-acento); border: 1px solid var(--borda); border-radius: var(--raio); padding: 14px 16px; margin-bottom: 18px; }
+  .rot-colar-box > label { display: block; font-weight: 600; margin-bottom: 4px; }
+  .rot-colar-dica { font-size: 0.82rem; color: var(--texto-suave); margin: 0 0 10px; line-height: 1.5; }
+  .rot-colar-acoes { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin-top: 8px; }
+  .rot-link-ia { background: none; border: none; color: var(--acento); font-size: 0.82rem; cursor: pointer; padding: 0; text-decoration: underline; }
+  .rot-link-ia:hover { color: var(--acento-escuro); }
   .rot-cena-linha { border: 1px solid var(--borda); border-radius: var(--raio); padding: 14px 12px 12px; margin-bottom: 10px; position: relative; background: var(--creme); }
   .rot-cena-linha .linha-form-2 { margin-bottom: 8px; }
   .rot-remover { position: absolute; top: 8px; right: 8px; border: none; background: transparent; color: var(--erro); cursor: pointer; font-size: 1.15rem; line-height: 1; padding: 2px 6px; }
@@ -1860,8 +1867,22 @@
       <input type="hidden" id="rot-token">
 
       <!-- Gerar com IA -->
-      <div class="rot-ia-box">
+      <!-- Colar roteiro pronto (gerado no Claude) -->
+      <div class="rot-colar-box">
+        <label for="rot-colar">📋 Colar roteiro pronto</label>
+        <p class="rot-colar-dica">Gerou o roteiro no Claude? Cola ele aqui e clica em <strong>Preencher campos</strong> — ele distribui tudo nos lugares certos (título, objetivo, legenda, cenas). Depois é só revisar e salvar.</p>
+        <textarea id="rot-colar" rows="5" placeholder="Cole aqui o roteiro inteiro..."></textarea>
+        <div class="rot-colar-acoes">
+          <button type="button" class="botao botao-principal" id="btn-colar-roteiro">Preencher campos</button>
+          <button type="button" class="rot-link-ia" id="btn-mostrar-ia">✨ ou gerar com IA (opcional)</button>
+        </div>
+        <span class="rot-ia-status" id="rot-colar-status"></span>
+      </div>
+
+      <!-- Gerar com IA (escondido por padrão; aparece só se clicar no link acima) -->
+      <div class="rot-ia-box" id="rot-ia-box" hidden>
         <label for="rot-briefing">✨ Gerar com IA a partir do briefing</label>
+        <p class="rot-colar-dica">Precisa da chave do Claude configurada (veja CONFIGURAR-ROTEIROS.md) e usa crédito da API. Cola o briefing e a IA monta o roteiro.</p>
         <textarea id="rot-briefing" rows="4" placeholder="Cole aqui o briefing que a marca te mandou. A IA monta o hook, as cenas e a legenda. Você revisa e ajusta."></textarea>
         <div class="linha-form-2">
           <div class="campo-form"><label>Formato</label><input type="text" id="rot-ia-formato" placeholder="Reels · 60s"></div>
@@ -7504,6 +7525,9 @@
     document.getElementById("rot-cenas").innerHTML = "";
     document.getElementById("rot-moodboard").innerHTML = "";
     document.getElementById("rot-ia-status").textContent = "";
+    document.getElementById("rot-colar-status").textContent = "";
+    document.getElementById("rot-colar-status").className = "rot-ia-status";
+    document.getElementById("rot-ia-box").hidden = true;
     document.getElementById("modal-roteiro-titulo").textContent = r ? "Editar roteiro" : "Novo roteiro";
     document.getElementById("rot-id").value = r ? r.id : "";
     document.getElementById("rot-token").value = r ? r.token : "";
@@ -7634,17 +7658,7 @@
       });
       const corpo = await resp.json();
       if (!resp.ok || !corpo.roteiro) throw new Error(corpo.erro || ("status " + resp.status));
-      const g = corpo.roteiro;
-      if (g.titulo && !document.getElementById("rot-titulo").value.trim()) document.getElementById("rot-titulo").value = g.titulo;
-      if (g.subtitulo) document.getElementById("rot-subtitulo").value = g.subtitulo;
-      if (g.formato) document.getElementById("rot-formato").value = g.formato;
-      if (g.objetivo) document.getElementById("rot-objetivo").value = g.objetivo;
-      if (g.pontos_importantes) document.getElementById("rot-pontos").value = g.pontos_importantes;
-      if (g.sugestao_legenda) document.getElementById("rot-legenda").value = g.sugestao_legenda;
-      if (Array.isArray(g.cenas) && g.cenas.length) {
-        document.getElementById("rot-cenas").innerHTML = "";
-        g.cenas.forEach(addCena);
-      }
+      preencherFormComRoteiro(corpo.roteiro);
       status.textContent = "Pronto! Revise e ajuste o que quiser antes de salvar. ✨";
     } catch (e) {
       status.classList.add("erro");
@@ -7652,6 +7666,97 @@
     } finally {
       botao.disabled = false;
     }
+  });
+
+  // ---- Preencher o formulário a partir de um roteiro (IA ou colado) ----
+  function preencherFormComRoteiro(g) {
+    if (!g) return;
+    if (g.titulo && !document.getElementById("rot-titulo").value.trim()) document.getElementById("rot-titulo").value = g.titulo;
+    if (g.subtitulo) document.getElementById("rot-subtitulo").value = g.subtitulo;
+    if (g.formato) document.getElementById("rot-formato").value = g.formato;
+    if (g.objetivo) document.getElementById("rot-objetivo").value = g.objetivo;
+    if (g.pontos_importantes) document.getElementById("rot-pontos").value = g.pontos_importantes;
+    if (g.sugestao_legenda) document.getElementById("rot-legenda").value = g.sugestao_legenda;
+    if (Array.isArray(g.cenas) && g.cenas.length) {
+      document.getElementById("rot-cenas").innerHTML = "";
+      g.cenas.forEach(addCena);
+    }
+  }
+
+  // Lê um roteiro colado (texto com rótulos, ou JSON) e devolve um objeto.
+  function textoSimples(s) { return (s || "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").trim(); }
+  function parsearRoteiroColado(txt) {
+    txt = (txt || "").trim();
+    if (!txt) return null;
+    // 1) Se parecer JSON, tenta direto (caminho mais confiável)
+    if (txt[0] === "{") {
+      try { const j = JSON.parse(txt); if (j && typeof j === "object") return j; } catch (e) { /* cai pro texto */ }
+    }
+    // 2) Parser por rótulos (Título:, Objetivo:, Cena 1 — HOOK (0-5s), Fala:, Cena:...)
+    const ROTULOS = {
+      "titulo": "titulo", "subtitulo": "subtitulo", "formato": "formato", "objetivo": "objetivo",
+      "pontos": "pontos_importantes", "pontos importantes": "pontos_importantes",
+      "legenda": "sugestao_legenda", "sugestao de legenda": "sugestao_legenda", "sugestao": "sugestao_legenda",
+    };
+    const r = { titulo: "", subtitulo: "", formato: "", objetivo: "", pontos_importantes: "", sugestao_legenda: "", cenas: [] };
+    let campoTopo = null, cena = null, subcena = null;
+    const ehCena = /^\s*cena\s*\d+/i;
+    txt.split(/\r?\n/).forEach(linhaRaw => {
+      const linha = linhaRaw.trim();
+      if (ehCena.test(linha)) {
+        campoTopo = null; subcena = null;
+        cena = { tag: "", tempo: "", narracao: "", cena: "" };
+        let resto = linha.replace(/^\s*cena\s*\d+\s*/i, "");
+        const mt = resto.match(/\(([^)]*)\)/);
+        if (mt) { cena.tempo = mt[1].trim(); resto = resto.replace(mt[0], ""); }
+        resto = resto.replace(/^[\s:—–-]+/, "").replace(/[\s:—–-]+$/, "").trim();
+        if (resto) cena.tag = resto;
+        r.cenas.push(cena);
+        return;
+      }
+      if (cena) {
+        const m = linha.match(/^([^:]{1,24}):\s*(.*)$/);
+        if (m) {
+          const k = textoSimples(m[1]);
+          if (k === "fala" || k === "narracao") { subcena = "narracao"; cena.narracao = m[2]; return; }
+          if (k === "cena" || k === "detalhes" || k === "imagem" || k === "acao") { subcena = "cena"; cena.cena = m[2]; return; }
+        }
+        if (!linha) { subcena = null; return; }
+        if (subcena) { cena[subcena] += (cena[subcena] ? "\n" : "") + linha; return; }
+        return;
+      }
+      const m = linha.match(/^([^:]{1,30}):\s*(.*)$/);
+      if (m && ROTULOS[textoSimples(m[1])]) {
+        campoTopo = ROTULOS[textoSimples(m[1])];
+        r[campoTopo] = m[2].trim();
+        return;
+      }
+      if (campoTopo && linha) { r[campoTopo] += (r[campoTopo] ? "\n" : "") + linha; return; }
+      if (!r.titulo && linha) { r.titulo = linha; return; }
+    });
+    r.cenas = r.cenas.filter(c => c.tag || c.tempo || c.narracao || c.cena);
+    const temAlgo = r.titulo || r.objetivo || r.sugestao_legenda || r.cenas.length;
+    return temAlgo ? r : null;
+  }
+
+  // Botão "Preencher campos" (colar roteiro pronto)
+  document.getElementById("btn-colar-roteiro").addEventListener("click", () => {
+    const texto = document.getElementById("rot-colar").value;
+    const status = document.getElementById("rot-colar-status");
+    status.className = "rot-ia-status";
+    const r = parsearRoteiroColado(texto);
+    if (!r) { status.classList.add("erro"); status.textContent = "Não entendi o texto. Confere se colou o roteiro certinho."; return; }
+    preencherFormComRoteiro(r);
+    const nc = (r.cenas && r.cenas.length) ? r.cenas.length : 0;
+    status.classList.add("ok");
+    status.textContent = "Preenchido! " + (nc ? nc + " cena" + (nc > 1 ? "s" : "") + ". " : "") + "Revise e salve. ✨";
+  });
+
+  // Link "ou gerar com IA" — mostra/esconde a caixa de IA (escondida por padrão)
+  document.getElementById("btn-mostrar-ia").addEventListener("click", () => {
+    const box = document.getElementById("rot-ia-box");
+    box.hidden = !box.hidden;
+    if (!box.hidden) box.scrollIntoView({ behavior: "smooth", block: "nearest" });
   });
 
   // ---- Barra de ações da aba ----
