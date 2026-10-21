@@ -219,15 +219,6 @@
       <p class="campo-rot">Pontos importantes</p>
       <p class="campo-val" id="c-pontos"></p>
     </div>
-    <div id="campo-legenda" hidden>
-      <p class="campo-rot">Sugestão de legenda</p>
-      <div class="legenda-box" id="c-legenda"></div>
-      <button class="btn-copiar" id="btn-copiar-legenda" type="button">copiar legenda</button>
-    </div>
-    <div id="campo-resumo" hidden>
-      <p class="campo-rot">Cenas</p>
-      <div id="c-resumo"></div>
-    </div>
   </section>
 
   <section class="bloco" id="bloco-moodboard" hidden>
@@ -236,6 +227,9 @@
   </section>
 
   <p class="cenas-rotulo" id="cenas-rotulo" hidden>Cenas</p>
+  <div id="campo-resumo" hidden>
+    <div id="c-resumo"></div>
+  </div>
   <div id="lista-cenas"></div>
 
   <section class="bloco" id="bloco-comentario">
@@ -303,10 +297,9 @@
     let temRoteiro = false;
     if (r.objetivo && r.objetivo.trim()) { $("#c-objetivo").textContent = r.objetivo; $("#campo-objetivo").hidden = false; temRoteiro = true; }
     if (r.pontos_importantes && r.pontos_importantes.trim()) { $("#c-pontos").textContent = r.pontos_importantes; $("#campo-pontos").hidden = false; temRoteiro = true; }
-    if (r.sugestao_legenda && r.sugestao_legenda.trim()) {
-      $("#c-legenda").textContent = r.sugestao_legenda; $("#campo-legenda").hidden = false; temRoteiro = true;
-    }
-    // Resumo das cenas (fala + cena) dentro do bloco Roteiro
+    $("#bloco-roteiro").hidden = !temRoteiro;
+
+    // Resumo das cenas (fala + cena) — agora junto das cenas, depois do moodboard
     if (cenas.length) {
       $("#c-resumo").innerHTML = cenas.map((c, i) => {
         const titulo = "Cena " + (i + 1) + (c.tag ? " — " + escapar(c.tag) : "");
@@ -315,9 +308,8 @@
         if (c.cena && c.cena.trim()) linhas += `<p class="resumo-linha"><strong>Cena</strong>${escapar(c.cena)}</p>`;
         return `<div class="resumo-cena"><p class="resumo-cena-titulo">${titulo}</p>${linhas}</div>`;
       }).join("");
-      $("#campo-resumo").hidden = false; temRoteiro = true;
+      $("#campo-resumo").hidden = false;
     }
-    $("#bloco-roteiro").hidden = !temRoteiro;
 
     // Cenas
     if (cenas.length) {
@@ -351,17 +343,6 @@
     $("#carregando").hidden = true;
     $("#conteudo").hidden = false;
   })();
-
-  // Copiar legenda
-  document.addEventListener("click", function (e) {
-    if (e.target && e.target.id === "btn-copiar-legenda") {
-      const t = $("#c-legenda").textContent || "";
-      navigator.clipboard.writeText(t).then(() => {
-        e.target.textContent = "copiado ✓";
-        setTimeout(() => { e.target.textContent = "copiar legenda"; }, 1800);
-      }).catch(() => {});
-    }
-  });
 
   // Enviar comentário
   $("#form-comentario").addEventListener("submit", async function (ev) {
