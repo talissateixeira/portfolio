@@ -1083,6 +1083,29 @@
     .cartao-projeto-producao-topo { width: auto; }
     .linha-dashboard-dupla { grid-template-columns: 1fr; }
   }
+
+  /* ---- Aba Roteiros ---- */
+  .grade-roteiros { display: grid; grid-template-columns: repeat(auto-fill, minmax(258px, 1fr)); gap: 14px; }
+  .rot-card { background: var(--branco); border: 1px solid var(--borda); border-radius: var(--raio); padding: 16px 18px; cursor: pointer; transition: box-shadow .2s, transform .2s; display: flex; flex-direction: column; gap: 7px; }
+  .rot-card:hover { box-shadow: 0 10px 26px rgba(38,34,32,0.10); transform: translateY(-2px); }
+  .rot-card-topo { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+  .rot-card-titulo { font-weight: 600; color: var(--preto); line-height: 1.3; }
+  .rot-card-marca { font-size: 0.82rem; color: var(--texto-suave); }
+  .rot-card-meta { display: flex; gap: 8px; flex-wrap: wrap; font-size: 0.76rem; color: var(--texto-suave); align-items: center; margin-top: 2px; }
+  .rot-card-acoes { display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
+  .rot-card-acoes .botao { padding: 6px 12px; font-size: 0.8rem; }
+  .rot-ia-box { background: var(--fundo-acento); border: 1px solid var(--borda); border-radius: var(--raio); padding: 14px 16px; margin-bottom: 18px; }
+  .rot-ia-box > label { display: block; font-weight: 600; margin-bottom: 6px; }
+  .rot-ia-status { font-size: 0.82rem; color: var(--texto-suave); margin-left: 10px; }
+  .rot-ia-status.erro { color: var(--erro); }
+  .rot-cena-linha { border: 1px solid var(--borda); border-radius: var(--raio); padding: 14px 12px 12px; margin-bottom: 10px; position: relative; background: var(--creme); }
+  .rot-cena-linha .linha-form-2 { margin-bottom: 8px; }
+  .rot-remover { position: absolute; top: 8px; right: 8px; border: none; background: transparent; color: var(--erro); cursor: pointer; font-size: 1.15rem; line-height: 1; padding: 2px 6px; }
+  .rot-mood-linha { display: flex; gap: 8px; margin-bottom: 8px; align-items: center; }
+  .rot-mood-linha input { flex: 1; }
+  .rot-coment-item { border: 1px solid var(--borda); border-radius: var(--raio); padding: 10px 12px; margin-bottom: 8px; background: var(--creme); }
+  .rot-coment-item .meta { font-size: 0.75rem; color: var(--texto-suave); margin-bottom: 3px; }
+  .badge-novo-roteiro { background: var(--erro); color: #fff; border-radius: 999px; font-size: 0.66rem; padding: 1px 7px; vertical-align: middle; }
 </style>
 </head>
 <body>
@@ -1145,6 +1168,11 @@
       <button class="nav-item" data-aba="checklist" title="Checklist">
         <span class="icone"><svg viewBox="0 0 24 24"><path d="M9 11l2.2 2.2L15 9"/><rect x="3" y="3" width="18" height="18" rx="3"/></svg></span>
         <span class="rotulo-nav">Checklist</span>
+      </button>
+      <button class="nav-item" data-aba="roteiros" title="Roteiros">
+        <span class="icone"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2.5"/><path d="M3 9h18M8 4l-2 5M13 4l-2 5M18 4l-2 5"/></svg></span>
+        <span class="rotulo-nav">Roteiros</span>
+        <span class="nav-badge" id="badge-roteiros" title="Comentários novos de marcas" hidden>0</span>
       </button>
     </nav>
 
@@ -1799,10 +1827,108 @@
       </div>
       <div class="grade-mensagens" id="grade-mensagens"></div>
     </section>
+
+    <!-- ===================== ABA ROTEIROS ===================== -->
+    <section class="aba" id="aba-roteiros">
+      <p class="portfolio-subtitulo">Monte o roteiro do vídeo e mande um link pra marca aprovar. Ela vê tudo numa página na sua cara e pode comentar — o comentário cai como notificação no seu celular.</p>
+
+      <div class="stats-faixa" id="stats-roteiros"></div>
+
+      <div class="barra-acoes">
+        <div class="barra-acoes-esquerda">
+          <button class="pill-filtro ativo" data-filtro-roteiro="todos">Todos</button>
+          <button class="pill-filtro" data-filtro-roteiro="rascunho">Rascunhos</button>
+          <button class="pill-filtro" data-filtro-roteiro="enviado">Enviados</button>
+          <button class="pill-filtro" data-filtro-roteiro="aprovado">Aprovados</button>
+          <input type="text" class="campo-busca" id="busca-roteiros" placeholder="Buscar por título ou marca...">
+        </div>
+        <button type="button" class="botao botao-principal" id="botao-add-roteiro">+ Novo roteiro</button>
+      </div>
+
+      <div id="lista-roteiros" class="grade-roteiros"></div>
+    </section>
   </main>
 </div>
 
 <!-- ===================== MODAIS ===================== -->
+<!-- ===================== MODAL ROTEIRO ===================== -->
+<div class="modal-fundo" id="modal-roteiro" hidden>
+  <div class="modal-caixa" style="max-width:820px;">
+    <h3 class="modal-titulo" id="modal-roteiro-titulo">Novo roteiro</h3>
+    <form id="form-roteiro">
+      <input type="hidden" id="rot-id">
+      <input type="hidden" id="rot-token">
+
+      <!-- Gerar com IA -->
+      <div class="rot-ia-box">
+        <label for="rot-briefing">✨ Gerar com IA a partir do briefing</label>
+        <textarea id="rot-briefing" rows="4" placeholder="Cole aqui o briefing que a marca te mandou. A IA monta o hook, as cenas e a legenda. Você revisa e ajusta."></textarea>
+        <div class="linha-form-2">
+          <div class="campo-form"><label>Formato</label><input type="text" id="rot-ia-formato" placeholder="Reels · 60s"></div>
+          <div class="campo-form"><label>Observações pra IA (opcional)</label><input type="text" id="rot-ia-obs" placeholder="Ex.: tom leve, falar em 1ª pessoa"></div>
+        </div>
+        <button type="button" class="botao botao-principal" id="btn-gerar-ia">Gerar com IA</button>
+        <span class="rot-ia-status" id="rot-ia-status"></span>
+      </div>
+
+      <div class="linha-form-2">
+        <div class="campo-form"><label>Título</label><input type="text" id="rot-titulo" required placeholder="Ex.: Campanha verão / roteiro 1"></div>
+        <div class="campo-form"><label>Marca (sua referência)</label><input type="text" id="rot-marca" placeholder="Nome da marca"></div>
+      </div>
+      <div class="linha-form-2">
+        <div class="campo-form"><label>Subtítulo (opcional)</label><input type="text" id="rot-subtitulo" placeholder="Ex.: Lançamento"></div>
+        <div class="campo-form"><label>Formato</label><input type="text" id="rot-formato" placeholder="Reels · 60s"></div>
+      </div>
+      <div class="campo-form"><label>Objetivo</label><textarea id="rot-objetivo" rows="2"></textarea></div>
+      <div class="campo-form"><label>Pontos importantes</label><textarea id="rot-pontos" rows="3" placeholder="Um por linha, começando com -"></textarea></div>
+      <div class="campo-form"><label>Sugestão de legenda</label><textarea id="rot-legenda" rows="3"></textarea></div>
+
+      <div class="campo-form">
+        <label>Cenas</label>
+        <div id="rot-cenas"></div>
+        <button type="button" class="botao botao-secundario" id="btn-add-cena" style="margin-top:4px;">+ cena</button>
+      </div>
+
+      <div class="campo-form">
+        <label>Moodboard (cole o link de cada imagem)</label>
+        <div id="rot-moodboard"></div>
+        <button type="button" class="botao botao-secundario" id="btn-add-mood" style="margin-top:4px;">+ imagem</button>
+      </div>
+
+      <div class="linha-form-2">
+        <div class="campo-form"><label>Status</label>
+          <select id="rot-status">
+            <option value="rascunho">Rascunho</option>
+            <option value="enviado">Enviado</option>
+            <option value="aprovado">Aprovado</option>
+            <option value="ajustes">Pedir ajustes</option>
+          </select>
+        </div>
+        <div class="campo-form" id="rot-link-wrap" hidden>
+          <label>Link pra marca (salve primeiro)</label>
+          <div style="display:flex;gap:8px;">
+            <input type="text" id="rot-link" readonly style="flex:1;">
+            <button type="button" class="botao botao-secundario" id="btn-copiar-link">Copiar</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="campo-form" id="rot-coment-wrap" hidden>
+        <label>Comentários da marca</label>
+        <div id="rot-comentarios"></div>
+      </div>
+
+      <div class="modal-acoes">
+        <button type="button" class="link-apagar" id="rot-apagar" hidden title="Apagar roteiro"><span class="icone"><svg viewBox="0 0 24 24"><path d="M4 7h16M9 7V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v3m3 0-1 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L6 7h12Z"/><path d="M10 11v6M14 11v6"/></svg></span></button>
+        <div class="modal-acoes-direita">
+          <button type="button" class="botao botao-secundario" data-fechar-modal>Cancelar</button>
+          <button type="submit" class="botao botao-principal">Salvar</button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+
 <!-- ===================== MODAL PRÉVIA EM TELA CHEIA ===================== -->
 <div class="modal-fundo" id="modal-prosp-fullscreen" hidden>
   <div class="modal-caixa" style="max-width:600px;padding:0;overflow:hidden;">
@@ -2447,8 +2573,8 @@
   }
 
   // ---- Navegação (abas + gaveta no celular) ----
-  const TITULOS_ABA = { dashboard: "👋 Início", portfolio: "Suas Métricas", marcas: "Leads", prospeccao: "Prospecção", calendario: "Calendário", campanhas: "Campanhas", conteudo: "Meu conteúdo no Instagram", producao: "Produção", checklist: "Checklist", transcricoes: "Transcrições", mensagens: "Mensagens" };
-  const CARREGADORES_ABA = { dashboard: carregarDashboard, portfolio: carregarPortfolio, marcas: carregarMarcas, prospeccao: carregarProspeccao, calendario: carregarCalendario, campanhas: carregarCampanhas, conteudo: carregarConteudo, producao: carregarProducao, checklist: carregarChecklist, transcricoes: carregarTranscricoes, mensagens: carregarMensagens };
+  const TITULOS_ABA = { dashboard: "👋 Início", portfolio: "Suas Métricas", marcas: "Leads", prospeccao: "Prospecção", calendario: "Calendário", campanhas: "Campanhas", conteudo: "Meu conteúdo no Instagram", producao: "Produção", checklist: "Checklist", roteiros: "Roteiros", transcricoes: "Transcrições", mensagens: "Mensagens" };
+  const CARREGADORES_ABA = { dashboard: carregarDashboard, portfolio: carregarPortfolio, marcas: carregarMarcas, prospeccao: carregarProspeccao, calendario: carregarCalendario, campanhas: carregarCampanhas, conteudo: carregarConteudo, producao: carregarProducao, checklist: carregarChecklist, roteiros: carregarRoteiros, transcricoes: carregarTranscricoes, mensagens: carregarMensagens };
   const abasCarregadas = new Set();
 
   function abrirAba(nome) {
@@ -7215,6 +7341,326 @@
   // "#producao-proximas" é um link especial (usado pelo "Ver tudo" de
   // Próximas tarefas, que abre numa aba nova): precisa esperar os dados de
   // Produção carregarem antes de conseguir clicar na subaba certa.
+  // ===================== ABA ROTEIROS =====================
+  let listaRoteiros = [];
+  let comentariosPorRoteiro = {};   // { roteiro_id: { total, novos } }
+  let filtroRoteiroAtual = "todos";
+  const modalRoteiro = document.getElementById("modal-roteiro");
+
+  function linkRoteiro(r) {
+    return location.origin + "/roteiro/?id=" + r.id + "&token=" + r.token;
+  }
+
+  async function carregarRoteiros() {
+    listaRoteiros = await consultarSeguro("roteiros", sb.from("roteiros").select("*").order("atualizado_em", { ascending: false }));
+    const coments = await consultarSeguro("roteiro_comentarios", sb.from("roteiro_comentarios").select("roteiro_id, visto"));
+    comentariosPorRoteiro = {};
+    coments.forEach(c => {
+      const b = comentariosPorRoteiro[c.roteiro_id] || (comentariosPorRoteiro[c.roteiro_id] = { total: 0, novos: 0 });
+      b.total++; if (!c.visto) b.novos++;
+    });
+    atualizarBadgeRoteiros();
+    renderStatsRoteiros();
+    renderListaRoteiros();
+  }
+
+  function totalNovosRoteiros() {
+    return Object.values(comentariosPorRoteiro).reduce((s, b) => s + b.novos, 0);
+  }
+  function atualizarBadgeRoteiros() {
+    const badge = document.getElementById("badge-roteiros");
+    if (!badge) return;
+    const n = totalNovosRoteiros();
+    badge.textContent = n;
+    badge.hidden = n === 0;
+  }
+
+  function renderStatsRoteiros() {
+    const total = listaRoteiros.length;
+    const rascunhos = listaRoteiros.filter(r => r.status === "rascunho").length;
+    const enviados = listaRoteiros.filter(r => r.status === "enviado").length;
+    const aprovados = listaRoteiros.filter(r => r.status === "aprovado").length;
+    document.getElementById("stats-roteiros").innerHTML = [
+      { rotulo: "Roteiros", valor: total },
+      { rotulo: "Rascunhos", valor: rascunhos },
+      { rotulo: "Enviados", valor: enviados },
+      { rotulo: "Aprovados", valor: aprovados },
+      { rotulo: "Comentários novos", valor: totalNovosRoteiros() }
+    ].map((s, i, arr) => '<div class="stat-item' + (i === arr.length - 1 ? " stat-item-cor-3" : "") + '"><div class="stat-rotulo">' + s.rotulo + '</div><div class="stat-valor">' + s.valor + "</div></div>").join("");
+  }
+
+  const ROTULO_STATUS_ROTEIRO = { rascunho: "Rascunho", enviado: "Enviado", aprovado: "Aprovado", ajustes: "Ajustes" };
+  function corStatusRoteiro(s) {
+    if (s === "aprovado") return "var(--fundo-sucesso);color:var(--sucesso)";
+    if (s === "enviado") return "var(--fundo-acento);color:var(--acento)";
+    if (s === "ajustes") return "var(--fundo-aviso);color:var(--aviso)";
+    return "var(--fundo-cinza);color:var(--cinza)";
+  }
+
+  function renderListaRoteiros() {
+    const termo = document.getElementById("busca-roteiros").value.trim().toLowerCase();
+    const linhas = listaRoteiros.filter(r => {
+      if (filtroRoteiroAtual !== "todos" && r.status !== filtroRoteiroAtual) return false;
+      if (!termo) return true;
+      return (r.titulo || "").toLowerCase().includes(termo) || (r.marca || "").toLowerCase().includes(termo);
+    });
+    const cont = document.getElementById("lista-roteiros");
+    if (linhas.length === 0) {
+      cont.innerHTML = '<p class="texto-vazio">Nenhum roteiro ainda. Clique em "+ Novo roteiro" pra começar.</p>';
+      return;
+    }
+    cont.innerHTML = linhas.map(r => {
+      const c = comentariosPorRoteiro[r.id] || { total: 0, novos: 0 };
+      const selo = c.novos ? ' <span class="badge-novo-roteiro">' + c.novos + ' novo' + (c.novos > 1 ? "s" : "") + '</span>' : "";
+      const coment = c.total ? '💬 ' + c.total + selo : "sem comentários";
+      return '<div class="rot-card" data-id="' + r.id + '">' +
+        '<div class="rot-card-topo">' +
+          '<div class="rot-card-titulo">' + escaparHtmlEmail(r.titulo || "(sem título)") + '</div>' +
+          '<span class="pill" style="background:' + corStatusRoteiro(r.status) + '">' + (ROTULO_STATUS_ROTEIRO[r.status] || r.status) + '</span>' +
+        '</div>' +
+        (r.marca ? '<div class="rot-card-marca">' + escaparHtmlEmail(r.marca) + '</div>' : "") +
+        '<div class="rot-card-meta">' + (r.formato ? '<span>' + escaparHtmlEmail(r.formato) + '</span>' : "") + '<span>' + coment + '</span></div>' +
+        '<div class="rot-card-acoes">' +
+          '<button type="button" class="botao botao-secundario" data-acao-rot="link" data-id="' + r.id + '">Copiar link</button>' +
+          '<button type="button" class="botao botao-secundario" data-acao-rot="ver" data-id="' + r.id + '">Abrir página</button>' +
+        '</div>' +
+      '</div>';
+    }).join("");
+
+    cont.querySelectorAll(".rot-card").forEach(card => {
+      card.addEventListener("click", (e) => {
+        if (e.target.closest("[data-acao-rot]")) return;
+        abrirModalRoteiro(listaRoteiros.find(r => r.id === card.dataset.id));
+      });
+    });
+    cont.querySelectorAll('[data-acao-rot="link"]').forEach(b => b.addEventListener("click", () => {
+      const r = listaRoteiros.find(x => x.id === b.dataset.id);
+      navigator.clipboard.writeText(linkRoteiro(r)).then(() => { b.textContent = "Copiado ✓"; setTimeout(() => b.textContent = "Copiar link", 1600); });
+    }));
+    cont.querySelectorAll('[data-acao-rot="ver"]').forEach(b => b.addEventListener("click", () => {
+      const r = listaRoteiros.find(x => x.id === b.dataset.id);
+      window.open(linkRoteiro(r), "_blank");
+    }));
+  }
+
+  // ---- Linhas de cena e moodboard (dentro do modal) ----
+  function htmlLinhaCena(c) {
+    c = c || {};
+    return '<div class="rot-cena-linha">' +
+      '<button type="button" class="rot-remover" title="Remover cena">&times;</button>' +
+      '<div class="linha-form-2">' +
+        '<div class="campo-form"><label>Tag</label><input type="text" class="cena-tag" placeholder="HOOK" value="' + escaparAttr(c.tag) + '"></div>' +
+        '<div class="campo-form"><label>Tempo</label><input type="text" class="cena-tempo" placeholder="0-5s" value="' + escaparAttr(c.tempo) + '"></div>' +
+      '</div>' +
+      '<div class="campo-form"><label>Narração (a fala)</label><textarea class="cena-narracao" rows="2">' + escaparHtmlEmail(c.narracao) + '</textarea></div>' +
+      '<div class="campo-form"><label>Cena (o que aparece)</label><textarea class="cena-cena" rows="2">' + escaparHtmlEmail(c.cena) + '</textarea></div>' +
+    '</div>';
+  }
+  function htmlLinhaMood(url) {
+    return '<div class="rot-mood-linha">' +
+      '<input type="text" class="mood-url" placeholder="https://..." value="' + escaparAttr(url) + '">' +
+      '<button type="button" class="botao botao-secundario rot-remover-mood">Remover</button>' +
+    '</div>';
+  }
+  function escaparAttr(s) { return (s || "").replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;"); }
+
+  function addCena(c) {
+    document.getElementById("rot-cenas").insertAdjacentHTML("beforeend", htmlLinhaCena(c));
+  }
+  function addMood(url) {
+    document.getElementById("rot-moodboard").insertAdjacentHTML("beforeend", htmlLinhaMood(url));
+  }
+  document.getElementById("btn-add-cena").addEventListener("click", () => addCena());
+  document.getElementById("btn-add-mood").addEventListener("click", () => addMood());
+  document.getElementById("rot-cenas").addEventListener("click", (e) => {
+    if (e.target.classList.contains("rot-remover")) e.target.closest(".rot-cena-linha").remove();
+  });
+  document.getElementById("rot-moodboard").addEventListener("click", (e) => {
+    if (e.target.classList.contains("rot-remover-mood")) e.target.closest(".rot-mood-linha").remove();
+  });
+
+  function lerCenasDoForm() {
+    return Array.from(document.querySelectorAll("#rot-cenas .rot-cena-linha")).map((el, i) => ({
+      ordem: i,
+      tag: el.querySelector(".cena-tag").value.trim(),
+      tempo: el.querySelector(".cena-tempo").value.trim(),
+      narracao: el.querySelector(".cena-narracao").value.trim(),
+      cena: el.querySelector(".cena-cena").value.trim(),
+    })).filter(c => c.tag || c.tempo || c.narracao || c.cena);
+  }
+  function lerMoodDoForm() {
+    return Array.from(document.querySelectorAll("#rot-moodboard .mood-url"))
+      .map((el, i) => ({ url: el.value.trim(), ordem: i })).filter(m => m.url);
+  }
+
+  // ---- Abrir o modal (novo ou edição) ----
+  async function abrirModalRoteiro(r) {
+    document.getElementById("form-roteiro").reset();
+    document.getElementById("rot-cenas").innerHTML = "";
+    document.getElementById("rot-moodboard").innerHTML = "";
+    document.getElementById("rot-ia-status").textContent = "";
+    document.getElementById("modal-roteiro-titulo").textContent = r ? "Editar roteiro" : "Novo roteiro";
+    document.getElementById("rot-id").value = r ? r.id : "";
+    document.getElementById("rot-token").value = r ? r.token : "";
+    document.getElementById("rot-titulo").value = r ? (r.titulo || "") : "";
+    document.getElementById("rot-marca").value = r ? (r.marca || "") : "";
+    document.getElementById("rot-subtitulo").value = r ? (r.subtitulo || "") : "";
+    document.getElementById("rot-formato").value = r ? (r.formato || "") : "";
+    document.getElementById("rot-objetivo").value = r ? (r.objetivo || "") : "";
+    document.getElementById("rot-pontos").value = r ? (r.pontos_importantes || "") : "";
+    document.getElementById("rot-legenda").value = r ? (r.sugestao_legenda || "") : "";
+    document.getElementById("rot-status").value = r ? r.status : "rascunho";
+    document.getElementById("rot-apagar").hidden = !r;
+
+    const linkWrap = document.getElementById("rot-link-wrap");
+    if (r) { linkWrap.hidden = false; document.getElementById("rot-link").value = linkRoteiro(r); }
+    else linkWrap.hidden = true;
+
+    // Cenas e moodboard existentes
+    if (r) {
+      const cenas = await consultarSeguro("roteiro_cenas", sb.from("roteiro_cenas").select("*").eq("roteiro_id", r.id).order("ordem"));
+      cenas.forEach(addCena);
+      const mood = await consultarSeguro("roteiro_moodboard", sb.from("roteiro_moodboard").select("*").eq("roteiro_id", r.id).order("ordem"));
+      mood.forEach(m => addMood(m.url));
+      await carregarComentariosNoModal(r.id);
+    } else {
+      document.getElementById("rot-coment-wrap").hidden = true;
+      addCena({ tag: "HOOK" });
+    }
+
+    modalRoteiro.hidden = false;
+  }
+
+  async function carregarComentariosNoModal(roteiroId) {
+    const wrap = document.getElementById("rot-coment-wrap");
+    const cont = document.getElementById("rot-comentarios");
+    const coments = await consultarSeguro("roteiro_comentarios", sb.from("roteiro_comentarios").select("*").eq("roteiro_id", roteiroId).order("criado_em", { ascending: false }));
+    if (!coments.length) { wrap.hidden = true; return; }
+    wrap.hidden = false;
+    cont.innerHTML = coments.map(c =>
+      '<div class="rot-coment-item"><div class="meta">' + escaparHtmlEmail(c.nome || "Marca") + " · " + formatarDataHora(c.criado_em) + '</div>' +
+      escaparHtmlEmail(c.texto) + '</div>'
+    ).join("");
+    // Marca como vistos (zera a bolinha de "novo").
+    const novos = coments.filter(c => !c.visto).map(c => c.id);
+    if (novos.length) {
+      await salvarSeguro("roteiro_comentarios", sb.from("roteiro_comentarios").update({ visto: true }).in("id", novos));
+      if (comentariosPorRoteiro[roteiroId]) comentariosPorRoteiro[roteiroId].novos = 0;
+      atualizarBadgeRoteiros(); renderStatsRoteiros(); renderListaRoteiros();
+    }
+  }
+
+  // ---- Salvar ----
+  document.getElementById("form-roteiro").addEventListener("submit", async (ev) => {
+    ev.preventDefault();
+    const id = document.getElementById("rot-id").value;
+    const dados = {
+      titulo: document.getElementById("rot-titulo").value.trim(),
+      marca: document.getElementById("rot-marca").value.trim() || null,
+      subtitulo: document.getElementById("rot-subtitulo").value.trim() || null,
+      formato: document.getElementById("rot-formato").value.trim() || null,
+      objetivo: document.getElementById("rot-objetivo").value.trim() || null,
+      pontos_importantes: document.getElementById("rot-pontos").value.trim() || null,
+      sugestao_legenda: document.getElementById("rot-legenda").value.trim() || null,
+      status: document.getElementById("rot-status").value,
+    };
+    if (!dados.titulo) { alert("Dê um título ao roteiro."); return; }
+
+    let roteiroId = id;
+    if (id) {
+      const ok = await salvarSeguro("roteiros", sb.from("roteiros").update(dados).eq("id", id));
+      if (ok === null) return;
+    } else {
+      const novo = await salvarSeguro("roteiros", sb.from("roteiros").insert(dados).select());
+      if (!novo || !novo[0]) return;
+      roteiroId = novo[0].id;
+    }
+
+    // Regrava cenas e moodboard (apaga e insere de novo — simples e confiável).
+    await salvarSeguro("roteiro_cenas", sb.from("roteiro_cenas").delete().eq("roteiro_id", roteiroId));
+    const cenas = lerCenasDoForm().map(c => ({ ...c, roteiro_id: roteiroId }));
+    if (cenas.length) await salvarSeguro("roteiro_cenas", sb.from("roteiro_cenas").insert(cenas));
+
+    await salvarSeguro("roteiro_moodboard", sb.from("roteiro_moodboard").delete().eq("roteiro_id", roteiroId));
+    const mood = lerMoodDoForm().map(m => ({ ...m, roteiro_id: roteiroId }));
+    if (mood.length) await salvarSeguro("roteiro_moodboard", sb.from("roteiro_moodboard").insert(mood));
+
+    modalRoteiro.hidden = true;
+    await carregarRoteiros();
+  });
+
+  // ---- Apagar ----
+  document.getElementById("rot-apagar").addEventListener("click", async () => {
+    const id = document.getElementById("rot-id").value;
+    if (!id) return;
+    if (!confirm("Apagar este roteiro? O link que você mandou pra marca para de funcionar.")) return;
+    await salvarSeguro("roteiros", sb.from("roteiros").delete().eq("id", id));
+    modalRoteiro.hidden = true;
+    await carregarRoteiros();
+  });
+
+  // ---- Copiar link de dentro do modal ----
+  document.getElementById("btn-copiar-link").addEventListener("click", () => {
+    const campo = document.getElementById("rot-link");
+    navigator.clipboard.writeText(campo.value).then(() => {
+      const b = document.getElementById("btn-copiar-link");
+      b.textContent = "Copiado ✓"; setTimeout(() => b.textContent = "Copiar", 1600);
+    });
+  });
+
+  // ---- Gerar com IA ----
+  document.getElementById("btn-gerar-ia").addEventListener("click", async () => {
+    const briefing = document.getElementById("rot-briefing").value.trim();
+    const status = document.getElementById("rot-ia-status");
+    if (!briefing) { status.textContent = "Cole o briefing da marca primeiro."; status.classList.add("erro"); return; }
+    const botao = document.getElementById("btn-gerar-ia");
+    botao.disabled = true; status.classList.remove("erro"); status.textContent = "Gerando… pode levar uns segundos.";
+    try {
+      const { data: sess } = await sb.auth.getSession();
+      const token = sess && sess.session ? sess.session.access_token : "";
+      const resp = await fetch(SUPABASE_URL + "/functions/v1/gerar-roteiro", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Authorization": "Bearer " + token },
+        body: JSON.stringify({
+          briefing,
+          formato: document.getElementById("rot-ia-formato").value.trim(),
+          instrucoes: document.getElementById("rot-ia-obs").value.trim(),
+        }),
+      });
+      const corpo = await resp.json();
+      if (!resp.ok || !corpo.roteiro) throw new Error(corpo.erro || ("status " + resp.status));
+      const g = corpo.roteiro;
+      if (g.titulo && !document.getElementById("rot-titulo").value.trim()) document.getElementById("rot-titulo").value = g.titulo;
+      if (g.subtitulo) document.getElementById("rot-subtitulo").value = g.subtitulo;
+      if (g.formato) document.getElementById("rot-formato").value = g.formato;
+      if (g.objetivo) document.getElementById("rot-objetivo").value = g.objetivo;
+      if (g.pontos_importantes) document.getElementById("rot-pontos").value = g.pontos_importantes;
+      if (g.sugestao_legenda) document.getElementById("rot-legenda").value = g.sugestao_legenda;
+      if (Array.isArray(g.cenas) && g.cenas.length) {
+        document.getElementById("rot-cenas").innerHTML = "";
+        g.cenas.forEach(addCena);
+      }
+      status.textContent = "Pronto! Revise e ajuste o que quiser antes de salvar. ✨";
+    } catch (e) {
+      status.classList.add("erro");
+      status.textContent = "Não rolou: " + e.message + ". (Confira a chave ANTHROPIC_API_KEY no Supabase.)";
+    } finally {
+      botao.disabled = false;
+    }
+  });
+
+  // ---- Barra de ações da aba ----
+  document.getElementById("botao-add-roteiro").addEventListener("click", () => abrirModalRoteiro(null));
+  document.getElementById("busca-roteiros").addEventListener("input", renderListaRoteiros);
+  document.querySelectorAll("[data-filtro-roteiro]").forEach(pill => {
+    pill.addEventListener("click", () => {
+      document.querySelectorAll("[data-filtro-roteiro]").forEach(p => p.classList.remove("ativo"));
+      pill.classList.add("ativo");
+      filtroRoteiroAtual = pill.dataset.filtroRoteiro;
+      renderListaRoteiros();
+    });
+  });
+
   const hashInicial = (window.location.hash || "#dashboard").replace("#", "");
   if (hashInicial === "producao-proximas") {
     abasCarregadas.add("producao");
