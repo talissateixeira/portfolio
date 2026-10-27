@@ -2763,7 +2763,7 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
-<script src="../js/banco.js"></script>
+<script src="../js/banco.js?v=20261027"></script>
 <script src="../js/biblioteca.js"></script>
 <script>
 (async function () {
@@ -2788,6 +2788,27 @@
     linha.textContent = mensagem;
     caixaAvisos.appendChild(linha);
   }
+  // Alguns erros não são "tabela/coluna faltando": são o token de acesso (JWT)
+  // do navegador que ficou velho ou com a hora fora de sincronia — por exemplo
+  // "JWT issued at future" ou "JWT expired". Nesses casos não adianta avisar: a
+  // gente renova a sessão e recarrega a página UMA vez. Depois do reload o
+  // token vem novo e o erro some. Uma trava de tempo (60s) garante que isto
+  // nunca vire um loop de recarregamento.
+  function ehErroDeSessao(mensagem) {
+    return /jwt|issued at future|expired|invalid.*(token|claim|signature)|pgrst301|not authenticated/i.test(String(mensagem || ""));
+  }
+  let renovandoSessao = false;
+  function curarSessaoERecarregar() {
+    if (renovandoSessao) return true; // já estamos recarregando: suprime novos avisos
+    let ultima = 0;
+    try { ultima = parseInt(sessionStorage.getItem("ultimaRenovacaoToken") || "0", 10); } catch (e) {}
+    if (Date.now() - ultima < 60000) return false; // tentamos há pouco: deixa o aviso aparecer, sem loop
+    renovandoSessao = true;
+    try { sessionStorage.setItem("ultimaRenovacaoToken", String(Date.now())); } catch (e) {}
+    Promise.resolve(sb.auth.refreshSession()).catch(() => {}).then(() => window.location.reload());
+    return true;
+  }
+
   // Roda uma consulta ao banco com segurança: nunca deixa um erro (tabela ou
   // coluna faltando, por exemplo) quebrar a página — devolve uma lista vazia
   // e avisa, em vez de travar o admin inteiro.
@@ -2795,11 +2816,13 @@
     try {
       const { data, error } = await promessa;
       if (error) {
+        if (ehErroDeSessao(error.message) && curarSessaoERecarregar()) return [];
         avisar('Não consegui carregar "' + nomeTabela + '": ' + error.message);
         return [];
       }
       return data || [];
     } catch (erro) {
+      if (ehErroDeSessao(erro.message) && curarSessaoERecarregar()) return [];
       avisar('Não consegui carregar "' + nomeTabela + '": ' + erro.message);
       return [];
     }
@@ -2807,9 +2830,14 @@
   async function salvarSeguro(nomeTabela, promessa) {
     try {
       const { data, error } = await promessa;
-      if (error) { alert("Não consegui salvar em " + nomeTabela + ": " + error.message); return null; }
+      if (error) {
+        if (ehErroDeSessao(error.message) && curarSessaoERecarregar()) return null;
+        alert("Não consegui salvar em " + nomeTabela + ": " + error.message);
+        return null;
+      }
       return data;
     } catch (erro) {
+      if (ehErroDeSessao(erro.message) && curarSessaoERecarregar()) return null;
       alert("Não consegui salvar em " + nomeTabela + ": " + erro.message);
       return null;
     }

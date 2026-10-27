@@ -47,6 +47,18 @@ window.Banco = {
       window.location.href = caminhoLogin;
       return null;
     }
+    // Renova o token de acesso logo no carregamento. Sem isto, um token antigo
+    // que ficou guardado no navegador (por exemplo gerado com o relógio fora de
+    // sincronia) pode ser recusado pelo Supabase com "JWT issued at future" —
+    // e como ele ainda não "expirou" na visão do navegador, não seria renovado
+    // sozinho, fazendo o erro voltar toda vez que o painel abre. Se a renovação
+    // falhar, seguimos com a sessão atual em vez de derrubar a usuária.
+    try {
+      const { data: renovada, error: erroRenovar } = await sb.auth.refreshSession();
+      if (!erroRenovar && renovada && renovada.session) {
+        return renovada.session.user;
+      }
+    } catch (e) { /* renovação falhou: segue com a sessão já existente */ }
     return data.session.user;
   },
 
