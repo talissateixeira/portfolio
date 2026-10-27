@@ -1116,7 +1116,205 @@
   .rot-coment-item { border: 1px solid var(--borda); border-radius: var(--raio); padding: 10px 12px; margin-bottom: 8px; background: var(--creme); }
   .rot-coment-item .meta { font-size: 0.75rem; color: var(--texto-suave); margin-bottom: 3px; }
   .badge-novo-roteiro { background: var(--erro); color: #fff; border-radius: 999px; font-size: 0.66rem; padding: 1px 7px; vertical-align: middle; }
+
+  /* ================================================================
+     ====================  SKIN MODERNA (2026)  =====================
+     Camada adicionada por cima do estilo original: profundidade por
+     sombra, cantos mais macios, micro-interações, barra lateral que
+     abre no hover e modo escuro. Fica por último de propósito, pra
+     vencer as regras anteriores sem precisar editá-las uma a uma.
+     ================================================================ */
+
+  :root {
+    --raio: 16px;
+    --creme: #F3F1EC;                 /* fundo um tom mais limpo, menos bege */
+    --easing: cubic-bezier(0.22, 0.72, 0.2, 1);
+    --sombra-1: 0 1px 2px rgba(38,35,31,0.05);
+    --sombra-2: 0 1px 2px rgba(38,35,31,0.05), 0 12px 30px -18px rgba(38,35,31,0.30);
+    --sombra-3: 0 2px 6px rgba(38,35,31,0.06), 0 24px 52px -22px rgba(38,35,31,0.36);
+    --hover-sutil: rgba(38,34,32,0.05);
+    --fundo-sutil: rgba(38,34,32,0.06);
+  }
+
+  /* ---------- MODO ESCURO (segue o sistema, ou o botão da lateral) ---------- */
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --creme: #15140F;
+      --creme-destaque: #2E2A20;
+      --creme-destaque-texto: #E6DAC0;
+      --preto: #F1ECE2;
+      --texto: #E7E1D5;
+      --texto-suave: #A69F93;
+      --borda: rgba(255,255,255,0.12);
+      --acento: #8FA896;
+      --acento-escuro: #AEC2B4;
+      --fundo-acento: rgba(143,168,150,0.18);
+      --branco: #211F1B;
+      --sucesso: #8FA896;
+      --fundo-sucesso: rgba(143,168,150,0.18);
+      --erro: #E06A60;
+      --fundo-erro: rgba(224,106,96,0.16);
+      --destaque-hoje: #DB8460;
+      --aviso: #D7A93B;
+      --fundo-aviso: rgba(215,169,59,0.16);
+      --cinza: #9A948B;
+      --fundo-cinza: rgba(255,255,255,0.09);
+      --pill-amanha: #D9B64A; --fundo-pill-amanha: rgba(217,182,74,0.18);
+      --pill-atrasado: #DB8460; --fundo-pill-atrasado: rgba(219,132,96,0.16);
+      --pill-hoje: #6FB587; --fundo-pill-hoje: rgba(111,181,135,0.16);
+      --sidebar-fundo: #121110;
+      --hover-sutil: rgba(255,255,255,0.06);
+      --fundo-sutil: rgba(255,255,255,0.08);
+      --sombra-1: 0 1px 2px rgba(0,0,0,0.4);
+      --sombra-2: 0 1px 2px rgba(0,0,0,0.4), 0 12px 30px -18px rgba(0,0,0,0.7);
+      --sombra-3: 0 2px 6px rgba(0,0,0,0.5), 0 24px 52px -22px rgba(0,0,0,0.75);
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --creme: #15140F; --creme-destaque: #2E2A20; --creme-destaque-texto: #E6DAC0;
+    --preto: #F1ECE2; --texto: #E7E1D5; --texto-suave: #A69F93;
+    --borda: rgba(255,255,255,0.12);
+    --acento: #8FA896; --acento-escuro: #AEC2B4; --fundo-acento: rgba(143,168,150,0.18);
+    --branco: #211F1B;
+    --sucesso: #8FA896; --fundo-sucesso: rgba(143,168,150,0.18);
+    --erro: #E06A60; --fundo-erro: rgba(224,106,96,0.16);
+    --destaque-hoje: #DB8460;
+    --aviso: #D7A93B; --fundo-aviso: rgba(215,169,59,0.16);
+    --cinza: #9A948B; --fundo-cinza: rgba(255,255,255,0.09);
+    --pill-amanha: #D9B64A; --fundo-pill-amanha: rgba(217,182,74,0.18);
+    --pill-atrasado: #DB8460; --fundo-pill-atrasado: rgba(219,132,96,0.16);
+    --pill-hoje: #6FB587; --fundo-pill-hoje: rgba(111,181,135,0.16);
+    --sidebar-fundo: #121110;
+    --hover-sutil: rgba(255,255,255,0.06); --fundo-sutil: rgba(255,255,255,0.08);
+    --sombra-1: 0 1px 2px rgba(0,0,0,0.4);
+    --sombra-2: 0 1px 2px rgba(0,0,0,0.4), 0 12px 30px -18px rgba(0,0,0,0.7);
+    --sombra-3: 0 2px 6px rgba(0,0,0,0.5), 0 24px 52px -22px rgba(0,0,0,0.75);
+    color-scheme: dark;
+  }
+
+  body { transition: opacity 0.2s ease, background 0.35s var(--easing), color 0.35s var(--easing); }
+
+  /* ---- cartões com profundidade e leve elevação no hover ---- */
+  .painel-branco, .cartao-resumo, .stat-item, .prosp-card, .cartao-mensagem,
+  .cartao-nicho, .secao-checklist, .acordeao-simples, .cartao-transcricao,
+  .lista-tarefas-producao, .card-kanban, .modal-caixa {
+    box-shadow: var(--sombra-1);
+    transition: box-shadow 0.25s var(--easing), transform 0.25s var(--easing),
+                border-color 0.2s var(--easing), background 0.3s var(--easing);
+  }
+  .cartao-resumo:hover, .stat-item:hover, .prosp-card:hover,
+  .cartao-mensagem:hover, .cartao-nicho:hover {
+    transform: translateY(-3px); box-shadow: var(--sombra-2);
+  }
+  .card-kanban { border-color: var(--borda); }
+  .card-kanban:hover { box-shadow: var(--sombra-2); }
+
+  /* ---- hover suave tokenizado (legível nos dois temas) ---- */
+  table.tabela tbody tr:hover, .cartao-transcricao:hover,
+  .cartao-projeto-producao:hover, .linha-tarefa-producao:hover,
+  .btn-mini-transc:hover, .botao-secundario:hover, .botao-icone:hover {
+    background: var(--hover-sutil);
+  }
+  .leads-view-switch, .producao-quadro-switch, .prosp-modo-toggle,
+  .prosp-metodo-toggle, .coluna-kanban, .pill-pilar { background: var(--fundo-sutil); }
+
+  /* ---- botões: primário na cor da marca + micro-interação ---- */
+  .botao { transition: background 0.18s var(--easing), color 0.18s var(--easing),
+           box-shadow 0.18s var(--easing), transform 0.12s var(--easing), filter 0.18s var(--easing); }
+  .botao-principal { background: var(--acento); color: #fff; box-shadow: var(--sombra-1); }
+  .botao-principal:hover { background: var(--acento); opacity: 1; filter: brightness(0.93);
+                           transform: translateY(-1px); box-shadow: var(--sombra-2); }
+  .botao-principal:active { transform: translateY(0); filter: brightness(0.88); }
+  .botao-secundario:hover { transform: translateY(-1px); }
+  .botao-icone { transition: background 0.16s var(--easing), border-color 0.16s var(--easing), transform 0.12s var(--easing); }
+  .botao-icone:hover { transform: translateY(-1px); }
+
+  /* pílulas de filtro invertidas acompanham o tema */
+  .pill-filtro { transition: all 0.16s var(--easing); }
+  .pill-filtro:hover { border-color: var(--acento); color: var(--acento-escuro); }
+  .pill-filtro.ativo { color: var(--creme); }
+  .dia-add-btn { color: var(--creme); }
+
+  /* ---- navegação: aba ativa com barrinha de acento + micro-movimento ---- */
+  .nav-item { transition: background 0.16s var(--easing), color 0.16s var(--easing), transform 0.12s var(--easing); }
+  .nav-item:hover { transform: translateX(1px); }
+  .nav-item.ativo { box-shadow: inset 2px 0 0 0 var(--acento); }
+  .nav-item .icone { transition: transform 0.2s var(--easing); }
+  .nav-item:hover .icone { transform: scale(1.06); }
+
+  /* linhas de tarefa do dashboard: realce no hover */
+  .linha-tarefa-unificada, .linha-proxima-tarefa-dash { transition: background 0.15s var(--easing); border-radius: 10px; }
+  .linha-tarefa-unificada:hover, .linha-proxima-tarefa-dash:hover { background: var(--hover-sutil); }
+
+  /* barras do gráfico: cantos mais macios */
+  .grafico-barra { border-radius: 6px 6px 2px 2px; }
+
+  /* ---- botão de alternar tema (na barra lateral) ---- */
+  .botao-tema {
+    display: flex; align-items: center; gap: 10px; width: 100%;
+    padding: 8px 10px; margin-bottom: 8px; border: none; border-radius: 10px;
+    background: none; color: var(--sidebar-texto-suave); font-size: 0.82rem;
+    font-family: var(--fonte); cursor: pointer;
+    transition: background 0.15s var(--easing), color 0.15s var(--easing);
+  }
+  .botao-tema:hover { background: var(--sidebar-hover); color: var(--sidebar-texto); }
+
+  /* ---- BARRA LATERAL: recolhida por padrão, abre ao passar o mouse ---- */
+  @media (min-width: 781px) {
+    .layout.sidebar-colapsada .botao-tema { justify-content: center; padding: 10px; }
+  }
+  @media (hover: hover) and (min-width: 781px) {
+    .layout.sidebar-colapsada .sidebar { transition: width 0.22s var(--easing), box-shadow 0.22s var(--easing); }
+    .layout.sidebar-colapsada .sidebar:hover { width: var(--sidebar-largura); z-index: 350; box-shadow: 0 24px 60px -18px rgba(0,0,0,0.55); }
+    .layout.sidebar-colapsada .sidebar:hover .rotulo-nav { display: initial; }
+    .layout.sidebar-colapsada .sidebar:hover .sidebar-email.rotulo-nav { display: block; }
+    .layout.sidebar-colapsada .sidebar:hover .nav-grupo-titulo { display: block; }
+    .layout.sidebar-colapsada .sidebar:hover .sidebar-marca { text-align: left; padding: 0 8px 20px; }
+    .layout.sidebar-colapsada .sidebar:hover .nav-item,
+    .layout.sidebar-colapsada .sidebar:hover .botao-sair,
+    .layout.sidebar-colapsada .sidebar:hover .botao-tema,
+    .layout.sidebar-colapsada .sidebar:hover .botao-colapsar-sidebar { justify-content: flex-start; padding: 9px 10px; }
+    .layout.sidebar-colapsada .sidebar:hover .nav-badge { position: static; top: auto; right: auto; margin-left: auto; min-width: 20px; height: 20px; padding: 0 6px; font-size: 0.68rem; }
+    .layout.sidebar-colapsada .sidebar:hover .nav-arvore-filhos:not(.recolhida) { display: flex; }
+  }
+
+  /* contraste de detalhes no modo escuro */
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) .pill-pilar[data-pilar="Autoridade/Cases"] { color: #E6C758; }
+    :root:not([data-theme="light"]) .pill-pilar[data-pilar="Dicas/Educativo"] { color: #7FC99A; }
+    :root:not([data-theme="light"]) .pill-pilar[data-pilar="Bastidores UGC"] { color: #E0916C; }
+    :root:not([data-theme="light"]) .pill-pilar[data-pilar="Pessoal/Lifestyle"] { color: #C9C2B4; }
+    :root:not([data-theme="light"]) .campo-form select,
+    :root:not([data-theme="light"]) select.campo-busca { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23A69F93' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E"); }
+  }
+  :root[data-theme="dark"] .pill-pilar[data-pilar="Autoridade/Cases"] { color: #E6C758; }
+  :root[data-theme="dark"] .pill-pilar[data-pilar="Dicas/Educativo"] { color: #7FC99A; }
+  :root[data-theme="dark"] .pill-pilar[data-pilar="Bastidores UGC"] { color: #E0916C; }
+  :root[data-theme="dark"] .pill-pilar[data-pilar="Pessoal/Lifestyle"] { color: #C9C2B4; }
+  :root[data-theme="dark"] .campo-form select,
+  :root[data-theme="dark"] select.campo-busca { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23A69F93' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E"); }
+
+  @media (prefers-reduced-motion: reduce) {
+    .painel-branco, .cartao-resumo, .stat-item, .prosp-card, .cartao-mensagem,
+    .cartao-nicho, .botao, .botao-principal, .nav-item, .nav-item .icone, .sidebar,
+    .linha-tarefa-unificada, .linha-proxima-tarefa-dash, .botao-icone { transition: none !important; }
+    .cartao-resumo:hover, .stat-item:hover, .prosp-card:hover, .cartao-mensagem:hover,
+    .cartao-nicho:hover, .botao-principal:hover, .botao-secundario:hover, .nav-item:hover,
+    .nav-item:hover .icone, .botao-icone:hover,
+    .linha-tarefa-unificada:hover, .linha-proxima-tarefa-dash:hover { transform: none !important; }
+  }
 </style>
+<!-- Aplica o tema salvo (claro/escuro) antes da página desenhar, sem flash. -->
+<script>
+  (function () {
+    try {
+      var t = localStorage.getItem("tema");
+      if (t === "escuro") document.documentElement.setAttribute("data-theme", "dark");
+      else if (t === "claro") document.documentElement.setAttribute("data-theme", "light");
+    } catch (e) { /* sem localStorage: segue o tema do sistema */ }
+  })();
+</script>
 </head>
 <body>
 
@@ -1207,6 +1405,10 @@
     </nav>
 
     <div class="sidebar-rodape">
+      <button type="button" class="botao-tema" id="botao-tema" title="Alternar tema claro/escuro">
+        <span class="icone"><svg viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg></span>
+        <span class="rotulo-nav">Modo escuro</span>
+      </button>
       <button type="button" class="botao-colapsar-sidebar" id="botao-colapsar-sidebar" title="Recolher menu">
         <span class="icone"><svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg></span>
         <span class="rotulo-nav">Recolher menu</span>
@@ -2684,14 +2886,39 @@
     layoutEl.classList.toggle("sidebar-colapsada", colapsada);
     botaoColapsar.title = colapsada ? "Expandir menu" : "Recolher menu";
   }
-  let colapsoSalvo = false;
-  try { colapsoSalvo = localStorage.getItem("sidebarColapsada") === "1"; } catch (erro) { /* sem acesso ao localStorage, segue expandida */ }
+  // Padrão: recolhida (ela abre ao passar o mouse). Se já houver uma escolha
+  // salva (pelo botão), respeita essa escolha.
+  let colapsoSalvo = true;
+  try { const v = localStorage.getItem("sidebarColapsada"); if (v !== null) colapsoSalvo = v === "1"; } catch (erro) { /* sem localStorage: segue recolhida */ }
   aplicarColapsoSidebar(colapsoSalvo);
   botaoColapsar.addEventListener("click", () => {
     const novoEstado = !layoutEl.classList.contains("sidebar-colapsada");
     aplicarColapsoSidebar(novoEstado);
     try { localStorage.setItem("sidebarColapsada", novoEstado ? "1" : "0"); } catch (erro) { /* ignora, só não vai lembrar da próxima vez */ }
   });
+
+  // ---- Alternar tema claro/escuro (preferência lembrada por navegador) ----
+  const botaoTema = document.getElementById("botao-tema");
+  const ICONE_LUA = '<svg viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>';
+  const ICONE_SOL = '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4.5"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M5 5l1.5 1.5M17.5 17.5 19 19M19 5l-1.5 1.5M6.5 17.5 5 19"/></svg>';
+  function temaEscuroAtivo() {
+    const attr = document.documentElement.getAttribute("data-theme");
+    if (attr) return attr === "dark";
+    return window.matchMedia("(prefers-color-scheme: dark)").matches;
+  }
+  function pintarBotaoTema() {
+    const esc = temaEscuroAtivo();
+    botaoTema.querySelector(".icone").innerHTML = esc ? ICONE_SOL : ICONE_LUA;
+    botaoTema.querySelector(".rotulo-nav").textContent = esc ? "Modo claro" : "Modo escuro";
+    botaoTema.title = esc ? "Mudar para o modo claro" : "Mudar para o modo escuro";
+  }
+  botaoTema.addEventListener("click", () => {
+    const novo = temaEscuroAtivo() ? "light" : "dark";
+    document.documentElement.setAttribute("data-theme", novo);
+    try { localStorage.setItem("tema", novo === "dark" ? "escuro" : "claro"); } catch (erro) { /* ignora */ }
+    pintarBotaoTema();
+  });
+  pintarBotaoTema();
 
   // Modais: fecham no botão "Cancelar/Fechar" ou clicando fora da caixa.
   document.querySelectorAll("[data-fechar-modal]").forEach(botao => {
