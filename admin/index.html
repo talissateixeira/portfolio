@@ -1195,6 +1195,9 @@
 
   body { transition: opacity 0.2s ease, background 0.35s var(--easing), color 0.35s var(--easing); }
 
+  /* relógio do topo removido a pedido */
+  #dashboard-relogio { display: none !important; }
+
   /* ---- cartões com profundidade e leve elevação no hover ---- */
   .painel-branco, .cartao-resumo, .stat-item, .prosp-card, .cartao-mensagem,
   .cartao-nicho, .secao-checklist, .acordeao-simples, .cartao-transcricao,
@@ -1354,10 +1357,6 @@
         <span class="icone"><svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="m3.5 7 8.5 6 8.5-6"/></svg></span>
         <span class="rotulo-nav">Prospecção</span>
       </button>
-      <button class="nav-item" data-aba="calendario" title="Calendário">
-        <span class="icone"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2.5"/><path d="M8 3v4M16 3v4M3 10h18"/></svg></span>
-        <span class="rotulo-nav">Calendário</span>
-      </button>
       <button class="nav-item" data-aba="campanhas" title="Campanhas">
         <span class="icone"><svg viewBox="0 0 24 24"><rect x="3" y="7.5" width="18" height="12.5" rx="2.2"/><path d="M8 7.5V6a2.5 2.5 0 0 1 2.5-2.5h3A2.5 2.5 0 0 1 16 6v1.5M3 13h18"/></svg></span>
         <span class="rotulo-nav">Campanhas</span>
@@ -1373,10 +1372,6 @@
         </button>
         <div id="nav-lista-projetos-sidebar"></div>
       </div>
-      <button class="nav-item" data-aba="checklist" title="Checklist">
-        <span class="icone"><svg viewBox="0 0 24 24"><path d="M9 11l2.2 2.2L15 9"/><rect x="3" y="3" width="18" height="18" rx="3"/></svg></span>
-        <span class="rotulo-nav">Checklist</span>
-      </button>
       <button class="nav-item" data-aba="roteiros" title="Roteiros">
         <span class="icone"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2.5"/><path d="M3 9h18M8 4l-2 5M13 4l-2 5M18 4l-2 5"/></svg></span>
         <span class="rotulo-nav">Roteiros</span>
@@ -2889,12 +2884,12 @@
   // Padrão: recolhida (ela abre ao passar o mouse). Se já houver uma escolha
   // salva (pelo botão), respeita essa escolha.
   let colapsoSalvo = true;
-  try { const v = localStorage.getItem("sidebarColapsada"); if (v !== null) colapsoSalvo = v === "1"; } catch (erro) { /* sem localStorage: segue recolhida */ }
+  try { const v = localStorage.getItem("sidebarRecolhida"); if (v !== null) colapsoSalvo = v === "1"; } catch (erro) { /* sem localStorage: segue recolhida */ }
   aplicarColapsoSidebar(colapsoSalvo);
   botaoColapsar.addEventListener("click", () => {
     const novoEstado = !layoutEl.classList.contains("sidebar-colapsada");
     aplicarColapsoSidebar(novoEstado);
-    try { localStorage.setItem("sidebarColapsada", novoEstado ? "1" : "0"); } catch (erro) { /* ignora, só não vai lembrar da próxima vez */ }
+    try { localStorage.setItem("sidebarRecolhida", novoEstado ? "1" : "0"); } catch (erro) { /* ignora, só não vai lembrar da próxima vez */ }
   });
 
   // ---- Alternar tema claro/escuro (preferência lembrada por navegador) ----
