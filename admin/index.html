@@ -2944,11 +2944,20 @@
   pintarBotaoTema();
 
   // Modais: fecham no botão "Cancelar/Fechar" ou clicando fora da caixa.
+  // Só conta como "clicar fora" se o clique também COMEÇOU fora — senão
+  // selecionar um texto e soltar o mouse fora da caixa fechava o modal.
+  // O do roteiro (formulário longo) só fecha pelo botão, pra não perder edição.
   document.querySelectorAll("[data-fechar-modal]").forEach(botao => {
     botao.addEventListener("click", () => botao.closest(".modal-fundo").hidden = true);
   });
   document.querySelectorAll(".modal-fundo").forEach(modal => {
-    modal.addEventListener("click", (evento) => { if (evento.target === modal) modal.hidden = true; });
+    if (modal.id === "modal-roteiro") return;
+    let comecouFora = false;
+    modal.addEventListener("mousedown", (evento) => { comecouFora = evento.target === modal; });
+    modal.addEventListener("click", (evento) => {
+      if (evento.target === modal && comecouFora) modal.hidden = true;
+      comecouFora = false;
+    });
   });
 
   // ---- Favoritos rápidos (estrela no dashboard) ----
