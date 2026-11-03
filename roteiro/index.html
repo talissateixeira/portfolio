@@ -152,6 +152,18 @@
   }
   .cena-tempo { margin-left: auto; font-family: var(--mono); font-size: 12px; color: var(--texto-suave); }
 
+  /* ---- Comentário por cena ---- */
+  .cena-coment { margin-top: 20px; padding-top: 16px; border-top: 1px dashed var(--borda); }
+  .btn-cena-coment {
+    font-family: var(--mono); font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase;
+    border: 1px solid var(--borda); background: var(--creme); color: var(--rust-suave);
+    border-radius: 999px; padding: 7px 14px; cursor: pointer; transition: background .2s;
+  }
+  .btn-cena-coment:hover { background: var(--branco); }
+  .cena-coment-form { margin-top: 14px; }
+  .cena-coment-form textarea.inp { min-height: 80px; }
+  .cena-coment-form .btn-enviar { font-size: 12px; padding: 10px 20px; }
+
   /* ---- Moodboard ---- */
   .moodboard-grid {
     display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
@@ -348,9 +360,19 @@
         if (c.cena && c.cena.trim()) {
           corpo += `<p class="campo-rot">Cena</p><p class="campo-val">${escapar(c.cena)}</p>`;
         }
+        const rotuloCena = "Cena " + num + (c.tag ? " — " + c.tag : "");
         return `<article class="cena">
           <div class="cena-cab"><span class="cena-num">${num}</span>${tag}${tempo}</div>
           ${corpo}
+          <div class="cena-coment" data-cena="${escapar(rotuloCena)}">
+            <button class="btn-cena-coment" type="button">💬 Comentar esta cena</button>
+            <form class="cena-coment-form" hidden>
+              <input class="inp cc-nome" type="text" maxlength="80" placeholder="Seu nome (opcional)">
+              <textarea class="inp cc-texto" maxlength="2000" placeholder="O que você gostaria de ajustar nesta cena?" required></textarea>
+              <button class="btn-enviar" type="submit">Enviar comentário</button>
+              <p class="aviso-form" hidden></p>
+            </form>
+          </div>
         </article>`;
       }).join("");
       $("#lista-cenas").innerHTML = html;
@@ -367,6 +389,61 @@
     $("#conteudo").hidden = false;
   })();
 
+  // Grava o comentário e avisa a Talissa por push (se o push falhar, não atrapalha a marca).
+  async function enviarComentario(nome, texto) {
+    const { error } = await sb.rpc("comentar_roteiro", {
+      p_id: id, p_token: token, p_nome: nome, p_texto: texto,
+    });
+    if (error) throw error;
+    try {
+      await fetch(SUPABASE_URL + "/functions/v1/avisar-comentario", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Authorization": "Bearer " + SUPABASE_ANON_KEY },
+        body: JSON.stringify({ id: id, token: token, nome: nome }),
+      });
+    } catch (_e) { /* push é bônus */ }
+  }
+  let ultimoNome = "";
+
+  // Comentário por cena — vai pro mesmo lugar, com "Cena 02 — HOOK:" na frente
+  $("#lista-cenas").addEventListener("click", function (ev) {
+    const btn = ev.target.closest(".btn-cena-coment");
+    if (!btn) return;
+    const form = btn.nextElementSibling;
+    form.hidden = !form.hidden;
+    if (!form.hidden) {
+      const campoNome = form.querySelector(".cc-nome");
+      if (!campoNome.value) campoNome.value = ultimoNome;
+      form.querySelector(".cc-texto").focus();
+    }
+  });
+  $("#lista-cenas").addEventListener("submit", async function (ev) {
+    const form = ev.target.closest(".cena-coment-form");
+    if (!form) return;
+    ev.preventDefault();
+    const nome = form.querySelector(".cc-nome").value.trim();
+    const texto = form.querySelector(".cc-texto").value.trim();
+    const aviso = form.querySelector(".aviso-form");
+    const botao = form.querySelector(".btn-enviar");
+    const cena = form.closest(".cena-coment").dataset.cena;
+    if (!texto) return;
+
+    botao.disabled = true;
+    aviso.hidden = true;
+    try {
+      await enviarComentario(nome, cena + ": " + texto);
+      ultimoNome = nome;
+      form.querySelector(".cc-texto").value = "";
+      aviso.textContent = "Comentário enviado! A Talissa já foi avisada. 💛";
+      aviso.className = "aviso-form ok";
+    } catch (e) {
+      aviso.textContent = "Não consegui enviar agora. Tenta de novo em instantes?";
+      aviso.className = "aviso-form erro";
+    }
+    aviso.hidden = false;
+    botao.disabled = false;
+  });
+
   // Enviar comentário
   $("#form-comentario").addEventListener("submit", async function (ev) {
     ev.preventDefault();
@@ -380,20 +457,8 @@
     aviso.hidden = true;
 
     try {
-      const { error } = await sb.rpc("comentar_roteiro", {
-        p_id: id, p_token: token, p_nome: nome, p_texto: texto,
-      });
-      if (error) throw error;
-
-      // Avisa a Talissa por push (se falhar, não atrapalha a marca).
-      try {
-        await fetch(SUPABASE_URL + "/functions/v1/avisar-comentario", {
-          method: "POST",
-          headers: { "Content-Type": "application/json", "Authorization": "Bearer " + SUPABASE_ANON_KEY },
-          body: JSON.stringify({ id: id, token: token, nome: nome }),
-        });
-      } catch (_e) { /* push é bônus */ }
-
+      await enviarComentario(nome, texto);
+      ultimoNome = nome;
       $("#form-comentario").reset();
       aviso.textContent = "Comentário enviado! A Talissa já foi avisada. 💛";
       aviso.className = "aviso-form ok";
