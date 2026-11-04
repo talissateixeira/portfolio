@@ -2217,14 +2217,18 @@
         if (NICHOS_FIXOS.includes(v.nicho)) {
           if (!videosFixos[v.nicho]) videosFixos[v.nicho] = [];
           videosFixos[v.nicho].push(v);
+          // "Mostrar também nos Destaques" (marcado no admin): entra na fileira
+          // Destaques na posição da lista, sem sair da fileira do nicho.
+          if (v.nos_destaques) videosDestaques.push(v);
         } else {
           videosDestaques.push(v);
         }
       });
 
       // Nichos únicos dentro de "Todos", na ordem em que aparecem pela primeira vez.
+      // Os nichos fixos já têm pill própria, então não repetem aqui.
       const nichosDestaques = [];
-      videosDestaques.forEach(v => { if (!nichosDestaques.includes(v.nicho)) nichosDestaques.push(v.nicho); });
+      videosDestaques.forEach(v => { if (!NICHOS_FIXOS.includes(v.nicho) && !nichosDestaques.includes(v.nicho)) nichosDestaques.push(v.nicho); });
 
       let destaquesScroll = null;
       let contagemDestaques = null;

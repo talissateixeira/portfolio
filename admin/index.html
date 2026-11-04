@@ -2446,6 +2446,10 @@
           <select id="video-visivel"><option value="true">Sim</option><option value="false">Não</option></select>
         </div>
       </div>
+      <div class="campo-form"><label>Mostrar também nos Destaques</label>
+        <select id="video-nos-destaques"><option value="false">Não</option><option value="true">Sim</option></select>
+        <p style="font-size:0.78rem;color:var(--texto-suave);margin:6px 0 0;">Pra vídeos de Skincare, Auto Cuidados e Educação e Negócios, que têm fileira própria. Com "Sim", ele aparece também na fileira Destaques, na posição em que estiver na lista.</p>
+      </div>
       <div class="modal-acoes">
         <button type="button" class="link-apagar" id="video-apagar" hidden title="Apagar vídeo"><span class="icone"><svg viewBox="0 0 24 24"><path d="M4 7h16M9 7V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v3m3 0-1 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L6 7h12Z"/><path d="M10 11v6M14 11v6"/></svg></span></button>
         <div class="modal-acoes-direita">
@@ -3748,6 +3752,7 @@
     document.getElementById("video-preview").value = video ? (video.preview_url || "") : "";
     document.getElementById("video-destaque").value = video ? (video.destaque || "") : "";
     document.getElementById("video-visivel").value = video ? String(video.visivel) : "true";
+    document.getElementById("video-nos-destaques").value = video && video.nos_destaques ? "true" : "false";
     document.getElementById("video-apagar").hidden = !video;
     modalVideo.hidden = false;
   }
@@ -3776,6 +3781,11 @@
       destaque: document.getElementById("video-destaque").value.trim() || null,
       visivel: document.getElementById("video-visivel").value === "true"
     };
+    // Só manda "nos_destaques" se a coluna já existe (banco-atualizacao-videos-destaques.sql),
+    // pra não quebrar o salvar antes de rodar o SQL.
+    const nosDestaques = document.getElementById("video-nos-destaques").value === "true";
+    if (listaVideos.some(v => "nos_destaques" in v)) registro.nos_destaques = nosDestaques;
+    else if (nosDestaques) alert("Pra \"Mostrar também nos Destaques\" funcionar, rode antes o arquivo banco-atualizacao-videos-destaques.sql no Supabase. O resto foi salvo normalmente.");
     if (id) {
       await salvarSeguro("videos", sb.from("videos").update(registro).eq("id", id));
     } else {
