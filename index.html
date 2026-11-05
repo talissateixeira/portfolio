@@ -2222,7 +2222,7 @@
     } else {
       // Nichos com fileira própria e sempre visível (nesta ordem). Qualquer outro
       // nicho cai na fileira "Todos", que os pills de cima filtram.
-      const NICHOS_FIXOS = ["Skincare", "Auto Cuidados", "Educação e Negócios"];
+      const NICHOS_FIXOS = ["Educação e Negócios", "Skincare", "Auto Cuidados"];
       const videosFixos = {};
       const videosDestaques = [];
       videosDb.forEach(v => {
@@ -2269,7 +2269,7 @@
         if (pillAtiva) pillAtiva.classList.add("ativo");
       }
 
-      // Fileiras fixas (Skincare, Auto Cuidados), nessa ordem: pill simples que só rola até a linha.
+      // Fileiras fixas (Educação e Negócios, Skincare, Auto Cuidados), nessa ordem: pill simples que só rola até a linha.
       NICHOS_FIXOS.forEach(nicho => {
         if (!videosFixos[nicho]) return;
         const slug = "cat-" + slugificar(nicho);
