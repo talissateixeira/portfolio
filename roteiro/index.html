@@ -364,27 +364,6 @@
     if (tipo === "conexao") $("#erro-conexao").hidden = false;
     else $("#erro").hidden = false;
   }
-  // Pega a cor média da logo e usa bem suave no fundo do cabeçalho.
-  function tingirCapa(img) {
-    try {
-      const c = document.createElement("canvas"); c.width = 48; c.height = 48;
-      const ctx = c.getContext("2d"); ctx.drawImage(img, 0, 0, 48, 48);
-      const px = ctx.getImageData(0, 0, 48, 48).data;
-      let r = 0, g = 0, b = 0, n = 0;
-      for (let i = 0; i < px.length; i += 4) {
-        const claro = px[i] > 235 && px[i + 1] > 235 && px[i + 2] > 235;
-        if (px[i + 3] > 160 && !claro) { r += px[i]; g += px[i + 1]; b += px[i + 2]; n++; }
-      }
-      if (!n) return;
-      const cor = Math.round(r / n) + "," + Math.round(g / n) + "," + Math.round(b / n);
-      const capa = document.querySelector(".capa");
-      capa.style.background =
-        "radial-gradient(560px 260px at 100% 0%, rgba(" + cor + ",0.20) 0%, transparent 70%)," +
-        "radial-gradient(560px 280px at 0% 100%, rgba(" + cor + ",0.12) 0%, transparent 70%)," +
-        "linear-gradient(rgba(" + cor + ",0.07), rgba(" + cor + ",0.07)), #F3EEE4";
-      capa.style.borderColor = "rgba(" + cor + ",0.25)";
-    } catch (_e) { /* sem cor, fica o creme */ }
-  }
   function escapar(t) {
     const d = document.createElement("div"); d.textContent = t == null ? "" : String(t); return d.innerHTML;
   }
@@ -423,7 +402,7 @@
       const slug = marca.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
       const logo = $("#c-logo");
       logo.alt = marca;
-      logo.onload = () => { logo.hidden = false; tingirCapa(logo); };
+      logo.onload = () => { logo.hidden = false; };
       const doPortfolio = "../logos-marcas/" + slug + ".png";
       const mostrarNome = () => { logo.hidden = true; $("#c-marca").textContent = marca; $("#c-marca").hidden = false; };
       // 1º a logo enviada no painel; se falhar, a do portfólio; por último, o nome escrito.
@@ -437,7 +416,7 @@
     } else if (r.logo_url) {
       const logo = $("#c-logo");
       logo.crossOrigin = "anonymous";
-      logo.onload = () => { logo.hidden = false; tingirCapa(logo); $("#c-x").hidden = false; };
+      logo.onload = () => { logo.hidden = false; $("#c-x").hidden = false; };
       logo.src = r.logo_url;
     }
     if (r.subtitulo && r.subtitulo.trim()) { $("#c-subtitulo").textContent = r.subtitulo; $("#c-subtitulo").hidden = false; }
