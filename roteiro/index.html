@@ -137,6 +137,56 @@
   .resumo-linha { margin: 0 0 4px; white-space: pre-wrap; }
   .resumo-linha strong { font-family: var(--mono); font-size: 11px; letter-spacing: 1px; text-transform: uppercase; color: var(--acento); margin-right: 6px; }
 
+  /* ---- Legenda de leitura (na capa) ---- */
+  .capa-legenda { display: flex; flex-wrap: wrap; gap: 8px 16px; margin-top: 22px; padding-top: 18px; border-top: 1px solid rgba(255,255,255,0.14); font-size: 14px; color: rgba(238,242,234,0.85); }
+
+  /* ---- A ideia do vídeo ---- */
+  .ideia-item + .ideia-item { margin-top: 22px; }
+  .ideia-rot { font-family: var(--sans); font-weight: 700; font-size: 15px; color: var(--rust); margin: 0 0 6px; }
+  .ideia-texto { margin: 0; white-space: pre-wrap; font-size: 16px; }
+  .checklist { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+  .checklist li { position: relative; padding-left: 30px; font-size: 16px; }
+  .checklist li::before {
+    content: "✓"; position: absolute; left: 0; top: 1px;
+    width: 20px; height: 20px; border-radius: 50%; background: #E3EAE1; color: var(--rust);
+    font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center;
+  }
+
+  /* ---- Passo a passo (etapas + cenas) ---- */
+  .passo-titulo { font-family: var(--serif); font-style: italic; font-weight: 500; font-size: 26px; color: var(--rust); margin: 44px 4px 2px; }
+  .passo-sub { color: var(--texto-suave); font-size: 15px; margin: 0 4px; }
+  .falas { margin: 16px 0 0; background: var(--branco); border: 1px solid var(--borda); border-radius: var(--raio); padding: 0 20px; }
+  .falas summary { cursor: pointer; padding: 15px 0; font-weight: 600; color: var(--rust); list-style: none; }
+  .falas summary::-webkit-details-marker { display: none; }
+  .falas summary::after { content: "＋"; float: right; color: var(--acento); }
+  .falas[open] summary::after { content: "－"; }
+  .falas-texto { padding: 0 0 18px; font-family: var(--serif); font-size: 17px; line-height: 1.7; color: var(--rust-escuro); }
+  .falas-texto p { margin: 0 0 10px; }
+  .etapa { margin-top: 30px; }
+  .etapa-cab { display: flex; align-items: center; gap: 12px; margin: 0 4px; flex-wrap: wrap; }
+  .etapa-num {
+    width: 30px; height: 30px; border-radius: 50%; background: var(--rust); color: #EEF2EA;
+    font-family: var(--mono); font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: center;
+  }
+  .etapa-nome { font-family: var(--serif); font-weight: 600; font-size: 21px; color: var(--rust); }
+  .etapa-tempo { margin-left: auto; font-family: var(--mono); font-size: 12px; color: var(--texto-suave); background: var(--branco); border: 1px solid var(--borda); padding: 4px 11px; border-radius: 999px; }
+  .cena-quadro { border-radius: 16px; padding: 14px 16px; }
+  .cena-quadro + .cena-quadro { margin-top: 12px; }
+  .cena-quadro-rot { font-size: 12px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; margin: 0 0 4px; }
+  .cena-quadro p:last-child { margin-bottom: 0; }
+  .quadro-visual { background: #F1EFEA; }
+  .quadro-visual .cena-quadro-rot { color: var(--texto-suave); }
+  .quadro-visual .cena-quadro-txt { margin: 0; white-space: pre-wrap; color: var(--texto); font-size: 15px; }
+  .quadro-fala { background: #E6EDE3; border-left: 4px solid var(--acento); }
+  .quadro-fala .cena-quadro-rot { color: var(--acento); }
+  .quadro-fala .cena-quadro-txt { margin: 0; white-space: pre-wrap; font-family: var(--serif); font-size: 18px; line-height: 1.55; color: var(--rust-escuro); }
+
+  /* ---- Aprovar ---- */
+  .aprovar-caixa { text-align: center; padding: 6px 0 22px; margin-bottom: 22px; border-bottom: 1px dashed var(--borda); }
+  .aprovar-caixa p { margin: 0 0 14px; color: var(--texto-suave); font-size: 15px; }
+  .btn-aprovar { font-size: 14px; padding: 15px 30px; background: var(--acento); }
+  .btn-aprovar:hover { background: var(--rust); }
+
   /* ---- Cenas ---- */
   .cenas-rotulo { font-family: var(--mono); font-size: 12px; letter-spacing: 3px; text-transform: uppercase; color: var(--rust-suave); margin: 36px 4px 4px; }
   .cena {
@@ -145,7 +195,8 @@
     margin-top: 16px; position: relative;
   }
   .cena-cab { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
-  .cena-num { font-family: var(--serif); font-weight: 900; font-size: 34px; color: var(--blush); line-height: 1; }
+  .cena-num { font-family: var(--serif); font-weight: 900; font-size: 30px; color: var(--blush); line-height: 1; }
+  .cena-num-rot { font-family: var(--sans); font-size: 13px; font-weight: 600; color: var(--texto-suave); }
   .cena-tag {
     font-family: var(--mono); font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase;
     background: var(--rust); color: #EEF2EA; padding: 4px 10px; border-radius: 6px;
@@ -232,34 +283,47 @@
     <h1 id="c-titulo"></h1>
     <p class="capa-sub" id="c-subtitulo" hidden></p>
     <span class="capa-formato" id="c-formato" hidden></span>
+    <div class="capa-legenda" id="capa-legenda" hidden>
+      <span>🎬 o que aparece no vídeo</span>
+      <span>💬 o que eu falo</span>
+    </div>
   </header>
 
   <section class="bloco" id="bloco-roteiro">
-    <h2 class="bloco-titulo">Roteiro</h2>
-    <div id="campo-objetivo" hidden>
-      <p class="campo-rot">Objetivo</p>
-      <p class="campo-val" id="c-objetivo"></p>
+    <h2 class="bloco-titulo">A ideia do vídeo</h2>
+    <div class="ideia-item" id="campo-objetivo" hidden>
+      <p class="ideia-rot">🎯 Objetivo</p>
+      <p class="ideia-texto" id="c-objetivo"></p>
     </div>
-    <div id="campo-pontos" hidden>
-      <p class="campo-rot">Pontos importantes</p>
-      <p class="campo-val" id="c-pontos"></p>
+    <div class="ideia-item" id="campo-pontos" hidden>
+      <p class="ideia-rot">O que não pode faltar</p>
+      <div id="c-pontos"></div>
     </div>
   </section>
 
   <section class="bloco" id="bloco-moodboard" hidden>
-    <h2 class="bloco-titulo">Moodboard</h2>
+    <h2 class="bloco-titulo">Referências visuais</h2>
     <div class="moodboard-grid" id="c-moodboard"></div>
   </section>
 
-  <p class="cenas-rotulo" id="cenas-rotulo" hidden>Cenas</p>
-  <section class="bloco" id="campo-resumo" hidden>
-    <div id="c-resumo"></div>
-  </section>
-  <div id="lista-cenas"></div>
+  <div id="bloco-passo" hidden>
+    <h2 class="passo-titulo">Passo a passo do vídeo</h2>
+    <p class="passo-sub" id="passo-sub"></p>
+    <details class="falas" id="bloco-falas" hidden>
+      <summary>📄 Ler só as falas, do começo ao fim</summary>
+      <div class="falas-texto" id="c-falas"></div>
+    </details>
+    <div id="lista-cenas"></div>
+  </div>
 
   <section class="bloco" id="bloco-comentario">
-    <h2 class="bloco-titulo">Deixar um comentário</h2>
-    <p style="margin:-8px 0 18px; color:var(--texto-suave); font-size:15px;">Alguma observação sobre o roteiro? Escreve aqui que eu recebo na hora.</p>
+    <h2 class="bloco-titulo">E aí, o que achou?</h2>
+    <div class="aprovar-caixa">
+      <p>Gostou do jeito que está? É só aprovar, que eu já sigo pra gravação.</p>
+      <button class="btn-enviar btn-aprovar" id="btn-aprovar" type="button">✅ Aprovar roteiro</button>
+      <p class="aviso-form" id="aprovar-aviso" hidden style="margin:14px 0 0;"></p>
+    </div>
+    <p style="margin:0 0 18px; color:var(--texto-suave); font-size:15px;">Quer ajustar algo? Escreve aqui embaixo, ou use o botão “Comentar esta cena” em cada cena. Eu recebo na hora.</p>
     <form id="form-comentario">
       <label class="lbl" for="cm-nome">Seu nome (opcional)</label>
       <input class="inp" id="cm-nome" type="text" maxlength="80" placeholder="Ex.: Marca X">
@@ -328,41 +392,63 @@
     if (r.subtitulo && r.subtitulo.trim()) { $("#c-subtitulo").textContent = r.subtitulo; $("#c-subtitulo").hidden = false; }
     if (r.formato && r.formato.trim()) { $("#c-formato").textContent = r.formato; $("#c-formato").hidden = false; }
 
-    // Roteiro
+    // A ideia do vídeo
     let temRoteiro = false;
     if (r.objetivo && r.objetivo.trim()) { $("#c-objetivo").textContent = r.objetivo; $("#campo-objetivo").hidden = false; temRoteiro = true; }
-    if (r.pontos_importantes && r.pontos_importantes.trim()) { $("#c-pontos").textContent = r.pontos_importantes; $("#campo-pontos").hidden = false; temRoteiro = true; }
+    if (r.pontos_importantes && r.pontos_importantes.trim()) {
+      // Cada linha vira um item com ✓ (tira "-", "•", "*" ou número do começo)
+      const itens = r.pontos_importantes.split(/\n+/).map(l => l.replace(/^\s*(?:[-•*–]|\d+[.)])\s*/, "").trim()).filter(Boolean);
+      $("#c-pontos").innerHTML = itens.length > 1
+        ? '<ul class="checklist">' + itens.map(i => "<li>" + escapar(i) + "</li>").join("") + "</ul>"
+        : '<p class="ideia-texto">' + escapar(itens[0] || r.pontos_importantes) + "</p>";
+      $("#campo-pontos").hidden = false; temRoteiro = true;
+    }
     $("#bloco-roteiro").hidden = !temRoteiro;
 
-    // Resumo das cenas (fala + cena) — agora junto das cenas, depois do moodboard
+    // Passo a passo: cenas seguidas com a mesma tag viram uma etapa (Gancho, Contexto, Chamada final...)
     if (cenas.length) {
-      $("#c-resumo").innerHTML = cenas.map((c, i) => {
-        const titulo = "Cena " + (i + 1) + (c.tag ? " — " + escapar(c.tag) : "");
-        let linhas = "";
-        if (c.narracao && c.narracao.trim()) linhas += `<p class="resumo-linha"><strong>Fala</strong>${escapar(c.narracao)}</p>`;
-        if (c.cena && c.cena.trim()) linhas += `<p class="resumo-linha"><strong>Cena</strong>${escapar(c.cena)}</p>`;
-        return `<div class="resumo-cena"><p class="resumo-cena-titulo">${titulo}</p>${linhas}</div>`;
-      }).join("");
-      $("#campo-resumo").hidden = false;
-    }
+      const NOMES_ETAPA = {
+        HOOK: "Gancho", GANCHO: "Gancho", ABERTURA: "Abertura", INTRO: "Abertura",
+        CONTEXTO: "Contexto", PROBLEMA: "O problema", DOR: "A dor", SOLUCAO: "A solução",
+        PRODUTO: "O produto", APRESENTACAO: "Apresentação", DEMONSTRACAO: "Demonstração",
+        APLICACAO: "Aplicação", BENEFICIOS: "Benefícios", PROVA: "Prova", RESULTADO: "Resultado",
+        DESENVOLVIMENTO: "Desenvolvimento", CTA: "Chamada final", FECHAMENTO: "Fechamento", FINAL: "Fechamento"
+      };
+      const semAcento = (t) => t.normalize("NFD").replace(/[̀-ͯ]/g, "").toUpperCase().replace(/[^A-Z]/g, "");
+      const nomeEtapa = (tag) => {
+        if (!tag || !tag.trim()) return "";
+        return NOMES_ETAPA[semAcento(tag)] || tag.trim().charAt(0).toUpperCase() + tag.trim().slice(1).toLowerCase();
+      };
+      const faixa = (tempo) => { const m = String(tempo || "").match(/(\d+)\s*(?:-|–|a|até)\s*(\d+)/); return m ? [Number(m[1]), Number(m[2])] : null; };
 
-    // Cenas
-    if (cenas.length) {
-      $("#cenas-rotulo").hidden = false;
-      const html = cenas.map((c, i) => {
-        const num = String(i + 1).padStart(2, "0");
-        const tag = c.tag ? `<span class="cena-tag">${escapar(c.tag)}</span>` : "";
-        const tempo = c.tempo ? `<span class="cena-tempo">${escapar(c.tempo)}</span>` : "";
-        let corpo = "";
-        if (c.narracao && c.narracao.trim()) {
-          corpo += `<p class="campo-rot">Narração</p><p class="campo-val">${escapar(c.narracao)}</p>`;
-        }
-        if (c.cena && c.cena.trim()) {
-          corpo += `<p class="campo-rot">Cena</p><p class="campo-val">${escapar(c.cena)}</p>`;
-        }
-        const rotuloCena = "Cena " + num + (c.tag ? " — " + c.tag : "");
-        return `<article class="cena">
-          <div class="cena-cab"><span class="cena-num">${num}</span>${tag}${tempo}</div>
+      const etapas = [];
+      cenas.forEach((c, i) => {
+        const nome = nomeEtapa(c.tag);
+        const ultima = etapas[etapas.length - 1];
+        if (ultima && ultima.nome === nome) ultima.cenas.push({ c, i });
+        else etapas.push({ nome, cenas: [{ c, i }] });
+      });
+
+      const html = etapas.map((et, ie) => {
+        const f1 = faixa(et.cenas[0].c.tempo), f2 = faixa(et.cenas[et.cenas.length - 1].c.tempo);
+        const tempoEtapa = f1 && f2 ? f1[0] + " a " + f2[1] + "s" : (et.cenas.length === 1 && et.cenas[0].c.tempo ? et.cenas[0].c.tempo : "");
+        const cab = `<div class="etapa-cab"><span class="etapa-num">${ie + 1}</span>` +
+          `<span class="etapa-nome">${escapar(et.nome || "Cena " + (et.cenas[0].i + 1))}</span>` +
+          (tempoEtapa ? `<span class="etapa-tempo">⏱ ${escapar(tempoEtapa)}</span>` : "") + `</div>`;
+        const cards = et.cenas.map(({ c, i }) => {
+          const num = String(i + 1).padStart(2, "0");
+          const tempo = et.cenas.length > 1 && c.tempo ? `<span class="cena-tempo">${escapar(c.tempo)}</span>` : "";
+          let corpo = "";
+          if (c.cena && c.cena.trim()) {
+            corpo += `<div class="cena-quadro quadro-visual"><p class="cena-quadro-rot">🎬 O que aparece</p><p class="cena-quadro-txt">${escapar(c.cena)}</p></div>`;
+          }
+          if (c.narracao && c.narracao.trim()) {
+            const fala = c.narracao.trim().replace(/^["“]|["”]$/g, "");
+            corpo += `<div class="cena-quadro quadro-fala"><p class="cena-quadro-rot">💬 O que eu falo</p><p class="cena-quadro-txt">“${escapar(fala)}”</p></div>`;
+          }
+          const rotuloCena = "Cena " + num + (c.tag ? " — " + c.tag : "");
+          return `<article class="cena">
+          <div class="cena-cab"><span class="cena-num">${num}</span><span class="cena-num-rot">cena</span>${tempo}</div>
           ${corpo}
           <div class="cena-coment" data-cena="${escapar(rotuloCena)}">
             <button class="btn-cena-coment" type="button">💬 Comentar esta cena</button>
@@ -374,8 +460,22 @@
             </form>
           </div>
         </article>`;
+        }).join("");
+        return `<section class="etapa">${cab}${cards}</section>`;
       }).join("");
       $("#lista-cenas").innerHTML = html;
+
+      const fim = faixa(cenas[cenas.length - 1].tempo);
+      $("#passo-sub").textContent = cenas.length + (cenas.length === 1 ? " cena" : " cenas") +
+        (etapas.length > 1 ? " em " + etapas.length + " etapas" : "") + (fim ? " · cerca de " + fim[1] + " segundos" : "");
+
+      const falas = cenas.map(c => (c.narracao || "").trim().replace(/^["“]|["”]$/g, "")).filter(Boolean);
+      if (falas.length) {
+        $("#c-falas").innerHTML = falas.map(f => "<p>" + escapar(f) + "</p>").join("");
+        $("#bloco-falas").hidden = false;
+      }
+      $("#bloco-passo").hidden = false;
+      $("#capa-legenda").hidden = false;
     }
 
     // Moodboard
@@ -442,6 +542,24 @@
     }
     aviso.hidden = false;
     botao.disabled = false;
+  });
+
+  // Aprovar com um clique — vai como comentário (cai no painel e dá push)
+  $("#btn-aprovar").addEventListener("click", async function () {
+    const botao = this, aviso = $("#aprovar-aviso");
+    const nome = $("#cm-nome").value.trim() || ultimoNome;
+    botao.disabled = true; aviso.hidden = true;
+    try {
+      await enviarComentario(nome, "✅ Roteiro aprovado!");
+      botao.textContent = "Aprovado ✓";
+      aviso.textContent = "Obrigada! A Talissa já foi avisada. 💛";
+      aviso.className = "aviso-form ok";
+    } catch (e) {
+      botao.disabled = false;
+      aviso.textContent = "Não consegui enviar agora. Tenta de novo em instantes?";
+      aviso.className = "aviso-form erro";
+    }
+    aviso.hidden = false;
   });
 
   // Enviar comentário
