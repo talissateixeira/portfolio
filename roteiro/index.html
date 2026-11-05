@@ -499,7 +499,15 @@
       $("#passo-sub").textContent = cenas.length + (cenas.length === 1 ? " cena" : " cenas") +
         (etapas.length > 1 ? " em " + etapas.length + " etapas" : "") + (fim ? " · cerca de " + fim[1] + " segundos" : "");
 
-      const falas = cenas.map(c => (c.narracao || "").trim().replace(/^["“]|["”]$/g, "")).filter(Boolean);
+      // Só o que é falado: corta o que vem depois das aspas (ex.: "…" Tom de amiga.)
+      const soFala = (t) => {
+        t = String(t || "").trim();
+        const m = t.match(/^["“]([\s\S]*?)["”](?:\s|$)/);
+        if (m) return m[1].trim();
+        const k = t.search(/["”]\s+\S/);
+        return (k > 0 ? t.slice(0, k) : t).replace(/["”]$/, "").trim();
+      };
+      const falas = cenas.map(c => soFala(c.narracao)).filter(Boolean);
       if (falas.length) {
         $("#c-falas").innerHTML = falas.map(f => "<p>" + escapar(f) + "</p>").join("");
         $("#bloco-falas").hidden = false;
