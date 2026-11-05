@@ -368,12 +368,13 @@
   .ticker-lista {
     display: flex;
     align-items: center;
-    gap: 28px;
     list-style: none;
     margin: 0;
     padding: 0;
     width: max-content;
     animation: rolar-ticker 34s linear infinite;
+    will-change: transform;
+    backface-visibility: hidden;
   }
   .ticker-track:hover .ticker-lista { animation-play-state: paused; }
   .ticker-lista li {
@@ -384,9 +385,10 @@
     text-transform: uppercase;
     color: var(--menta);
     white-space: nowrap;
+    padding-right: 28px; /* no lugar do gap: com gap a metade -50% ficava meio espaço fora e a volta dava um tranco */
   }
   .ticker-lista li.separador { color: var(--menta); font-size: 0.9rem; }
-  @keyframes rolar-ticker { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+  @keyframes rolar-ticker { from { transform: translate3d(0, 0, 0); } to { transform: translate3d(-50%, 0, 0); } }
   @media (prefers-reduced-motion: reduce) { .ticker-lista { animation: none; } }
 
   /* ===== SOBRE + MARCAS (seção única) ===== */
@@ -471,13 +473,14 @@
   .marcas-marquee-lista {
     display: flex;
     align-items: center;
-    gap: 64px;
     width: max-content;
-    animation: rolar-marcas 26s linear infinite;
+    animation: rolar-marcas 34s linear infinite;
+    will-change: transform;
+    backface-visibility: hidden;
   }
   .marcas-marquee:hover .marcas-marquee-lista { animation-play-state: paused; }
-  .marcas-marquee-lista img { height: 34px; width: auto; object-fit: contain; flex-shrink: 0; }
-  @keyframes rolar-marcas { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+  .marcas-marquee-lista img { height: 34px; width: auto; object-fit: contain; flex-shrink: 0; padding-right: 64px; box-sizing: content-box; }
+  @keyframes rolar-marcas { from { transform: translate3d(0, 0, 0); } to { transform: translate3d(-50%, 0, 0); } }
   @media (prefers-reduced-motion: reduce) { .marcas-marquee-lista { animation: none; } }
 
   @media (max-width: 640px) {
@@ -2104,7 +2107,7 @@
       const img = document.createElement("img");
       img.src = "logos-marcas/" + marca.logo + "?v=" + VERSAO_FOTOS;
       img.alt = T.logoDaMarca + marca.nome;
-      img.loading = "lazy";
+      img.decoding = "async";
       if (marca.altura) img.style.height = marca.altura + "px";
       marcasBolhas.appendChild(img);
     });
