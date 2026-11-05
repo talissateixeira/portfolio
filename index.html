@@ -704,12 +704,13 @@
     font-size: clamp(1.2rem, 1.8vw, 1.5rem);
     padding-left: 0;
     list-style: none;
-    margin-bottom: 4px;
+    margin-bottom: 10px;
+    line-height: 1.05;
     background: linear-gradient(
       90deg,
-      #321F14 0%, #321F14 35%,
-      #b9885f 50%,
-      #321F14 65%, #321F14 100%
+      #321F14 0%, #321F14 30%,
+      #d9a46c 50%,
+      #321F14 70%, #321F14 100%
     );
     background-size: 260% 100%;
     background-position: 100% 0;
@@ -728,6 +729,9 @@
     .case-lista-resultado li:first-child { animation: none; background: none; color: #321F14; -webkit-text-fill-color: #321F14; }
   }
   .case-lista-resultado li:first-child::before { content: none; }
+  /* O número grande ("+300 mil") e a palavra embaixo, menor. */
+  .case-num-grande { display: block; font-size: clamp(2.6rem, 5vw, 3.6rem); letter-spacing: -0.02em; }
+  .case-num-rotulo { display: block; font-size: 0.8em; font-weight: 700; letter-spacing: 0.02em; margin-top: 2px; }
   .case-estatisticas {
     display: flex;
     gap: 26px;
@@ -2325,9 +2329,17 @@
     });
 
     const caseResultadoLista = document.getElementById("case-resultado-lista");
-    caseCfg.resultadoItens.forEach(item => {
+    caseCfg.resultadoItens.forEach((item, i) => {
       const li = document.createElement("li");
-      li.textContent = item;
+      // No primeiro item, o número ("+300 mil" / "+300K") vai grande e o resto embaixo.
+      const partes = i === 0 && item.match(/^(\+?[\d.,]+\s*(?:mil|K)?)\s+(.+)$/);
+      if (partes) {
+        li.innerHTML = '<span class="case-num-grande"></span><span class="case-num-rotulo"></span>';
+        li.children[0].textContent = partes[1];
+        li.children[1].textContent = partes[2];
+      } else {
+        li.textContent = item;
+      }
       caseResultadoLista.appendChild(li);
     });
 
