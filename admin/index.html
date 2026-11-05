@@ -1112,6 +1112,7 @@
   .rot-remover { position: absolute; top: 8px; right: 8px; border: none; background: transparent; color: var(--erro); cursor: pointer; font-size: 1.15rem; line-height: 1; padding: 2px 6px; }
   .rot-mood-linha { display: flex; gap: 8px; margin-bottom: 8px; align-items: center; }
   .rot-mood-linha input { flex: 1; }
+  .rot-logo-thumb { max-height: 48px; max-width: 160px; object-fit: contain; padding: 6px 10px; border-radius: 8px; border: 1px solid var(--borda); background: #F3EEE4; }
   .rot-mood-thumb { width: 40px; height: 52px; object-fit: cover; border-radius: 6px; border: 1px solid var(--borda); background: var(--creme); flex: none; }
   .rot-coment-item { border: 1px solid var(--borda); border-radius: var(--raio); padding: 10px 12px; margin-bottom: 8px; background: var(--creme); }
   .rot-coment-item .meta { font-size: 0.75rem; color: var(--texto-suave); margin-bottom: 3px; }
@@ -2112,6 +2113,18 @@
       <div class="linha-form-2">
         <div class="campo-form"><label>Título</label><input type="text" id="rot-titulo" required placeholder="Ex.: Campanha verão / roteiro 1"></div>
         <div class="campo-form"><label>Marca (sua referência)</label><input type="text" id="rot-marca" placeholder="Nome da marca"></div>
+      </div>
+      <div class="campo-form">
+        <label>Logo da marca (aparece no topo da página que a marca recebe)</label>
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+          <img class="rot-logo-thumb" id="rot-logo-thumb" alt="" hidden>
+          <button type="button" class="botao botao-principal" id="btn-upload-logo">📎 Enviar logo</button>
+          <button type="button" class="botao botao-secundario" id="btn-remover-logo" hidden>Remover</button>
+          <span class="rot-ia-status" id="rot-logo-status"></span>
+        </div>
+        <input type="hidden" id="rot-logo-url">
+        <input type="file" id="input-logo-file" accept="image/*" hidden>
+        <p style="font-size:0.78rem;color:var(--texto-suave);margin:6px 0 0;">PNG com fundo transparente fica mais bonito. Se vier com fundo branco (ou de uma cor só), eu tiro o fundo sozinha. Sem logo aqui, uso a do portfólio, se a marca tiver.</p>
       </div>
       <div class="linha-form-2">
         <div class="campo-form"><label>Subtítulo (opcional)</label><input type="text" id="rot-subtitulo" placeholder="Ex.: Lançamento"></div>
@@ -7911,6 +7924,68 @@
     const { data } = sb.storage.from("producao-arquivos").getPublicUrl(nome);
     return data.publicUrl;
   }
+  // ---- Logo da marca ----
+  function mostrarLogoRoteiro(url) {
+    document.getElementById("rot-logo-url").value = url || "";
+    const thumb = document.getElementById("rot-logo-thumb");
+    thumb.hidden = !url;
+    if (url) thumb.src = url; else thumb.removeAttribute("src");
+    document.getElementById("btn-remover-logo").hidden = !url;
+    document.getElementById("btn-upload-logo").textContent = url ? "📎 Trocar logo" : "📎 Enviar logo";
+  }
+  // Se os 4 cantos da imagem são da mesma cor e opacos (fundo branco, print, JPG...),
+  // apaga esse fundo a partir das bordas (o miolo da logo fica intacto) e devolve PNG.
+  function tirarFundoLogo(arquivo) {
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.onload = () => {
+        try {
+          const escala = Math.min(1, 900 / Math.max(img.width, img.height));
+          const w = Math.round(img.width * escala), h = Math.round(img.height * escala);
+          const c = document.createElement("canvas"); c.width = w; c.height = h;
+          const ctx = c.getContext("2d"); ctx.drawImage(img, 0, 0, w, h);
+          const d = ctx.getImageData(0, 0, w, h), px = d.data;
+          const at = (x, y) => (y * w + x) * 4;
+          const cantos = [at(0, 0), at(w - 1, 0), at(0, h - 1), at(w - 1, h - 1)];
+          const ref = cantos[0];
+          const perto = (i, j, tol) => Math.abs(px[i] - px[j]) + Math.abs(px[i + 1] - px[j + 1]) + Math.abs(px[i + 2] - px[j + 2]) <= tol;
+          if (!cantos.every(i => px[i + 3] > 250 && perto(i, ref, 40))) { URL.revokeObjectURL(img.src); resolve(arquivo); return; }
+          const visto = new Uint8Array(w * h), fila = [];
+          for (let x = 0; x < w; x++) { fila.push(x, 0, x, h - 1); }
+          for (let y = 0; y < h; y++) { fila.push(0, y, w - 1, y); }
+          while (fila.length) {
+            const y = fila.pop(), x = fila.pop();
+            if (x < 0 || y < 0 || x >= w || y >= h || visto[y * w + x]) continue;
+            visto[y * w + x] = 1;
+            const i = at(x, y);
+            if (!perto(i, ref, 60)) continue;
+            px[i + 3] = 0;
+            fila.push(x + 1, y, x - 1, y, x, y + 1, x, y - 1);
+          }
+          ctx.putImageData(d, 0, 0);
+          c.toBlob((blob) => { URL.revokeObjectURL(img.src); resolve(blob ? new File([blob], "logo.png", { type: "image/png" }) : arquivo); }, "image/png");
+        } catch (_e) { resolve(arquivo); }
+      };
+      img.onerror = () => resolve(arquivo);
+      img.src = URL.createObjectURL(arquivo);
+    });
+  }
+  document.getElementById("btn-upload-logo").addEventListener("click", () => document.getElementById("input-logo-file").click());
+  document.getElementById("btn-remover-logo").addEventListener("click", () => mostrarLogoRoteiro(""));
+  document.getElementById("input-logo-file").addEventListener("change", async (e) => {
+    const arquivo = (e.target.files || [])[0];
+    e.target.value = "";
+    if (!arquivo) return;
+    const status = document.getElementById("rot-logo-status");
+    const btn = document.getElementById("btn-upload-logo");
+    btn.disabled = true;
+    status.className = "rot-ia-status";
+    status.textContent = "Enviando…";
+    const url = await uploadImagemMoodboard(await tirarFundoLogo(arquivo));
+    btn.disabled = false;
+    if (url) { mostrarLogoRoteiro(url); status.className = "rot-ia-status ok"; status.textContent = "Logo adicionada! Clique em Salvar. ✨"; }
+    else { status.className = "rot-ia-status erro"; status.textContent = "Não consegui enviar. Tenta de novo?"; }
+  });
   document.getElementById("btn-upload-mood").addEventListener("click", () => document.getElementById("input-mood-file").click());
   document.getElementById("input-mood-file").addEventListener("change", async (e) => {
     const arquivos = Array.from(e.target.files || []);
@@ -7961,6 +8036,8 @@
     document.getElementById("rot-token").value = r ? r.token : "";
     document.getElementById("rot-titulo").value = r ? (r.titulo || "") : "";
     document.getElementById("rot-marca").value = r ? (r.marca || "") : "";
+    mostrarLogoRoteiro(r ? (r.logo_url || "") : "");
+    document.getElementById("rot-logo-status").textContent = "";
     document.getElementById("rot-subtitulo").value = r ? (r.subtitulo || "") : "";
     document.getElementById("rot-formato").value = r ? (r.formato || "") : "";
     document.getElementById("rot-objetivo").value = r ? (r.objetivo || "") : "";
@@ -8023,6 +8100,11 @@
       status: document.getElementById("rot-status").value,
     };
     if (!dados.titulo) { alert("Dê um título ao roteiro."); return; }
+    // Só manda "logo_url" se a coluna já existe (banco-atualizacao-roteiros-logo.sql),
+    // pra não quebrar o salvar antes de rodar o SQL.
+    const logoUrl = document.getElementById("rot-logo-url").value.trim() || null;
+    if (listaRoteiros.some(r => "logo_url" in r)) dados.logo_url = logoUrl;
+    else if (logoUrl) alert("Pra logo aparecer, rode antes o arquivo banco-atualizacao-roteiros-logo.sql no Supabase. O resto do roteiro vai ser salvo normalmente.");
 
     let roteiroId = id;
     if (id) {

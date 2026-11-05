@@ -424,9 +424,21 @@
       const logo = $("#c-logo");
       logo.alt = marca;
       logo.onload = () => { logo.hidden = false; tingirCapa(logo); };
-      logo.onerror = () => { $("#c-marca").textContent = marca; $("#c-marca").hidden = false; };
-      logo.src = "../logos-marcas/" + slug + ".png";
+      const doPortfolio = "../logos-marcas/" + slug + ".png";
+      const mostrarNome = () => { logo.hidden = true; $("#c-marca").textContent = marca; $("#c-marca").hidden = false; };
+      // 1º a logo enviada no painel; se falhar, a do portfólio; por último, o nome escrito.
+      logo.onerror = () => {
+        if (logo.dataset.tentouPortfolio) { mostrarNome(); return; }
+        logo.dataset.tentouPortfolio = "1"; logo.removeAttribute("crossorigin"); logo.src = doPortfolio;
+      };
+      if (r.logo_url) { logo.crossOrigin = "anonymous"; logo.src = r.logo_url; }
+      else { logo.dataset.tentouPortfolio = "1"; logo.src = doPortfolio; }
       $("#c-x").hidden = false;
+    } else if (r.logo_url) {
+      const logo = $("#c-logo");
+      logo.crossOrigin = "anonymous";
+      logo.onload = () => { logo.hidden = false; tingirCapa(logo); $("#c-x").hidden = false; };
+      logo.src = r.logo_url;
     }
     if (r.subtitulo && r.subtitulo.trim()) { $("#c-subtitulo").textContent = r.subtitulo; $("#c-subtitulo").hidden = false; }
     if (r.formato && r.formato.trim()) { $("#c-formato").textContent = r.formato; $("#c-formato").hidden = false; }
