@@ -69,9 +69,9 @@
   /* ---- Cabeçalho (parceria: logo da marca × Talissa) ---- */
   .capa {
     background:
-      radial-gradient(520px 240px at 100% 0%, rgba(195,183,154,0.28) 0%, transparent 70%),
-      radial-gradient(520px 260px at 0% 100%, rgba(116,144,123,0.16) 0%, transparent 70%),
-      var(--branco);
+      radial-gradient(560px 260px at 100% 0%, rgba(195,183,154,0.38) 0%, transparent 70%),
+      radial-gradient(560px 280px at 0% 100%, rgba(116,144,123,0.18) 0%, transparent 70%),
+      #F3EEE4;
     border: 1px solid var(--borda);
     border-radius: var(--raio-grande);
     padding: 30px 32px 28px;
@@ -84,7 +84,7 @@
   }
   .capa-logo { max-height: 52px; max-width: 190px; width: auto; height: auto; object-fit: contain; display: block; }
   .capa-marca-txt { font-family: var(--serif); font-weight: 600; font-size: 22px; color: var(--rust); letter-spacing: 0.5px; }
-  .capa-x { font-family: var(--serif); font-size: 22px; color: var(--blush); }
+  .capa-x { font-family: var(--serif); font-style: italic; font-size: 26px; color: var(--texto-suave); }
   .capa-nome { font-family: var(--seasons); font-style: italic; font-size: 24px; color: var(--rust); }
   .capa-rotulo { display: block; font-family: var(--mono); font-size: 11px; letter-spacing: 2.5px; text-transform: uppercase; color: var(--acento); margin-bottom: 10px; }
   .capa h1 {
@@ -282,7 +282,7 @@
     <div class="capa-collab">
       <img class="capa-logo" id="c-logo" alt="" hidden>
       <span class="capa-marca-txt" id="c-marca" hidden></span>
-      <span class="capa-x" id="c-x" hidden>×</span>
+      <span class="capa-x" id="c-x" hidden>&amp;</span>
       <span class="capa-nome">Talissa Müller</span>
     </div>
     <span class="capa-rotulo">Roteiro para aprovação</span>
@@ -364,6 +364,27 @@
     if (tipo === "conexao") $("#erro-conexao").hidden = false;
     else $("#erro").hidden = false;
   }
+  // Pega a cor média da logo e usa bem suave no fundo do cabeçalho.
+  function tingirCapa(img) {
+    try {
+      const c = document.createElement("canvas"); c.width = 48; c.height = 48;
+      const ctx = c.getContext("2d"); ctx.drawImage(img, 0, 0, 48, 48);
+      const px = ctx.getImageData(0, 0, 48, 48).data;
+      let r = 0, g = 0, b = 0, n = 0;
+      for (let i = 0; i < px.length; i += 4) {
+        const claro = px[i] > 235 && px[i + 1] > 235 && px[i + 2] > 235;
+        if (px[i + 3] > 160 && !claro) { r += px[i]; g += px[i + 1]; b += px[i + 2]; n++; }
+      }
+      if (!n) return;
+      const cor = Math.round(r / n) + "," + Math.round(g / n) + "," + Math.round(b / n);
+      const capa = document.querySelector(".capa");
+      capa.style.background =
+        "radial-gradient(560px 260px at 100% 0%, rgba(" + cor + ",0.20) 0%, transparent 70%)," +
+        "radial-gradient(560px 280px at 0% 100%, rgba(" + cor + ",0.12) 0%, transparent 70%)," +
+        "linear-gradient(rgba(" + cor + ",0.07), rgba(" + cor + ",0.07)), #F3EEE4";
+      capa.style.borderColor = "rgba(" + cor + ",0.25)";
+    } catch (_e) { /* sem cor, fica o creme */ }
+  }
   function escapar(t) {
     const d = document.createElement("div"); d.textContent = t == null ? "" : String(t); return d.innerHTML;
   }
@@ -402,7 +423,7 @@
       const slug = marca.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
       const logo = $("#c-logo");
       logo.alt = marca;
-      logo.onload = () => { logo.hidden = false; };
+      logo.onload = () => { logo.hidden = false; tingirCapa(logo); };
       logo.onerror = () => { $("#c-marca").textContent = marca; $("#c-marca").hidden = false; };
       logo.src = "../logos-marcas/" + slug + ".png";
       $("#c-x").hidden = false;
