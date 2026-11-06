@@ -376,7 +376,9 @@
     will-change: transform;
     backface-visibility: hidden;
   }
-  .ticker-track:hover .ticker-lista { animation-play-state: paused; }
+  .ticker-lista, .marcas-marquee-lista { animation-play-state: paused; }
+  .ticker-lista.faixa-pronta, .marcas-marquee-lista.faixa-pronta { animation-play-state: running; }
+  .ticker-track:hover .ticker-lista.faixa-pronta { animation-play-state: paused; }
   .ticker-lista li {
     font-family: var(--fonte-titulo);
     font-weight: 700;
@@ -478,7 +480,7 @@
     will-change: transform;
     backface-visibility: hidden;
   }
-  .marcas-marquee:hover .marcas-marquee-lista { animation-play-state: paused; }
+  .marcas-marquee:hover .marcas-marquee-lista.faixa-pronta { animation-play-state: paused; }
   .marcas-marquee-lista img { height: 34px; width: auto; object-fit: contain; flex-shrink: 0; padding-right: 64px; box-sizing: content-box; }
   @keyframes rolar-marcas { from { transform: translate3d(0, 0, 0); } to { transform: translate3d(-50%, 0, 0); } }
   @media (prefers-reduced-motion: reduce) { .marcas-marquee-lista { animation: none; } }
@@ -733,8 +735,8 @@
   }
   .case-lista-resultado li:first-child::before { content: none; }
   /* O número grande ("+300 mil") e a palavra embaixo, menor. */
-  .case-num-grande { display: block; font-size: clamp(2.6rem, 5vw, 3.6rem); letter-spacing: -0.02em; }
-  .case-num-rotulo { display: block; font-size: 0.8em; font-weight: 700; letter-spacing: 0.02em; margin-top: 2px; }
+  .case-num-grande { display: block; font-size: clamp(1.9rem, 2.8vw, 2.3rem); letter-spacing: -0.01em; }
+  .case-num-rotulo { display: block; font-size: 0.72em; font-weight: 700; letter-spacing: 0.02em; margin-top: 2px; }
   .case-estatisticas {
     display: flex;
     gap: 26px;
@@ -1497,8 +1499,8 @@
   </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
-<script src="js/banco.js?v=20261027"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script defer src="js/banco.js?v=20261027"></script>
 <script>
   /* ======================================================================
      BANCO DE DADOS: usa o mesmo cliente Supabase de js/banco.js (o mesmo
@@ -1507,7 +1509,9 @@
      visíveis — nunca de ler, editar ou apagar o resto. Quem lê tudo é só o
      admin, depois do login (veja banco.sql).
   ====================================================================== */
-  const sbSite = Banco.sb;
+  // Com "defer" o Supabase chega depois deste script (mas antes do DOMContentLoaded),
+  // então o cliente é buscado na hora de usar. Assim as faixas não esperam o CDN.
+  const sbSite = { from: (tabela) => window.Banco.sb.from(tabela) };
 
   // Grava uma visita simples nesta página, sem pedir nada pro visitante e
   // sem nenhum serviço de fora. "origem" é de onde a pessoa veio: um link
@@ -2009,6 +2013,41 @@
     return m + ":" + String(s).padStart(2, "0");
   }
 
+  // As duas faixas animadas são montadas já aqui, sem esperar o Supabase, e só começam
+  // a andar com a fonte e as logos prontas: largura mudando no meio da animação dá tranco.
+  (function montarFaixas() {
+    const comLimite = (promessa, ms) => Promise.race([promessa, new Promise(r => setTimeout(r, ms))]);
+
+    // ---- Faixa de especialidades ----
+    const tickerLista = document.getElementById("ticker-lista");
+    [...CONFIG.especialidades, ...CONFIG.especialidades].forEach(item => {
+      const li = document.createElement("li");
+      li.textContent = item;
+      tickerLista.appendChild(li);
+      const sep = document.createElement("li");
+      sep.className = "separador";
+      sep.textContent = "◆";
+      sep.setAttribute("aria-hidden", "true");
+      tickerLista.appendChild(sep);
+    });
+    comLimite(document.fonts ? document.fonts.ready : Promise.resolve(), 1200)
+      .then(() => tickerLista.classList.add("faixa-pronta"));
+
+    // ---- Marcas (faixa com rolagem lateral) ----
+    const marcasBolhas = document.getElementById("marcas-bolhas");
+    const logos = [...CONFIG.marcas, ...CONFIG.marcas].map(marca => {
+      const img = document.createElement("img");
+      img.src = "logos-marcas/" + marca.logo + "?v=" + VERSAO_FOTOS;
+      img.alt = T.logoDaMarca + marca.nome;
+      img.decoding = "sync";
+      if (marca.altura) img.style.height = marca.altura + "px";
+      marcasBolhas.appendChild(img);
+      return img;
+    });
+    comLimite(Promise.all(logos.map(img => img.decode().catch(() => {}))), 2500)
+      .then(() => marcasBolhas.classList.add("faixa-pronta"));
+  })();
+
   document.addEventListener("DOMContentLoaded", () => {
 
     // ---- Rastreamento: registra a visita assim que a página carrega ----
@@ -2076,19 +2115,6 @@
     document.getElementById("hero-titulo").textContent = CONFIG.hero.tituloNome + " " + CONFIG.hero.tituloSobrenome;
     document.getElementById("hero-cargo").textContent = CONFIG.hero.cargo;
 
-    // ---- Faixa de especialidades ----
-    const tickerLista = document.getElementById("ticker-lista");
-    [...CONFIG.especialidades, ...CONFIG.especialidades].forEach(item => {
-      const li = document.createElement("li");
-      li.textContent = item;
-      tickerLista.appendChild(li);
-      const sep = document.createElement("li");
-      sep.className = "separador";
-      sep.textContent = "◆";
-      sep.setAttribute("aria-hidden", "true");
-      tickerLista.appendChild(sep);
-    });
-
     // ---- Sobre ----
     document.getElementById("sobre-titulo").innerHTML = CONFIG.sobre.titulo;
     document.getElementById("sobre-texto").innerHTML = CONFIG.sobre.texto;
@@ -2099,17 +2125,6 @@
       span.className = "pill-info";
       span.textContent = texto;
       sobrePills.appendChild(span);
-    });
-
-    // ---- Marcas (faixa com rolagem lateral) ----
-    const marcasBolhas = document.getElementById("marcas-bolhas");
-    [...CONFIG.marcas, ...CONFIG.marcas].forEach(marca => {
-      const img = document.createElement("img");
-      img.src = "logos-marcas/" + marca.logo + "?v=" + VERSAO_FOTOS;
-      img.alt = T.logoDaMarca + marca.nome;
-      img.decoding = "async";
-      if (marca.altura) img.style.height = marca.altura + "px";
-      marcasBolhas.appendChild(img);
     });
 
     // ---- Vídeos do portfólio: vêm do banco (tabela "videos"), editados no admin.
