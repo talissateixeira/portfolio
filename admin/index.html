@@ -42,6 +42,8 @@
     --fundo-aviso: rgba(176, 137, 0, 0.12);
     --laranja: #C2571A;
     --fundo-laranja: rgba(224, 120, 50, 0.16);
+    --azul: #2F64B5;
+    --fundo-azul: rgba(47, 100, 181, 0.13);
     --cinza: #8A8A8A;
     --fundo-cinza: rgba(138, 138, 138, 0.14);
     /* Selos de prazo (mesma família tonal do verde, só mudando o matiz) */
@@ -1158,6 +1160,8 @@
       --erro: #E06A60;
       --laranja: #EE9A5C;
       --fundo-laranja: rgba(238, 154, 92, 0.18);
+      --azul: #7FA8EC;
+      --fundo-azul: rgba(127, 168, 236, 0.18);
       --fundo-erro: rgba(224,106,96,0.16);
       --destaque-hoje: #DB8460;
       --aviso: #D7A93B;
@@ -1183,7 +1187,7 @@
     --acento: #8FA896; --acento-escuro: #AEC2B4; --fundo-acento: rgba(143,168,150,0.18);
     --branco: #211F1B;
     --sucesso: #8FA896; --fundo-sucesso: rgba(143,168,150,0.18);
-    --erro: #E06A60; --fundo-erro: rgba(224,106,96,0.16); --laranja: #EE9A5C; --fundo-laranja: rgba(238,154,92,0.18);
+    --erro: #E06A60; --fundo-erro: rgba(224,106,96,0.16); --laranja: #EE9A5C; --fundo-laranja: rgba(238,154,92,0.18); --azul: #7FA8EC; --fundo-azul: rgba(127,168,236,0.18);
     --destaque-hoje: #DB8460;
     --aviso: #D7A93B; --fundo-aviso: rgba(215,169,59,0.16);
     --cinza: #9A948B; --fundo-cinza: rgba(255,255,255,0.09);
@@ -2054,6 +2058,7 @@
           <button class="pill-filtro" data-filtro-roteiro="rascunho">Rascunhos</button>
           <button class="pill-filtro" data-filtro-roteiro="enviado">Enviados</button>
           <button class="pill-filtro" data-filtro-roteiro="aprovado">Aprovados</button>
+          <button class="pill-filtro" data-filtro-roteiro="concluido">Concluídos</button>
           <input type="text" class="campo-busca" id="busca-roteiros" placeholder="Buscar por título ou marca...">
         </div>
         <button type="button" class="botao botao-principal" id="botao-add-roteiro">+ Novo roteiro</button>
@@ -2161,6 +2166,7 @@
             <option value="rascunho">Rascunho</option>
             <option value="enviado">Enviado</option>
             <option value="aprovado">Aprovado</option>
+            <option value="concluido">Concluído</option>
             <option value="ajustes">Pedir ajustes</option>
           </select>
         </div>
@@ -7807,19 +7813,22 @@
     const rascunhos = listaRoteiros.filter(r => r.status === "rascunho").length;
     const enviados = listaRoteiros.filter(r => r.status === "enviado").length;
     const aprovados = listaRoteiros.filter(r => r.status === "aprovado").length;
+    const concluidos = listaRoteiros.filter(r => r.status === "concluido").length;
     document.getElementById("stats-roteiros").innerHTML = [
       { rotulo: "Roteiros", valor: total },
       { rotulo: "Rascunhos", valor: rascunhos },
       { rotulo: "Enviados", valor: enviados },
       { rotulo: "Aprovados", valor: aprovados },
+      { rotulo: "Concluídos", valor: concluidos },
       { rotulo: "Comentários novos", valor: totalNovosRoteiros() }
     ].map((s, i, arr) => '<div class="stat-item' + (i === arr.length - 1 ? " stat-item-cor-3" : "") + '"><div class="stat-rotulo">' + s.rotulo + '</div><div class="stat-valor">' + s.valor + "</div></div>").join("");
   }
 
-  const ROTULO_STATUS_ROTEIRO = { rascunho: "Rascunho", enviado: "Enviado", aprovado: "Aprovado", ajustes: "Ajustes" };
+  const ROTULO_STATUS_ROTEIRO = { rascunho: "Rascunho", enviado: "Enviado", aprovado: "Aprovado", concluido: "Concluído", ajustes: "Ajustes" };
   function corStatusRoteiro(s) {
     if (s === "aprovado") return "var(--fundo-sucesso);color:var(--sucesso)";
     if (s === "enviado") return "var(--fundo-laranja);color:var(--laranja)";
+    if (s === "concluido") return "var(--fundo-azul);color:var(--azul)";
     if (s === "ajustes") return "var(--fundo-aviso);color:var(--aviso)";
     return "var(--fundo-cinza);color:var(--cinza)";
   }
