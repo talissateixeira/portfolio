@@ -40,6 +40,8 @@
     --fundo-erro: rgba(196, 69, 60, 0.1);
     --aviso: #B08900;
     --fundo-aviso: rgba(176, 137, 0, 0.12);
+    --laranja: #C2571A;
+    --fundo-laranja: rgba(224, 120, 50, 0.16);
     --cinza: #8A8A8A;
     --fundo-cinza: rgba(138, 138, 138, 0.14);
     /* Selos de prazo (mesma família tonal do verde, só mudando o matiz) */
@@ -1154,6 +1156,8 @@
       --sucesso: #8FA896;
       --fundo-sucesso: rgba(143,168,150,0.18);
       --erro: #E06A60;
+      --laranja: #EE9A5C;
+      --fundo-laranja: rgba(238, 154, 92, 0.18);
       --fundo-erro: rgba(224,106,96,0.16);
       --destaque-hoje: #DB8460;
       --aviso: #D7A93B;
@@ -1179,7 +1183,7 @@
     --acento: #8FA896; --acento-escuro: #AEC2B4; --fundo-acento: rgba(143,168,150,0.18);
     --branco: #211F1B;
     --sucesso: #8FA896; --fundo-sucesso: rgba(143,168,150,0.18);
-    --erro: #E06A60; --fundo-erro: rgba(224,106,96,0.16);
+    --erro: #E06A60; --fundo-erro: rgba(224,106,96,0.16); --laranja: #EE9A5C; --fundo-laranja: rgba(238,154,92,0.18);
     --destaque-hoje: #DB8460;
     --aviso: #D7A93B; --fundo-aviso: rgba(215,169,59,0.16);
     --cinza: #9A948B; --fundo-cinza: rgba(255,255,255,0.09);
@@ -7815,7 +7819,7 @@
   const ROTULO_STATUS_ROTEIRO = { rascunho: "Rascunho", enviado: "Enviado", aprovado: "Aprovado", ajustes: "Ajustes" };
   function corStatusRoteiro(s) {
     if (s === "aprovado") return "var(--fundo-sucesso);color:var(--sucesso)";
-    if (s === "enviado") return "var(--fundo-acento);color:var(--acento)";
+    if (s === "enviado") return "var(--fundo-laranja);color:var(--laranja)";
     if (s === "ajustes") return "var(--fundo-aviso);color:var(--aviso)";
     return "var(--fundo-cinza);color:var(--cinza)";
   }
