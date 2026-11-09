@@ -1037,6 +1037,11 @@
   .card-kanban-rodape { display: flex; justify-content: space-between; align-items: center; font-size: 0.7rem; color: var(--texto-suave); gap: 6px; }
   .card-kanban-prazo.atrasado { color: var(--erro); font-weight: 700; }
   .card-kanban-prazo.proximo { color: var(--aviso); font-weight: 700; }
+  .pill-roteiro-card { font-size: 0.64rem; font-weight: 700; padding: 2px 8px; align-self: flex-start; margin-top: 4px; }
+  .resumo-etapas-projeto { color: var(--texto); font-weight: 600; margin-top: 2px; }
+  .card-roteiro-linha { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 8px; }
+  .card-roteiro-linha select { flex: 1; min-width: 180px; }
+  .card-roteiro-nome { flex: 1; min-width: 120px; font-weight: 600; font-size: 0.86rem; }
   .pill-formato { font-size: 0.64rem; font-weight: 700; padding: 2px 8px; border-radius: 100px; background: var(--fundo-acento); color: var(--acento-escuro); align-self: flex-start; }
   .ponto-prioridade { width: 8px; height: 8px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
   .ponto-prioridade-alta { background: var(--erro); }
@@ -2349,7 +2354,10 @@
       </div>
 
       <div class="linha-form-2">
-        <div class="campo-form"><label>Link do roteiro</label><input type="url" id="card-link-roteiro" placeholder="https://..."></div>
+        <div class="campo-form"><label>Roteiro</label>
+          <div class="card-roteiro-ligado" id="card-roteiro-ligado"></div>
+          <input type="url" id="card-link-roteiro" placeholder="ou cole um link externo (Docs...)">
+        </div>
         <div class="campo-form"><label>Link dos arquivos brutos</label><input type="url" id="card-link-brutos" placeholder="https://..."></div>
       </div>
       <div class="campo-form"><label>Link do vídeo final</label><input type="url" id="card-link-final" placeholder="https://..."></div>
@@ -3522,6 +3530,8 @@
           }
         } else if (botao.dataset.origem === "producao") {
           await salvarSeguro("tarefas_producao", sb.from("tarefas_producao").update({ coluna: "Concluído", concluido_em: new Date().toISOString() }).eq("id", botao.dataset.id));
+          const { data: tarefaConcluida } = await sb.from("tarefas_producao").select("*").eq("id", botao.dataset.id).maybeSingle();
+          if (tarefaConcluida) await aoMudarColunaTarefa(tarefaConcluida, "Concluído");
         } else {
           await salvarSeguro("calendario", sb.from("calendario").update({ status: "feito" }).eq("id", botao.dataset.id));
         }
@@ -5187,7 +5197,7 @@
       campanha_id: campanhaId || null
     }).select().single());
     if (!novoProjeto) return;
-    const criadas = await criarTarefasDoTemplate(novoProjeto.id, prazo, entregas);
+    const criadas = await criarTarefasDoTemplate(novoProjeto.id, prazo, entregas, cliente, nomeCampanha);
     await carregarDadosProducao();
     abrirAba("producao");
     abrirQuadroProjeto(novoProjeto.id);
@@ -5240,7 +5250,7 @@
   // ============================================================================
   // ABA — PRODUÇÃO (quadro Kanban de entregas por projeto/marca)
   // ============================================================================
-  let COLUNAS_PRODUCAO = ["To Do", "Briefing", "Roteiro", "Aprovação do roteiro", "Gravação", "Edição", "Revisão", "Envio pra marca", "Aprovação", "Concluído"];
+  let COLUNAS_PRODUCAO = ["Roteiro", "Aprovação do roteiro", "Gravar", "Editar", "Aprovação do vídeo", "Concluído"];
   const FORMATOS_PRODUCAO = ["Reels", "TikTok", "Stories", "Foto", "Carrossel", "Outro"];
   // Checklist padrão que toda tarefa nova já vem preenchida, com as etapas
   // da produção como subtarefas dentro do próprio card.
@@ -5275,6 +5285,8 @@
         if (Array.isArray(colunas) && colunas.length > 0) COLUNAS_PRODUCAO = colunas;
       } catch (erro) { /* mantém o padrão se o valor salvo estiver corrompido */ }
     }
+    await migrarFluxoProducaoV2();
+    colunasProducaoCarregadas = true;
     popularSelectColunaCard();
   }
   async function salvarColunasProducao() {
@@ -5294,8 +5306,10 @@
     rerenderizarQuadroAtivo();
   });
   async function carregarDadosProducao() {
+    await carregarColunasProducao();
+    await processarAprovacoesDasMarcas();
     const [, projetos, tarefas] = await Promise.all([
-      carregarColunasProducao(),
+      carregarMapaRoteirosProducao(),
       consultarSeguro("projetos_producao", sb.from("projetos_producao").select("*").order("created_at", { ascending: false })),
       consultarSeguro("tarefas_producao", sb.from("tarefas_producao").select("*"))
     ]);
@@ -5428,6 +5442,7 @@
         '<div class="cartao-projeto-producao-progresso">' +
           '<div class="barra-progresso-fundo"><div class="barra-progresso" style="width:' + prog.pct + '%;"></div></div>' +
           '<div class="cartao-projeto-producao-meta">' + prog.feitas + " de " + prog.total + " concluídas (" + prog.pct + "%)</div>" +
+          resumoEtapasProjetoHtml(p.id) +
         "</div>" +
         '<div class="cartao-projeto-producao-acoes">' +
           '<button type="button" class="botao-icone botao-fixar-projeto' + (p.fixado ? " fixado" : "") + '" data-fixar-projeto="' + p.id + '" data-fixado="' + p.fixado + '" title="' + (p.fixado ? "Desfixar do topo" : "Fixar no topo") + '"><span class="icone"><svg viewBox="0 0 24 24"><path d="M12 21s7-6.5 7-11a7 7 0 1 0-14 0c0 4.5 7 11 7 11Z"/><circle cx="12" cy="10" r="2.5"/></svg></span></button>' +
@@ -5597,7 +5612,7 @@
     return '<div class="card-kanban" data-id="' + t.id + '">' +
       marcaHtml +
       '<span class="card-kanban-titulo">' + escaparAtributo(t.titulo) + "</span>" +
-      '<span class="pill-formato">' + t.formato + "</span>" +
+      '<span class="pill-formato">' + t.formato + "</span>" + pillRoteiroDoCard(t) +
       '<div class="card-kanban-rodape">' +
         '<span class="ponto-prioridade ponto-prioridade-' + t.prioridade + '" title="Prioridade ' + t.prioridade + '"></span>' +
         prazoHtml +
@@ -5818,6 +5833,7 @@
     await Promise.all(idsNaColuna.map((id, ordem) =>
       salvarSeguro("tarefas_producao", sb.from("tarefas_producao").update({ ordem: ordem }).eq("id", id))
     ));
+    if (mudouColuna) aoMudarColunaTarefa(tarefa, novaColuna);
   }
 
   // ---- Modal: projeto ----
@@ -5838,7 +5854,7 @@
     div.querySelector(".remover-linha-entrega").addEventListener("click", () => div.remove());
     document.getElementById(containerId).appendChild(div);
   }
-  async function criarTarefasDoTemplate(projetoId, prazoFinal, entregas) {
+  async function criarTarefasDoTemplate(projetoId, prazoFinal, entregas, marca, nomeCampanha) {
     const contagemPorFormato = {};
     const linhas = [];
     entregas.forEach(({ formato, quantidade }) => {
@@ -5848,7 +5864,7 @@
           projeto_id: projetoId,
           titulo: formato + " " + contagemPorFormato[formato],
           formato: formato,
-          coluna: "Briefing",
+          coluna: COLUNAS_PRODUCAO.includes("Roteiro") ? "Roteiro" : COLUNAS_PRODUCAO[0],
           ordem: linhas.length,
           // Nasce SEM prazo: antes copiava o prazo da campanha em toda tarefa,
           // então os N reels caíam todos no mesmo dia e entupiam a Início.
@@ -5856,12 +5872,15 @@
           // guardado em projetos_producao.prazo_final, pra referência).
           prazo: null,
           prioridade: "media",
-          checklist: JSON.parse(JSON.stringify(CHECKLIST_PADRAO_PRODUCAO))
+          // Sem checklist padrão: a coluna do card já diz a etapa (antes o
+          // checklist repetia as colunas e ficava tudo duplicado).
+          checklist: []
         });
       }
     });
     if (linhas.length === 0) return [];
     const criadas = await salvarSeguro("tarefas_producao", sb.from("tarefas_producao").insert(linhas).select());
+    if (criadas && criadas.length && marca) await criarRoteirosParaTarefas(criadas, marca, nomeCampanha);
     return criadas || [];
   }
   function abrirModalProjeto(item) {
@@ -5908,7 +5927,7 @@
       await salvarSeguro("projetos_producao", sb.from("projetos_producao").update(registro).eq("id", id));
     } else {
       const novo = await salvarSeguro("projetos_producao", sb.from("projetos_producao").insert(registro).select().single());
-      if (novo) await criarTarefasDoTemplate(novo.id, registro.prazo_final, lerLinhasEntregas("lista-entregas-form"));
+      if (novo) await criarTarefasDoTemplate(novo.id, registro.prazo_final, lerLinhasEntregas("lista-entregas-form"), registro.marca, null);
     }
     modalProjeto.hidden = true;
     carregarDadosProducao();
@@ -6020,10 +6039,11 @@
     document.getElementById("card-prioridade").value = tarefa ? tarefa.prioridade : "media";
     document.getElementById("card-descricao").value = tarefa ? (tarefa.descricao || "") : "";
     document.getElementById("card-link-roteiro").value = tarefa ? (tarefa.link_roteiro || "") : "";
+    renderRoteiroLigadoNoCard();
     document.getElementById("card-link-brutos").value = tarefa ? (tarefa.link_arquivos_brutos || "") : "";
     document.getElementById("card-link-final").value = tarefa ? (tarefa.link_video_final || "") : "";
     document.getElementById("card-apagar").hidden = !tarefa;
-    checklistEditando = tarefa && Array.isArray(tarefa.checklist) ? JSON.parse(JSON.stringify(tarefa.checklist)) : JSON.parse(JSON.stringify(CHECKLIST_PADRAO_PRODUCAO));
+    checklistEditando = tarefa && Array.isArray(tarefa.checklist) ? JSON.parse(JSON.stringify(tarefa.checklist)) : [];
     comentariosEditando = tarefa && Array.isArray(tarefa.comentarios) ? JSON.parse(JSON.stringify(tarefa.comentarios)) : [];
     anexoTarefaAtual = tarefa && tarefa.anexo_url ? { url: tarefa.anexo_url, nome: tarefa.anexo_nome || "arquivo" } : null;
     renderChecklistModal();
@@ -6080,6 +6100,11 @@
       await salvarSeguro("tarefas_producao", sb.from("tarefas_producao").insert(registro));
     }
     modalCard.hidden = true;
+    if (id && tarefaAntiga && tarefaAntiga.coluna !== colunaEscolhida) {
+      await aoMudarColunaTarefa({ ...tarefaAntiga, ...registro, id: id }, colunaEscolhida);
+    } else if (id && registro.link_roteiro !== (tarefaAntiga && tarefaAntiga.link_roteiro)) {
+      await sincronizarCampanhaDoProjeto(registro.projeto_id);
+    }
     carregarDadosProducao();
   });
 
@@ -7785,6 +7810,7 @@
   }
 
   async function carregarRoteiros() {
+    await processarAprovacoesDasMarcas();
     listaRoteiros = await consultarSeguro("roteiros", sb.from("roteiros").select("*").order("atualizado_em", { ascending: false }));
     const coments = await consultarSeguro("roteiro_comentarios", sb.from("roteiro_comentarios").select("roteiro_id, visto"));
     comentariosPorRoteiro = {};
@@ -7873,6 +7899,14 @@
     cont.querySelectorAll('[data-acao-rot="link"]').forEach(b => b.addEventListener("click", () => {
       const r = listaRoteiros.find(x => x.id === b.dataset.id);
       navigator.clipboard.writeText(linkRoteiro(r)).then(() => { b.textContent = "Copiado ✓"; setTimeout(() => b.textContent = "Copiar link", 1600); });
+      // Copiar o link de um rascunho = mandar pra marca: vira "Enviado" e o
+      // card da Produção anda pra "Aprovação do roteiro" sozinho.
+      if (r.status === "rascunho") {
+        r.status = "enviado";
+        renderStatsRoteiros(); renderListaRoteiros();
+        salvarSeguro("roteiros", sb.from("roteiros").update({ status: "enviado" }).eq("id", r.id).select())
+          .then(() => moverCardPeloRoteiro(r.id, "enviado"));
+      }
     }));
     cont.querySelectorAll('[data-acao-rot="ver"]').forEach(b => b.addEventListener("click", () => {
       const r = listaRoteiros.find(x => x.id === b.dataset.id);
@@ -8141,6 +8175,8 @@
     if (mood.length) await salvarSeguro("roteiro_moodboard", sb.from("roteiro_moodboard").insert(mood));
 
     modalRoteiro.hidden = true;
+    const statusAntes = id ? ((listaRoteiros.find(r => r.id === id) || {}).status) : null;
+    if (dados.status !== statusAntes) await moverCardPeloRoteiro(roteiroId, dados.status);
     await carregarRoteiros();
    } catch (e) {
     alert("Erro ao salvar o roteiro: " + (e && e.message ? e.message : e));
@@ -8299,6 +8335,292 @@
       renderListaRoteiros();
     });
   });
+
+  // ============================================================================
+  // FLUXO AUTOMÁTICO — Campanha → Produção → Roteiro (2026-11)
+  // ----------------------------------------------------------------------------
+  // A Produção é o lugar "oficial" de cada vídeo. As outras abas conversam com
+  // ela sozinhas:
+  //  • criar campanha/projeto → cria um roteiro RASCUNHO por vídeo, ligado ao card
+  //    (a ligação fica em tarefas_producao.link_roteiro = link público do roteiro)
+  //  • status do roteiro muda → card anda (Enviado → Aprovação do roteiro;
+  //    Aprovado → Gravar; Ajustes → volta pra Roteiro; Concluído → Concluído)
+  //  • marca clica "Aprovar" na página dela → roteiro vira Aprovado e o card vai pra Gravar
+  //  • card muda de coluna → status do roteiro e da campanha acompanham
+  //  • todos os vídeos em Concluído → projeto concluído + campanha "Entregue"
+  // ============================================================================
+  const COLUNAS_FLUXO_V2 = ["Roteiro", "Aprovação do roteiro", "Gravar", "Editar", "Aprovação do vídeo", "Concluído"];
+  const MAPA_COLUNAS_ANTIGAS = {
+    "To Do": "Roteiro", "Briefing": "Roteiro", "Roteiro": "Roteiro",
+    "Aprovação do roteiro": "Aprovação do roteiro",
+    "Gravação": "Gravar", "Edição": "Editar", "Revisão": "Editar",
+    "Envio pra marca": "Aprovação do vídeo", "Aprovação": "Aprovação do vídeo",
+    "Concluído": "Concluído"
+  };
+  const COLUNA_PARA_STATUS_CAMPANHA = {
+    "Roteiro": "Roteiro", "Aprovação do roteiro": "Aprovação Roteiro", "Gravar": "Gravação",
+    "Editar": "Edição", "Aprovação do vídeo": "Edição", "Concluído": "Entregue"
+  };
+  const REGRAS_ROTEIRO_PARA_CARD = {
+    enviado:   { de: ["Roteiro"], para: "Aprovação do roteiro" },
+    aprovado:  { de: ["Roteiro", "Aprovação do roteiro"], para: "Gravar" },
+    ajustes:   { de: ["Aprovação do roteiro", "Gravar"], para: "Roteiro" },
+    concluido: { de: null, para: "Concluído" }
+  };
+  const RESUMO_ETAPA = {
+    "Roteiro": "no roteiro", "Aprovação do roteiro": "esperando aprovar roteiro", "Gravar": "pra gravar",
+    "Editar": "pra editar", "Aprovação do vídeo": "esperando aprovar vídeo"
+  };
+  var colunasProducaoCarregadas = false;
+  var mapaRoteirosProducao = {};
+  var processandoAprovacoes = false;
+  // As abas carregam uma vez só; quando uma automação mexe nos dados de outra
+  // aba, tira ela da lista de "já carregadas" pra recarregar na próxima visita.
+  function invalidarAbas(...nomes) { nomes.forEach(n => abasCarregadas.delete(n)); }
+
+  // Roda UMA vez (marca "fluxo_producao_v2" em configuracoes): troca as 10
+  // colunas antigas pelas 6 novas e move os cards que estavam nelas. Colunas
+  // criadas por você que não estão no mapa são mantidas (antes do Concluído).
+  async function migrarFluxoProducaoV2() {
+    try {
+      const { data: flag, error: erroFlag } = await sb.from("configuracoes").select("valor").eq("chave", "fluxo_producao_v2").maybeSingle();
+      if (erroFlag || (flag && flag.valor)) return;
+      const extras = COLUNAS_PRODUCAO.filter(c => !(c in MAPA_COLUNAS_ANTIGAS) && !COLUNAS_FLUXO_V2.includes(c));
+      for (const [antiga, nova] of Object.entries(MAPA_COLUNAS_ANTIGAS)) {
+        if (antiga === nova) continue;
+        const { error } = await sb.from("tarefas_producao").update({ coluna: nova }).eq("coluna", antiga);
+        if (error) throw error;
+      }
+      COLUNAS_PRODUCAO = COLUNAS_FLUXO_V2.slice(0, -1).concat(extras, ["Concluído"]);
+      await salvarColunasProducao();
+      await sb.from("configuracoes").upsert({ chave: "fluxo_producao_v2", valor: new Date().toISOString(), updated_at: new Date().toISOString() });
+    } catch (e) {
+      console.warn("Migração das colunas da Produção falhou:", e);
+    }
+  }
+
+  function idRoteiroDoLink(link) {
+    const m = /\/roteiro\/\?id=([0-9a-f-]{36})/i.exec(link || "");
+    return m ? m[1] : null;
+  }
+  function urlPublicaRoteiro(r) { return location.origin + "/roteiro/?id=" + r.id + "&token=" + r.token; }
+
+  async function carregarMapaRoteirosProducao() {
+    const lista = await consultarSeguro("roteiros", sb.from("roteiros").select("id, titulo, marca, status, token").order("atualizado_em", { ascending: false }));
+    mapaRoteirosProducao = {};
+    lista.forEach(r => { mapaRoteirosProducao[r.id] = r; });
+  }
+
+  // Um roteiro rascunho por card, já ligado (ex.: "Rejuv – Reels 1").
+  async function criarRoteirosParaTarefas(tarefas, marca, nomeCampanha) {
+    const linhas = tarefas.map(t => ({
+      id: crypto.randomUUID(),
+      titulo: marca + " – " + t.titulo,
+      marca: marca,
+      subtitulo: nomeCampanha || null,
+      formato: t.formato,
+      status: "rascunho"
+    }));
+    const criados = await salvarSeguro("roteiros", sb.from("roteiros").insert(linhas).select("id, titulo, marca, status, token"));
+    if (!criados) return;
+    const porId = {};
+    criados.forEach(r => { porId[r.id] = r; mapaRoteirosProducao[r.id] = r; });
+    await Promise.all(tarefas.map((t, i) => {
+      const r = porId[linhas[i].id];
+      if (!r) return null;
+      t.link_roteiro = urlPublicaRoteiro(r);
+      return salvarSeguro("tarefas_producao", sb.from("tarefas_producao").update({ link_roteiro: t.link_roteiro }).eq("id", t.id));
+    }));
+    invalidarAbas("roteiros");
+  }
+
+  async function moverTarefaPara(t, coluna) {
+    const irmas = listaTarefasProducao.filter(x => x.projeto_id === t.projeto_id && x.coluna === coluna);
+    const registro = { coluna: coluna, ordem: Math.max(0, ...irmas.map(x => x.ordem || 0)) + 1 };
+    if (coluna === "Concluído") registro.concluido_em = new Date().toISOString();
+    else if (t.coluna === "Concluído") registro.concluido_em = null;
+    await salvarSeguro("tarefas_producao", sb.from("tarefas_producao").update(registro).eq("id", t.id));
+  }
+
+  // Status do roteiro mudou → move o(s) card(s) ligado(s) a ele.
+  async function moverCardPeloRoteiro(roteiroId, status) {
+    try {
+      if (mapaRoteirosProducao[roteiroId]) mapaRoteirosProducao[roteiroId].status = status;
+      const regra = REGRAS_ROTEIRO_PARA_CARD[status];
+      if (!regra) return;
+      if (!colunasProducaoCarregadas) await carregarColunasProducao();
+      if (!COLUNAS_PRODUCAO.includes(regra.para)) return;
+      const { data: tarefas } = await sb.from("tarefas_producao").select("*").ilike("link_roteiro", "%id=" + roteiroId + "%");
+      const projetos = new Set();
+      for (const t of (tarefas || [])) {
+        if (t.coluna === regra.para) continue;
+        if (regra.de && !regra.de.includes(t.coluna)) continue;
+        await moverTarefaPara(t, regra.para);
+        projetos.add(t.projeto_id);
+      }
+      for (const p of projetos) await sincronizarCampanhaDoProjeto(p);
+      if (projetos.size) invalidarAbas("producao", "campanhas");
+    } catch (e) {
+      console.warn("Não consegui mover o card pelo roteiro:", e);
+    }
+  }
+
+  // Card mudou de coluna → roteiro e campanha acompanham.
+  async function aoMudarColunaTarefa(t, novaColuna) {
+    try {
+      const rid = idRoteiroDoLink(t.link_roteiro);
+      if (rid) {
+        const { data: r } = await sb.from("roteiros").select("id, status").eq("id", rid).maybeSingle();
+        if (r) {
+          let novo = null;
+          if (novaColuna === "Concluído") novo = "concluido";
+          else if (["Gravar", "Editar", "Aprovação do vídeo"].includes(novaColuna) && ["rascunho", "enviado", "ajustes", "concluido"].includes(r.status)) novo = "aprovado";
+          else if (novaColuna === "Aprovação do roteiro" && r.status === "rascunho") novo = "enviado";
+          if (novo && novo !== r.status) {
+            await salvarSeguro("roteiros", sb.from("roteiros").update({ status: novo }).eq("id", rid).select());
+            if (mapaRoteirosProducao[rid]) mapaRoteirosProducao[rid].status = novo;
+            invalidarAbas("roteiros");
+          }
+        }
+      }
+      await sincronizarCampanhaDoProjeto(t.projeto_id);
+      rerenderizarProducao();
+    } catch (e) {
+      console.warn("Não consegui sincronizar o roteiro/campanha:", e);
+    }
+  }
+
+  // Campanha fica no status do vídeo MAIS ATRASADO; tudo concluído → "Entregue"
+  // e o projeto vai pra Concluídos (volta pra Ativo se algum card sair do Concluído).
+  async function sincronizarCampanhaDoProjeto(projetoId) {
+    if (!projetoId) return;
+    const { data: proj } = await sb.from("projetos_producao").select("id, campanha_id, status").eq("id", projetoId).maybeSingle();
+    if (!proj) return;
+    const { data: tarefas } = await sb.from("tarefas_producao").select("coluna").eq("projeto_id", projetoId);
+    if (!tarefas || tarefas.length === 0) return;
+    const tudoConcluido = tarefas.every(t => t.coluna === "Concluído");
+    let novoStatusProjeto = null;
+    if (tudoConcluido && proj.status === "ativo") novoStatusProjeto = "concluido";
+    else if (!tudoConcluido && proj.status === "concluido") novoStatusProjeto = "ativo";
+    if (novoStatusProjeto) {
+      await salvarSeguro("projetos_producao", sb.from("projetos_producao").update({ status: novoStatusProjeto }).eq("id", projetoId));
+      const local = listaProjetosProducao.find(p => p.id === projetoId);
+      if (local) local.status = novoStatusProjeto;
+    }
+    if (!proj.campanha_id) return;
+    const indices = tarefas.map(t => FUNIL_STATUS.indexOf(COLUNA_PARA_STATUS_CAMPANHA[t.coluna])).filter(i => i >= 0);
+    if (indices.length === 0) return;
+    await salvarSeguro("campanhas", sb.from("campanhas").update({ status: FUNIL_STATUS[Math.min(...indices)] }).eq("id", proj.campanha_id));
+    invalidarAbas("campanhas");
+  }
+
+  // A marca clicou "Aprovar" na página do roteiro (vira o comentário
+  // "✅ Roteiro aprovado!"). Se isso veio DEPOIS da última edição sua e o
+  // roteiro ainda não está aprovado → aprova e manda o card pra Gravar.
+  async function processarAprovacoesDasMarcas() {
+    if (processandoAprovacoes) return;
+    processandoAprovacoes = true;
+    try {
+      const { data: coments } = await sb.from("roteiro_comentarios").select("roteiro_id, texto, criado_em").ilike("texto", "%Roteiro aprovado!%");
+      if (!coments || coments.length === 0) return;
+      const ids = [...new Set(coments.map(c => c.roteiro_id))];
+      const { data: rots } = await sb.from("roteiros").select("id, status, atualizado_em").in("id", ids);
+      for (const r of (rots || [])) {
+        if (!["rascunho", "enviado", "ajustes"].includes(r.status)) continue;
+        const aprovouDepois = coments.some(c => c.roteiro_id === r.id && new Date(c.criado_em) > new Date(r.atualizado_em));
+        if (!aprovouDepois) continue;
+        await salvarSeguro("roteiros", sb.from("roteiros").update({ status: "aprovado" }).eq("id", r.id).select());
+        await moverCardPeloRoteiro(r.id, "aprovado");
+        invalidarAbas("roteiros");
+      }
+    } catch (e) {
+      console.warn("Não consegui conferir as aprovações das marcas:", e);
+    } finally {
+      processandoAprovacoes = false;
+    }
+  }
+
+  // ---- Visual: selo do roteiro no card + resumo de etapas no projeto ----
+  function pillRoteiroDoCard(t) {
+    const rid = idRoteiroDoLink(t.link_roteiro);
+    const r = rid ? mapaRoteirosProducao[rid] : null;
+    if (!r) return "";
+    return '<span class="pill pill-roteiro-card" style="background:' + corStatusRoteiro(r.status) + '">📝 Roteiro ' + (ROTULO_STATUS_ROTEIRO[r.status] || r.status).toLowerCase() + "</span>";
+  }
+  function resumoEtapasProjetoHtml(projetoId) {
+    const cont = {};
+    listaTarefasProducao.forEach(t => { if (t.projeto_id === projetoId && t.coluna !== "Concluído") cont[t.coluna] = (cont[t.coluna] || 0) + 1; });
+    const partes = COLUNAS_PRODUCAO.filter(c => cont[c]).map(c => cont[c] + " " + (RESUMO_ETAPA[c] || "em " + c));
+    return partes.length ? '<div class="cartao-projeto-producao-meta resumo-etapas-projeto">' + escaparAtributo(partes.join(" · ")) + "</div>" : "";
+  }
+
+  // ---- Modal do card: roteiro ligado (abrir / ligar / criar / desligar) ----
+  function renderRoteiroLigadoNoCard() {
+    const alvo = document.getElementById("card-roteiro-ligado");
+    const input = document.getElementById("card-link-roteiro");
+    const rid = idRoteiroDoLink(input.value);
+    const r = rid ? mapaRoteirosProducao[rid] : null;
+    if (r) {
+      input.style.display = "none";
+      alvo.innerHTML = '<div class="card-roteiro-linha">' +
+        '<span class="pill" style="background:' + corStatusRoteiro(r.status) + '">' + (ROTULO_STATUS_ROTEIRO[r.status] || r.status) + "</span>" +
+        '<span class="card-roteiro-nome">' + escaparAtributo(r.titulo || "(sem título)") + "</span>" +
+        '<button type="button" class="botao botao-secundario" data-card-rot="abrir">Abrir roteiro</button>' +
+        '<button type="button" class="botao botao-secundario" data-card-rot="desligar" title="Desligar este roteiro do card">✕</button>' +
+      "</div>";
+    } else {
+      input.style.display = "";
+      const projeto = listaProjetosProducao.find(p => p.id === document.getElementById("card-projeto-id").value);
+      const marca = projeto ? (projeto.marca || "").toLowerCase() : "";
+      const lista = Object.values(mapaRoteirosProducao).sort((a, b) => ((b.marca || "").toLowerCase() === marca) - ((a.marca || "").toLowerCase() === marca));
+      alvo.innerHTML = '<div class="card-roteiro-linha">' +
+        '<select data-card-rot="escolher"><option value="">Ligar a um roteiro do painel…</option>' +
+          lista.map(x => '<option value="' + x.id + '">' + escaparAtributo((x.titulo || "(sem título)") + (x.marca ? " · " + x.marca : "")) + "</option>").join("") +
+        "</select>" +
+        '<button type="button" class="botao botao-secundario" data-card-rot="criar">+ Criar roteiro</button>' +
+      "</div>";
+    }
+    const botaoAbrir = alvo.querySelector('[data-card-rot="abrir"]');
+    if (botaoAbrir) botaoAbrir.addEventListener("click", () => abrirRoteiroDoPainel(rid));
+    const botaoDesligar = alvo.querySelector('[data-card-rot="desligar"]');
+    if (botaoDesligar) botaoDesligar.addEventListener("click", () => { input.value = ""; renderRoteiroLigadoNoCard(); });
+    const select = alvo.querySelector('[data-card-rot="escolher"]');
+    if (select) select.addEventListener("change", () => {
+      const escolhido = mapaRoteirosProducao[select.value];
+      if (escolhido) { input.value = urlPublicaRoteiro(escolhido); renderRoteiroLigadoNoCard(); }
+    });
+    const botaoCriar = alvo.querySelector('[data-card-rot="criar"]');
+    if (botaoCriar) botaoCriar.addEventListener("click", criarRoteiroPeloCard);
+  }
+  async function criarRoteiroPeloCard() {
+    const projeto = listaProjetosProducao.find(p => p.id === document.getElementById("card-projeto-id").value);
+    const marca = projeto ? projeto.marca : "";
+    const tituloCard = document.getElementById("card-titulo").value.trim() || "Vídeo";
+    const novo = await salvarSeguro("roteiros", sb.from("roteiros").insert({
+      titulo: (marca ? marca + " – " : "") + tituloCard,
+      marca: marca || null,
+      formato: document.getElementById("card-formato").value,
+      status: "rascunho"
+    }).select("id, titulo, marca, status, token").single());
+    if (!novo) return;
+    mapaRoteirosProducao[novo.id] = novo;
+    const input = document.getElementById("card-link-roteiro");
+    input.value = urlPublicaRoteiro(novo);
+    const idCard = document.getElementById("card-id").value;
+    if (idCard) {
+      await salvarSeguro("tarefas_producao", sb.from("tarefas_producao").update({ link_roteiro: input.value }).eq("id", idCard));
+      const local = listaTarefasProducao.find(t => t.id === idCard);
+      if (local) local.link_roteiro = input.value;
+    }
+    renderRoteiroLigadoNoCard();
+  }
+  async function abrirRoteiroDoPainel(rid) {
+    const { data: r } = await sb.from("roteiros").select("*").eq("id", rid).maybeSingle();
+    if (!r) { alert("Não achei esse roteiro — ele pode ter sido apagado."); return; }
+    modalCard.hidden = true;
+    abrirAba("roteiros");
+    abrirModalRoteiro(r);
+  }
 
   const hashInicial = (window.location.hash || "#dashboard").replace("#", "");
   if (hashInicial === "producao-proximas") {
