@@ -1037,6 +1037,26 @@
   .card-kanban-rodape { display: flex; justify-content: space-between; align-items: center; font-size: 0.7rem; color: var(--texto-suave); gap: 6px; }
   .card-kanban-prazo.atrasado { color: var(--erro); font-weight: 700; }
   .card-kanban-prazo.proximo { color: var(--aviso); font-weight: 700; }
+  /* O conteúdo é item flex: sem min-width:0 ele crescia até a largura do
+     quadro Kanban e a PÁGINA inteira rolava pro lado. Assim o quadro rola
+     dentro dele mesmo (ele já tem overflow-x:auto). */
+  .layout > .conteudo { min-width: 0; }
+  .cronograma-projeto { margin: 0 0 14px; }
+  .cronograma-faixa { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; background: var(--branco); border: 1px solid var(--borda); border-radius: var(--raio); padding: 10px 12px; font-size: 0.8rem; }
+  .cronograma-faixa.vazio { color: var(--texto-suave); justify-content: space-between; }
+  .cronograma-rotulo { font-weight: 700; margin-right: 4px; }
+  .cronograma-etapa { padding: 4px 10px; border-radius: 100px; background: var(--fundo-cinza); color: var(--texto); white-space: nowrap; }
+  .cronograma-etapa b { font-weight: 700; }
+  .cronograma-etapa.hoje { background: var(--fundo-laranja); color: var(--laranja); }
+  .cronograma-etapa.atrasada { background: var(--fundo-erro); color: var(--erro); }
+  .cronograma-etapa.feita { background: var(--fundo-sucesso); color: var(--sucesso); }
+  .cronograma-faixa .botao { margin-left: auto; padding: 6px 12px; font-size: 0.78rem; }
+  .cronograma-editor { background: var(--branco); border: 1px solid var(--borda); border-radius: var(--raio); padding: 14px; }
+  .cronograma-editor-campos { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-bottom: 12px; }
+  .cronograma-campo { display: flex; flex-direction: column; gap: 4px; font-size: 0.74rem; font-weight: 700; color: var(--texto-suave); }
+  .cronograma-campo input { padding: 8px; border: 1px solid var(--borda); border-radius: 10px; background: var(--creme); color: var(--texto); font: inherit; font-weight: 400; }
+  .cronograma-editor-acoes { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .cronograma-dica { font-size: 0.74rem; color: var(--texto-suave); margin: 8px 0 0; }
   .pill-roteiro-card { font-size: 0.64rem; font-weight: 700; padding: 2px 8px; align-self: flex-start; margin-top: 4px; }
   .resumo-etapas-projeto { color: var(--texto); font-weight: 600; margin-top: 2px; }
   .card-roteiro-linha { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 8px; }
@@ -1916,6 +1936,7 @@
             <button type="button" class="botao botao-principal" id="botao-add-card-topo">+ Nova tarefa</button>
           </div>
         </div>
+        <div class="cronograma-projeto" id="cronograma-projeto"></div>
         <div class="quadro-kanban" id="quadro-kanban-projeto"></div>
         <div class="lista-tarefas-producao" id="lista-tarefas-projeto" hidden></div>
       </div>
@@ -3529,9 +3550,9 @@
             await salvarSeguro("tarefas_producao", sb.from("tarefas_producao").update({ checklist: novoChecklist }).eq("id", item.tarefaId));
           }
         } else if (botao.dataset.origem === "producao") {
-          await salvarSeguro("tarefas_producao", sb.from("tarefas_producao").update({ coluna: "Concluído", concluido_em: new Date().toISOString() }).eq("id", botao.dataset.id));
-          const { data: tarefaConcluida } = await sb.from("tarefas_producao").select("*").eq("id", botao.dataset.id).maybeSingle();
-          if (tarefaConcluida) await aoMudarColunaTarefa(tarefaConcluida, "Concluído");
+          // Com prazo por etapa, o ✓ quer dizer "terminei esta etapa": o card
+          // avança pra próxima coluna (e pega o prazo dela do cronograma).
+          await avancarEtapaTarefa(botao.dataset.id);
         } else {
           await salvarSeguro("calendario", sb.from("calendario").update({ status: "feito" }).eq("id", botao.dataset.id));
         }
@@ -5198,6 +5219,7 @@
     }).select().single());
     if (!novoProjeto) return;
     const criadas = await criarTarefasDoTemplate(novoProjeto.id, prazo, entregas, cliente, nomeCampanha);
+    if (prazo) await salvarCronograma(novoProjeto.id, sugerirCronograma(prazo), criadas);
     await carregarDadosProducao();
     abrirAba("producao");
     abrirQuadroProjeto(novoProjeto.id);
@@ -5308,8 +5330,9 @@
   async function carregarDadosProducao() {
     await carregarColunasProducao();
     await processarAprovacoesDasMarcas();
-    const [, projetos, tarefas] = await Promise.all([
+    const [, , projetos, tarefas] = await Promise.all([
       carregarMapaRoteirosProducao(),
+      carregarCronogramas(),
       consultarSeguro("projetos_producao", sb.from("projetos_producao").select("*").order("created_at", { ascending: false })),
       consultarSeguro("tarefas_producao", sb.from("tarefas_producao").select("*"))
     ]);
@@ -5666,6 +5689,7 @@
   function renderProjetoAtual() {
     if (!projetoAtualId) return;
     const tarefas = listaTarefasProducao.filter(t => t.projeto_id === projetoAtualId);
+    renderCronogramaProjeto();
     const emLista = producaoProjetoView === "lista";
     document.getElementById("quadro-kanban-projeto").hidden = emLista;
     document.getElementById("lista-tarefas-projeto").hidden = !emLista;
@@ -5927,7 +5951,10 @@
       await salvarSeguro("projetos_producao", sb.from("projetos_producao").update(registro).eq("id", id));
     } else {
       const novo = await salvarSeguro("projetos_producao", sb.from("projetos_producao").insert(registro).select().single());
-      if (novo) await criarTarefasDoTemplate(novo.id, registro.prazo_final, lerLinhasEntregas("lista-entregas-form"), registro.marca, null);
+      if (novo) {
+        const criadas = await criarTarefasDoTemplate(novo.id, registro.prazo_final, lerLinhasEntregas("lista-entregas-form"), registro.marca, null);
+        if (registro.prazo_final) await salvarCronograma(novo.id, sugerirCronograma(registro.prazo_final), criadas);
+      }
     }
     modalProjeto.hidden = true;
     carregarDadosProducao();
@@ -6101,7 +6128,7 @@
     }
     modalCard.hidden = true;
     if (id && tarefaAntiga && tarefaAntiga.coluna !== colunaEscolhida) {
-      await aoMudarColunaTarefa({ ...tarefaAntiga, ...registro, id: id }, colunaEscolhida);
+      await aoMudarColunaTarefa({ ...tarefaAntiga, ...registro, id: id }, colunaEscolhida, { manterPrazo: registro.prazo !== tarefaAntiga.prazo });
     } else if (id && registro.link_roteiro !== (tarefaAntiga && tarefaAntiga.link_roteiro)) {
       await sincronizarCampanhaDoProjeto(registro.projeto_id);
     }
@@ -8437,6 +8464,8 @@
   async function moverTarefaPara(t, coluna) {
     const irmas = listaTarefasProducao.filter(x => x.projeto_id === t.projeto_id && x.coluna === coluna);
     const registro = { coluna: coluna, ordem: Math.max(0, ...irmas.map(x => x.ordem || 0)) + 1 };
+    const cron = await cronogramaDoProjeto(t.projeto_id);
+    if (cron[coluna]) registro.prazo = cron[coluna];
     if (coluna === "Concluído") registro.concluido_em = new Date().toISOString();
     else if (t.coluna === "Concluído") registro.concluido_em = null;
     await salvarSeguro("tarefas_producao", sb.from("tarefas_producao").update(registro).eq("id", t.id));
@@ -8466,8 +8495,9 @@
   }
 
   // Card mudou de coluna → roteiro e campanha acompanham.
-  async function aoMudarColunaTarefa(t, novaColuna) {
+  async function aoMudarColunaTarefa(t, novaColuna, opcoes) {
     try {
+      if (!(opcoes && opcoes.manterPrazo)) await aplicarPrazoDaEtapa(t, novaColuna);
       const rid = idRoteiroDoLink(t.link_roteiro);
       if (rid) {
         const { data: r } = await sb.from("roteiros").select("id, status").eq("id", rid).maybeSingle();
@@ -8620,6 +8650,146 @@
     modalCard.hidden = true;
     abrirAba("roteiros");
     abrirModalRoteiro(r);
+  }
+
+
+  // ============================================================================
+  // CRONOGRAMA POR ETAPA (2026-11)
+  // ----------------------------------------------------------------------------
+  // Cada projeto tem uma data-limite por etapa, guardada em configuracoes
+  // (chave "cronograma_<projetoId>", valor JSON { "Gravar": "2026-11-20", ... }).
+  // O prazo de um card = a data da etapa em que ele está: muda sozinho quando o
+  // card anda. Atrasou → fica vermelho no quadro e aparece em "Atrasado" na Início.
+  // ============================================================================
+  const ETAPAS_CRONOGRAMA = ["Roteiro", "Aprovação do roteiro", "Gravar", "Editar", "Aprovação do vídeo"];
+  // Fração do tempo (de hoje até o prazo final) em que cada etapa termina.
+  const FRACAO_ETAPA = { "Roteiro": 0.25, "Aprovação do roteiro": 0.4, "Gravar": 0.6, "Editar": 0.8, "Aprovação do vídeo": 1 };
+  var mapaCronogramas = {};
+  var editandoCronograma = false;
+
+  function somarDiasISO(dataIso, dias) {
+    const d = new Date(dataIso + "T12:00:00");
+    d.setDate(d.getDate() + dias);
+    return d.toISOString().slice(0, 10);
+  }
+  function sugerirCronograma(prazoFinal) {
+    const hoje = hojeISO();
+    const total = Math.max(0, Math.round((new Date(prazoFinal + "T12:00:00") - new Date(hoje + "T12:00:00")) / 86400000));
+    const cron = {};
+    let anterior = hoje;
+    ETAPAS_CRONOGRAMA.forEach(etapa => {
+      let data = etapa === "Aprovação do vídeo" ? prazoFinal : somarDiasISO(hoje, Math.round(total * FRACAO_ETAPA[etapa]));
+      if (data < anterior) data = anterior;
+      cron[etapa] = data;
+      anterior = data;
+    });
+    return cron;
+  }
+  async function carregarCronogramas() {
+    const linhas = await consultarSeguro("configuracoes", sb.from("configuracoes").select("chave, valor").ilike("chave", "cronograma_%"));
+    mapaCronogramas = {};
+    linhas.forEach(l => { try { mapaCronogramas[l.chave.slice("cronograma_".length)] = JSON.parse(l.valor) || {}; } catch (e) { /* ignora valor corrompido */ } });
+  }
+  async function cronogramaDoProjeto(projetoId) {
+    if (!projetoId) return {};
+    if (mapaCronogramas[projetoId]) return mapaCronogramas[projetoId];
+    const { data } = await sb.from("configuracoes").select("valor").eq("chave", "cronograma_" + projetoId).maybeSingle();
+    let cron = {};
+    try { cron = data && data.valor ? JSON.parse(data.valor) : {}; } catch (e) { cron = {}; }
+    mapaCronogramas[projetoId] = cron;
+    return cron;
+  }
+  // Salva o cronograma e atualiza o prazo de todo card (não concluído) do projeto
+  // pra data da etapa em que ele está.
+  async function salvarCronograma(projetoId, cron, tarefasConhecidas) {
+    mapaCronogramas[projetoId] = cron;
+    await salvarSeguro("configuracoes", sb.from("configuracoes").upsert({ chave: "cronograma_" + projetoId, valor: JSON.stringify(cron), updated_at: new Date().toISOString() }));
+    let tarefas = tarefasConhecidas;
+    if (!tarefas) {
+      const { data } = await sb.from("tarefas_producao").select("id, coluna, prazo").eq("projeto_id", projetoId);
+      tarefas = data || [];
+    }
+    await Promise.all(tarefas.filter(t => t.coluna !== "Concluído" && cron[t.coluna] && cron[t.coluna] !== t.prazo).map(t => {
+      t.prazo = cron[t.coluna];
+      const local = listaTarefasProducao.find(x => x.id === t.id);
+      if (local) local.prazo = t.prazo;
+      return salvarSeguro("tarefas_producao", sb.from("tarefas_producao").update({ prazo: t.prazo }).eq("id", t.id));
+    }));
+  }
+  async function aplicarPrazoDaEtapa(t, coluna) {
+    const cron = await cronogramaDoProjeto(t.projeto_id);
+    const data = cron[coluna];
+    if (!data || data === t.prazo || coluna === "Concluído") return;
+    await salvarSeguro("tarefas_producao", sb.from("tarefas_producao").update({ prazo: data }).eq("id", t.id));
+    const local = listaTarefasProducao.find(x => x.id === t.id);
+    if (local) local.prazo = data;
+  }
+  // ✓ na Início: o card vai pra próxima coluna do fluxo.
+  async function avancarEtapaTarefa(tarefaId) {
+    if (!colunasProducaoCarregadas) await carregarColunasProducao();
+    const { data: t } = await sb.from("tarefas_producao").select("*").eq("id", tarefaId).maybeSingle();
+    if (!t) return;
+    const i = COLUNAS_PRODUCAO.indexOf(t.coluna);
+    const proxima = i >= 0 && i < COLUNAS_PRODUCAO.length - 1 ? COLUNAS_PRODUCAO[i + 1] : "Concluído";
+    const registro = { coluna: proxima };
+    if (proxima === "Concluído") registro.concluido_em = new Date().toISOString();
+    await salvarSeguro("tarefas_producao", sb.from("tarefas_producao").update(registro).eq("id", tarefaId));
+    await aoMudarColunaTarefa({ ...t, ...registro }, proxima);
+    invalidarAbas("producao");
+  }
+
+  // ---- Faixa do cronograma em cima do quadro do projeto ----
+  function renderCronogramaProjeto() {
+    const alvo = document.getElementById("cronograma-projeto");
+    if (!alvo || !projetoAtualId) return;
+    const projeto = listaProjetosProducao.find(p => p.id === projetoAtualId);
+    const cron = mapaCronogramas[projetoAtualId] || {};
+    const etapas = ETAPAS_CRONOGRAMA.filter(e => COLUNAS_PRODUCAO.includes(e));
+    const hoje = hojeISO();
+    const tarefas = listaTarefasProducao.filter(t => t.projeto_id === projetoAtualId);
+    if (editandoCronograma) {
+      alvo.innerHTML = '<div class="cronograma-editor">' +
+        '<div class="cronograma-editor-campos">' +
+          etapas.map(e => '<label class="cronograma-campo"><span>' + escaparAtributo(e) + '</span><input type="date" data-etapa-cron="' + escaparAtributo(e) + '" value="' + (cron[e] || "") + '"></label>').join("") +
+        "</div>" +
+        '<div class="cronograma-editor-acoes">' +
+          (projeto && projeto.prazo_final ? '<button type="button" class="botao botao-secundario" data-cron="sugerir">✨ Sugerir pelo prazo final (' + formatarData(projeto.prazo_final) + ")</button>" : '<span class="cronograma-dica">Dica: coloque um prazo final no projeto ("Editar projeto") que eu sugiro as datas.</span>') +
+          '<span style="flex:1"></span>' +
+          '<button type="button" class="botao botao-secundario" data-cron="cancelar">Cancelar</button>' +
+          '<button type="button" class="botao botao-principal" data-cron="salvar">Salvar cronograma</button>' +
+        "</div>" +
+        '<p class="cronograma-dica">Ao salvar, o prazo de cada vídeo vira a data da etapa em que ele está — e muda sozinho quando ele avança.</p>' +
+      "</div>";
+      alvo.querySelector('[data-cron="cancelar"]').addEventListener("click", () => { editandoCronograma = false; renderCronogramaProjeto(); });
+      const sugerir = alvo.querySelector('[data-cron="sugerir"]');
+      if (sugerir) sugerir.addEventListener("click", () => {
+        const s = sugerirCronograma(projeto.prazo_final);
+        alvo.querySelectorAll("[data-etapa-cron]").forEach(inp => { inp.value = s[inp.dataset.etapaCron] || ""; });
+      });
+      alvo.querySelector('[data-cron="salvar"]').addEventListener("click", async () => {
+        const novo = {};
+        alvo.querySelectorAll("[data-etapa-cron]").forEach(inp => { if (inp.value) novo[inp.dataset.etapaCron] = inp.value; });
+        await salvarCronograma(projetoAtualId, novo);
+        editandoCronograma = false;
+        renderProjetoAtual();
+      });
+      return;
+    }
+    if (!etapas.some(e => cron[e])) {
+      alvo.innerHTML = '<div class="cronograma-faixa vazio"><span>📅 Este projeto ainda não tem cronograma por etapa.</span>' +
+        '<button type="button" class="botao botao-secundario" data-cron="editar">Montar cronograma</button></div>';
+    } else {
+      alvo.innerHTML = '<div class="cronograma-faixa"><span class="cronograma-rotulo">📅 Cronograma</span>' +
+        etapas.map(e => {
+          if (!cron[e]) return "";
+          const pendentes = tarefas.filter(t => t.coluna === e || (COLUNAS_PRODUCAO.indexOf(t.coluna) >= 0 && COLUNAS_PRODUCAO.indexOf(t.coluna) < COLUNAS_PRODUCAO.indexOf(e))).length;
+          const classe = pendentes === 0 ? "feita" : (cron[e] < hoje ? "atrasada" : (cron[e] === hoje ? "hoje" : ""));
+          return '<span class="cronograma-etapa ' + classe + '" title="' + (pendentes ? pendentes + " vídeo(s) ainda não passaram desta etapa" : "Etapa concluída por todos os vídeos") + '">' +
+            '<b>' + escaparAtributo(e) + "</b> " + (pendentes === 0 ? "✓" : "até " + formatarData(cron[e])) + "</span>";
+        }).join("") +
+        '<button type="button" class="botao botao-secundario" data-cron="editar">Editar</button></div>';
+    }
+    alvo.querySelector('[data-cron="editar"]').addEventListener("click", () => { editandoCronograma = true; renderCronogramaProjeto(); });
   }
 
   const hashInicial = (window.location.hash || "#dashboard").replace("#", "");
