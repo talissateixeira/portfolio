@@ -5275,7 +5275,7 @@
   // ============================================================================
   // ABA — PRODUÇÃO (quadro Kanban de entregas por projeto/marca)
   // ============================================================================
-  let COLUNAS_PRODUCAO = ["Roteiro", "Aprovação do roteiro", "Gravar", "Editar", "Aprovação do vídeo", "Concluído"];
+  let COLUNAS_PRODUCAO = ["Roteiro", "Aprovação do roteiro", "Fotos", "Gravar", "Editar", "Aprovação do vídeo", "Concluído"];
   const FORMATOS_PRODUCAO = ["Reels", "TikTok", "Stories", "Foto", "Carrossel", "Outro"];
   // Checklist padrão que toda tarefa nova já vem preenchida, com as etapas
   // da produção como subtarefas dentro do próprio card.
@@ -5311,6 +5311,7 @@
       } catch (erro) { /* mantém o padrão se o valor salvo estiver corrompido */ }
     }
     await migrarFluxoProducaoV2();
+    await adicionarColunaFotos();
     colunasProducaoCarregadas = true;
     popularSelectColunaCard();
   }
@@ -8379,7 +8380,7 @@
   //  • card muda de coluna → status do roteiro e da campanha acompanham
   //  • todos os vídeos em Concluído → projeto concluído + campanha "Entregue"
   // ============================================================================
-  const COLUNAS_FLUXO_V2 = ["Roteiro", "Aprovação do roteiro", "Gravar", "Editar", "Aprovação do vídeo", "Concluído"];
+  const COLUNAS_FLUXO_V2 = ["Roteiro", "Aprovação do roteiro", "Fotos", "Gravar", "Editar", "Aprovação do vídeo", "Concluído"];
   const MAPA_COLUNAS_ANTIGAS = {
     "To Do": "Roteiro", "Briefing": "Roteiro", "Roteiro": "Roteiro",
     "Aprovação do roteiro": "Aprovação do roteiro",
@@ -8388,7 +8389,7 @@
     "Concluído": "Concluído"
   };
   const COLUNA_PARA_STATUS_CAMPANHA = {
-    "Roteiro": "Roteiro", "Aprovação do roteiro": "Aprovação Roteiro", "Gravar": "Gravação",
+    "Roteiro": "Roteiro", "Aprovação do roteiro": "Aprovação Roteiro", "Fotos": "Gravação", "Gravar": "Gravação",
     "Editar": "Edição", "Aprovação do vídeo": "Edição", "Concluído": "Entregue"
   };
   const REGRAS_ROTEIRO_PARA_CARD = {
@@ -8398,7 +8399,7 @@
     concluido: { de: null, para: "Concluído" }
   };
   const RESUMO_ETAPA = {
-    "Roteiro": "no roteiro", "Aprovação do roteiro": "esperando aprovar roteiro", "Gravar": "pra gravar",
+    "Roteiro": "no roteiro", "Aprovação do roteiro": "esperando aprovar roteiro", "Fotos": "pra fotografar", "Gravar": "pra gravar",
     "Editar": "pra editar", "Aprovação do vídeo": "esperando aprovar vídeo"
   };
   var colunasProducaoCarregadas = false;
@@ -8426,6 +8427,21 @@
       await sb.from("configuracoes").upsert({ chave: "fluxo_producao_v2", valor: new Date().toISOString(), updated_at: new Date().toISOString() });
     } catch (e) {
       console.warn("Migração das colunas da Produção falhou:", e);
+    }
+  }
+
+  // Roda uma vez (flag "coluna_fotos_v1"): coloca "Fotos" antes de "Gravar".
+  async function adicionarColunaFotos() {
+    try {
+      if (COLUNAS_PRODUCAO.includes("Fotos")) return;
+      const { data: flag, error } = await sb.from("configuracoes").select("valor").eq("chave", "coluna_fotos_v1").maybeSingle();
+      if (error || (flag && flag.valor)) return;
+      const iGravar = COLUNAS_PRODUCAO.indexOf("Gravar");
+      COLUNAS_PRODUCAO.splice(iGravar >= 0 ? iGravar : Math.max(0, COLUNAS_PRODUCAO.length - 1), 0, "Fotos");
+      await salvarColunasProducao();
+      await sb.from("configuracoes").upsert({ chave: "coluna_fotos_v1", valor: new Date().toISOString(), updated_at: new Date().toISOString() });
+    } catch (e) {
+      console.warn("Não consegui adicionar a coluna Fotos:", e);
     }
   }
 
@@ -8485,9 +8501,11 @@
       const { data: tarefas } = await sb.from("tarefas_producao").select("*").ilike("link_roteiro", "%id=" + roteiroId + "%");
       const projetos = new Set();
       for (const t of (tarefas || [])) {
-        if (t.coluna === regra.para) continue;
+        let destino = regra.para;
+        if (status === "aprovado" && t.formato === "Foto" && COLUNAS_PRODUCAO.includes("Fotos")) destino = "Fotos";
+        if (t.coluna === destino) continue;
         if (regra.de && !regra.de.includes(t.coluna)) continue;
-        await moverTarefaPara(t, regra.para);
+        await moverTarefaPara(t, destino);
         projetos.add(t.projeto_id);
       }
       for (const p of projetos) await sincronizarCampanhaDoProjeto(p);
@@ -8507,7 +8525,7 @@
         if (r) {
           let novo = null;
           if (novaColuna === "Concluído") novo = "concluido";
-          else if (["Gravar", "Editar", "Aprovação do vídeo"].includes(novaColuna) && ["rascunho", "enviado", "ajustes", "concluido"].includes(r.status)) novo = "aprovado";
+          else if (["Fotos", "Gravar", "Editar", "Aprovação do vídeo"].includes(novaColuna) && ["rascunho", "enviado", "ajustes", "concluido"].includes(r.status)) novo = "aprovado";
           else if (novaColuna === "Aprovação do roteiro" && r.status === "rascunho") novo = "enviado";
           if (novo && novo !== r.status) {
             await salvarSeguro("roteiros", sb.from("roteiros").update({ status: novo }).eq("id", rid).select());
@@ -8664,9 +8682,9 @@
   // O prazo de um card = a data da etapa em que ele está: muda sozinho quando o
   // card anda. Atrasou → fica vermelho no quadro e aparece em "Atrasado" na Início.
   // ============================================================================
-  const ETAPAS_CRONOGRAMA = ["Roteiro", "Aprovação do roteiro", "Gravar", "Editar", "Aprovação do vídeo"];
+  const ETAPAS_CRONOGRAMA = ["Roteiro", "Aprovação do roteiro", "Fotos", "Gravar", "Editar", "Aprovação do vídeo"];
   // Fração do tempo (de hoje até o prazo final) em que cada etapa termina.
-  const FRACAO_ETAPA = { "Roteiro": 0.25, "Aprovação do roteiro": 0.4, "Gravar": 0.6, "Editar": 0.8, "Aprovação do vídeo": 1 };
+  const FRACAO_ETAPA = { "Roteiro": 0.25, "Aprovação do roteiro": 0.4, "Fotos": 0.5, "Gravar": 0.6, "Editar": 0.8, "Aprovação do vídeo": 1 };
   var mapaCronogramas = {};
   var editandoCronograma = false;
 
@@ -8732,8 +8750,16 @@
     if (!colunasProducaoCarregadas) await carregarColunasProducao();
     const { data: t } = await sb.from("tarefas_producao").select("*").eq("id", tarefaId).maybeSingle();
     if (!t) return;
-    const i = COLUNAS_PRODUCAO.indexOf(t.coluna);
-    const proxima = i >= 0 && i < COLUNAS_PRODUCAO.length - 1 ? COLUNAS_PRODUCAO[i + 1] : "Concluído";
+    let i = COLUNAS_PRODUCAO.indexOf(t.coluna);
+    let proxima = "Concluído";
+    while (i >= 0 && i < COLUNAS_PRODUCAO.length - 1) {
+      i++;
+      const c = COLUNAS_PRODUCAO[i];
+      // Card de vídeo não passa por "Fotos"; card de foto não passa por "Gravar".
+      if (c === "Fotos" && t.formato !== "Foto") continue;
+      if (c === "Gravar" && t.formato === "Foto") continue;
+      proxima = c; break;
+    }
     const registro = { coluna: proxima };
     if (proxima === "Concluído") registro.concluido_em = new Date().toISOString();
     await salvarSeguro("tarefas_producao", sb.from("tarefas_producao").update(registro).eq("id", tarefaId));
