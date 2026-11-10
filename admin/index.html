@@ -1041,6 +1041,15 @@
      quadro Kanban e a PÁGINA inteira rolava pro lado. Assim o quadro rola
      dentro dele mesmo (ele já tem overflow-x:auto). */
   .layout > .conteudo { min-width: 0; }
+  .produto-projeto { margin: 0 0 10px; }
+  .produto-faixa { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; border-radius: var(--raio); padding: 10px 12px; font-size: 0.82rem; border: 1px solid var(--borda); background: var(--branco); }
+  .produto-faixa.aguardando { background: var(--fundo-laranja); border-color: transparent; color: var(--texto); }
+  .produto-faixa.recebido { background: var(--fundo-sucesso); border-color: transparent; }
+  .produto-faixa input[type="date"], .produto-faixa input[type="number"] { padding: 7px 8px; border: 1px solid var(--borda); border-radius: 10px; background: var(--branco); color: var(--texto); font: inherit; }
+  .produto-faixa .botao { padding: 6px 12px; font-size: 0.78rem; }
+  .produto-faixa.editando .cronograma-campo { min-width: 200px; }
+  .produto-link { margin: 0; font-size: 0.78rem; }
+  .pill-produto-card { font-size: 0.64rem; font-weight: 700; padding: 2px 8px; align-self: flex-start; margin-top: 4px; background: var(--fundo-laranja); color: var(--laranja); }
   .cronograma-projeto { margin: 0 0 14px; }
   .cronograma-faixa { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; background: var(--branco); border: 1px solid var(--borda); border-radius: var(--raio); padding: 10px 12px; font-size: 0.8rem; }
   .cronograma-faixa.vazio { color: var(--texto-suave); justify-content: space-between; }
@@ -1939,6 +1948,7 @@
             <button type="button" class="botao botao-principal" id="botao-add-card-topo">+ Nova tarefa</button>
           </div>
         </div>
+        <div class="produto-projeto" id="produto-projeto"></div>
         <div class="cronograma-projeto" id="cronograma-projeto"></div>
         <div class="quadro-kanban" id="quadro-kanban-projeto"></div>
         <div class="lista-tarefas-producao" id="lista-tarefas-projeto" hidden></div>
@@ -2690,6 +2700,10 @@
         <div class="campo-form"><label>Pagamento</label>
           <select id="camp-pagamento"><option value="pendente">Pendente</option><option value="pago">Pago</option></select>
         </div>
+      </div>
+      <div class="campo-form" id="bloco-camp-dias-produto">
+        <label>📦 Ou o prazo conta a partir do produto? Entregar em quantos dias depois de receber</label>
+        <input type="number" id="camp-dias-produto" min="1" step="1" placeholder="ex.: 10 (deixe vazio se o prazo é uma data fixa)">
       </div>
       <div class="campo-form" id="bloco-campanha-entregas">
         <label>Entregas / serviços (cria o projeto no Produção sozinho)</label>
@@ -5206,12 +5220,14 @@
     document.getElementById("camp-apagar").hidden = !campanha;
     document.getElementById("bloco-campanha-qtd-manual").hidden = !campanha;
     document.getElementById("bloco-campanha-entregas").hidden = !!campanha;
+    document.getElementById("bloco-camp-dias-produto").hidden = !!campanha;
+    document.getElementById("camp-dias-produto").value = "";
     document.getElementById("lista-entregas-campanha-form").innerHTML = "";
     if (!campanha) adicionarLinhaEntrega("lista-entregas-campanha-form");
     modalCampanha.hidden = false;
   }
   document.getElementById("botao-add-linha-entrega-campanha").addEventListener("click", () => adicionarLinhaEntrega("lista-entregas-campanha-form"));
-  async function criarProjetoDeCampanhaEAbrir(campanhaId, nomeCampanha, cliente, prazo, valor, entregas) {
+  async function criarProjetoDeCampanhaEAbrir(campanhaId, nomeCampanha, cliente, prazo, valor, entregas, diasProduto) {
     const novoProjeto = await salvarSeguro("projetos_producao", sb.from("projetos_producao").insert({
       marca: cliente,
       observacoes: nomeCampanha ? "Campanha: " + nomeCampanha : null,
@@ -5222,7 +5238,14 @@
     }).select().single());
     if (!novoProjeto) return;
     const criadas = await criarTarefasDoTemplate(novoProjeto.id, prazo, entregas, cliente, nomeCampanha);
-    if (prazo) await salvarCronograma(novoProjeto.id, sugerirCronograma(prazo), criadas);
+    if (diasProduto > 0) {
+      // Prazo conta a partir do produto: agenda só o que dá pra fazer antes
+      // (roteiro + aprovação); o resto é calculado quando o produto chegar.
+      await salvarProdutoProjeto(novoProjeto.id, { dias: diasProduto, recebido_em: null });
+      await salvarCronograma(novoProjeto.id, sugerirEtapasAntesDoProduto(), criadas);
+    } else if (prazo) {
+      await salvarCronograma(novoProjeto.id, sugerirCronograma(prazo), criadas);
+    }
     await carregarDadosProducao();
     abrirAba("producao");
     abrirQuadroProjeto(novoProjeto.id);
@@ -5240,6 +5263,7 @@
     evento.preventDefault();
     const id = document.getElementById("camp-id").value;
     const entregasCampanha = id ? [] : lerLinhasEntregas("lista-entregas-campanha-form");
+    const diasProduto = id ? 0 : (parseInt(document.getElementById("camp-dias-produto").value, 10) || 0);
     const qtdCalculada = entregasCampanha.reduce((soma, e) => soma + e.quantidade, 0);
     const registro = {
       campanha: document.getElementById("camp-campanha").value.trim(),
@@ -5263,7 +5287,7 @@
       // Cria o projeto em Produção sozinho, com um card por entrega, e já
       // abre no primeiro card (na coluna Briefing) pronto pra editar.
       if (entregasCampanha.length > 0) {
-        await criarProjetoDeCampanhaEAbrir(novaCampanha ? novaCampanha.id : null, registro.campanha, registro.cliente, registro.prazo, registro.valor, entregasCampanha);
+        await criarProjetoDeCampanhaEAbrir(novaCampanha ? novaCampanha.id : null, registro.campanha, registro.cliente, registro.prazo, registro.valor, entregasCampanha, diasProduto);
       }
     }
   });
@@ -5334,9 +5358,10 @@
   async function carregarDadosProducao() {
     await carregarColunasProducao();
     await processarAprovacoesDasMarcas();
-    const [, , projetos, tarefas] = await Promise.all([
+    const [, , , projetos, tarefas] = await Promise.all([
       carregarMapaRoteirosProducao(),
       carregarCronogramas(),
+      carregarProdutos(),
       consultarSeguro("projetos_producao", sb.from("projetos_producao").select("*").order("created_at", { ascending: false })),
       consultarSeguro("tarefas_producao", sb.from("tarefas_producao").select("*"))
     ]);
@@ -5639,7 +5664,7 @@
     return '<div class="card-kanban" data-id="' + t.id + '">' +
       marcaHtml +
       '<span class="card-kanban-titulo">' + escaparAtributo(t.titulo) + "</span>" +
-      '<span class="pill-formato">' + t.formato + "</span>" + pillRoteiroDoCard(t) +
+      '<span class="pill-formato">' + t.formato + "</span>" + pillRoteiroDoCard(t) + pillProdutoDoCard(t) +
       '<div class="card-kanban-rodape">' +
         '<span class="ponto-prioridade ponto-prioridade-' + t.prioridade + '" title="Prioridade ' + t.prioridade + '"></span>' +
         prazoHtml +
@@ -8484,7 +8509,7 @@
     const irmas = listaTarefasProducao.filter(x => x.projeto_id === t.projeto_id && x.coluna === coluna);
     const registro = { coluna: coluna, ordem: Math.max(0, ...irmas.map(x => x.ordem || 0)) + 1 };
     const cron = await cronogramaDoProjeto(t.projeto_id);
-    if (cron[coluna]) registro.prazo = cron[coluna];
+    if (coluna !== "Concluído" && ETAPAS_CRONOGRAMA.some(e => cron[e])) registro.prazo = cron[coluna] || null;
     if (coluna === "Concluído") registro.concluido_em = new Date().toISOString();
     else if (t.coluna === "Concluído") registro.concluido_em = null;
     await salvarSeguro("tarefas_producao", sb.from("tarefas_producao").update(registro).eq("id", t.id));
@@ -8739,8 +8764,11 @@
   }
   async function aplicarPrazoDaEtapa(t, coluna) {
     const cron = await cronogramaDoProjeto(t.projeto_id);
-    const data = cron[coluna];
-    if (!data || data === t.prazo || coluna === "Concluído") return;
+    if (coluna === "Concluído" || !ETAPAS_CRONOGRAMA.some(e => cron[e])) return;
+    // Projeto com cronograma mas sem data pra esta etapa (ex.: esperando o
+    // produto chegar): tira o prazo antigo pra não aparecer como atrasado.
+    const data = cron[coluna] || null;
+    if (data === (t.prazo || null)) return;
     await salvarSeguro("tarefas_producao", sb.from("tarefas_producao").update({ prazo: data }).eq("id", t.id));
     const local = listaTarefasProducao.find(x => x.id === t.id);
     if (local) local.prazo = data;
@@ -8771,6 +8799,7 @@
   function renderCronogramaProjeto() {
     const alvo = document.getElementById("cronograma-projeto");
     if (!alvo || !projetoAtualId) return;
+    renderProdutoProjeto();
     const projeto = listaProjetosProducao.find(p => p.id === projetoAtualId);
     const cron = mapaCronogramas[projetoAtualId] || {};
     const etapas = ETAPAS_CRONOGRAMA.filter(e => COLUNAS_PRODUCAO.includes(e));
@@ -8782,7 +8811,7 @@
           etapas.map(e => '<label class="cronograma-campo"><span>' + escaparAtributo(e) + '</span><input type="date" data-etapa-cron="' + escaparAtributo(e) + '" value="' + (cron[e] || "") + '"></label>').join("") +
         "</div>" +
         '<div class="cronograma-editor-acoes">' +
-          (projeto && projeto.prazo_final ? '<button type="button" class="botao botao-secundario" data-cron="sugerir">✨ Sugerir pelo prazo final (' + formatarData(projeto.prazo_final) + ")</button>" : '<span class="cronograma-dica">Dica: coloque um prazo final no projeto ("Editar projeto") que eu sugiro as datas.</span>') +
+          (projeto && (projeto.prazo_final || (mapaProdutos[projetoAtualId] && mapaProdutos[projetoAtualId].dias)) ? '<button type="button" class="botao botao-secundario" data-cron="sugerir">✨ Sugerir datas' + (projeto.prazo_final ? " (entrega " + formatarData(projeto.prazo_final) + ")" : "") + "</button>" : '<span class="cronograma-dica">Dica: coloque um prazo final no projeto ("Editar projeto") que eu sugiro as datas.</span>') +
           '<span style="flex:1"></span>' +
           '<button type="button" class="botao botao-secundario" data-cron="cancelar">Cancelar</button>' +
           '<button type="button" class="botao botao-principal" data-cron="salvar">Salvar cronograma</button>' +
@@ -8792,7 +8821,8 @@
       alvo.querySelector('[data-cron="cancelar"]').addEventListener("click", () => { editandoCronograma = false; renderCronogramaProjeto(); });
       const sugerir = alvo.querySelector('[data-cron="sugerir"]');
       if (sugerir) sugerir.addEventListener("click", () => {
-        const s = sugerirCronograma(projeto.prazo_final);
+        const prod = mapaProdutos[projetoAtualId];
+        const s = prod && prod.dias ? (prod.recebido_em ? { ...sugerirEtapasAntesDoProduto(), ...sugerirEtapasDepoisDoProduto(prod.recebido_em, projeto.prazo_final) } : sugerirEtapasAntesDoProduto()) : sugerirCronograma(projeto.prazo_final);
         alvo.querySelectorAll("[data-etapa-cron]").forEach(inp => { inp.value = s[inp.dataset.etapaCron] || ""; });
       });
       alvo.querySelector('[data-cron="salvar"]').addEventListener("click", async () => {
@@ -8819,6 +8849,132 @@
         '<button type="button" class="botao botao-secundario" data-cron="editar">Editar</button></div>';
     }
     alvo.querySelector('[data-cron="editar"]').addEventListener("click", () => { editandoCronograma = true; renderCronogramaProjeto(); });
+  }
+
+
+  // ============================================================================
+  // RECEBIMENTO DO PRODUTO (2026-11)
+  // ----------------------------------------------------------------------------
+  // Muitas marcas dão o prazo como "X dias depois que o produto chegar". Por
+  // projeto, em configuracoes "produto_<projetoId>" = { dias, recebido_em }.
+  //  • antes de chegar: só Roteiro e Aprovação do roteiro têm data (a partir de
+  //    hoje); Fotos/Gravar/Editar ficam sem prazo e com selo "aguardando produto"
+  //  • "📦 Chegou!": prazo final = chegada + dias → atualiza projeto, campanha e
+  //    as datas de Fotos → Aprovação do vídeo no cronograma (e os cards)
+  // ============================================================================
+  const ETAPAS_DEPOIS_DO_PRODUTO = ["Fotos", "Gravar", "Editar", "Aprovação do vídeo"];
+  const FRACAO_DEPOIS_DO_PRODUTO = { "Fotos": 0.3, "Gravar": 0.45, "Editar": 0.75, "Aprovação do vídeo": 1 };
+  var mapaProdutos = {};
+  var editandoProduto = false;
+
+  async function carregarProdutos() {
+    const linhas = await consultarSeguro("configuracoes", sb.from("configuracoes").select("chave, valor").ilike("chave", "produto_%"));
+    mapaProdutos = {};
+    linhas.forEach(l => { try { mapaProdutos[l.chave.slice("produto_".length)] = JSON.parse(l.valor) || {}; } catch (e) { /* ignora */ } });
+  }
+  async function salvarProdutoProjeto(projetoId, dados) {
+    mapaProdutos[projetoId] = dados;
+    await salvarSeguro("configuracoes", sb.from("configuracoes").upsert({ chave: "produto_" + projetoId, valor: JSON.stringify(dados), updated_at: new Date().toISOString() }));
+  }
+  function sugerirEtapasAntesDoProduto() {
+    const hoje = hojeISO();
+    return { "Roteiro": somarDiasISO(hoje, 2), "Aprovação do roteiro": somarDiasISO(hoje, 4) };
+  }
+  function sugerirEtapasDepoisDoProduto(recebidoEm, prazoFinal) {
+    const total = Math.max(0, Math.round((new Date(prazoFinal + "T12:00:00") - new Date(recebidoEm + "T12:00:00")) / 86400000));
+    const cron = {};
+    let anterior = recebidoEm;
+    ETAPAS_DEPOIS_DO_PRODUTO.forEach(etapa => {
+      let data = etapa === "Aprovação do vídeo" ? prazoFinal : somarDiasISO(recebidoEm, Math.round(total * FRACAO_DEPOIS_DO_PRODUTO[etapa]));
+      if (data < anterior) data = anterior;
+      cron[etapa] = data;
+      anterior = data;
+    });
+    return cron;
+  }
+  function aguardandoProduto(projetoId) {
+    const prod = mapaProdutos[projetoId];
+    return !!(prod && prod.dias && !prod.recebido_em);
+  }
+  function pillProdutoDoCard(t) {
+    if (!aguardandoProduto(t.projeto_id)) return "";
+    if (!ETAPAS_DEPOIS_DO_PRODUTO.includes(t.coluna)) return "";
+    return '<span class="pill pill-produto-card">📦 aguardando produto</span>';
+  }
+  async function registrarChegadaProduto(projetoId, dataChegada) {
+    const prod = mapaProdutos[projetoId] || {};
+    if (!prod.dias) return;
+    const prazoFinal = somarDiasISO(dataChegada, prod.dias);
+    await salvarProdutoProjeto(projetoId, { ...prod, recebido_em: dataChegada });
+    // Prazo final no projeto e na campanha (a Início/Campanhas usam esse prazo).
+    await salvarSeguro("projetos_producao", sb.from("projetos_producao").update({ prazo_final: prazoFinal }).eq("id", projetoId));
+    const projeto = listaProjetosProducao.find(p => p.id === projetoId);
+    if (projeto) {
+      projeto.prazo_final = prazoFinal;
+      if (projeto.campanha_id) {
+        await salvarSeguro("campanhas", sb.from("campanhas").update({ prazo: prazoFinal }).eq("id", projeto.campanha_id));
+        invalidarAbas("campanhas");
+      }
+    }
+    const cronAtual = await cronogramaDoProjeto(projetoId);
+    await salvarCronograma(projetoId, { ...cronAtual, ...sugerirEtapasDepoisDoProduto(dataChegada, prazoFinal) });
+  }
+  function renderProdutoProjeto() {
+    const alvo = document.getElementById("produto-projeto");
+    if (!alvo || !projetoAtualId) return;
+    const prod = mapaProdutos[projetoAtualId] || {};
+    if (editandoProduto) {
+      alvo.innerHTML = '<div class="produto-faixa editando">' +
+        '<label class="cronograma-campo"><span>Entregar quantos dias depois de receber?</span><input type="number" min="1" id="prod-dias" value="' + (prod.dias || "") + '" placeholder="ex.: 10"></label>' +
+        '<label class="cronograma-campo"><span>Produto chegou em (vazio = ainda não)</span><input type="date" id="prod-recebido" value="' + (prod.recebido_em || "") + '"></label>' +
+        '<span style="flex:1"></span>' +
+        '<button type="button" class="botao botao-secundario" data-prod="cancelar">Cancelar</button>' +
+        '<button type="button" class="botao botao-principal" data-prod="salvar">Salvar</button>' +
+      "</div>";
+      alvo.querySelector('[data-prod="cancelar"]').addEventListener("click", () => { editandoProduto = false; renderProdutoProjeto(); });
+      alvo.querySelector('[data-prod="salvar"]').addEventListener("click", async () => {
+        const dias = parseInt(alvo.querySelector("#prod-dias").value, 10) || 0;
+        const recebido = alvo.querySelector("#prod-recebido").value || null;
+        const antes = mapaProdutos[projetoAtualId] || {};
+        if (!dias) {
+          await salvarProdutoProjeto(projetoAtualId, {});
+        } else {
+          await salvarProdutoProjeto(projetoAtualId, { dias: dias, recebido_em: antes.recebido_em || null });
+          if (recebido && (recebido !== antes.recebido_em || dias !== antes.dias)) await registrarChegadaProduto(projetoAtualId, recebido);
+          else if (!recebido && antes.recebido_em) await salvarProdutoProjeto(projetoAtualId, { dias: dias, recebido_em: null });
+        }
+        editandoProduto = false;
+        renderGradeProjetos();
+        renderProjetoAtual();
+      });
+      return;
+    }
+    if (!prod.dias) {
+      alvo.innerHTML = '<button type="button" class="link-discreto produto-link" data-prod="editar">📦 O prazo deste projeto conta a partir do produto chegar?</button>';
+    } else if (!prod.recebido_em) {
+      alvo.innerHTML = '<div class="produto-faixa aguardando">' +
+        '<span>📦 <b>Aguardando o produto</b> — a entrega é ' + prod.dias + ' dia' + (prod.dias > 1 ? "s" : "") + ' depois que ele chegar. Fotos, gravação e edição ficam sem data até lá.</span>' +
+        '<span style="flex:1"></span>' +
+        '<input type="date" id="prod-chegou-data" value="' + hojeISO() + '" title="Dia em que o produto chegou">' +
+        '<button type="button" class="botao botao-principal" data-prod="chegou">📦 Chegou!</button>' +
+        '<button type="button" class="botao botao-secundario" data-prod="editar" title="Mudar os dias">✎</button>' +
+      "</div>";
+      alvo.querySelector('[data-prod="chegou"]').addEventListener("click", async () => {
+        const data = alvo.querySelector("#prod-chegou-data").value || hojeISO();
+        await registrarChegadaProduto(projetoAtualId, data);
+        renderGradeProjetos();
+        renderProjetoAtual();
+      });
+    } else {
+      const projeto = listaProjetosProducao.find(p => p.id === projetoAtualId);
+      alvo.innerHTML = '<div class="produto-faixa recebido">' +
+        '<span>📦 Produto chegou em <b>' + formatarData(prod.recebido_em) + "</b>" + (projeto && projeto.prazo_final ? " → entrega até <b>" + formatarData(projeto.prazo_final) + "</b> (" + prod.dias + " dias)" : "") + "</span>" +
+        '<span style="flex:1"></span>' +
+        '<button type="button" class="botao botao-secundario" data-prod="editar">✎</button>' +
+      "</div>";
+    }
+    const editar = alvo.querySelector('[data-prod="editar"]');
+    if (editar) editar.addEventListener("click", () => { editandoProduto = true; renderProdutoProjeto(); });
   }
 
   const hashInicial = (window.location.hash || "#dashboard").replace("#", "");
