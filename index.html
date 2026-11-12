@@ -2265,6 +2265,10 @@
         }
       });
 
+      // A fileira Destaques tem ordem própria (ordem_destaques, arrastada na aba
+      // "Ordem dos Destaques" do admin). Sem ela, segue a ordem geral, no fim.
+      videosDestaques.sort((a, b) => (a.ordem_destaques ?? 100000 + (a.ordem || 0)) - (b.ordem_destaques ?? 100000 + (b.ordem || 0)));
+
       // Nichos únicos dentro de "Todos", na ordem em que aparecem pela primeira vez.
       // Os nichos fixos já têm pill própria, então não repetem aqui.
       const nichosDestaques = [];

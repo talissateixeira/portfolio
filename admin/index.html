@@ -701,8 +701,8 @@
 
   /* ===== CHECKLIST ===== */
   .subtabs { display: flex; gap: 6px; margin-bottom: 18px; flex-wrap: wrap; }
-  .subtab-btn, .subtab-btn-producao, .subtab-btn-conteudo { padding: 7px 14px; border-radius: 100px; border: 1px solid var(--borda); background: var(--branco); font-size: 0.8rem; font-weight: 600; color: var(--texto-suave); cursor: pointer; }
-  .subtab-btn.ativo, .subtab-btn-producao.ativo, .subtab-btn-conteudo.ativo { background: var(--fundo-acento); border-color: var(--acento); color: var(--acento); }
+  .subtab-btn, .subtab-btn-producao, .subtab-btn-conteudo, .subtab-btn-videos { padding: 7px 14px; border-radius: 100px; border: 1px solid var(--borda); background: var(--branco); font-size: 0.8rem; font-weight: 600; color: var(--texto-suave); cursor: pointer; }
+  .subtab-btn.ativo, .subtab-btn-producao.ativo, .subtab-btn-conteudo.ativo, .subtab-btn-videos.ativo { background: var(--fundo-acento); border-color: var(--acento); color: var(--acento); }
   .subaba-conteudo { display: none; }
   .subaba-conteudo.ativa { display: block; }
   /* Etiqueta de pilar no card de conteúdo — uma cor por pilar. */
@@ -1581,6 +1581,11 @@
           Adicionar vídeo
         </button>
       </div>
+      <div class="subtabs" style="margin-bottom:10px;">
+        <button class="subtab-btn-videos ativo" data-modo-ordem="geral">Ordem geral</button>
+        <button class="subtab-btn-videos" data-modo-ordem="destaques">Ordem dos Destaques</button>
+      </div>
+      <p id="dica-ordem-videos" style="font-size:0.8rem;color:var(--texto-suave);margin:0 0 12px;">Arraste pra mudar a ordem das fileiras de nicho (Educação e Negócios, Skincare, Auto Cuidados...).</p>
       <div class="painel-branco tabela-scroll">
         <table class="tabela">
           <thead>
@@ -2513,7 +2518,7 @@
       </div>
       <div class="campo-form"><label>Mostrar também nos Destaques</label>
         <select id="video-nos-destaques"><option value="false">Não</option><option value="true">Sim</option></select>
-        <p style="font-size:0.78rem;color:var(--texto-suave);margin:6px 0 0;">Pra vídeos de Skincare, Auto Cuidados e Educação e Negócios, que têm fileira própria. Com "Sim", ele aparece também na fileira Destaques, na posição em que estiver na lista.</p>
+        <p style="font-size:0.78rem;color:var(--texto-suave);margin:6px 0 0;">Pra vídeos de Skincare, Auto Cuidados e Educação e Negócios, que têm fileira própria. Com "Sim", ele aparece também na fileira Destaques. A posição dele lá você muda em "Ordem dos Destaques", acima da lista de vídeos.</p>
       </div>
       <div class="modal-acoes">
         <button type="button" class="link-apagar" id="video-apagar" hidden title="Apagar vídeo"><span class="icone"><svg viewBox="0 0 24 24"><path d="M4 7h16M9 7V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v3m3 0-1 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L6 7h12Z"/><path d="M10 11v6M14 11v6"/></svg></span></button>
@@ -3726,13 +3731,40 @@
     ).join("") + "</div>";
   }
 
+  // Duas ordens independentes: "ordem" (lista geral → fileiras de nicho) e
+  // "ordem_destaques" (só a fileira Destaques do site). Vídeo sem
+  // ordem_destaques ainda entra no fim dos Destaques, na ordem geral.
+  const NICHOS_COM_FILEIRA = ["Educação e Negócios", "Skincare", "Auto Cuidados"];
+  let modoOrdemVideos = "geral";
+  function estaNosDestaques(v) { return !NICHOS_COM_FILEIRA.includes(v.nicho) || v.nos_destaques; }
+  function chaveOrdemDestaques(v) { return v.ordem_destaques ?? (100000 + (v.ordem || 0)); }
+  function videosDaTabela() {
+    if (modoOrdemVideos === "geral") return listaVideos;
+    return listaVideos.filter(estaNosDestaques).sort((a, b) => chaveOrdemDestaques(a) - chaveOrdemDestaques(b));
+  }
+  document.querySelectorAll(".subtab-btn-videos").forEach(botao => {
+    botao.addEventListener("click", () => {
+      modoOrdemVideos = botao.dataset.modoOrdem;
+      document.querySelectorAll(".subtab-btn-videos").forEach(b => b.classList.toggle("ativo", b === botao));
+      document.getElementById("dica-ordem-videos").textContent = modoOrdemVideos === "geral"
+        ? "Arraste pra mudar a ordem das fileiras de nicho (Educação e Negócios, Skincare, Auto Cuidados...)."
+        : "Só os vídeos que aparecem na fileira Destaques. Arraste pra mudar a ordem lá, sem mexer nas fileiras de nicho.";
+      renderTabelaVideos();
+    });
+  });
+
   function renderTabelaVideos() {
     const corpo = document.getElementById("corpo-tabela-videos");
+    const lista = videosDaTabela();
+    if (lista.length === 0 && modoOrdemVideos === "destaques") {
+      corpo.innerHTML = '<tr><td colspan="7" class="texto-vazio">Nenhum vídeo na fileira Destaques.</td></tr>';
+      return;
+    }
     if (listaVideos.length === 0) {
       corpo.innerHTML = '<tr><td colspan="7" class="texto-vazio">Nenhum vídeo cadastrado ainda. Clique em "Adicionar vídeo" para começar.</td></tr>';
       return;
     }
-    corpo.innerHTML = listaVideos.map((v, indice) =>
+    corpo.innerHTML = lista.map((v, indice) =>
       '<tr draggable="true" data-indice="' + indice + '" data-id="' + v.id + '">' +
         '<td><span class="alca-arrastar">⠿⠿</span></td>' +
         '<td><div class="celula-video"><img class="video-thumb" src="../' + v.capa_url + '" onerror="this.style.visibility=\'hidden\'"><div class="celula-video-textos"><strong>' + v.titulo + '</strong><span>' + v.marca + '</span></div></div></td>' +
@@ -3764,10 +3796,18 @@
       linha.addEventListener("drop", async () => {
         const indiceDestino = Number(linha.dataset.indice);
         if (indiceArrastado === null || indiceArrastado === indiceDestino) return;
-        const [item] = listaVideos.splice(indiceArrastado, 1);
-        listaVideos.splice(indiceDestino, 0, item);
-        renderTabelaVideos();
-        await Promise.all(listaVideos.map((v, i) => sb.from("videos").update({ ordem: i }).eq("id", v.id)));
+        const [item] = lista.splice(indiceArrastado, 1);
+        lista.splice(indiceDestino, 0, item);
+        if (modoOrdemVideos === "geral") {
+          listaVideos = lista;
+          lista.forEach((v, i) => { v.ordem = i; });
+          renderTabelaVideos();
+          await Promise.all(lista.map((v, i) => sb.from("videos").update({ ordem: i }).eq("id", v.id)));
+        } else {
+          lista.forEach((v, i) => { v.ordem_destaques = i; });
+          renderTabelaVideos();
+          await Promise.all(lista.map((v, i) => salvarSeguro("videos", sb.from("videos").update({ ordem_destaques: i }).eq("id", v.id))));
+        }
       });
     });
   }
