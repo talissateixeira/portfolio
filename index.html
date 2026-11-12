@@ -734,9 +734,9 @@
     .case-lista-resultado li:first-child { animation: none; background: none; color: #321F14; -webkit-text-fill-color: #321F14; }
   }
   .case-lista-resultado li:first-child::before { content: none; }
-  /* O número grande ("+300 mil") e a palavra embaixo, menor. */
-  .case-num-grande { display: block; font-size: clamp(1.9rem, 2.8vw, 2.3rem); letter-spacing: -0.01em; }
-  .case-num-rotulo { display: block; font-size: 0.72em; font-weight: 700; letter-spacing: 0.02em; margin-top: 2px; }
+  /* O número ("+300 mil") e a palavra na MESMA linha, a palavra um pouco menor. */
+  .case-num-grande { display: inline; font-size: clamp(1.5rem, 2.2vw, 1.85rem); letter-spacing: -0.01em; white-space: nowrap; }
+  .case-num-rotulo { display: inline; font-size: 0.85em; font-weight: 700; letter-spacing: 0.01em; margin-left: 0.3em; white-space: nowrap; }
   .case-estatisticas {
     display: flex;
     gap: 26px;
