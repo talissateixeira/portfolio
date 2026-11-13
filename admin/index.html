@@ -1363,6 +1363,158 @@
     .nav-item:hover .icone, .botao-icone:hover,
     .linha-tarefa-unificada:hover, .linha-proxima-tarefa-dash:hover { transform: none !important; }
   }
+
+  /* ================================================================
+     =====================  SKIN APPLE (2026-11)  ====================
+     Aprovada pela Talissa (versão 1 da prévia = claro + verde sálvia;
+     botão "modo noturno" = versão 3, escuro + verde sálvia).
+     Fonte do sistema (SF Pro), cinzas neutros, cartões brancos sem
+     borda, uma cor de destaque só e menu lateral claro.
+     Fica por último pra vencer as camadas anteriores.
+     ================================================================ */
+  :root {
+    --fonte: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Inter", "Helvetica Neue", "Segoe UI", sans-serif;
+    --creme: #F5F5F7; --branco: #FFFFFF; --preto: #1D1D1F; --texto: #1D1D1F; --texto-suave: #6E6E73;
+    --borda: rgba(0,0,0,0.08);
+    --acento: #5C7564; --acento-escuro: #4A6152; --fundo-acento: rgba(92,117,100,0.12);
+    --sucesso: #2F7A4A; --fundo-sucesso: #E5F5EA;
+    --pill-atrasado: #B4380B; --fundo-pill-atrasado: #FFEDE4;
+    --pill-hoje: #1E7B3C; --fundo-pill-hoje: #E5F5EA;
+    --pill-amanha: #7A5600; --fundo-pill-amanha: #FFF4D6;
+    --destaque-hoje: #B4380B;
+    --sidebar-fundo: #FBFBFD; --sidebar-borda: rgba(0,0,0,0.08);
+    --sidebar-texto: #1D1D1F; --sidebar-texto-suave: #6E6E73;
+    --sidebar-hover: rgba(0,0,0,0.05); --sidebar-ativo-fundo: rgba(92,117,100,0.12);
+    --nav-ativo-texto: #4A6152;
+    --botao-cinza: #E8E8ED;
+    --hover-sutil: rgba(0,0,0,0.04); --fundo-sutil: rgba(0,0,0,0.05);
+    --sombra-1: 0 1px 2px rgba(0,0,0,0.05);
+    --sombra-2: 0 1px 2px rgba(0,0,0,0.05), 0 10px 28px -16px rgba(0,0,0,0.22);
+    --sombra-3: 0 2px 6px rgba(0,0,0,0.06), 0 22px 50px -22px rgba(0,0,0,0.30);
+    --raio: 18px; --raio-grande: 22px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --creme: #000000; --branco: #1C1C1E; --preto: #F5F5F7; --texto: #F5F5F7; --texto-suave: #A1A1A6;
+      --borda: rgba(255,255,255,0.10);
+      --acento: #8FA896; --acento-escuro: #A9C2B1; --fundo-acento: rgba(143,168,150,0.20);
+      --sucesso: #6FD48F; --fundo-sucesso: rgba(111,212,143,0.16);
+      --pill-atrasado: #FF9F6E; --fundo-pill-atrasado: rgba(255,159,110,0.16);
+      --pill-hoje: #6FD48F; --fundo-pill-hoje: rgba(111,212,143,0.16);
+      --pill-amanha: #F2C94C; --fundo-pill-amanha: rgba(242,201,76,0.16);
+      --destaque-hoje: #FF9F6E;
+      --sidebar-fundo: #161617; --sidebar-borda: rgba(255,255,255,0.08);
+      --sidebar-texto: #F5F5F7; --sidebar-texto-suave: #A1A1A6;
+      --sidebar-hover: rgba(255,255,255,0.06); --sidebar-ativo-fundo: rgba(143,168,150,0.22);
+      --nav-ativo-texto: #A9C2B1;
+      --botao-cinza: #2C2C2E;
+      --hover-sutil: rgba(255,255,255,0.05); --fundo-sutil: rgba(255,255,255,0.06);
+      --sombra-1: none; --sombra-2: 0 12px 30px -16px rgba(0,0,0,0.8); --sombra-3: 0 24px 52px -22px rgba(0,0,0,0.85);
+    }
+  }
+  :root[data-theme="dark"] {
+    --creme: #000000; --branco: #1C1C1E; --preto: #F5F5F7; --texto: #F5F5F7; --texto-suave: #A1A1A6;
+    --borda: rgba(255,255,255,0.10);
+    --acento: #8FA896; --acento-escuro: #A9C2B1; --fundo-acento: rgba(143,168,150,0.20);
+    --sucesso: #6FD48F; --fundo-sucesso: rgba(111,212,143,0.16);
+    --pill-atrasado: #FF9F6E; --fundo-pill-atrasado: rgba(255,159,110,0.16);
+    --pill-hoje: #6FD48F; --fundo-pill-hoje: rgba(111,212,143,0.16);
+    --pill-amanha: #F2C94C; --fundo-pill-amanha: rgba(242,201,76,0.16);
+    --destaque-hoje: #FF9F6E;
+    --sidebar-fundo: #161617; --sidebar-borda: rgba(255,255,255,0.08);
+    --sidebar-texto: #F5F5F7; --sidebar-texto-suave: #A1A1A6;
+    --sidebar-hover: rgba(255,255,255,0.06); --sidebar-ativo-fundo: rgba(143,168,150,0.22);
+    --nav-ativo-texto: #A9C2B1;
+    --botao-cinza: #2C2C2E;
+    --hover-sutil: rgba(255,255,255,0.05); --fundo-sutil: rgba(255,255,255,0.06);
+    --sombra-1: none; --sombra-2: 0 12px 30px -16px rgba(0,0,0,0.8); --sombra-3: 0 24px 52px -22px rgba(0,0,0,0.85);
+  }
+
+  /* ---- tipografia ---- */
+  body { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; letter-spacing: -0.01em; }
+  h1, h2, h3 { font-weight: 600; letter-spacing: -0.022em; }
+  .dashboard-saudacao-titulo, .conteudo-titulo.titulo-grande { font-size: 2.35rem; font-weight: 700; letter-spacing: -0.03em; line-height: 1.1; }
+  .conteudo-titulo { font-size: 1.5rem; font-weight: 600; letter-spacing: -0.025em; }
+  .dashboard-saudacao-label, .cartao-resumo-rotulo, .stat-rotulo, .nav-grupo-titulo {
+    text-transform: none; letter-spacing: 0; font-weight: 600;
+  }
+  .dashboard-saudacao-label { font-size: 0.86rem; }
+  .cartao-resumo-rotulo, .stat-rotulo { font-size: 0.86rem; font-weight: 500; }
+  .cartao-resumo-valor, .stat-valor { font-weight: 600; letter-spacing: -0.03em; }
+  .cartao-resumo-valor { font-size: 2.1rem; line-height: 1.15; }
+  .modal-titulo { font-size: 1.2rem; font-weight: 600; letter-spacing: -0.02em; }
+
+  /* ---- menu lateral claro, estilo Finder ---- */
+  .sidebar { border-right: 1px solid var(--sidebar-borda); }
+  .nav-grupo-titulo { font-size: 0.74rem; }
+  .nav-item { color: var(--sidebar-texto); font-weight: 400; }
+  .nav-item .icone { color: var(--acento); }
+  .nav-item.ativo { background: var(--sidebar-ativo-fundo); color: var(--nav-ativo-texto); font-weight: 600; box-shadow: none; }
+  .nav-item:hover { transform: none; }
+  .nav-subitem { color: var(--sidebar-texto-suave); }
+  .nav-subitem.ativo { color: var(--nav-ativo-texto); font-weight: 600; }
+  .botao-sair { border-color: transparent; background: var(--sidebar-hover); color: var(--sidebar-texto); }
+  @media (hover: hover) and (min-width: 781px) {
+    .layout.sidebar-colapsada .sidebar:hover { box-shadow: 0 20px 50px -20px rgba(0,0,0,0.35); }
+  }
+  /* menu recolhido: some o "Painel administrativo" (aparecia cortado); volta ao abrir */
+  @media (min-width: 781px) {
+    .layout.sidebar-colapsada .sidebar-marca span { display: none; }
+  }
+  @media (hover: hover) and (min-width: 781px) {
+    .layout.sidebar-colapsada .sidebar:hover .sidebar-marca span { display: block; }
+  }
+
+  /* ---- cartões brancos sem borda ---- */
+  .painel-branco, .cartao-resumo, .stat-item, .prosp-card, .cartao-mensagem, .cartao-nicho,
+  .secao-checklist, .acordeao-simples, .cartao-transcricao, .lista-tarefas-producao, .modal-caixa {
+    border-color: transparent;
+  }
+  .painel-branco, .cartao-resumo, .stat-item { border-radius: var(--raio-grande); }
+  .cartao-resumo, .stat-item { padding: 20px 22px; }
+  .cartao-resumo:hover, .stat-item:hover, .prosp-card:hover, .cartao-mensagem:hover, .cartao-nicho:hover {
+    transform: translateY(-2px);
+  }
+  .card-kanban { border-color: transparent; border-radius: 12px; }
+  .coluna-kanban { border-radius: var(--raio); }
+  .coluna-kanban-nome { text-transform: none; letter-spacing: 0; font-size: 0.84rem; }
+
+  /* ---- botões em pílula, estilo Apple ---- */
+  .botao { font-weight: 500; font-size: 0.86rem; padding: 9px 18px; }
+  .botao-principal { box-shadow: none; }
+  .botao-principal:hover { transform: none; box-shadow: none; filter: brightness(1.08); }
+  .botao-secundario { background: var(--botao-cinza); border-color: transparent; color: var(--texto); }
+  .botao-secundario:hover { background: var(--botao-cinza); filter: brightness(0.96); transform: none; }
+  :root[data-theme="dark"] .botao-principal { color: #0E1410; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .botao-principal { color: #0E1410; } }
+  .pill-filtro { border-color: transparent; background: var(--botao-cinza); color: var(--texto); font-weight: 500; }
+  .pill-filtro:hover { border-color: transparent; color: var(--texto); filter: brightness(0.96); }
+  .pill-filtro.ativo { background: var(--preto); border-color: var(--preto); color: var(--creme); font-weight: 600; }
+
+  /* sub-abas (Projetos / Todas as tarefas…): pílulas sem borda, ativa em sálvia */
+  .subtab-btn, .subtab-btn-producao, .subtab-btn-conteudo, .subtab-btn-videos {
+    border-color: transparent; background: transparent; color: var(--texto-suave); font-weight: 500;
+  }
+  .subtab-btn:hover, .subtab-btn-producao:hover, .subtab-btn-conteudo:hover, .subtab-btn-videos:hover { background: var(--hover-sutil); }
+  .subtab-btn.ativo, .subtab-btn-producao.ativo, .subtab-btn-conteudo.ativo, .subtab-btn-videos.ativo {
+    background: var(--fundo-acento); border-color: transparent; color: var(--acento-escuro); font-weight: 600;
+  }
+  /* cartão de destaque verde segue o sálvia */
+  .stat-item-cor-3 { background: var(--acento); }
+  :root[data-theme="dark"] .stat-item-cor-1 .stat-valor, :root[data-theme="dark"] .stat-item-cor-1 .stat-rotulo { color: #0E1410; }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) .stat-item-cor-1 .stat-valor, :root:not([data-theme="light"]) .stat-item-cor-1 .stat-rotulo { color: #0E1410; }
+  }
+  :root[data-theme="dark"] .stat-item-cor-3 .stat-valor, :root[data-theme="dark"] .stat-item-cor-3 .stat-rotulo { color: #0E1410; }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) .stat-item-cor-3 .stat-valor, :root:not([data-theme="light"]) .stat-item-cor-3 .stat-rotulo { color: #0E1410; }
+  }
+
+  /* ---- campos ---- */
+  .campo-form input, .campo-form select, .campo-form textarea { border-radius: 10px; }
+  .campo-form input:focus, .campo-form select:focus, .campo-form textarea:focus {
+    outline: none; border-color: var(--acento); box-shadow: 0 0 0 3px var(--fundo-acento);
+  }
 </style>
 <!-- Aplica o tema salvo (claro/escuro) antes da página desenhar, sem flash. -->
 <script>
