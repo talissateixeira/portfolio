@@ -1147,6 +1147,19 @@
   .rot-link-ia:hover { color: var(--acento-escuro); }
   .rot-cena-linha { border: 1px solid var(--borda); border-radius: var(--raio); padding: 14px 12px 12px; margin-bottom: 10px; position: relative; background: var(--creme); }
   .rot-cena-linha .linha-form-2 { margin-bottom: 8px; }
+  .rot-board { border: 1px solid var(--borda); border-radius: var(--raio); padding: 0 14px; margin: 6px 0 16px; background: var(--fundo-sutil, transparent); }
+  .rot-board > summary { cursor: pointer; padding: 13px 0; font-weight: 600; }
+  .rot-board-dica { font-weight: 400; font-size: 0.8rem; color: var(--texto-suave); margin-left: 6px; }
+  .rot-board[open] { padding-bottom: 12px; }
+  .rot-img-campo, .bd-linha { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .rot-img-campo input.bd-img-url { flex: 1 1 200px; width: auto; }
+  .bd-linha { border: 1px solid var(--borda); border-radius: 12px; padding: 10px; margin-bottom: 8px; position: relative; }
+  .campo-form .bd-linha input[type="text"], .campo-form .bd-linha textarea { flex: 1 1 160px; width: auto; }
+  .campo-form .bd-linha input[type="color"] { width: 42px; height: 38px; padding: 2px; flex: 0 0 42px; border-radius: 8px; }
+  .campo-form .bd-linha input[type="checkbox"] { width: auto; flex: 0 0 auto; padding: 0; margin: 0; }
+  .bd-linha label.bd-check { display: flex; gap: 6px; align-items: center; font-size: 0.8rem; margin: 0; white-space: nowrap; }
+  .bd-linha .rot-mood-thumb { flex: 0 0 auto; }
+  .bd-remover { background: none; border: 0; font-size: 20px; line-height: 1; cursor: pointer; color: var(--texto-suave); padding: 0 4px; }
   .rot-remover { position: absolute; top: 8px; right: 8px; border: none; background: transparent; color: var(--erro); cursor: pointer; font-size: 1.15rem; line-height: 1; padding: 2px 6px; }
   .rot-mood-linha { display: flex; gap: 8px; margin-bottom: 8px; align-items: center; }
   .rot-mood-linha input { flex: 1; }
@@ -2186,6 +2199,57 @@
       <div class="campo-form"><label>Objetivo</label><textarea id="rot-objetivo" rows="2"></textarea></div>
       <div class="campo-form"><label>Pontos importantes</label><textarea id="rot-pontos" rows="3" placeholder="Um por linha, começando com -"></textarea></div>
       <div class="campo-form"><label>Sugestão de legenda</label><textarea id="rot-legenda" rows="3"></textarea></div>
+
+      <!-- Mood board (página da marca vira o board, nas cores da paleta) -->
+      <details class="rot-board" id="rot-board">
+        <summary>🎨 Mood board <span class="rot-board-dica">paleta, produto, suas fotos, diferenciais… (preenchido = a página vira o board nas cores da marca)</span></summary>
+        <div class="linha-form-2">
+          <div class="campo-form"><label>Campanha</label><input type="text" id="bd-campanha" placeholder="Ex.: Campanha de Natal"></div>
+          <div class="campo-form"><label>Chips da capa (um por linha)</label><textarea id="bd-chips" rows="2" placeholder="60 a 90 segundos&#10;Roteiro até 16/11 · Vídeo até 25/11"></textarea></div>
+        </div>
+        <div class="campo-form">
+          <label>Imagem da capa (foto do produto/caixa que aparece no topo)</label>
+          <div class="rot-img-campo" data-img-campo="capa">
+            <img class="rot-mood-thumb" alt="" hidden>
+            <input type="text" class="bd-img-url" id="bd-capa" placeholder="https://… ou Enviar">
+            <button type="button" class="botao botao-secundario bd-btn-img">📎 Enviar</button>
+          </div>
+        </div>
+
+        <div class="campo-form">
+          <label>Paleta (a 1ª cor vira a cor principal da página, a 2ª o destaque)</label>
+          <div id="bd-paleta"></div>
+          <button type="button" class="botao botao-secundario" id="bd-add-cor">+ cor</button>
+        </div>
+        <div class="campo-form"><label>Nota da paleta (opcional)</label><input type="text" id="bd-paleta-nota" placeholder="amostrada das imagens da marca"></div>
+        <div class="campo-form"><label>Clima da marca (um por linha)</label><textarea id="bd-clima" rows="3"></textarea></div>
+        <div class="linha-form-2">
+          <div class="campo-form"><label>Gancho escolhido</label><input type="text" id="bd-gancho" placeholder="Parei de dar roupa de presente pra minha sogra."></div>
+          <div class="campo-form"><label>Notas do gancho (uma por linha)</label><textarea id="bd-gancho-notas" rows="2"></textarea></div>
+        </div>
+        <div class="campo-form"><label>Observação do gancho (opcional)</label><input type="text" id="bd-gancho-nota" placeholder="Ainda sem vídeo de referência."></div>
+
+        <div class="campo-form">
+          <label>Produtos (marque "largo" pra virar o banner grande)</label>
+          <div id="bd-produtos"></div>
+          <button type="button" class="botao botao-secundario" id="bd-add-produto">+ produto</button>
+        </div>
+        <div class="campo-form">
+          <label>Minhas fotos (sem imagem = vira um quadro tracejado "Foto 2…", pra mostrar a foto que vai vir)</label>
+          <div id="bd-fotos"></div>
+          <button type="button" class="botao botao-secundario" id="bd-add-foto">+ foto</button>
+        </div>
+
+        <div class="campo-form"><label>Diferenciais que entram no vídeo (um por linha)</label><textarea id="bd-diferenciais" rows="4"></textarea></div>
+        <div class="campo-form"><label>Nota dos diferenciais (opcional)</label><input type="text" id="bd-diferenciais-nota" placeholder="Ativos e claims oficiais não vieram no briefing."></div>
+        <div class="campo-form"><label>Evitar (um por linha)</label><textarea id="bd-evitar" rows="3"></textarea></div>
+        <div class="linha-form-2">
+          <div class="campo-form"><label>CTA</label><input type="text" id="bd-cta" placeholder="www.marca.com.br"></div>
+          <div class="campo-form"><label>Nota do CTA</label><input type="text" id="bd-cta-nota" placeholder="Indicar o site no final do vídeo…"></div>
+        </div>
+        <div class="campo-form"><label>A confirmar com a marca (um por linha)</label><textarea id="bd-pendencias" rows="3"></textarea></div>
+        <input type="file" id="bd-input-img" accept="image/*" hidden>
+      </details>
 
       <div class="campo-form">
         <label>Cenas</label>
@@ -8046,6 +8110,10 @@
       '</div>' +
       '<div class="campo-form"><label>Narração (a fala)</label><textarea class="cena-narracao" rows="2">' + escaparHtmlEmail(c.narracao) + '</textarea></div>' +
       '<div class="campo-form"><label>Cena (o que aparece)</label><textarea class="cena-cena" rows="2">' + escaparHtmlEmail(c.cena) + '</textarea></div>' +
+      '<div class="linha-form-2">' +
+        '<div class="campo-form"><label>Tom (opcional)</label><input type="text" class="cena-tom" placeholder="tom direto, meio confissão leve" value="' + escaparAttr(c.tom) + '"></div>' +
+        '<div class="campo-form"><label>Texto na tela (opcional)</label><input type="text" class="cena-tela" placeholder="Presente pra sogra" value="' + escaparAttr(c.texto_tela) + '"></div>' +
+      '</div>' +
     '</div>';
   }
   function htmlLinhaMood(url) {
@@ -8179,7 +8247,165 @@
       tempo: el.querySelector(".cena-tempo").value.trim(),
       narracao: el.querySelector(".cena-narracao").value.trim(),
       cena: el.querySelector(".cena-cena").value.trim(),
-    })).filter(c => c.tag || c.tempo || c.narracao || c.cena);
+      tom: el.querySelector(".cena-tom").value.trim() || null,
+      texto_tela: el.querySelector(".cena-tela").value.trim() || null,
+    })).filter(c => c.tag || c.tempo || c.narracao || c.cena || c.tom || c.texto_tela);
+  }
+
+  // ---- Mood board (roteiros.board) ----
+  // Colunas novas só existem depois de rodar banco-atualizacao-roteiros-board.sql.
+  // Testa uma vez: sem elas, salva o resto normalmente e avisa.
+  let colunasBoardOk = null;
+  async function temColunasBoard() {
+    if (colunasBoardOk !== null) return colunasBoardOk;
+    try {
+      const a = await sb.from("roteiros").select("board").limit(1);
+      const b = await sb.from("roteiro_cenas").select("tom,texto_tela").limit(1);
+      colunasBoardOk = !a.error && !b.error;
+    } catch (_e) { colunasBoardOk = false; }
+    return colunasBoardOk;
+  }
+  const linhasDe = (id) => document.getElementById(id).value.split(/\n+/).map(l => l.replace(/^\s*(?:[-•*–]|\d+[.)])\s*/, "").trim()).filter(Boolean);
+  const valorDe = (id) => document.getElementById(id).value.trim();
+  function corValida(c) { c = String(c || "").trim(); if (c && c[0] !== "#") c = "#" + c; return /^#([0-9a-f]{6}|[0-9a-f]{3})$/i.test(c) ? c : ""; }
+  function cor6(c) { c = corValida(c); if (c.length === 4) c = "#" + c.slice(1).split("").map(x => x + x).join(""); return c || "#cccccc"; }
+  function thumbHtml(u) { return '<img class="rot-mood-thumb" alt="" src="' + escaparAttr(u) + '"' + (u ? "" : " hidden") + '>'; }
+
+  function htmlLinhaCor(p) {
+    p = p || {};
+    return '<div class="bd-linha bd-cor">' +
+      '<input type="color" class="bd-cor-pick" value="' + cor6(p.cor) + '">' +
+      '<input type="text" class="bd-cor-hex" placeholder="#7E2614" value="' + escaparAttr(p.cor ? corValida(p.cor) || p.cor : "") + '" style="flex:0 1 110px">' +
+      '<input type="text" class="bd-cor-nome" placeholder="Terracota da caixa" value="' + escaparAttr(p.nome) + '">' +
+      '<input type="text" class="bd-cor-nota" placeholder="de onde saiu (opcional)" value="' + escaparAttr(p.nota) + '">' +
+      '<button type="button" class="bd-remover" title="Remover">&times;</button></div>';
+  }
+  function htmlLinhaProduto(p) {
+    p = p || {};
+    return '<div class="bd-linha bd-produto"><div class="rot-img-campo" style="flex:1 1 100%">' + thumbHtml(p.foto || "") +
+      '<input type="text" class="bd-img-url" placeholder="foto do produto: https://… ou Enviar" value="' + escaparAttr(p.foto) + '">' +
+      '<button type="button" class="botao botao-secundario bd-btn-img">📎 Enviar</button>' +
+      '<label class="bd-check"><input type="checkbox" class="bd-prod-largo"' + (p.largo ? " checked" : "") + '> largo</label>' +
+      '<button type="button" class="bd-remover" title="Remover">&times;</button></div>' +
+      '<input type="text" class="bd-prod-nome" placeholder="Nome (Pocket Argan Oil)" value="' + escaparAttr(p.nome) + '">' +
+      '<input type="text" class="bd-prod-desc" placeholder="Descrição" value="' + escaparAttr(p.descricao) + '">' +
+      '<input type="text" class="bd-prod-obs" placeholder="Observação em destaque (opcional)" value="' + escaparAttr(p.obs) + '"></div>';
+  }
+  function htmlLinhaFoto(f) {
+    f = f || {};
+    return '<div class="bd-linha bd-foto"><div class="rot-img-campo" style="flex:1 1 100%">' + thumbHtml(f.foto || "") +
+      '<input type="text" class="bd-img-url" placeholder="sua foto: https://… ou Enviar (vazio = quadro reservado)" value="' + escaparAttr(f.foto) + '">' +
+      '<button type="button" class="botao botao-secundario bd-btn-img">📎 Enviar</button>' +
+      '<button type="button" class="bd-remover" title="Remover">&times;</button></div>' +
+      '<input type="text" class="bd-foto-rot" placeholder="Rótulo do quadro (Foto 2)" value="' + escaparAttr(f.rotulo) + '" style="flex:0 1 140px">' +
+      '<input type="text" class="bd-foto-desc" placeholder="O que vai ter na foto (aparece no quadro vazio)" value="' + escaparAttr(f.descricao) + '">' +
+      '<input type="text" class="bd-foto-leg" placeholder="Legenda embaixo (Cena 4 · uso)" value="' + escaparAttr(f.legenda) + '"></div>';
+  }
+  const addCor = (p) => document.getElementById("bd-paleta").insertAdjacentHTML("beforeend", htmlLinhaCor(p));
+  const addProduto = (p) => document.getElementById("bd-produtos").insertAdjacentHTML("beforeend", htmlLinhaProduto(p));
+  const addFotoBoard = (f) => document.getElementById("bd-fotos").insertAdjacentHTML("beforeend", htmlLinhaFoto(f));
+  document.getElementById("bd-add-cor").addEventListener("click", () => addCor());
+  document.getElementById("bd-add-produto").addEventListener("click", () => addProduto());
+  document.getElementById("bd-add-foto").addEventListener("click", () => addFotoBoard());
+
+  const boardEl = document.getElementById("rot-board");
+  boardEl.addEventListener("click", (e) => {
+    if (e.target.classList.contains("bd-remover")) { e.target.closest(".bd-linha").remove(); return; }
+    if (e.target.classList.contains("bd-btn-img")) {
+      boardEl.querySelectorAll("[data-alvo-img]").forEach(x => x.removeAttribute("data-alvo-img"));
+      e.target.closest(".rot-img-campo").setAttribute("data-alvo-img", "1");
+      document.getElementById("bd-input-img").click();
+    }
+  });
+  boardEl.addEventListener("input", (e) => {
+    const t = e.target;
+    if (t.classList.contains("bd-img-url")) {
+      const th = t.closest(".rot-img-campo").querySelector(".rot-mood-thumb");
+      th.src = t.value; th.hidden = !t.value.trim();
+    } else if (t.classList.contains("bd-cor-pick")) {
+      t.closest(".bd-cor").querySelector(".bd-cor-hex").value = t.value.toUpperCase();
+    } else if (t.classList.contains("bd-cor-hex") && corValida(t.value)) {
+      t.closest(".bd-cor").querySelector(".bd-cor-pick").value = cor6(t.value);
+    }
+  });
+  document.getElementById("bd-input-img").addEventListener("change", async (e) => {
+    const arquivo = (e.target.files || [])[0];
+    e.target.value = "";
+    const campo = boardEl.querySelector("[data-alvo-img]");
+    if (!arquivo || !campo) return;
+    const btn = campo.querySelector(".bd-btn-img");
+    btn.disabled = true; btn.textContent = "Enviando…";
+    const url = await uploadImagemMoodboard(arquivo);
+    btn.disabled = false; btn.textContent = "📎 Enviar";
+    if (!url) { alert("Não consegui enviar a imagem. Tenta de novo?"); return; }
+    const inp = campo.querySelector(".bd-img-url");
+    inp.value = url;
+    inp.dispatchEvent(new Event("input", { bubbles: true }));
+  });
+
+  function lerBoardDoForm() {
+    const val = (el, sel) => el.querySelector(sel).value.trim();
+    const b = {
+      campanha: valorDe("bd-campanha"),
+      chips: linhasDe("bd-chips"),
+      capa_url: valorDe("bd-capa"),
+      paleta: Array.from(document.querySelectorAll("#bd-paleta .bd-cor")).map(el => ({
+        cor: corValida(val(el, ".bd-cor-hex")) ? corValida(val(el, ".bd-cor-hex")).toUpperCase() : "",
+        nome: val(el, ".bd-cor-nome"), nota: val(el, ".bd-cor-nota"),
+      })).filter(p => p.cor || p.nome),
+      paleta_nota: valorDe("bd-paleta-nota"),
+      clima: linhasDe("bd-clima"),
+      gancho: { frase: valorDe("bd-gancho"), notas: linhasDe("bd-gancho-notas"), nota: valorDe("bd-gancho-nota") },
+      produtos: Array.from(document.querySelectorAll("#bd-produtos .bd-produto")).map(el => ({
+        foto: val(el, ".bd-img-url"), nome: val(el, ".bd-prod-nome"), descricao: val(el, ".bd-prod-desc"),
+        obs: val(el, ".bd-prod-obs"), largo: el.querySelector(".bd-prod-largo").checked,
+      })).filter(p => p.foto || p.nome || p.descricao),
+      fotos: Array.from(document.querySelectorAll("#bd-fotos .bd-foto")).map(el => ({
+        foto: val(el, ".bd-img-url"), rotulo: val(el, ".bd-foto-rot"), descricao: val(el, ".bd-foto-desc"), legenda: val(el, ".bd-foto-leg"),
+      })).filter(f => f.foto || f.rotulo || f.descricao || f.legenda),
+      diferenciais: linhasDe("bd-diferenciais"),
+      diferenciais_nota: valorDe("bd-diferenciais-nota"),
+      evitar: linhasDe("bd-evitar"),
+      cta: { texto: valorDe("bd-cta"), nota: valorDe("bd-cta-nota") },
+      pendencias: linhasDe("bd-pendencias"),
+    };
+    const vazio = !b.campanha && !b.chips.length && !b.capa_url && !b.paleta.length && !b.clima.length &&
+      !b.gancho.frase && !b.gancho.notas.length && !b.produtos.length && !b.fotos.length &&
+      !b.diferenciais.length && !b.evitar.length && !b.cta.texto && !b.pendencias.length;
+    return vazio ? null : b;
+  }
+
+  function preencherBoard(b, substituir) {
+    const set = (id, v) => { if (v != null && (substituir || String(v).trim())) document.getElementById(id).value = v; };
+    const setLinhas = (id, arr) => { if (Array.isArray(arr) && (substituir || arr.length)) document.getElementById(id).value = arr.join("\n"); };
+    if (substituir) {
+      ["bd-paleta", "bd-produtos", "bd-fotos"].forEach(id => document.getElementById(id).innerHTML = "");
+      boardEl.querySelectorAll("input[type=text], textarea").forEach(el => { if (el.id && el.id.startsWith("bd-")) el.value = ""; });
+    }
+    b = b || {};
+    set("bd-campanha", b.campanha || "");
+    setLinhas("bd-chips", b.chips || []);
+    set("bd-capa", b.capa_url || "");
+    if (Array.isArray(b.paleta) && b.paleta.length) { document.getElementById("bd-paleta").innerHTML = ""; b.paleta.forEach(addCor); }
+    set("bd-paleta-nota", b.paleta_nota || "");
+    setLinhas("bd-clima", b.clima || []);
+    const g = b.gancho || {};
+    set("bd-gancho", g.frase || "");
+    setLinhas("bd-gancho-notas", g.notas || []);
+    set("bd-gancho-nota", g.nota || "");
+    if (Array.isArray(b.produtos) && b.produtos.length) { document.getElementById("bd-produtos").innerHTML = ""; b.produtos.forEach(addProduto); }
+    if (Array.isArray(b.fotos) && b.fotos.length) { document.getElementById("bd-fotos").innerHTML = ""; b.fotos.forEach(addFotoBoard); }
+    setLinhas("bd-diferenciais", b.diferenciais || []);
+    set("bd-diferenciais-nota", b.diferenciais_nota || "");
+    setLinhas("bd-evitar", b.evitar || []);
+    const cta = b.cta || {};
+    set("bd-cta", cta.texto || "");
+    set("bd-cta-nota", cta.nota || "");
+    setLinhas("bd-pendencias", b.pendencias || []);
+    const capa = boardEl.querySelector('[data-img-campo="capa"] .rot-mood-thumb');
+    const capaUrl = valorDe("bd-capa");
+    capa.hidden = !capaUrl; if (capaUrl) capa.src = capaUrl; else capa.removeAttribute("src");
+    if (lerBoardDoForm()) boardEl.open = true;
   }
   function lerMoodDoForm() {
     return Array.from(document.querySelectorAll("#rot-moodboard .mood-url"))
@@ -8209,6 +8435,8 @@
     document.getElementById("rot-legenda").value = r ? (r.sugestao_legenda || "") : "";
     document.getElementById("rot-status").value = r ? r.status : "rascunho";
     document.getElementById("rot-apagar").hidden = !r;
+    preencherBoard(r ? r.board : null, true);
+    boardEl.open = !!(r && r.board);
 
     const linkWrap = document.getElementById("rot-link-wrap");
     if (r) { linkWrap.hidden = false; document.getElementById("rot-link").value = linkRoteiro(r); }
@@ -8269,6 +8497,11 @@
     const logoUrl = document.getElementById("rot-logo-url").value.trim() || null;
     if (listaRoteiros.some(r => "logo_url" in r)) dados.logo_url = logoUrl;
     else if (logoUrl) alert("Pra logo aparecer, rode antes o arquivo banco-atualizacao-roteiros-logo.sql no Supabase. O resto do roteiro vai ser salvo normalmente.");
+    // Mood board + tom/texto na tela: só se as colunas já existem (banco-atualizacao-roteiros-board.sql).
+    const board = lerBoardDoForm();
+    const boardOk = await temColunasBoard();
+    if (boardOk) dados.board = board;
+    else if (board || lerCenasDoForm().some(c => c.tom || c.texto_tela)) alert("Pro mood board (e o tom/texto na tela das cenas) serem salvos, rode antes o arquivo banco-atualizacao-roteiros-board.sql no Supabase. O resto do roteiro vai ser salvo normalmente.");
 
     let roteiroId = id;
     if (id) {
@@ -8284,7 +8517,11 @@
 
     // Regrava cenas e moodboard (apaga e insere de novo — simples e confiável).
     await salvarSeguro("roteiro_cenas", sb.from("roteiro_cenas").delete().eq("roteiro_id", roteiroId));
-    const cenas = lerCenasDoForm().map(c => ({ ...c, roteiro_id: roteiroId }));
+    const cenas = lerCenasDoForm().map(c => {
+      const linha = { ...c, roteiro_id: roteiroId };
+      if (!boardOk) { delete linha.tom; delete linha.texto_tela; }
+      return linha;
+    });
     if (cenas.length) await salvarSeguro("roteiro_cenas", sb.from("roteiro_cenas").insert(cenas));
 
     await salvarSeguro("roteiro_moodboard", sb.from("roteiro_moodboard").delete().eq("roteiro_id", roteiroId));
@@ -8359,6 +8596,8 @@
     if (g.objetivo) document.getElementById("rot-objetivo").value = g.objetivo;
     if (g.pontos_importantes) document.getElementById("rot-pontos").value = g.pontos_importantes;
     if (g.sugestao_legenda) document.getElementById("rot-legenda").value = g.sugestao_legenda;
+    if (g.marca && !document.getElementById("rot-marca").value.trim()) document.getElementById("rot-marca").value = g.marca;
+    if (g.board && typeof g.board === "object") preencherBoard(g.board, false);
     if (Array.isArray(g.cenas) && g.cenas.length) {
       document.getElementById("rot-cenas").innerHTML = "";
       g.cenas.forEach(addCena);
@@ -8374,50 +8613,137 @@
     if (txt[0] === "{") {
       try { const j = JSON.parse(txt); if (j && typeof j === "object") return j; } catch (e) { /* cai pro texto */ }
     }
-    // 2) Parser por rótulos (Título:, Objetivo:, Cena 1 — HOOK (0-5s), Fala:, Cena:...)
+    // 2) Parser por rótulos. Campos simples (Título:, Objetivo:...), seções do
+    //    mood board (PALETA:, CLIMA:, GANCHO:, PRODUTOS:, MINHAS FOTOS:,
+    //    DIFERENCIAIS:, EVITAR:, CTA:, A CONFIRMAR:) e cenas
+    //    (Cena 1 — GANCHO (0-4s) / Áudio: / Tom: / Imagem: / Na tela:).
     const ROTULOS = {
       "titulo": "titulo", "subtitulo": "subtitulo", "formato": "formato", "objetivo": "objetivo",
       "pontos": "pontos_importantes", "pontos importantes": "pontos_importantes",
       "legenda": "sugestao_legenda", "sugestao de legenda": "sugestao_legenda", "sugestao": "sugestao_legenda",
+      "marca": "marca",
     };
-    const r = { titulo: "", subtitulo: "", formato: "", objetivo: "", pontos_importantes: "", sugestao_legenda: "", cenas: [] };
-    let campoTopo = null, cena = null, subcena = null;
-    const ehCena = /^\s*cena\s*\d+/i;
+    const SECOES = {
+      "campanha": "campanha", "prazos": "chips", "prazo": "chips", "chips": "chips",
+      "paleta": "paleta", "cores": "paleta", "clima": "clima", "clima da marca": "clima",
+      "gancho": "gancho", "gancho escolhido": "gancho", "referencia de gancho": "gancho",
+      "produtos": "produtos", "produto": "produtos", "minhas fotos": "fotos", "fotos": "fotos",
+      "diferenciais": "diferenciais", "diferenciais que entram no video": "diferenciais",
+      "evitar": "evitar", "nao fazer": "evitar", "cta": "cta",
+      "a confirmar": "pendencias", "a confirmar com a marca": "pendencias", "pendencias": "pendencias",
+    };
+    const SUBCENA = {
+      "fala": "narracao", "narracao": "narracao", "audio": "narracao",
+      "cena": "cena", "detalhes": "cena", "imagem": "cena", "acao": "cena",
+      "tag": "tag", "etapa": "tag", "tempo": "tempo",
+      "tom": "tom", "na tela": "texto_tela", "texto na tela": "texto_tela", "tela": "texto_tela", "texto": "texto_tela",
+    };
+    const r = { titulo: "", subtitulo: "", formato: "", objetivo: "", pontos_importantes: "", sugestao_legenda: "", marca: "", cenas: [] };
+    const bd = { campanha: "", chips: [], paleta: [], clima: [], gancho: { frase: "", notas: [], nota: "" }, produtos: [], fotos: [],
+      diferenciais: [], diferenciais_nota: "", evitar: [], cta: { texto: "", nota: "" }, pendencias: [], paleta_nota: "" };
+    let campoTopo = null, secao = null, cena = null, subcena = null;
+    const ehCena = /^cena\s*\d+/i;
+    const item = (l) => l.replace(/^\s*(?:[-•*–]|\d+[.)])\s*/, "").trim();
+    const partes = (l) => item(l).split(/\s*\|\s*/).map(x => x.trim());
+    const tiraAspas = (t) => String(t || "").trim().replace(/^["“]|["”]$/g, "").trim();
+
+    function addNaSecao(l, inline) {
+      if (!l) return;
+      const p = partes(l);
+      switch (secao) {
+        case "campanha": bd.campanha = item(l); break;
+        case "chips": bd.chips.push(...item(l).split(/\s*·\s*/).filter(Boolean)); break;
+        case "paleta": {
+          const hexIdx = p.findIndex(x => /^#?[0-9a-f]{6}$|^#?[0-9a-f]{3}$/i.test(x));
+          if (p.length === 1 && hexIdx < 0) {
+            const m = p[0].match(/#[0-9a-f]{6}\b|#[0-9a-f]{3}\b/i);  // "Terracota · #7E2614 · nota"
+            if (!m) { if (inline) bd.paleta_nota = tiraAspas(p[0].replace(/^\(|\)$/g, "")); break; }
+            const [antes, depois] = p[0].split(m[0]);
+            bd.paleta.push({ cor: m[0].toUpperCase(), nome: antes.replace(/[\s·:—–-]+$/, "").trim(), nota: depois.replace(/^[\s·:—–-]+/, "").trim() });
+            break;
+          }
+          const cor = hexIdx >= 0 ? p[hexIdx] : "";
+          const resto = p.filter((_, i) => i !== hexIdx);
+          bd.paleta.push({ cor: cor ? (cor[0] === "#" ? cor : "#" + cor).toUpperCase() : "", nome: resto[0] || "", nota: resto.slice(1).join(" · ") });
+          break;
+        }
+        case "clima": bd.clima.push(item(l)); break;
+        case "gancho":
+          if (inline || !bd.gancho.frase && !/^\s*[-•*–]/.test(l)) bd.gancho.frase = tiraAspas(item(l));
+          else bd.gancho.notas.push(item(l));
+          break;
+        case "produtos": {
+          const largo = p.some(x => /^largo$|^banner$|^destaque$/i.test(x));
+          const q = p.filter(x => !/^largo$|^banner$|^destaque$/i.test(x));
+          bd.produtos.push({ nome: q[0] || "", descricao: q[1] || "", obs: q.slice(2).join(" · "), foto: "", largo });
+          break;
+        }
+        case "fotos": bd.fotos.push({ rotulo: p[0] || "", descricao: p[1] || "", legenda: p.slice(2).join(" · "), foto: "" }); break;
+        case "diferenciais": bd.diferenciais.push(item(l)); break;
+        case "evitar": bd.evitar.push(item(l)); break;
+        case "cta": if (!bd.cta.texto) bd.cta.texto = item(l); else bd.cta.nota += (bd.cta.nota ? " " : "") + item(l); break;
+        case "pendencias": bd.pendencias.push(item(l)); break;
+      }
+    }
+
     txt.split(/\r?\n/).forEach(linhaRaw => {
-      const linha = linhaRaw.trim();
+      // Limpa markdown: "## Título", "**Cena 1**", "> citação", "---"
+      const linha = linhaRaw.replace(/\*\*/g, "").replace(/^\s*#+\s*/, "").replace(/^\s*>\s?/, "").trim();
+      if (/^[-–—_=]{3,}$/.test(linha)) return;
       if (ehCena.test(linha)) {
-        campoTopo = null; subcena = null;
-        cena = { tag: "", tempo: "", narracao: "", cena: "" };
-        let resto = linha.replace(/^\s*cena\s*\d+\s*/i, "");
+        campoTopo = null; secao = null; subcena = null;
+        cena = { tag: "", tempo: "", narracao: "", cena: "", tom: "", texto_tela: "" };
+        let resto = linha.replace(/^cena\s*\d+\s*/i, "");
         const mt = resto.match(/\(([^)]*)\)/);
         if (mt) { cena.tempo = mt[1].trim(); resto = resto.replace(mt[0], ""); }
-        resto = resto.replace(/^[\s:—–-]+/, "").replace(/[\s:—–-]+$/, "").trim();
+        resto = resto.replace(/^[\s:·—–-]+/, "").replace(/[\s:·—–-]+$/, "").trim();
         if (resto) cena.tag = resto;
         r.cenas.push(cena);
         return;
       }
+      const m = linha.match(/^([^:]{1,40}):\s*(.*)$/);
+      const k = m ? textoSimples(m[1]) : "";
       if (cena) {
-        const m = linha.match(/^([^:]{1,24}):\s*(.*)$/);
-        if (m) {
-          const k = textoSimples(m[1]);
-          if (k === "fala" || k === "narracao") { subcena = "narracao"; cena.narracao = m[2]; return; }
-          if (k === "cena" || k === "detalhes" || k === "imagem" || k === "acao") { subcena = "cena"; cena.cena = m[2]; return; }
+        if (m && SUBCENA[k]) {
+          subcena = SUBCENA[k];
+          cena[subcena] = subcena === "texto_tela" ? tiraAspas(m[2]) : m[2].trim();
+          if (subcena === "tag" || subcena === "tempo") subcena = null;
+          return;
         }
-        if (!linha) { subcena = null; return; }
-        if (subcena) { cena[subcena] += (cena[subcena] ? "\n" : "") + linha; return; }
+        if (!(m && (SECOES[k] || ROTULOS[k]))) {
+          if (!linha) { subcena = null; return; }
+          if (subcena) cena[subcena] += (cena[subcena] ? "\n" : "") + linha;
+          return;
+        }
+        cena = null; subcena = null;  // um rótulo de seção fecha as cenas
+      }
+      if (m && SECOES[k]) {
+        secao = SECOES[k]; campoTopo = null;
+        if (m[2].trim()) addNaSecao(m[2].trim(), true);
         return;
       }
-      const m = linha.match(/^([^:]{1,30}):\s*(.*)$/);
-      if (m && ROTULOS[textoSimples(m[1])]) {
-        campoTopo = ROTULOS[textoSimples(m[1])];
+      if (m && secao && k === "nota") {
+        if (secao === "diferenciais") bd.diferenciais_nota = m[2].trim();
+        else if (secao === "cta") bd.cta.nota = m[2].trim();
+        else if (secao === "gancho") bd.gancho.nota = m[2].trim();
+        else if (secao === "paleta") bd.paleta_nota = m[2].trim();
+        return;
+      }
+      if (m && ROTULOS[k]) {
+        secao = null;
+        campoTopo = ROTULOS[k];
         r[campoTopo] = m[2].trim();
         return;
       }
+      if (secao) { addNaSecao(linha, false); return; }
       if (campoTopo && linha) { r[campoTopo] += (r[campoTopo] ? "\n" : "") + linha; return; }
       if (!r.titulo && linha) { r.titulo = linha; return; }
     });
-    r.cenas = r.cenas.filter(c => c.tag || c.tempo || c.narracao || c.cena);
-    const temAlgo = r.titulo || r.objetivo || r.sugestao_legenda || r.cenas.length;
+    r.cenas = r.cenas.filter(c => c.tag || c.tempo || c.narracao || c.cena || c.tom || c.texto_tela);
+    const temBoard = bd.campanha || bd.chips.length || bd.paleta.length || bd.clima.length || bd.gancho.frase ||
+      bd.produtos.length || bd.fotos.length || bd.diferenciais.length || bd.evitar.length || bd.cta.texto || bd.pendencias.length;
+    if (temBoard) r.board = bd;
+    const temAlgo = r.titulo || r.objetivo || r.sugestao_legenda || r.cenas.length || temBoard;
     return temAlgo ? r : null;
   }
 

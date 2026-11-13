@@ -255,6 +255,139 @@
   @media (max-width: 560px) {
     .capa, .bloco, .cena { padding-left: 22px; padding-right: 22px; }
   }
+
+  /* =====================================================================
+     MODO MOOD BOARD — quando o roteiro tem "board" preenchido.
+     As cores saem da paleta da marca (variáveis --b-* definidas no JS).
+     ===================================================================== */
+  body.modo-board {
+    --b-pri: #3C4B40; --b-pri-txt: #3C4B40; --b-escuro: #26302A; --b-on-pri: #FFFFFF;
+    --b-acento: #C3B79A; --b-acento-txt: #79736A; --b-fundo: #F4F1EA; --b-tinta: #2B2522; --b-suave: #EFE9DF;
+    background: var(--b-fundo); color: var(--b-tinta); padding: 0 0 56px;
+  }
+  body.modo-board .wrap { max-width: 1120px; }
+  body.modo-board .rodape-nome { color: var(--b-pri-txt); }
+  .bd-hero { background: var(--b-pri); color: var(--b-on-pri); position: relative; overflow: hidden; }
+  .bd-hero-in { max-width: 1120px; margin: 0 auto; display: grid; grid-template-columns: 1.15fr 1fr; min-height: 300px; }
+  .bd-hero-txt { padding: 34px 24px 34px 40px; position: relative; z-index: 2; }
+  .bd-logo { width: 72px; height: 72px; border-radius: 50%; background: #fff; display: flex; align-items: center; justify-content: center; overflow: hidden; margin-bottom: 22px; box-shadow: 0 6px 18px rgba(0,0,0,.18); }
+  .bd-logo img { max-width: 78%; max-height: 62%; object-fit: contain; display: block; }
+  .bd-logo span { font-family: var(--serif); font-size: 13px; color: var(--b-tinta); text-align: center; padding: 6px; line-height: 1.1; }
+  .bd-eyebrow { font-family: var(--mono); font-size: 11px; letter-spacing: 2.5px; text-transform: uppercase; opacity: .82; margin: 0 0 10px; }
+  .bd-hero h1 { font-family: var(--serif); font-weight: 600; font-size: clamp(28px, 4.4vw, 46px); line-height: 1.1; margin: 0; letter-spacing: -0.3px; }
+  .bd-tagline { margin: 10px 0 0; font-size: 17px; opacity: .92; }
+  .bd-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 20px; }
+  .bd-chip { font-size: 12.5px; padding: 6px 13px; border-radius: 999px; border: 1px solid rgba(255,255,255,.45); white-space: nowrap; }
+  .bd-hero-img { position: relative; min-height: 220px; }
+  .bd-hero-img img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .bd-hero-img::before { content: ""; position: absolute; inset: 0; z-index: 1; background: linear-gradient(90deg, var(--b-pri) 0%, transparent 38%); }
+  .bd-hero.sem-img .bd-hero-in { grid-template-columns: 1fr; }
+  .bd-hero.sem-img .bd-hero-img { display: none; }
+
+  .bd-sec { margin-top: 46px; padding: 0 4px; }
+  .bd-sec-rot { font-family: var(--mono); font-size: 11px; letter-spacing: 2.5px; text-transform: uppercase; color: var(--b-acento-txt); margin: 0 0 4px; }
+  .bd-sec h2 { font-family: var(--serif); font-weight: 600; font-size: clamp(22px, 3vw, 28px); color: var(--b-pri-txt); margin: 0 0 18px; }
+  .bd-grid { display: grid; gap: 18px; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .bd-card { background: #fff; border-radius: 18px; padding: 22px 22px; box-shadow: 0 10px 30px rgba(0,0,0,.06); min-width: 0; }
+  .bd-card-rot { font-family: var(--mono); font-size: 10.5px; letter-spacing: 2px; text-transform: uppercase; color: var(--b-pri-txt); margin: 0 0 14px; font-weight: 700; }
+  .bd-nota { font-size: 12.5px; color: #8A8178; margin: 12px 0 0; }
+
+  .bd-swatch { display: flex; gap: 12px; align-items: flex-start; }
+  .bd-swatch + .bd-swatch { margin-top: 12px; }
+  .bd-swatch i { flex: 0 0 46px; height: 46px; border-radius: 10px; border: 1px solid rgba(0,0,0,.08); }
+  .bd-swatch b { display: block; font-size: 14px; color: var(--b-tinta); }
+  .bd-swatch small { display: block; font-size: 12px; color: #8A8178; line-height: 1.4; }
+
+  .bd-lista { list-style: none; margin: 0; padding: 0; }
+  .bd-lista li { position: relative; padding: 9px 0 9px 22px; font-size: 14.5px; line-height: 1.45; border-top: 1px solid rgba(0,0,0,.06); }
+  .bd-lista li:first-child { border-top: 0; padding-top: 0; }
+  .bd-lista li::before { content: ""; position: absolute; left: 2px; top: 15px; width: 8px; height: 8px; border-radius: 50%; background: var(--b-acento); }
+  .bd-lista li:first-child::before { top: 6px; }
+  .bd-lista.forte li::before { background: var(--b-pri); }
+
+  .bd-gancho { background: var(--b-tinta); color: #fff; border-radius: 14px; padding: 18px 18px 18px; position: relative; margin-top: 8px; }
+  .bd-gancho-pill { position: absolute; top: -11px; left: 14px; background: var(--b-acento); color: var(--b-tinta); font-family: var(--mono); font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase; padding: 4px 10px; border-radius: 999px; font-weight: 700; }
+  .bd-gancho p { margin: 4px 0 0; font-family: var(--serif); font-size: 21px; line-height: 1.3; }
+  .bd-gancho-notas { margin: 14px 0 0; padding-left: 18px; font-size: 13.5px; }
+  .bd-gancho-notas li { margin-bottom: 4px; }
+
+  .bd-banner { position: relative; border-radius: 18px; overflow: hidden; aspect-ratio: 21 / 8; background: var(--b-pri); margin-bottom: 18px; }
+  .bd-banner img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .bd-banner-txt { position: absolute; left: 0; right: 0; bottom: 0; padding: 40px 22px 18px; color: #fff; background: linear-gradient(0deg, rgba(0,0,0,.6), transparent); }
+  .bd-banner-txt b { font-family: var(--serif); font-size: 19px; font-weight: 600; display: block; }
+  .bd-banner-txt span { font-size: 13px; opacity: .9; }
+  .bd-prod { padding: 0; overflow: hidden; display: flex; flex-direction: column; }
+  .bd-prod-img { aspect-ratio: 4 / 3; background: var(--b-suave); overflow: hidden; }
+  .bd-prod-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .bd-prod-txt { padding: 16px 18px 18px; }
+  .bd-prod-txt b { font-family: var(--serif); font-size: 17px; font-weight: 600; display: block; margin-bottom: 4px; }
+  .bd-prod-txt p { margin: 0; font-size: 13.5px; color: #6F675F; line-height: 1.45; }
+  .bd-obs { display: inline-block; margin-top: 10px; font-size: 12px; background: var(--b-suave); border: 1px solid rgba(0,0,0,.08); padding: 4px 10px; border-radius: 8px; color: var(--b-tinta); }
+
+  .bd-fotos { display: grid; gap: 18px; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+  .bd-foto { margin: 0; min-width: 0; }
+  .bd-foto.larga { grid-column: span 2; }
+  .bd-foto-img { height: 300px; border-radius: 16px; overflow: hidden; background: #fff; }
+  .bd-foto-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .bd-foto-vaga { height: 300px; border-radius: 16px; border: 1.5px dashed var(--b-acento); background: var(--b-suave); display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 18px; }
+  .bd-foto-vaga b { font-family: var(--mono); font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--b-pri-txt); }
+  .bd-foto-vaga span { font-size: 13px; color: #8A8178; margin-top: 6px; }
+  .bd-foto figcaption { text-align: center; font-size: 12.5px; color: #8A8178; margin-top: 8px; }
+
+  .bd-ref { display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+  .bd-ref img { width: 100%; aspect-ratio: 3/4; object-fit: cover; border-radius: 14px; display: block; }
+
+  .bd-cena { padding: 0; overflow: hidden; display: flex; flex-direction: column; }
+  .bd-cena-cab { background: var(--b-escuro); color: #fff; display: flex; justify-content: space-between; gap: 10px; padding: 11px 18px; font-family: var(--mono); font-size: 11.5px; letter-spacing: 1.5px; text-transform: uppercase; font-weight: 700; }
+  .bd-cena-cab span:last-child { opacity: .8; font-weight: 400; letter-spacing: 0.5px; }
+  .bd-cena-corpo { padding: 16px 18px 6px; flex: 1; }
+  .bd-cena-rot { font-family: var(--mono); font-size: 10.5px; letter-spacing: 2px; text-transform: uppercase; color: var(--b-pri-txt); font-weight: 700; margin: 0 0 4px; }
+  .bd-cena-rot + p { margin-top: 0; }
+  .bd-fala { font-family: var(--serif); font-size: 16px; line-height: 1.5; margin: 0; color: var(--b-tinta); white-space: pre-wrap; }
+  .bd-tom { font-size: 12.5px; color: #8A8178; font-style: italic; margin: 4px 0 0; }
+  .bd-img-txt { font-size: 14px; line-height: 1.5; margin: 0; white-space: pre-wrap; }
+  .bd-bloco + .bd-bloco { margin-top: 14px; }
+  .bd-tela { display: inline-block; margin-top: 12px; font-size: 12.5px; font-weight: 600; background: var(--b-suave); padding: 5px 11px; border-radius: 8px; color: var(--b-tinta); }
+  .bd-cena .cena-coment { margin: 14px 18px 18px; padding-top: 12px; }
+  .bd-falas { margin-top: 18px; background: #fff; border: 0; box-shadow: 0 10px 30px rgba(0,0,0,.06); }
+  .bd-falas summary, .bd-falas .falas-texto { color: var(--b-pri-txt); }
+
+  .bd-duo { display: grid; gap: 18px; grid-template-columns: 1.5fr 1fr; align-items: start; }
+  .bd-duo-dir { display: grid; gap: 18px; }
+  .bd-cta { background: var(--b-pri); color: var(--b-on-pri); }
+  .bd-cta .bd-card-rot { color: inherit; opacity: .8; }
+  .bd-cta-txt { font-family: var(--serif); font-size: 24px; font-weight: 600; margin: 0; word-break: break-word; }
+  .bd-cta p.bd-nota { color: inherit; opacity: .85; }
+  .bd-confirmar { background: var(--b-suave); border: 1px solid rgba(0,0,0,.08); box-shadow: none; margin-top: 18px; }
+  .bd-confirmar ol { margin: 0; padding-left: 20px; font-size: 14.5px; }
+  .bd-confirmar li { margin-bottom: 6px; }
+
+  body.modo-board #bloco-comentario { border: 0; box-shadow: 0 10px 30px rgba(0,0,0,.06); margin-top: 46px; }
+  body.modo-board #bloco-comentario .bloco-titulo { color: var(--b-pri-txt); }
+  body.modo-board .btn-enviar { background: var(--b-pri-txt); color: #fff; }
+  body.modo-board .btn-enviar:hover { background: var(--b-escuro); }
+  body.modo-board .btn-cena-coment { color: var(--b-pri-txt); background: var(--b-suave); }
+  body.modo-board label.lbl, body.modo-board .aviso-form.ok { color: var(--b-pri-txt); }
+  body.modo-board input.inp, body.modo-board textarea.inp { background: var(--b-fundo); }
+  body.modo-board input.inp:focus, body.modo-board textarea.inp:focus { border-color: var(--b-pri-txt); }
+  body.modo-board #conteudo { padding: 0 16px; }
+  body.modo-board #conteudo > .rodape { margin-top: 40px; }
+
+  @media (max-width: 900px) {
+    .bd-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .bd-duo { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 640px) {
+    .bd-hero-in { grid-template-columns: 1fr; }
+    .bd-hero-img { order: -1; min-height: 200px; }
+    .bd-hero-img::before { background: linear-gradient(0deg, var(--b-pri) 0%, transparent 45%); }
+    .bd-hero-txt { padding: 8px 20px 28px; }
+    .bd-hero.sem-img .bd-hero-txt { padding-top: 28px; }
+    .bd-grid { grid-template-columns: 1fr; }
+    .bd-foto.larga { grid-column: auto; }
+    .bd-banner { aspect-ratio: 4 / 3; }
+    .bd-sec { margin-top: 36px; }
+  }
 </style>
 </head>
 <body>
@@ -321,6 +454,9 @@
     </details>
     <div id="lista-cenas"></div>
   </div>
+
+  <!-- Modo mood board (preenchido pelo JS quando o roteiro tem "board") -->
+  <div id="board" hidden></div>
 
   <section class="bloco" id="bloco-comentario">
     <h2 class="bloco-titulo">E aí, o que achou?</h2>
@@ -391,6 +527,14 @@
     const r = dados.roteiro;
     const cenas = dados.cenas || [];
     const moodboard = dados.moodboard || [];
+
+    // Roteiro novo, no formato mood board: layout próprio nas cores da marca.
+    if (temBoard(r.board)) {
+      renderBoard(r, cenas, moodboard);
+      $("#carregando").hidden = true;
+      $("#conteudo").hidden = false;
+      return;
+    }
 
     // Cabeçalho
     document.title = (r.titulo || "Roteiro") + " — Talissa Müller";
@@ -527,6 +671,197 @@
     $("#conteudo").hidden = false;
   })();
 
+  // =====================================================================
+  // MODO MOOD BOARD
+  // =====================================================================
+  function lista(v) { return Array.isArray(v) ? v.filter(x => x != null && String(typeof x === "object" ? JSON.stringify(x) : x).trim()) : []; }
+  function temBoard(b) {
+    if (!b || typeof b !== "object") return false;
+    return Object.keys(b).some(k => {
+      const v = b[k];
+      if (Array.isArray(v)) return v.length > 0;
+      if (v && typeof v === "object") return Object.values(v).some(x => Array.isArray(x) ? x.length : String(x || "").trim());
+      return String(v || "").trim() !== "";
+    });
+  }
+  // Só aceita links http(s) em imagens (nada de javascript:, data: estranho etc.)
+  function urlSegura(u) { u = String(u || "").trim(); return /^https?:\/\//i.test(u) ? u : ""; }
+  function attr(t) { return escapar(t).replace(/"/g, "&quot;"); }
+
+  // ---- Cores: tudo sai da paleta da marca ----
+  function hexOk(h) { h = String(h || "").trim(); if (!h.startsWith("#")) h = "#" + h; return /^#([0-9a-f]{6}|[0-9a-f]{3})$/i.test(h) ? h : null; }
+  function rgb(h) { h = h.replace("#", ""); if (h.length === 3) h = h.split("").map(c => c + c).join(""); return [0, 2, 4].map(i => parseInt(h.slice(i, i + 2), 16)); }
+  function hex(c) { return "#" + c.map(v => Math.round(Math.max(0, Math.min(255, v))).toString(16).padStart(2, "0")).join(""); }
+  function mix(a, b, t) { const x = rgb(a), y = rgb(b); return hex(x.map((v, i) => v + (y[i] - v) * t)); }
+  function lum(h) { return rgb(h).map(v => { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); }).reduce((s, v, i) => s + v * [0.2126, 0.7152, 0.0722][i], 0); }
+  function contraste(a, b) { const l1 = lum(a), l2 = lum(b); return (Math.max(l1, l2) + 0.05) / (Math.min(l1, l2) + 0.05); }
+  function escurecerAte(cor, fundo, alvo) { let c = cor; for (let t = 0.08; contraste(c, fundo) < alvo && t <= 1; t += 0.08) c = mix(cor, "#000000", t); return c; }
+
+  function aplicarCores(paleta) {
+    const cores = paleta.map(p => hexOk(p.cor)).filter(Boolean);
+    if (!cores.length) return;
+    const pri = cores[0];
+    const acento = cores[1] || mix(pri, "#FFFFFF", 0.45);
+    const claras = cores.filter(c => lum(c) > 0.55).sort((a, b) => lum(b) - lum(a));
+    const fundo = claras.length ? mix(claras[0], "#FFFFFF", 0.55) : mix(pri, "#FFFFFF", 0.93);
+    const escuras = cores.filter(c => lum(c) < 0.04);
+    const tinta = escuras.length ? escuras[0] : "#2B2522";
+    const priTxt = escurecerAte(pri, "#FFFFFF", 4.5);          // título/rotulos legíveis no branco
+    const heroBg = contraste(pri, "#FFFFFF") >= 3 ? pri : priTxt; // capa com texto branco legível
+    const s = document.body.style;
+    s.setProperty("--b-pri", heroBg);
+    s.setProperty("--b-pri-txt", priTxt);
+    s.setProperty("--b-escuro", mix(priTxt, "#000000", 0.35));
+    s.setProperty("--b-acento", acento);
+    s.setProperty("--b-acento-txt", escurecerAte(mix(acento, priTxt, 0.35), fundo, 4.5));
+    s.setProperty("--b-fundo", fundo);
+    s.setProperty("--b-suave", mix(acento, "#FFFFFF", 0.78));
+    s.setProperty("--b-tinta", tinta);
+  }
+
+  function renderBoard(r, cenas, moodboard) {
+    const b = r.board || {};
+    const paleta = lista(b.paleta).filter(p => p && typeof p === "object");
+    document.body.classList.add("modo-board");
+    aplicarCores(paleta);
+    document.title = (r.titulo || "Roteiro") + " — Talissa Müller";
+    ["#bloco-roteiro", "#bloco-moodboard", "#bloco-passo"].forEach(s => { const el = $(s); if (el) el.hidden = true; });
+    document.querySelector("header.capa").hidden = true;
+
+    // ---- Capa ----
+    const marca = (r.marca || "").trim();
+    const chips = ["Creator: Talissa Müller"].concat(r.formato ? String(r.formato).split(/\s*·\s*/) : [], lista(b.chips));
+    const capaUrl = urlSegura(b.capa_url);
+    const eyebrow = ["Mood board"].concat(b.campanha ? [b.campanha] : []).join(" · ");
+    const hero = document.createElement("header");
+    hero.className = "bd-hero" + (capaUrl ? "" : " sem-img");
+    hero.innerHTML = `<div class="bd-hero-in">
+      <div class="bd-hero-txt">
+        <div class="bd-logo" id="bd-logo"><span>${escapar(marca || "")}</span></div>
+        <p class="bd-eyebrow">${escapar(eyebrow)}</p>
+        <h1>${escapar(r.titulo || "Roteiro")}</h1>
+        ${r.subtitulo ? `<p class="bd-tagline">${escapar(r.subtitulo)}</p>` : ""}
+        <div class="bd-chips">${chips.filter(c => String(c).trim()).map(c => `<span class="bd-chip">${escapar(c)}</span>`).join("")}</div>
+      </div>
+      <div class="bd-hero-img">${capaUrl ? `<img src="${attr(capaUrl)}" alt="">` : ""}</div>
+    </div>`;
+    document.body.insertBefore(hero, $("#conteudo"));
+    // Logo: a enviada no painel → a do portfólio → o nome escrito.
+    const slug = marca.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+    const fontes = [urlSegura(r.logo_url), slug ? "../logos-marcas/" + slug + ".png" : ""].filter(Boolean);
+    (function tentarLogo(i) {
+      if (i >= fontes.length) { if (!marca) $("#bd-logo").remove(); return; }
+      const img = new Image();
+      img.onload = () => { const box = $("#bd-logo"); box.innerHTML = ""; img.alt = marca; box.appendChild(img); };
+      img.onerror = () => tentarLogo(i + 1);
+      img.src = fontes[i];
+    })(0);
+
+    let html = "";
+    const sec = (rot, titulo, corpo) => `<section class="bd-sec"><p class="bd-sec-rot">${escapar(rot)}</p><h2>${escapar(titulo)}</h2>${corpo}</section>`;
+    const ul = (itens, cls) => `<ul class="bd-lista ${cls || ""}">${itens.map(i => `<li>${escapar(i)}</li>`).join("")}</ul>`;
+
+    // ---- Identidade: paleta, clima, gancho ----
+    const clima = lista(b.clima);
+    const g = b.gancho || {};
+    const notasGancho = lista(g.notas);
+    const cards = [];
+    if (paleta.length) {
+      cards.push(`<div class="bd-card"><p class="bd-card-rot">Paleta${b.paleta_nota ? " (" + escapar(b.paleta_nota) + ")" : ""}</p>` +
+        paleta.map(p => {
+          const cor = hexOk(p.cor);
+          return `<div class="bd-swatch"><i style="background:${cor || "#ddd"}"></i><div><b>${escapar(p.nome || "")}${cor ? " · " + cor.toUpperCase() : ""}</b>${p.nota ? `<small>${escapar(p.nota)}</small>` : ""}</div></div>`;
+        }).join("") + `</div>`);
+    }
+    if (clima.length) cards.push(`<div class="bd-card"><p class="bd-card-rot">Clima da marca</p>${ul(clima)}</div>`);
+    if (g.frase || notasGancho.length) {
+      cards.push(`<div class="bd-card"><p class="bd-card-rot">Referência de gancho</p>` +
+        (g.frase ? `<div class="bd-gancho"><span class="bd-gancho-pill">Gancho escolhido</span><p>“${escapar(String(g.frase).replace(/^["“]|["”]$/g, ""))}”</p></div>` : "") +
+        (notasGancho.length ? `<ul class="bd-gancho-notas">${notasGancho.map(n => `<li>${escapar(n)}</li>`).join("")}</ul>` : "") +
+        (g.nota ? `<p class="bd-nota">${escapar(g.nota)}</p>` : "") + `</div>`);
+    }
+    if (cards.length) html += sec("Identidade", "Paleta, clima e gancho", `<div class="bd-grid">${cards.join("")}</div>`);
+
+    // ---- Produto ----
+    const produtos = lista(b.produtos).filter(p => p && typeof p === "object");
+    if (produtos.length) {
+      const largos = produtos.filter(p => p.largo), normais = produtos.filter(p => !p.largo);
+      let corpo = largos.map(p => `<div class="bd-banner">${urlSegura(p.foto) ? `<img src="${attr(urlSegura(p.foto))}" alt="">` : ""}
+        <div class="bd-banner-txt"><b>${escapar(p.nome || "")}</b>${p.descricao ? `<span>${escapar(p.descricao)}</span>` : ""}</div></div>`).join("");
+      if (normais.length) corpo += `<div class="bd-grid">${normais.map(p => `<div class="bd-card bd-prod">
+        ${urlSegura(p.foto) ? `<div class="bd-prod-img"><img src="${attr(urlSegura(p.foto))}" alt="" loading="lazy"></div>` : ""}
+        <div class="bd-prod-txt"><b>${escapar(p.nome || "")}</b>${p.descricao ? `<p>${escapar(p.descricao)}</p>` : ""}${p.obs ? `<span class="bd-obs">${escapar(p.obs)}</span>` : ""}</div></div>`).join("")}</div>`;
+      html += sec("Produto", b.produto_titulo || "O produto", corpo);
+    }
+
+    // ---- Minhas fotos ----
+    const fotos = lista(b.fotos).filter(f => f && typeof f === "object");
+    if (fotos.length) {
+      html += sec("Minhas fotos", "Fotos da Talissa para o board", `<div class="bd-fotos">${fotos.map((f, i) => {
+        const u = urlSegura(f.foto);
+        const larga = u && i === 0 && fotos.length >= 3 ? " larga" : "";
+        const quadro = u ? `<div class="bd-foto-img"><img src="${attr(u)}" alt="" loading="lazy"></div>`
+          : `<div class="bd-foto-vaga"><b>${escapar(f.rotulo || "Foto " + (i + 1))}</b>${f.descricao ? `<span>${escapar(f.descricao)}</span>` : ""}</div>`;
+        return `<figure class="bd-foto${larga}">${quadro}${f.legenda ? `<figcaption>${escapar(f.legenda)}</figcaption>` : ""}</figure>`;
+      }).join("")}</div>`);
+    }
+
+    // ---- Referências visuais (moodboard antigo) ----
+    const refs = moodboard.map(m => urlSegura(m.url)).filter(Boolean);
+    if (refs.length) html += sec("Referências", "Referências visuais", `<div class="bd-ref">${refs.map(u => `<img src="${attr(u)}" alt="referência" loading="lazy">`).join("")}</div>`);
+
+    // ---- Cena a cena ----
+    if (cenas.length) {
+      const soFala = (t) => String(t || "").trim().replace(/^["“]|["”]$/g, "");
+      const cardsCena = cenas.map((c, i) => {
+        const nome = (c.tag || "").trim();
+        const rotuloCena = "Cena " + String(i + 1).padStart(2, "0") + (nome ? " — " + nome : "");
+        let corpo = "";
+        if (c.narracao && c.narracao.trim()) corpo += `<div class="bd-bloco"><p class="bd-cena-rot">Áudio</p><p class="bd-fala">“${escapar(soFala(c.narracao))}”</p>${c.tom ? `<p class="bd-tom">${escapar(c.tom)}</p>` : ""}</div>`;
+        if (c.cena && c.cena.trim()) corpo += `<div class="bd-bloco"><p class="bd-cena-rot">Imagem</p><p class="bd-img-txt">${escapar(c.cena)}</p></div>`;
+        if (c.texto_tela && c.texto_tela.trim()) corpo += `<span class="bd-tela" title="Texto na tela">“${escapar(c.texto_tela.trim().replace(/^["“]|["”]$/g, ""))}”</span>`;
+        return `<article class="bd-card bd-cena">
+          <div class="bd-cena-cab"><span>${i + 1}${nome ? " · " + escapar(nome) : ""}</span><span>${escapar(c.tempo || "")}</span></div>
+          <div class="bd-cena-corpo">${corpo}</div>
+          ${blocoComentarCena(rotuloCena)}
+        </article>`;
+      }).join("");
+      const falas = cenas.map(c => soFala(c.narracao)).filter(Boolean);
+      const lerFalas = falas.length ? `<details class="falas bd-falas"><summary>📄 Ler só as falas, do começo ao fim</summary><div class="falas-texto">${falas.map(f => "<p>" + escapar(f) + "</p>").join("")}</div></details>` : "";
+      html += sec("Roteiro espelho", "Cena a cena: áudio e imagem", `<div class="bd-grid">${cardsCena}</div>${lerFalas}`);
+    }
+
+    // ---- Diferenciais, evitar, CTA ----
+    const dif = lista(b.diferenciais), evitar = lista(b.evitar);
+    const cta = b.cta || {};
+    const esquerda = dif.length ? `<div class="bd-card"><p class="bd-card-rot">Diferenciais que entram no vídeo</p>${ul(dif)}${b.diferenciais_nota ? `<p class="bd-nota">${escapar(b.diferenciais_nota)}</p>` : ""}</div>` : "";
+    let direita = "";
+    if (evitar.length) direita += `<div class="bd-card"><p class="bd-card-rot">Evitar</p>${ul(evitar, "forte")}</div>`;
+    if (cta.texto) direita += `<div class="bd-card bd-cta"><p class="bd-card-rot">CTA</p><p class="bd-cta-txt">${escapar(cta.texto)}</p>${cta.nota ? `<p class="bd-nota">${escapar(cta.nota)}</p>` : ""}</div>`;
+    const pend = lista(b.pendencias);
+    const confirmar = pend.length ? `<div class="bd-card bd-confirmar"><p class="bd-card-rot">A confirmar com a marca</p><ol>${pend.map(p => `<li>${escapar(p)}</li>`).join("")}</ol><p class="bd-nota">Pode me responder no comentário lá embaixo. 💛</p></div>` : "";
+    if (esquerda || direita || confirmar) {
+      const duo = esquerda && direita ? `<div class="bd-duo">${esquerda}<div class="bd-duo-dir">${direita}</div></div>`
+        : `<div class="bd-duo-dir">${esquerda}${direita}</div>`;
+      html += sec("Argumentos e regras", "Diferenciais e cuidados", (esquerda || direita ? duo : "") + confirmar);
+    }
+
+    $("#board").innerHTML = html;
+    $("#board").hidden = false;
+  }
+
+  function blocoComentarCena(rotuloCena) {
+    return `<div class="cena-coment" data-cena="${attr(rotuloCena)}">
+      <button class="btn-cena-coment" type="button">💬 Comentar esta cena</button>
+      <form class="cena-coment-form" hidden>
+        <input class="inp cc-nome" type="text" maxlength="80" placeholder="Seu nome (opcional)">
+        <textarea class="inp cc-texto" maxlength="2000" placeholder="O que você gostaria de ajustar nesta cena?" required></textarea>
+        <button class="btn-enviar" type="submit">Enviar comentário</button>
+        <p class="aviso-form" hidden></p>
+      </form>
+    </div>`;
+  }
+
   // Grava o comentário e avisa a Talissa por push (se o push falhar, não atrapalha a marca).
   async function enviarComentario(nome, texto) {
     const { error } = await sb.rpc("comentar_roteiro", {
@@ -544,7 +879,7 @@
   let ultimoNome = "";
 
   // Comentário por cena — vai pro mesmo lugar, com "Cena 02 — HOOK:" na frente
-  $("#lista-cenas").addEventListener("click", function (ev) {
+  $("#conteudo").addEventListener("click", function (ev) {
     const btn = ev.target.closest(".btn-cena-coment");
     if (!btn) return;
     const form = btn.nextElementSibling;
@@ -555,7 +890,7 @@
       form.querySelector(".cc-texto").focus();
     }
   });
-  $("#lista-cenas").addEventListener("submit", async function (ev) {
+  $("#conteudo").addEventListener("submit", async function (ev) {
     const form = ev.target.closest(".cena-coment-form");
     if (!form) return;
     ev.preventDefault();
