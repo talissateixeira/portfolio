@@ -2538,7 +2538,8 @@
           <button type="button" class="botao botao-secundario" id="bd-add-cor">+ cor</button>
         </div>
         <div class="campo-form"><label>Nota da paleta (opcional)</label><input type="text" id="bd-paleta-nota" placeholder="amostrada das imagens da marca"></div>
-        <div class="campo-form"><label>Clima da marca (um por linha)</label><textarea id="bd-clima" rows="3"></textarea></div>
+        <div class="campo-form"><label>Descrição do clima (2 ou 3 frases, aparece ao lado da paleta)</label><textarea id="bd-clima-texto" rows="3" placeholder="Quarto claro, luz natural de janela e cara de vídeo gravado de uma vez…"></textarea></div>
+        <div class="campo-form"><label>Palavras do clima (uma por linha, curtinhas: viram as tags embaixo da descrição)</label><textarea id="bd-clima" rows="3" placeholder="luz natural&#10;tons quentes&#10;casual de amiga"></textarea></div>
         <div class="linha-form-2">
           <div class="campo-form"><label>Gancho escolhido</label><input type="text" id="bd-gancho" placeholder="Parei de dar roupa de presente pra minha sogra."></div>
           <div class="campo-form"><label>Notas do gancho (uma por linha)</label><textarea id="bd-gancho-notas" rows="2"></textarea></div>
@@ -8781,6 +8782,7 @@
       })).filter(p => p.cor || p.nome),
       paleta_nota: valorDe("bd-paleta-nota"),
       clima: linhasDe("bd-clima"),
+      clima_texto: valorDe("bd-clima-texto"),
       gancho: { frase: valorDe("bd-gancho"), notas: linhasDe("bd-gancho-notas"), nota: valorDe("bd-gancho-nota") },
       ganchos: Array.from(document.querySelectorAll("#bd-ganchos .bd-gancho-var")).map(el => ({
         tipo: val(el, ".bd-gv-tipo"), fala: val(el, ".bd-gv-fala"), visual: val(el, ".bd-gv-visual"), tela: val(el, ".bd-gv-tela"),
@@ -8798,7 +8800,7 @@
       cta: { texto: valorDe("bd-cta"), nota: valorDe("bd-cta-nota") },
       pendencias: linhasDe("bd-pendencias"),
     };
-    const vazio = !b.campanha && !b.chips.length && !b.capa_url && !b.paleta.length && !b.clima.length &&
+    const vazio = !b.campanha && !b.chips.length && !b.capa_url && !b.paleta.length && !b.clima.length && !b.clima_texto &&
       !b.gancho.frase && !b.gancho.notas.length && !b.ganchos.length && !b.produtos.length && !b.fotos.length &&
       !b.diferenciais.length && !b.evitar.length && !b.cta.texto && !b.pendencias.length;
     return vazio ? null : b;
@@ -8818,6 +8820,7 @@
     if (Array.isArray(b.paleta) && b.paleta.length) { document.getElementById("bd-paleta").innerHTML = ""; b.paleta.forEach(addCor); }
     set("bd-paleta-nota", b.paleta_nota || "");
     setLinhas("bd-clima", b.clima || []);
+    set("bd-clima-texto", b.clima_texto || "");
     const g = b.gancho || {};
     set("bd-gancho", g.frase || "");
     setLinhas("bd-gancho-notas", g.notas || []);
@@ -9056,6 +9059,7 @@
     const SECOES = {
       "campanha": "campanha", "prazos": "chips", "prazo": "chips", "chips": "chips",
       "paleta": "paleta", "cores": "paleta", "clima": "clima", "clima da marca": "clima",
+      "descricao do clima": "clima_texto", "clima do video": "clima_texto", "tags do clima": "clima", "palavras do clima": "clima",
       "gancho": "gancho", "gancho escolhido": "gancho", "referencia de gancho": "gancho",
       "variacoes de gancho": "ganchos", "variacoes do gancho": "ganchos", "variacoes": "ganchos",
       "ganchos alternativos": "ganchos", "outros ganchos": "ganchos", "ganchos": "ganchos", "opcoes de gancho": "ganchos",
@@ -9071,7 +9075,7 @@
       "tom": "tom", "na tela": "texto_tela", "texto na tela": "texto_tela", "tela": "texto_tela", "texto": "texto_tela",
     };
     const r = { titulo: "", subtitulo: "", formato: "", objetivo: "", pontos_importantes: "", sugestao_legenda: "", marca: "", cenas: [] };
-    const bd = { campanha: "", chips: [], paleta: [], clima: [], gancho: { frase: "", notas: [], nota: "" }, ganchos: [], produtos: [], fotos: [],
+    const bd = { campanha: "", chips: [], paleta: [], clima: [], clima_texto: "", gancho: { frase: "", notas: [], nota: "" }, ganchos: [], produtos: [], fotos: [],
       diferenciais: [], diferenciais_nota: "", evitar: [], cta: { texto: "", nota: "" }, pendencias: [], paleta_nota: "" };
     let campoTopo = null, secao = null, cena = null, subcena = null;
     const ehCena = /^cena\s*\d+/i;
@@ -9099,7 +9103,12 @@
           bd.paleta.push({ cor: cor ? (cor[0] === "#" ? cor : "#" + cor).toUpperCase() : "", nome: resto[0] || "", nota: resto.slice(1).join(" · ") });
           break;
         }
-        case "clima": bd.clima.push(item(l)); break;
+        case "clima":
+          // "- luz natural" (com marcador) = tag; texto corrido = a descrição do clima
+          if (/^\s*(?:[-•*–]|\d+[.)])\s+/.test(l)) bd.clima.push(item(l));
+          else bd.clima_texto += (bd.clima_texto ? " " : "") + item(l);
+          break;
+        case "clima_texto": bd.clima_texto += (bd.clima_texto ? " " : "") + item(l); break;
         case "gancho":
           if (inline || !bd.gancho.frase && !/^\s*[-•*–]/.test(l)) bd.gancho.frase = tiraAspas(item(l));
           else bd.gancho.notas.push(item(l));
@@ -9183,7 +9192,7 @@
       if (!r.titulo && linha) { r.titulo = linha; return; }
     });
     r.cenas = r.cenas.filter(c => c.tag || c.tempo || c.narracao || c.cena || c.tom || c.texto_tela);
-    const temBoard = bd.campanha || bd.chips.length || bd.paleta.length || bd.clima.length || bd.gancho.frase || bd.ganchos.length ||
+    const temBoard = bd.campanha || bd.chips.length || bd.paleta.length || bd.clima.length || bd.clima_texto || bd.gancho.frase || bd.ganchos.length ||
       bd.produtos.length || bd.fotos.length || bd.diferenciais.length || bd.evitar.length || bd.cta.texto || bd.pendencias.length;
     if (temBoard) r.board = bd;
     const temAlgo = r.titulo || r.objetivo || r.sugestao_legenda || r.cenas.length || temBoard;

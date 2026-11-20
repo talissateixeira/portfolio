@@ -107,6 +107,7 @@ h2 { font-size: clamp(1.6rem, 4.6vw, 2.2rem); font-weight: 700; letter-spacing: 
 .clima li { position: relative; padding-left: 18px; }
 .clima li + li { margin-top: 8px; }
 .clima li::before { content: ""; position: absolute; left: 0; top: .6em; width: 7px; height: 7px; border-radius: 50%; background: var(--marca); }
+.clima-texto { margin: 0; font-size: 1.05rem; line-height: 1.65; white-space: pre-wrap; }
 .tags { margin: 16px 0 0; font-size: .9rem; font-weight: 500; color: var(--marca-texto); }
 .faixa { display: flex; height: 76px; border-radius: 18px; overflow: hidden; border: 1px solid var(--linha); }
 .faixa i { flex: 1; }
@@ -456,6 +457,10 @@ h2 { font-size: clamp(1.6rem, 4.6vw, 2.2rem); font-weight: 700; letter-spacing: 
     // ---- Mood board ----
     const clima = lista(b.clima);
     const chips = lista(b.chips);
+    const climaTexto = txt(b.clima_texto);
+    // Itens curtinhos viram tags ("luz natural · tons quentes"); frases longas viram lista
+    const climaCurto = clima.length && clima.every((c) => String(c).trim().split(/\s+/).length <= 4);
+    const tagsClima = (climaCurto ? clima : []).concat(chips);
     const cores = paleta.filter((p) => hexOk(p.cor));
     const figs = [];
     produtos.forEach((p) => {
@@ -466,16 +471,21 @@ h2 { font-size: clamp(1.6rem, 4.6vw, 2.2rem); font-weight: 700; letter-spacing: 
     });
     fotos.forEach((f, i) => {
       const u = urlSegura(f.foto);
+      if (u && u === fotoCapa && !urlSegura(b.capa_url)) return; // já está na capa
       const quadro = u ? `<div class="moldura"><img src="${esc(u)}" alt="${esc(f.legenda || "foto")}" loading="lazy"></div>`
         : `<div class="moldura vaga"><b>${esc(f.rotulo || "Foto " + (i + 1))}</b>${txt(f.descricao) ? `<span>${esc(f.descricao)}</span>` : ""}</div>`;
       figs.push(`<figure>${quadro}${txt(f.legenda) ? `<figcaption>${esc(f.legenda)}</figcaption>` : ""}</figure>`);
     });
-    refs.forEach((u) => figs.push(`<figure><div class="moldura"><img src="${esc(u)}" alt="referência" loading="lazy"></div></figure>`));
+    refs.forEach((u) => (u === fotoCapa && !urlSegura(b.capa_url)) || figs.push(`<figure><div class="moldura"><img src="${esc(u)}" alt="referência" loading="lazy"></div></figure>`));
     const nFigs = figs.length;
     let mood = "";
-    if (cores.length || clima.length || chips.length || nFigs) {
-      const ladoClima = (clima.length || chips.length)
-        ? `<div><span class="sub">Clima</span>${clima.length ? `<ul class="clima">${clima.map((c) => `<li>${esc(c)}</li>`).join("")}</ul>` : ""}${chips.length ? `<p class="tags">${chips.map(esc).join(" · ")}</p>` : ""}</div>`
+    if (cores.length || climaTexto || clima.length || chips.length || nFigs) {
+      const ladoClima = (climaTexto || clima.length || chips.length)
+        ? `<div><span class="sub">Clima</span>` +
+          (climaTexto ? `<p class="clima-texto">${esc(climaTexto)}</p>` : "") +
+          (clima.length && !climaCurto ? `<ul class="clima"${climaTexto ? ' style="margin-top:14px"' : ""}>${clima.map((c) => `<li>${esc(c)}</li>`).join("")}</ul>` : "") +
+          (tagsClima.length ? `<p class="tags"${climaTexto || !climaCurto ? "" : ' style="margin-top:0;font-size:1.05rem"'}>${tagsClima.map(esc).join(" · ")}</p>` : "") +
+          `</div>`
         : "";
       const ladoPaleta = cores.length
         ? `<div><span class="sub">Paleta</span><div class="faixa">${cores.map((p) => `<i style="background:${hexOk(p.cor)}" title="${esc(p.nota || "")}"></i>`).join("")}</div>
