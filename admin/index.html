@@ -2544,6 +2544,11 @@
           <div class="campo-form"><label>Notas do gancho (uma por linha)</label><textarea id="bd-gancho-notas" rows="2"></textarea></div>
         </div>
         <div class="campo-form"><label>Observação do gancho (opcional)</label><input type="text" id="bd-gancho-nota" placeholder="Ainda sem vídeo de referência."></div>
+        <div class="campo-form">
+          <label>Variações de gancho (a marca pode trocar a abertura por uma delas)</label>
+          <div id="bd-ganchos"></div>
+          <button type="button" class="botao botao-secundario" id="bd-add-gancho">+ variação</button>
+        </div>
 
         <div class="campo-form">
           <label>Produtos (marque "largo" pra virar o banner grande)</label>
@@ -8711,6 +8716,17 @@
       '<input type="text" class="bd-foto-desc" placeholder="O que vai ter na foto (aparece no quadro vazio)" value="' + escaparAttr(f.descricao) + '">' +
       '<input type="text" class="bd-foto-leg" placeholder="Legenda embaixo (Cena 4 · uso)" value="' + escaparAttr(f.legenda) + '"></div>';
   }
+  function htmlLinhaGancho(g) {
+    g = g || {};
+    return '<div class="bd-linha bd-gancho-var">' +
+      '<input type="text" class="bd-gv-tipo" placeholder="Tipo (Curiosidade, Polêmica…)" value="' + escaparAttr(g.tipo) + '" style="flex:0 1 190px">' +
+      '<input type="text" class="bd-gv-fala" placeholder="A fala do gancho" value="' + escaparAttr(g.fala) + '">' +
+      '<button type="button" class="bd-remover" title="Remover">&times;</button>' +
+      '<input type="text" class="bd-gv-visual" placeholder="Visual (opcional; vazio = o mesmo da cena original)" value="' + escaparAttr(g.visual) + '">' +
+      '<input type="text" class="bd-gv-tela" placeholder="Texto na tela (opcional)" value="' + escaparAttr(g.tela) + '"></div>';
+  }
+  const addGanchoVar = (g) => document.getElementById("bd-ganchos").insertAdjacentHTML("beforeend", htmlLinhaGancho(g));
+  document.getElementById("bd-add-gancho").addEventListener("click", () => addGanchoVar());
   const addCor = (p) => document.getElementById("bd-paleta").insertAdjacentHTML("beforeend", htmlLinhaCor(p));
   const addProduto = (p) => document.getElementById("bd-produtos").insertAdjacentHTML("beforeend", htmlLinhaProduto(p));
   const addFotoBoard = (f) => document.getElementById("bd-fotos").insertAdjacentHTML("beforeend", htmlLinhaFoto(f));
@@ -8766,6 +8782,9 @@
       paleta_nota: valorDe("bd-paleta-nota"),
       clima: linhasDe("bd-clima"),
       gancho: { frase: valorDe("bd-gancho"), notas: linhasDe("bd-gancho-notas"), nota: valorDe("bd-gancho-nota") },
+      ganchos: Array.from(document.querySelectorAll("#bd-ganchos .bd-gancho-var")).map(el => ({
+        tipo: val(el, ".bd-gv-tipo"), fala: val(el, ".bd-gv-fala"), visual: val(el, ".bd-gv-visual"), tela: val(el, ".bd-gv-tela"),
+      })).filter(g => g.fala),
       produtos: Array.from(document.querySelectorAll("#bd-produtos .bd-produto")).map(el => ({
         foto: val(el, ".bd-img-url"), nome: val(el, ".bd-prod-nome"), descricao: val(el, ".bd-prod-desc"),
         obs: val(el, ".bd-prod-obs"), largo: el.querySelector(".bd-prod-largo").checked,
@@ -8780,7 +8799,7 @@
       pendencias: linhasDe("bd-pendencias"),
     };
     const vazio = !b.campanha && !b.chips.length && !b.capa_url && !b.paleta.length && !b.clima.length &&
-      !b.gancho.frase && !b.gancho.notas.length && !b.produtos.length && !b.fotos.length &&
+      !b.gancho.frase && !b.gancho.notas.length && !b.ganchos.length && !b.produtos.length && !b.fotos.length &&
       !b.diferenciais.length && !b.evitar.length && !b.cta.texto && !b.pendencias.length;
     return vazio ? null : b;
   }
@@ -8789,7 +8808,7 @@
     const set = (id, v) => { if (v != null && (substituir || String(v).trim())) document.getElementById(id).value = v; };
     const setLinhas = (id, arr) => { if (Array.isArray(arr) && (substituir || arr.length)) document.getElementById(id).value = arr.join("\n"); };
     if (substituir) {
-      ["bd-paleta", "bd-produtos", "bd-fotos"].forEach(id => document.getElementById(id).innerHTML = "");
+      ["bd-paleta", "bd-produtos", "bd-fotos", "bd-ganchos"].forEach(id => document.getElementById(id).innerHTML = "");
       boardEl.querySelectorAll("input[type=text], textarea").forEach(el => { if (el.id && el.id.startsWith("bd-")) el.value = ""; });
     }
     b = b || {};
@@ -8803,6 +8822,7 @@
     set("bd-gancho", g.frase || "");
     setLinhas("bd-gancho-notas", g.notas || []);
     set("bd-gancho-nota", g.nota || "");
+    if (Array.isArray(b.ganchos) && b.ganchos.length) { document.getElementById("bd-ganchos").innerHTML = ""; b.ganchos.forEach(addGanchoVar); }
     if (Array.isArray(b.produtos) && b.produtos.length) { document.getElementById("bd-produtos").innerHTML = ""; b.produtos.forEach(addProduto); }
     if (Array.isArray(b.fotos) && b.fotos.length) { document.getElementById("bd-fotos").innerHTML = ""; b.fotos.forEach(addFotoBoard); }
     setLinhas("bd-diferenciais", b.diferenciais || []);
@@ -9037,6 +9057,8 @@
       "campanha": "campanha", "prazos": "chips", "prazo": "chips", "chips": "chips",
       "paleta": "paleta", "cores": "paleta", "clima": "clima", "clima da marca": "clima",
       "gancho": "gancho", "gancho escolhido": "gancho", "referencia de gancho": "gancho",
+      "variacoes de gancho": "ganchos", "variacoes do gancho": "ganchos", "variacoes": "ganchos",
+      "ganchos alternativos": "ganchos", "outros ganchos": "ganchos", "ganchos": "ganchos", "opcoes de gancho": "ganchos",
       "produtos": "produtos", "produto": "produtos", "minhas fotos": "fotos", "fotos": "fotos",
       "diferenciais": "diferenciais", "diferenciais que entram no video": "diferenciais",
       "evitar": "evitar", "nao fazer": "evitar", "cta": "cta",
@@ -9049,7 +9071,7 @@
       "tom": "tom", "na tela": "texto_tela", "texto na tela": "texto_tela", "tela": "texto_tela", "texto": "texto_tela",
     };
     const r = { titulo: "", subtitulo: "", formato: "", objetivo: "", pontos_importantes: "", sugestao_legenda: "", marca: "", cenas: [] };
-    const bd = { campanha: "", chips: [], paleta: [], clima: [], gancho: { frase: "", notas: [], nota: "" }, produtos: [], fotos: [],
+    const bd = { campanha: "", chips: [], paleta: [], clima: [], gancho: { frase: "", notas: [], nota: "" }, ganchos: [], produtos: [], fotos: [],
       diferenciais: [], diferenciais_nota: "", evitar: [], cta: { texto: "", nota: "" }, pendencias: [], paleta_nota: "" };
     let campoTopo = null, secao = null, cena = null, subcena = null;
     const ehCena = /^cena\s*\d+/i;
@@ -9082,6 +9104,17 @@
           if (inline || !bd.gancho.frase && !/^\s*[-•*–]/.test(l)) bd.gancho.frase = tiraAspas(item(l));
           else bd.gancho.notas.push(item(l));
           break;
+        case "ganchos": {
+          // "Curiosidade | fala | visual | na tela"  ou  "Curiosidade: “fala”"  ou só a fala
+          let g;
+          if (p.length > 1) g = { tipo: p[0], fala: tiraAspas(p[1]), visual: p[2] || "", tela: tiraAspas(p[3] || "") };
+          else {
+            const mm = item(l).match(/^([^:“"]{1,30}):\s*(.+)$/);
+            g = mm ? { tipo: mm[1].trim(), fala: tiraAspas(mm[2]), visual: "", tela: "" } : { tipo: "", fala: tiraAspas(item(l)), visual: "", tela: "" };
+          }
+          if (g.fala) bd.ganchos.push(g);
+          break;
+        }
         case "produtos": {
           const largo = p.some(x => /^largo$|^banner$|^destaque$/i.test(x));
           const q = p.filter(x => !/^largo$|^banner$|^destaque$/i.test(x));
@@ -9150,7 +9183,7 @@
       if (!r.titulo && linha) { r.titulo = linha; return; }
     });
     r.cenas = r.cenas.filter(c => c.tag || c.tempo || c.narracao || c.cena || c.tom || c.texto_tela);
-    const temBoard = bd.campanha || bd.chips.length || bd.paleta.length || bd.clima.length || bd.gancho.frase ||
+    const temBoard = bd.campanha || bd.chips.length || bd.paleta.length || bd.clima.length || bd.gancho.frase || bd.ganchos.length ||
       bd.produtos.length || bd.fotos.length || bd.diferenciais.length || bd.evitar.length || bd.cta.texto || bd.pendencias.length;
     if (temBoard) r.board = bd;
     const temAlgo = r.titulo || r.objetivo || r.sugestao_legenda || r.cenas.length || temBoard;

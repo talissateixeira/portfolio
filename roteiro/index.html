@@ -167,6 +167,23 @@ h2 { font-size: clamp(1.6rem, 4.6vw, 2.2rem); font-weight: 700; letter-spacing: 
 .caixa-comentario { display: block; width: 100%; min-height: 84px; margin-top: 6px; padding: 12px 14px; border: 1px solid var(--linha); border-radius: 14px; background: var(--cinza); resize: vertical; font-size: .95rem; }
 .caixa-comentario:focus { outline: 2px solid var(--marca); outline-offset: 1px; background: #fff; }
 
+/* ---------- Variações de gancho ---------- */
+.trocado { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 12px; margin: 0 0 14px; padding: 10px 14px; border-radius: 14px; background: var(--marca-clara); font-size: .86rem; }
+.trocado b { font-size: .7rem; letter-spacing: .08em; text-transform: uppercase; color: var(--marca-texto); }
+.trocado .btn-link { margin: 0 0 0 auto; }
+.ganchos { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; }
+.gancho { display: flex; flex-direction: column; padding: 24px; border-radius: 22px; background: var(--cinza); border: 2px solid transparent; transition: border-color .2s ease, background .2s ease; }
+.gancho.em-uso { background: #fff; border-color: var(--marca); }
+.gancho .tipo { font-size: .7rem; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--marca-texto); }
+.gancho .fala-g { display: block; margin: 10px 0 12px; font-size: 1.1rem; font-weight: 600; line-height: 1.35; letter-spacing: -.01em; }
+.gancho .extra { margin: 0 0 6px; font-size: .86rem; color: var(--tinta-suave); }
+.gancho .acoes { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-top: auto; padding-top: 14px; }
+.gancho .acoes .btn-link { margin: 0; }
+.btn-trocar { border-radius: 99px; padding: 10px 20px; font-weight: 600; font-size: .9rem; cursor: pointer; border: 0; background: var(--tinta); color: #fff; }
+.btn-trocar:hover { background: var(--marca-escura); }
+.btn-trocar:active { transform: scale(.98); }
+.selo-uso { font-size: .86rem; font-weight: 600; color: var(--marca-texto); }
+
 /* ---------- Detalhes ---------- */
 .colunas { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 40px; align-items: start; }
 .colunas h3 { margin: 0 0 12px; font-size: 1.05rem; font-weight: 600; letter-spacing: -.01em; }
@@ -336,6 +353,44 @@ h2 { font-size: clamp(1.6rem, 4.6vw, 2.2rem); font-weight: 700; letter-spacing: 
   let cenasAtuais = [];
   let ultimoDesenho = null;
 
+  // ---------- Variações de gancho ----------
+  // G.lista = board.ganchos; G.idx = cena do gancho; G.escolha = variação em uso (null = original)
+  const G = { lista: [], idx: -1, original: null, fraseOriginal: "", escolha: null };
+
+  function camposCena(c) {
+    const fala = semAspas(c.narracao);
+    return (fala ? `<div class="campo"><span class="fala">“${esc(fala)}”</span>${txt(c.tom) ? `<span class="tom">${esc(c.tom)}</span>` : ""}</div>` : "") +
+      (txt(c.cena) ? `<p class="campo visual"><b>Visual</b>${esc(c.cena)}</p>` : "") +
+      (txt(c.texto_tela) ? `<p class="campo"><b>Texto na tela</b><span class="tela">${esc(semAspas(c.texto_tela))}</span></p>` : "");
+  }
+  function ganchoEscolhido() { return G.escolha == null ? null : G.lista[G.escolha] || null; }
+  function camposGancho() {
+    const g = ganchoEscolhido(), o = G.original || {};
+    if (!g) return camposCena(o);
+    return `<div class="trocado"><b>Gancho trocado</b>${txt(g.tipo) ? `<span>Variação: ${esc(g.tipo)}</span>` : ""}<button type="button" class="btn-link" data-original>Voltar ao original</button></div>` +
+      camposCena({ narracao: g.fala, tom: "", cena: txt(g.visual) || o.cena, texto_tela: txt(g.tela) ? g.tela : "" });
+  }
+  function listaGanchosHtml() {
+    return G.lista.map((g, i) => {
+      const emUso = G.escolha === i;
+      return `<div class="gancho${emUso ? " em-uso" : ""}">` +
+        (txt(g.tipo) ? `<span class="tipo">${esc(g.tipo)}</span>` : "") +
+        `<span class="fala-g">“${esc(semAspas(g.fala))}”</span>` +
+        (txt(g.visual) ? `<p class="extra"><b>Visual:</b> ${esc(g.visual)}</p>` : "") +
+        (txt(g.tela) ? `<p class="extra"><b>Texto na tela:</b> ${esc(semAspas(g.tela))}</p>` : "") +
+        `<div class="acoes">${emUso
+          ? `<span class="selo-uso">Em uso no roteiro</span><button type="button" class="btn-link" data-original>Voltar ao original</button>`
+          : `<button type="button" class="btn-trocar" data-trocar="${i}">Trocar por esse</button>`}</div></div>`;
+    }).join("");
+  }
+  function trocarGancho(i) {
+    G.escolha = i;
+    const campos = $("#campos-gancho"); if (campos) campos.innerHTML = camposGancho();
+    const lista = $("#lista-ganchos"); if (lista) lista.innerHTML = listaGanchosHtml();
+    const ref = $("#gancho-ref"), g = ganchoEscolhido();
+    if (ref) ref.textContent = "“" + (g ? semAspas(g.fala) : G.fraseOriginal) + "”";
+  }
+
   function desenhar(r, cenas, moodboard) {
     cenasAtuais = cenas;
     ultimoDesenho = [r, cenas, moodboard];
@@ -379,16 +434,23 @@ h2 { font-size: clamp(1.6rem, 4.6vw, 2.2rem); font-weight: 700; letter-spacing: 
     } else if (respondi && respondi.acao === "ajuste") {
       aviso = `<div class="aviso ajuste"><b>Ajustes enviados</b>Recebi os seus comentários em ${esc(dataHora(respondi.quando))}. Vou ajustar e te mando a nova versão neste mesmo link.</div>`;
     } else {
-      aviso = `<p class="instrucao">Leia com calma. Para mudar alguma coisa, toque em <b>Comentar esta cena</b>. No final, é só aprovar ou pedir os ajustes.</p>`;
+      aviso = `<p class="instrucao">Leia com calma. Para mudar alguma coisa, toque em <b>Comentar esta cena</b>${lista(b.ganchos).length ? " ou troque o gancho por uma das variações" : ""}. No final, é só aprovar ou pedir os ajustes.</p>`;
     }
 
     // ---- Gancho em destaque ----
     const g = b.gancho || {};
     const idxGancho = Math.max(0, cenas.findIndex((c) => /hook|gancho/i.test(c.tag || "")));
     const fraseGancho = semAspas(g.frase) || (cenas[idxGancho] ? semAspas(cenas[idxGancho].narracao) : "");
+    G.lista = lista(b.ganchos).filter((x) => x && typeof x === "object" && txt(x.fala));
+    G.idx = cenas.length ? idxGancho : -1;
+    G.original = cenas[idxGancho] || null;
+    G.fraseOriginal = fraseGancho;
+    const salvoG = (ler(chaveRascunho) || {}).gancho || (respondi && respondi.gancho);
+    G.escolha = salvoG && typeof salvoG.indice === "number" && G.lista[salvoG.indice] ? salvoG.indice : null;
+    const fraseBloco = ganchoEscolhido() ? semAspas(ganchoEscolhido().fala) : fraseGancho;
     const notasGancho = lista(g.notas).concat(txt(g.nota) ? [g.nota] : []);
-    const blocoGancho = fraseGancho
-      ? `<section class="bloco-gancho"><span class="eyebrow">O gancho</span><p>“${esc(fraseGancho)}”</p>${notasGancho.length ? `<ul>${notasGancho.map((n) => `<li>${esc(n)}</li>`).join("")}</ul>` : ""}</section>`
+    const blocoGancho = fraseBloco
+      ? `<section class="bloco-gancho"><span class="eyebrow">O gancho</span><p id="gancho-ref">“${esc(fraseBloco)}”</p>${notasGancho.length ? `<ul>${notasGancho.map((n) => `<li>${esc(n)}</li>`).join("")}</ul>` : ""}</section>`
       : "";
 
     // ---- Mood board ----
@@ -430,14 +492,11 @@ h2 { font-size: clamp(1.6rem, 4.6vw, 2.2rem); font-weight: 700; letter-spacing: 
     const rascCenas = rascunho.cenas || {};
     const htmlCenas = cenas.map((c, i) => {
       const num = String(i + 1).padStart(2, "0");
-      const fala = semAspas(c.narracao);
       const rasc = rascCenas[i] || "";
       return `<article class="cena${i === idxGancho && fraseGancho ? " destaque" : ""}">
         <div class="cena-lado"><span class="num">${num}</span>${txt(c.tag) ? `<span class="nome">${esc(c.tag)}</span>` : ""}${txt(c.tempo) ? `<span class="tempo">${esc(c.tempo)}</span>` : ""}</div>
         <div class="cena-corpo">
-          ${fala ? `<div class="campo"><span class="fala">“${esc(fala)}”</span>${txt(c.tom) ? `<span class="tom">${esc(c.tom)}</span>` : ""}</div>` : ""}
-          ${txt(c.cena) ? `<p class="campo visual"><b>Visual</b>${esc(c.cena)}</p>` : ""}
-          ${txt(c.texto_tela) ? `<p class="campo"><b>Texto na tela</b><span class="tela">${esc(semAspas(c.texto_tela))}</span></p>` : ""}
+          ${i === G.idx && G.lista.length ? `<div id="campos-gancho">${camposGancho()}</div>` : camposCena(c)}
           <div class="comentar">
             <button type="button" class="btn-comentar" data-abrir="${i}"${rasc ? " hidden" : ""}>Comentar esta cena</button>
             <textarea class="caixa-comentario" data-cena="${i}" placeholder="O que você gostaria de mudar nesta cena?" aria-label="Comentário da cena ${num}"${rasc ? "" : " hidden"}>${esc(rasc)}</textarea>
@@ -449,6 +508,11 @@ h2 { font-size: clamp(1.6rem, 4.6vw, 2.2rem); font-weight: 700; letter-spacing: 
     const lerFalas = falas.length > 1 ? `<details class="falas"><summary>Ler só as falas, do começo ao fim</summary><div class="falas-texto">${falas.map((f) => `<p>${esc(f)}</p>`).join("")}</div></details>` : "";
     const secaoCenas = cenas.length
       ? `<section class="secao"><span class="eyebrow">Roteiro</span><h2>Cena a cena</h2><div class="cenas">${htmlCenas}</div>${lerFalas}</section>` : "";
+
+    const secaoGanchos = G.lista.length
+      ? `<section class="secao"><span class="eyebrow">Para escolher</span><h2>Variações de gancho</h2>
+         <p class="intro">Prefere outro começo? Toque em <b>Trocar por esse</b> e ${G.idx >= 0 ? "a cena " + String(G.idx + 1).padStart(2, "0") + " muda" : "o gancho muda"} na hora. Dá para voltar ao original quando quiser.</p>
+         <div class="ganchos" id="lista-ganchos">${listaGanchosHtml()}</div></section>` : "";
 
     // ---- Detalhes: gravação e cuidados ----
     const pontos = txt(r.pontos_importantes).split(/\n+/).map((l) => l.replace(/^\s*(?:[-•*–✓✅]|\d+[.)])\s*/, "").trim()).filter(Boolean);
@@ -487,7 +551,7 @@ h2 { font-size: clamp(1.6rem, 4.6vw, 2.2rem); font-weight: 700; letter-spacing: 
         </div>
       </section>`;
 
-    area.innerHTML = hero + aviso + blocoGancho + mood + secaoCenas + detalhes + resposta +
+    area.innerHTML = hero + aviso + blocoGancho + mood + secaoCenas + secaoGanchos + detalhes + resposta +
       `<footer class="rodape"><span>Roteiro ${esc(txt(r.marca) ? r.marca + " · " : "")}${esc(r.titulo || "")}</span><span class="assinatura">Talissa Müller</span></footer>`;
 
     $("#carregando").hidden = true;
@@ -501,7 +565,10 @@ h2 { font-size: clamp(1.6rem, 4.6vw, 2.2rem); font-weight: 700; letter-spacing: 
     area.querySelectorAll("textarea[data-cena]").forEach((t) => { const v = t.value.trim(); if (v) cenas[t.dataset.cena] = v; });
     const geral = $("#comentario-geral");
     const nome = $("#nome-marca");
-    return { cenas, geral: geral ? geral.value.trim() : "", nome: nome ? nome.value.trim() : "" };
+    const saida = { cenas, geral: geral ? geral.value.trim() : "", nome: nome ? nome.value.trim() : "" };
+    const g = ganchoEscolhido();
+    if (g) saida.gancho = { indice: G.escolha, tipo: txt(g.tipo), fala: semAspas(g.fala) };
+    return saida;
   }
   function rotuloCena(i) {
     const c = cenasAtuais[i] || {};
@@ -510,6 +577,7 @@ h2 { font-size: clamp(1.6rem, 4.6vw, 2.2rem); font-weight: 700; letter-spacing: 
   // O texto que chega no painel (e no push): uma resposta só, organizada
   function montarTexto(acao, c) {
     const partes = [];
+    if (c.gancho) partes.push("Gancho trocado" + (c.gancho.tipo ? " (" + c.gancho.tipo + ")" : "") + ": “" + c.gancho.fala + "”");
     Object.keys(c.cenas).sort((a, b) => a - b).forEach((i) => partes.push(rotuloCena(i) + ": " + c.cenas[i]));
     if (c.geral) partes.push("Geral: " + c.geral);
     if (acao === "aprovar") return "✅ Roteiro aprovado!" + (partes.length ? "\n\nObservações:\n" + partes.join("\n\n") : "");
@@ -518,11 +586,21 @@ h2 { font-size: clamp(1.6rem, 4.6vw, 2.2rem); font-weight: 700; letter-spacing: 
   function atualizarContador() {
     const el = $("#contador");
     if (!el) return;
-    const n = Object.keys(coletar().cenas).length;
-    el.textContent = n ? n + (n === 1 ? " cena comentada." : " cenas comentadas.") : "";
+    const c = coletar(), n = Object.keys(c.cenas).length, partes = [];
+    if (n) partes.push(n + (n === 1 ? " cena comentada" : " cenas comentadas"));
+    if (c.gancho) partes.push("gancho trocado");
+    el.textContent = partes.length ? partes.join(" · ") + "." : "";
   }
 
   area.addEventListener("click", (e) => {
+    const trocar = e.target.closest("[data-trocar]"), original = e.target.closest("[data-original]");
+    if (trocar || original) {
+      trocarGancho(trocar ? Number(trocar.dataset.trocar) : null);
+      gravar(chaveRascunho, coletar());
+      atualizarContador();
+      if (trocar && $("#campos-gancho")) $("#campos-gancho").closest(".cena").scrollIntoView({ behavior: "smooth", block: "center" });
+      return;
+    }
     const abrir = e.target.closest("[data-abrir]");
     if (abrir) {
       const caixa = area.querySelector(`textarea[data-cena="${abrir.dataset.abrir}"]`);
@@ -537,23 +615,24 @@ h2 { font-size: clamp(1.6rem, 4.6vw, 2.2rem); font-weight: 700; letter-spacing: 
     }
     if (e.target.closest("#btn-aprovar")) {
       const c = coletar();
-      const obs = Object.keys(c.cenas).length || c.geral ? " Os comentários que você escreveu vão junto, como observação." : "";
+      const obs = (c.gancho ? " O gancho que você escolheu entra no lugar do original." : "") + (Object.keys(c.cenas).length || c.geral ? " Os comentários que você escreveu vão junto, como observação." : "");
       perguntar("<b>Aprovar o roteiro?</b><br>Depois de aprovado, eu sigo para a gravação." + obs, "Sim, aprovar", "aprovar");
       return;
     }
     if (e.target.closest("#btn-ajuste")) {
       const c = coletar();
       const erro = $("#erro-envio");
-      if (!Object.keys(c.cenas).length && !c.geral) {
-        erro.textContent = "Escreva pelo menos um comentário (numa cena ou no comentário geral) para eu saber o que ajustar.";
+      if (!Object.keys(c.cenas).length && !c.geral && !c.gancho) {
+        erro.textContent = "Escreva pelo menos um comentário (numa cena ou no comentário geral) ou troque o gancho, para eu saber o que ajustar.";
         erro.hidden = false;
         return;
       }
       const n = Object.keys(c.cenas).length;
       const resumo = [];
       if (n) resumo.push(n + (n === 1 ? " cena comentada" : " cenas comentadas"));
+      if (c.gancho) resumo.push("gancho trocado");
       if (c.geral) resumo.push("comentário geral");
-      const frase = resumo.join(" e ");
+      const frase = resumo.join(", ").replace(/, ([^,]*)$/, " e $1");
       perguntar("<b>Enviar os ajustes?</b><br>" + frase.charAt(0).toUpperCase() + frase.slice(1) + ". Eu ajusto e te mando a nova versão neste mesmo link.", "Enviar ajustes", "ajuste");
     }
   });
@@ -589,7 +668,7 @@ h2 { font-size: clamp(1.6rem, 4.6vw, 2.2rem); font-weight: 700; letter-spacing: 
         });
       } catch (_e) { /* push é bônus */ }
       apagar(chaveRascunho);
-      gravar(chaveResposta, { acao: acao, quando: new Date().toISOString() });
+      gravar(chaveResposta, { acao: acao, quando: new Date().toISOString(), gancho: c.gancho || null });
       desenhar.apply(null, ultimoDesenho); // redesenha já com o aviso de "aprovado"/"ajustes enviados"
       window.scrollTo({ top: 0, behavior: "smooth" });
     } catch (e) {
