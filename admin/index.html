@@ -3705,7 +3705,10 @@
     const itensProducaoDash = [];
     tarefasProducaoPendentes.forEach(t => {
       const marca = mapaMarcaProjeto[t.projeto_id] || "";
-      if (t.prazo) {
+      // Se o card já tem etapas com data no checklist, só as etapas aparecem
+      // (o card inteiro com o prazo final ficava repetido na lista).
+      const temEtapasComData = Array.isArray(t.checklist) && t.checklist.some(item => item.data && !item.feito);
+      if (t.prazo && !temEtapasComData) {
         itensProducaoDash.push({ id: t.id, data: t.prazo, marca: marca, tipo: t.coluna, titulo: t.titulo, origem: "producao", projeto_id: t.projeto_id });
       }
       if (Array.isArray(t.checklist)) {
