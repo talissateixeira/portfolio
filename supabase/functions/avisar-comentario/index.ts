@@ -33,12 +33,13 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: CORS });
   if (req.method !== "POST") return json({ erro: "use POST" }, 405);
 
-  let id = "", token = "", nome = "";
+  let id = "", token = "", nome = "", texto = "";
   try {
     const b = await req.json();
     id = (b.id ?? "").toString();
     token = (b.token ?? "").toString();
     nome = (b.nome ?? "").toString().trim();
+    texto = (b.texto ?? "").toString().trim();
   } catch (_e) { /* corpo inválido */ }
 
   if (!id || !token) return json({ erro: "faltam id/token" }, 400);
@@ -56,12 +57,22 @@ Deno.serve(async (req) => {
   webpush.setVapidDetails(VAPID_SUBJECT, VAPID_PUBLIC, VAPID_PRIVATE);
 
   const { data: subs } = await sb.from("push_subscriptions").select("endpoint, p256dh, auth");
-  const quem = nome || "A marca";
-  const payload = JSON.stringify({
-    title: "💬 Novo comentário no roteiro",
-    body: `${quem} comentou em "${r.titulo}". Abra o painel pra ver.`,
-    url: "https://talissamuller.com/admin/#roteiros",
-  });
+  // O texto vem do trigger do banco (banco-avisar-comentario-pelo-banco.sql).
+  // A página da marca começa a resposta com "✅ Roteiro aprovado!" ou
+  // "✏️ Pediu ajustes:" — daí sai o título da notificação.
+  const quem = nome || r.marca || "A marca";
+  let title = "💬 Novo comentário no roteiro";
+  let body = `${quem} comentou em "${r.titulo}". Abra o painel pra ver.`;
+  if (texto.includes("Roteiro aprovado!")) {
+    title = `✅ ${quem} aprovou o roteiro`;
+    body = texto.includes("Observações:")
+      ? `"${r.titulo}" aprovado, com observações. Abra o painel pra ver.`
+      : `"${r.titulo}" aprovado! Pode seguir pra gravação.`;
+  } else if (texto.includes("Pediu ajustes")) {
+    title = `✏️ ${quem} pediu ajustes`;
+    body = `Ajustes em "${r.titulo}". Abra o painel pra ver o que mudar.`;
+  }
+  const payload = JSON.stringify({ title, body, url: "https://talissamuller.com/admin/#roteiros" });
 
   let enviados = 0;
   for (const s of subs ?? []) {
