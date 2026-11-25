@@ -15,9 +15,10 @@ self.addEventListener("push", (event) => {
     dados = { corpo: event.data ? event.data.text() : "" };
   }
 
-  const titulo = dados.titulo || "Tarefas de hoje";
+  // Aceita os dois formatos: titulo/corpo (tarefas do dia) e title/body.
+  const titulo = dados.titulo || dados.title || "Tarefas de hoje";
   const opcoes = {
-    body: dados.corpo || "",
+    body: dados.corpo || dados.body || "",
     icon: "/admin/icon-192.png",
     badge: "/admin/icon-192.png",
     tag: dados.tag || "tarefas-do-dia",

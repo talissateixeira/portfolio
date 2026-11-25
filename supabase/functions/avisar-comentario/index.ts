@@ -72,7 +72,13 @@ Deno.serve(async (req) => {
     title = `✏️ ${quem} pediu ajustes`;
     body = `Ajustes em "${r.titulo}". Abra o painel pra ver o que mudar.`;
   }
-  const payload = JSON.stringify({ title, body, url: "https://talissamuller.com/admin/#roteiros" });
+  // O app do painel (admin/sw.js) lê titulo/corpo; tag própria pra não
+  // substituir a notificação das tarefas do dia nem a de outro comentário.
+  const payload = JSON.stringify({
+    titulo: title, corpo: body, title, body,
+    tag: "roteiro-" + id + "-" + Date.now(),
+    url: "/admin/#roteiros",
+  });
 
   let enviados = 0;
   for (const s of subs ?? []) {
