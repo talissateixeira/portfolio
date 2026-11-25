@@ -662,7 +662,7 @@ h2 { font-size: clamp(1.6rem, 4.6vw, 2.2rem); font-weight: 700; letter-spacing: 
     $("#btn-sim").onclick = function () { enviar(acao, this, rotuloSim); };
   }
 
-  // Grava o comentário e avisa a Talissa por push (se o push falhar, não atrapalha a marca).
+  // Grava o comentário; o banco avisa a Talissa por push (banco-avisar-comentario-pelo-banco.sql).
   async function enviar(acao, botao, rotulo) {
     const c = coletar();
     botao.disabled = true;
@@ -670,13 +670,7 @@ h2 { font-size: clamp(1.6rem, 4.6vw, 2.2rem); font-weight: 700; letter-spacing: 
     try {
       const { error } = await sb.rpc("comentar_roteiro", { p_id: id, p_token: token, p_nome: c.nome, p_texto: montarTexto(acao, c) });
       if (error) throw error;
-      try {
-        await fetch(SUPABASE_URL + "/functions/v1/avisar-comentario", {
-          method: "POST",
-          headers: { "Content-Type": "application/json", "Authorization": "Bearer " + SUPABASE_ANON_KEY },
-          body: JSON.stringify({ id: id, token: token, nome: c.nome }),
-        });
-      } catch (_e) { /* push é bônus */ }
+      // O push pra Talissa sai do próprio banco (trigger trg_avisar_comentario).
       apagar(chaveRascunho);
       gravar(chaveResposta, { acao: acao, quando: new Date().toISOString(), gancho: c.gancho || null });
       desenhar.apply(null, ultimoDesenho); // redesenha já com o aviso de "aprovado"/"ajustes enviados"
